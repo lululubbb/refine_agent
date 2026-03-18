@@ -1,0 +1,20 @@
+{# d1_4.jinja2 — Initial generation prompt (no external dependencies) #}
+{# context: class_name, focal_method, information #}
+Please write a JUnit 5 test class for the Java method described below.
+
+### Method Under Test
+Class: `{{ class_name }}`
+Method: `{{ focal_method }}`
+
+### Code Context
+```java
+{{ information }}
+```
+
+### Requirements
+- Class name: `{{ class_name }}Test`
+- Use JUnit 5 (`@Test`, `Assertions.*`) and Mockito if needed.
+- Generate at least 5 diverse test methods covering: normal path, edge cases (null, empty, 0, negative), boundary values, and expected exceptions.
+- Each test name must be descriptive (e.g., `test{{ focal_method }}_nullInput`).
+- Include all necessary `import` statements.
+- Output **ONLY** the complete Java class — no prose, no markdown fences.

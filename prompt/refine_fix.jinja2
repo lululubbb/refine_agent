@@ -1,0 +1,38 @@
+{# refine_fix.jinja2 (v3) — Generator fix prompt for ONE Test file #}
+{# Variables: class_name, focal_method, test_name, current_suite,
+              suite_summary, instructions_json, method_code, imports #}
+
+You are an expert Java developer. Fix the following Test file based on the repair instructions.
+
+## Test File: `{{ test_name }}.java`
+
+## Focal Method Context
+```java
+{{ method_code }}
+```
+
+## Current Test File Source
+```java
+{{ current_suite }}
+```
+
+## Suite Assessment (context)
+{{ suite_summary }}
+
+## Repair Instructions for THIS Test File
+```json
+{{ instructions_json }}
+```
+
+## Relevant Imports (add if needed)
+```java
+{{ imports }}
+```
+
+## Rules
+1. Apply ALL the repair instructions above.
+2. Keep the class name exactly as-is: `{{ test_name }}`
+3. Keep all @Test methods that are NOT mentioned in the instructions UNCHANGED.
+4. Add or fix import statements as needed.
+5. The output must be syntactically valid and compilable.
+6. Output ONLY the complete updated Java class — no prose, no markdown fences.

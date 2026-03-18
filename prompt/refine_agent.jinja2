@@ -1,0 +1,62 @@
+{# refine_agent.jinja2 (v3) #}
+{# Variables: focal_method, class_name, focal_method_code,
+              suite_score (dict), test_diagnostics (list), iteration #}
+
+## Context
+- **Focal method**: `{{ focal_method }}` in class `{{ class_name }}`
+- **Iteration**: {{ iteration }}
+- **Suite size**: {{ suite_score.n_tests }} Test files
+
+---
+
+## Focal Method Source
+```java
+{{ focal_method_code }}
+```
+
+---
+
+## Suite-Level Scores (across all {{ suite_score.n_tests }} Test files)
+
+| Dimension | Value |
+|-----------|-------|
+| Compile pass | {{ suite_score.compile_pass_count }}/{{ suite_score.n_tests }} ({{ "%.0f"|format(suite_score.compile_pass_rate * 100) }}%) |
+| Exec pass | {{ suite_score.exec_pass_count }}/{{ suite_score.n_tests }} ({{ "%.0f"|format(suite_score.exec_pass_rate * 100) }}%) |
+| Line coverage avg | {% if suite_score.coverage_line_avg is not none %}{{ "%.1f"|format(suite_score.coverage_line_avg * 100) }}% (min={{ "%.1f"|format(suite_score.coverage_line_min * 100) }}%, max={{ "%.1f"|format(suite_score.coverage_line_max * 100) }}%){% else %}N/A{% endif %} |
+| Bug-revealing | {{ suite_score.bug_reveal_count }}/{{ suite_score.bug_reveal_checked }} checked ({{ "%.0f"|format(suite_score.bug_reveal_rate * 100) }}%) |
+| Max pairwise similarity | {% if suite_score.max_pairwise_similarity is not none %}{{ "%.3f"|format(suite_score.max_pairwise_similarity) }}{% else %}N/A{% endif %} |
+
+Problem summary by Test file:
+```json
+{{ suite_score.problem_tests | tojson(indent=2) }}
+```
+
+{% if suite_score.high_redundancy_pairs %}
+High-redundancy Test pairs (similarity > 0.7):
+{% for pair in suite_score.high_redundancy_pairs %}
+- {{ pair.test1 }} ↔ {{ pair.test2 }}: {{ "%.3f"|format(pair.similarity) }}
+{% endfor %}
+{% endif %}
+
+---
+
+## Problematic Test Files — Detailed Diagnostics + Scores
+
+Each entry below is one Test file with issues. It contains:
+- **Tool 1**: compile_ok, exec_ok, compile_errors, exec_errors
+- **Tool 2**: focal_line_rate (0-100%), focal_branch_rate, missed_methods, partial_methods  
+- **Tool 3**: bug_revealing (true/false/null)
+- **Tool 4**: redundancy_score (0-1), most_similar_to
+- **scores.issues**: problem labels for this Test file
+- **source_code**: full Java source of this Test file
+
+```json
+{{ test_diagnostics | tojson(indent=2) }}
+```
+
+---
+
+## Task
+Analyze the above data and produce repair instructions per Test file.
+Use the suite_score for overall context, then diagnose each problematic Test individually.
+Output ONLY the JSON object as specified in your system prompt.
