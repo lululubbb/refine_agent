@@ -30,7 +30,6 @@ import sys
 
 from colorama import Fore, Style, init
 
-# ── sys.path ────────────────────────────────────────────────────────
 HERE = os.path.dirname(os.path.abspath(__file__))
 if HERE not in sys.path:
     sys.path.insert(0, HERE)
@@ -67,16 +66,10 @@ def start_generation(
 ):
     """
     与 ChatUniTest scope_test.start_generation 接口完全相同。
-    替换内部的 start_whole_process 调用为 askGPT_refine 版本。
 
-    Parameters
-    ----------
-    sql_query   : 筛选 focal method 的 SQL，e.g.
-                  "SELECT id FROM method WHERE project_name='Csv_1_b';"
-    multiprocess: 多进程开关
-    confirmed   : False 时需要终端确认
+    sql_query 示例（与 ChatUniTest 保持一致，不过滤构造函数/getter/setter）：
+      "SELECT id FROM method WHERE project_name='Csv_1_b';"
     """
-    # ── 从 SQL 提取项目名（一次只处理一个项目）─────────────────────
     match = re.search(r"project_name\s*=\s*'([\w\-]*)'", sql_query)
     if not match:
         raise RuntimeError(
@@ -92,7 +85,7 @@ def start_generation(
     method_ids = [str(x[0]) for x in db.select(script=sql_query)]
     if not method_ids:
         raise Exception(f"No methods found for query: {sql_query}")
-    print(Fore.CYAN + f"Found {len(method_ids)} focal methods: {method_ids[:10]}..." + Style.RESET_ALL)
+    print(Fore.CYAN + f"Found {len(method_ids)} focal methods: {method_ids}" + Style.RESET_ALL)
 
     # ── 确认 ──────────────────────────────────────────────────────────
     if not confirmed:
@@ -119,14 +112,13 @@ def start_generation(
     # source_dir 是 dataset_batch/<proj>/direction_1/（与 ChatUniTest 相同）
     source_dir = os.path.join(dataset_dir, "direction_1")
     start_whole_process(
-        source_dir=source_dir,
-        result_path=result_path,
-        method_ids=method_ids,
-        multiprocess=multiprocess,
+        source_dir   = source_dir,
+        result_path  = result_path,
+        method_ids   = method_ids,
+        multiprocess = multiprocess,
     )
     print(Fore.GREEN + "GENERATION FINISHED" + Style.RESET_ALL)
 
-    # ── 运行最终测试（与 ChatUniTest 相同） ───────────────────────────
     project_path = os.path.abspath(project_dir)
     print(Fore.CYAN + "START ALL TESTS..." + Style.RESET_ALL)
     Task.all_test(result_path, project_path)
@@ -137,7 +129,7 @@ def start_generation(
 if __name__ == "__main__":
     # 示例
     start_generation(
-        sql_query="SELECT id FROM method WHERE project_name='Csv_1_b' AND is_constructor=0;",
-        multiprocess=False,
-        confirmed=True,
+        sql_query  = "SELECT id FROM method WHERE project_name='Csv_1_b';",
+        multiprocess = False,
+        confirmed    = True,
     )

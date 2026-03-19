@@ -46,7 +46,7 @@ DIAG_JSON_NAME = "suite_diagnosis.json"
 
 
 # ════════════════════════════════════════════════════════════════════
-# 主入口：调用 TestRunner 并输出 suite_diagnosis.json
+# 主入口
 # ════════════════════════════════════════════════════════════════════
 
 def run_and_export(
@@ -55,15 +55,15 @@ def run_and_export(
 ) -> Optional[str]:
     """
     1. 调用 TestRunner.start_all_test()
-    2. 找到 TestRunner 在 project_dir 下创建的最新 tests%T/ 目录
-    3. 从该目录下的 *_status.csv + diagnosis.log + coveragedetail.csv 提取数据
+    2. 找到输出目录（兼容分支A/B两种路径）
+    3. 从 status.csv + diagnosis.log + coveragedetail.csv 提取数据
     4. 写入 tests_output_dir/suite_diagnosis.json
-    5. 返回 tests_output_dir 路径（None = TestRunner 失败）
+    5. 返回 tests_output_dir 路径（None = 失败）
 
-    Parameters
-    ----------
-    focal_method_result_dir : base_dir，含 test_cases/ 子目录
-    project_dir             : defect4j_projects/Csv_1_b（Maven 项目根目录）
+    Bug Fix:
+      旧版 _find_latest_tests_dir 只找 project_dir/tests%T/（分支B输出），
+      当 TestRunner 走分支A（in-place）时永远找不到。
+      修复后同时检查 focal_method_result_dir 本身（分支A）和 project_dir/tests%T/（分支B）。
     """
     tests_output_dir = None
     try:
@@ -73,21 +73,32 @@ def run_and_export(
             target_path = project_dir,
         )
         runner.start_all_test()
-        tests_output_dir = _find_latest_tests_dir(project_dir)
     except Exception as e:
         logger.warning("[ToolRunner] TestRunner failed: %s", e)
-        return None
+        # TestRunner 抛异常通常是因为某个文件写入失败（目录权限/路径问题）
+        # 但测试可能已经部分运行，仍尝试找输出目录
+        logger.info("[ToolRunner] Attempting to find partial output...")
+
+    # ★ 修复：兼容两种输出路径
+    tests_output_dir = _find_tests_output_dir(focal_method_result_dir, project_dir)
 
     if not tests_output_dir:
-        logger.warning("[ToolRunner] tests output dir not found under %s", project_dir)
-        return None
+        logger.warning(
+            "[ToolRunner] tests output dir not found.\n"
+            "  Checked: %s/logs/  and  %s/tests%%*/\n"
+            "  This usually means TestRunner crashed before writing any output.",
+            focal_method_result_dir, project_dir
+        )
+        # 最后兜底：用 focal_method_result_dir 本身（哪怕 diagnosis.log 为空）
+        tests_output_dir = focal_method_result_dir
 
-    # 从多个文件提取数据，整合成统一 dict
-    diag_map = _build_diag_map(tests_output_dir)
+    # 构建诊断 dict
+    diag_map = _build_diag_map(tests_output_dir, focal_method_result_dir)
 
     # 写入 JSON
     out_path = os.path.join(tests_output_dir, DIAG_JSON_NAME)
     try:
+        os.makedirs(tests_output_dir, exist_ok=True)
         with open(out_path, "w", encoding="utf-8") as f:
             json.dump(diag_map, f, indent=2, ensure_ascii=False)
         logger.info("[ToolRunner] suite_diagnosis.json written: %s (%d tests)",
@@ -99,69 +110,106 @@ def run_and_export(
 
 
 # ════════════════════════════════════════════════════════════════════
-# 数据提取：从 tests_output_dir 下的已有文件构建统一 dict
+# 输出目录查找（兼容分支A/B）
 # ════════════════════════════════════════════════════════════════════
 
-def _build_diag_map(tests_output_dir: str) -> Dict[str, dict]:
+def _find_tests_output_dir(focal_method_result_dir: str, project_dir: str) -> Optional[str]:
     """
-    整合 status.csv + diagnosis.log + coveragedetail.csv → {test_name: diag_dict}
+    查找 TestRunner 实际写入输出的目录，兼容两种分支：
+
+    分支A（in-place）：
+      focal_method_result_dir/logs/diagnosis.log 存在
+      → 返回 focal_method_result_dir
+
+    分支B（copy-to-defect4j）：
+      project_dir/tests%YYYYMMDDHHMMSS/ 存在且有 logs/diagnosis.log
+      → 返回最新的 tests%T/ 目录
+    """
+    # 检查分支A：diagnosis.log 在 focal_method_result_dir/logs/ 下
+    diag_a = os.path.join(focal_method_result_dir, "logs", "diagnosis.log")
+    if os.path.exists(diag_a):
+        logger.info("[ToolRunner] Found in-place output (branch A): %s", focal_method_result_dir)
+        return focal_method_result_dir
+
+    # 检查分支A 备用：status.csv 在 focal_method_result_dir 下
+    status_files_a = glob.glob(os.path.join(focal_method_result_dir, "*_status*.csv"))
+    if status_files_a:
+        logger.info("[ToolRunner] Found status CSV in focal dir (branch A): %s", focal_method_result_dir)
+        return focal_method_result_dir
+
+    # 检查分支B：project_dir/tests%T/
+    b_dir = _find_latest_tests_dir_in_project(project_dir)
+    if b_dir:
+        logger.info("[ToolRunner] Found tests%T dir (branch B): %s", b_dir)
+        return b_dir
+
+    return None
+
+
+def _find_latest_tests_dir_in_project(project_dir: str) -> Optional[str]:
+    """在 project_dir 下找最新的 tests%YYYYMMDDHHMMSS/ 目录（分支B输出）。"""
+    try:
+        candidates = [
+            os.path.join(project_dir, d)
+            for d in os.listdir(project_dir)
+            if d.startswith("tests%") and os.path.isdir(os.path.join(project_dir, d))
+        ]
+        return max(candidates, key=os.path.getmtime) if candidates else None
+    except Exception:
+        return None
+
+
+# ════════════════════════════════════════════════════════════════════
+# 数据提取
+# ════════════════════════════════════════════════════════════════════
+
+def _build_diag_map(
+    tests_output_dir: str,
+    focal_method_result_dir: str = None,
+) -> Dict[str, dict]:
+    """
+    从 tests_output_dir 和（可选的）focal_method_result_dir 提取诊断数据。
+    当两者不同时（分支B），logs/ 在 tests_output_dir，coveragedetail.csv 也在那里。
+    当两者相同时（分支A），所有文件都在 focal_method_result_dir 下。
     """
     diag: Dict[str, dict] = {}
 
-    # ── Step 1: 从 *_status.csv 获取 compile/exec 状态 ─────────────
-    _load_status_csv(tests_output_dir, diag)
+    # 候选搜索目录（去重）
+    search_dirs = list({tests_output_dir, focal_method_result_dir} - {None})
 
-    # ── Step 2: 从 diagnosis.log 获取错误详情 + missed_methods ──────
-    _load_diagnosis_log(tests_output_dir, diag)
-
-    # ── Step 3: 从 coveragedetail.csv 获取覆盖率 ────────────────────
-    _load_coverage_csv(tests_output_dir, diag)
+    _load_status_csv_multi(search_dirs, diag)
+    _load_diagnosis_log_multi(search_dirs, diag)
+    _load_coverage_csv_multi(search_dirs, diag)
 
     return diag
 
 
 def _short(full_name: str) -> str:
-    """org.pkg.Token_1_1Test → Token_1_1Test"""
     return full_name.rsplit(".", 1)[-1]
 
 
 def _ensure(diag: dict, tc: str) -> dict:
-    """确保 tc 在 diag 中存在，返回其 entry。"""
     if tc not in diag:
         diag[tc] = {
-            "compile_status":   "unknown",
-            "exec_status":      "unknown",
-            "compile_errors":   [],
-            "exec_errors":      [],
-            "focal_line_rate":  None,
-            "focal_branch_rate":None,
-            "missed_methods":   [],
-            "partial_methods":  [],
+            "compile_status":    "unknown",
+            "exec_status":       "unknown",
+            "compile_errors":    [],
+            "exec_errors":       [],
+            "focal_line_rate":   None,
+            "focal_branch_rate": None,
+            "missed_methods":    [],
+            "partial_methods":   [],
         }
     return diag[tc]
 
 
 # ── Step 1: *_status.csv ─────────────────────────────────────────────
 
-def _load_status_csv(tests_output_dir: str, diag: dict):
-    """
-    *_status.csv 列：project, target_class, test_class, compile_status,
-                     exec_status, exec_timeout, jacoco_exec_size, compile_score, exec_score
-    注：compile_status = 'pass'/'fail', exec_status = 'pass'/'fail'/'skip'
-    """
-    # status CSV 在 tests_output_dir 的父目录（global_csv_parent_dir）
-    # TestRunner 把它写到和 tests%T/ 同级的 results_batch 目录下
-    # 查找策略：先查 tests_output_dir 本身，再查其父目录
-    search_dirs = [
-        tests_output_dir,
-        os.path.dirname(tests_output_dir),
-    ]
+def _load_status_csv_multi(search_dirs: list, diag: dict):
     for d in search_dirs:
         csv_files = glob.glob(os.path.join(d, "*_status*.csv"))
-        if csv_files:
-            for csv_path in sorted(csv_files):
-                _parse_status_csv(csv_path, diag)
-            return
+        for csv_path in sorted(csv_files):
+            _parse_status_csv(csv_path, diag)
 
 
 def _parse_status_csv(csv_path: str, diag: dict):
@@ -177,7 +225,6 @@ def _parse_status_csv(csv_path: str, diag: dict):
                 if cs:
                     entry["compile_status"] = cs
                 if es and es != "pending":
-                    # exec_timeout 字段
                     is_timeout = str(row.get("exec_timeout", "false")).lower() in ("true", "1")
                     if is_timeout and es == "fail":
                         entry["exec_status"] = "timeout"
@@ -187,43 +234,31 @@ def _parse_status_csv(csv_path: str, diag: dict):
         logger.debug("status csv %s: %s", csv_path, e)
 
 
-# ── Step 2: diagnosis.log（Block 解析，正确处理多行格式） ────────────
+# ── Step 2: diagnosis.log ─────────────────────────────────────────────
 
-def _load_diagnosis_log(tests_output_dir: str, diag: dict):
-    """
-    diagnosis.log 格式（由 TestRunner 写入）：
+def _load_diagnosis_log_multi(search_dirs: list, diag: dict):
+    for d in search_dirs:
+        # 分支A：logs/ 在 focal_method_result_dir/logs/
+        log_a = os.path.join(d, "logs", "diagnosis.log")
+        if os.path.exists(log_a) and os.path.getsize(log_a) > 100:
+            _load_diagnosis_log(log_a, diag)
+            return
+        # 分支B：logs/ 在 tests%T/logs/
+        log_b = os.path.join(d, "logs", "diagnosis.log")
+        if os.path.exists(log_b) and os.path.getsize(log_b) > 100:
+            _load_diagnosis_log(log_b, diag)
+            return
 
-    [DIAGNOSIS] test_class=org.pkg.Token_1_1Test
-      project=Csv_1_b  target_class=Token
-      status=compile_fail
-      error_type=compile_error
-      core_errors (3):
-        - Token_1_1Test.java:12: error: cannot find symbol 'Assertions'
-        - Token_1_1Test.java:15: error: ...
-      full_stderr (45/89 lines):
-        ...（可忽略）
-    ---
+    # 都没找到，打印提示
+    logger.warning(
+        "[ToolRunner] diagnosis.log not found or empty in any of: %s\n"
+        "  Hint: TestRunner may have crashed during compilation. "
+        "Check logs/compile.log for details.",
+        search_dirs
+    )
 
-    [DIAGNOSIS] test_class=org.pkg.Token_1_1Test
-      status=exec_ok
-      error_type=coverage_gap
-      line_rate=45.0000%  (9/20)
-      branch_rate=33.3333%  (2/6)
-      coverage_score=0.39
-      missed_methods:
-        - reset
-        - close
-      partial_methods:
-        - read
-    ---
 
-    解析策略：按 [DIAGNOSIS] 分 block，每个 block 内逐行读取字段。
-    """
-    log_path = os.path.join(tests_output_dir, "logs", "diagnosis.log")
-    if not os.path.exists(log_path):
-        return
-
-    # 读取全文，按 [DIAGNOSIS] 切 block
+def _load_diagnosis_log(log_path: str, diag: dict):
     try:
         with open(log_path, encoding="utf-8", errors="ignore") as f:
             content = f.read()
@@ -231,41 +266,34 @@ def _load_diagnosis_log(tests_output_dir: str, diag: dict):
         logger.debug("diagnosis.log read error: %s", e)
         return
 
-    # 用 [DIAGNOSIS] 作为分隔符切块
     raw_blocks = re.split(r'\[DIAGNOSIS\]', content)
-    for block in raw_blocks[1:]:   # 跳过第一个空块
+    for block in raw_blocks[1:]:
         _parse_diag_block(block, diag)
+
+    logger.info("[ToolRunner] Parsed %d blocks from diagnosis.log", len(raw_blocks) - 1)
 
 
 def _parse_diag_block(block: str, diag: dict):
-    """
-    解析单个 [DIAGNOSIS] block（已去掉 '[DIAGNOSIS]' 前缀）。
-    """
     lines = block.splitlines()
     if not lines:
         return
 
-    # 第一行：test_class=org.pkg.Token_1_1Test
     tc_match = re.match(r'\s*test_class=(.+)', lines[0])
     if not tc_match:
         return
     tc = _short(tc_match.group(1).strip())
     entry = _ensure(diag, tc)
 
-    status = ""
-    in_core_errors    = False
-    in_missed_methods = False
-    in_partial_methods= False
-    in_full_stderr    = False
+    in_core_errors     = False
+    in_missed_methods  = False
+    in_partial_methods = False
+    in_full_stderr     = False
 
     for line in lines[1:]:
         stripped = line.strip()
-
-        # Block 分隔符
         if stripped == "---":
             break
 
-        # 状态行
         sm = re.match(r'status=(\S+)', stripped)
         if sm:
             status = sm.group(1)
@@ -281,44 +309,23 @@ def _parse_diag_block(block: str, diag: dict):
             in_core_errors = in_missed_methods = in_partial_methods = in_full_stderr = False
             continue
 
-        # 进入 core_errors 区块
         if re.match(r'core_errors\s*\(?\d*\)?:', stripped):
-            in_core_errors     = True
-            in_missed_methods  = False
-            in_partial_methods = False
-            in_full_stderr     = False
+            in_core_errors = True; in_missed_methods = in_partial_methods = in_full_stderr = False
             continue
-
-        # 进入 full_stderr 区块（忽略内容，太长）
         if re.match(r'full_stderr\s*\(', stripped):
-            in_core_errors     = False
-            in_full_stderr     = True
-            in_missed_methods  = False
-            in_partial_methods = False
+            in_full_stderr = True; in_core_errors = in_missed_methods = in_partial_methods = False
+            continue
+        if re.match(r'(missed_methods|uncovered_methods):', stripped):
+            in_missed_methods = True; in_core_errors = in_full_stderr = in_partial_methods = False
+            continue
+        if re.match(r'(partial_methods|partial_branch_methods):', stripped):
+            in_partial_methods = True; in_core_errors = in_full_stderr = in_missed_methods = False
             continue
 
-        # 进入 missed_methods 区块
-        if re.match(r'missed_methods:', stripped):
-            in_core_errors     = False
-            in_full_stderr     = False
-            in_missed_methods  = True
-            in_partial_methods = False
-            continue
-
-        # 进入 partial_methods 区块
-        if re.match(r'partial_methods:', stripped):
-            in_core_errors     = False
-            in_full_stderr     = False
-            in_missed_methods  = False
-            in_partial_methods = True
-            continue
-
-        # 列表条目（- xxx）
         item_m = re.match(r'-\s+(.+)', stripped)
         if item_m:
             val = item_m.group(1).strip()
             if in_core_errors and not in_full_stderr:
-                # 按 compile/exec 分类到不同 errors 列表
                 if entry["compile_status"] == "fail":
                     entry["compile_errors"].append(val)
                 else:
@@ -329,44 +336,31 @@ def _parse_diag_block(block: str, diag: dict):
                 entry["partial_methods"].append(val)
             continue
 
-        # 非列表行进入 full_stderr 时，跳过（避免垃圾数据进 errors）
         if in_full_stderr:
             continue
-
-        # 重置列表状态：遇到非列表、非空行时
         if stripped and not stripped.startswith("-"):
             in_core_errors = in_missed_methods = in_partial_methods = False
 
-    # 去重 + 截断（防止 token 爆炸）
     entry["compile_errors"] = list(dict.fromkeys(entry["compile_errors"]))[:8]
     entry["exec_errors"]    = list(dict.fromkeys(entry["exec_errors"]))[:8]
     entry["missed_methods"] = list(dict.fromkeys(entry["missed_methods"]))
     entry["partial_methods"]= list(dict.fromkeys(entry["partial_methods"]))
 
 
-# ── Step 3: *coveragedetail*.csv ─────────────────────────────────────
+# ── Step 3: coveragedetail.csv ────────────────────────────────────────
 
-def _load_coverage_csv(tests_output_dir: str, diag: dict):
-    """
-    *coveragedetail*.csv 列（由 TestRunner._write_per_test_status 写入）：
-    project, target_class, test_class, exec_status,
-    m_per_line_cov, m_per_line_total, m_per_line_rate,  ...（class 级）
-    f_per_line_cov, f_per_line_total, f_per_line_rate,  ...（focal method 级）
-    f_per_branch_cov, f_per_branch_total, f_per_branch_rate, ...
-
-    注：coveragedetail.csv 也写在 global_csv_parent_dir（tests%T/ 的父目录）。
-    """
-    search_dirs = [
-        tests_output_dir,
-        os.path.dirname(tests_output_dir),
-    ]
+def _load_coverage_csv_multi(search_dirs: list, diag: dict):
     for d in search_dirs:
         cov_files = sorted(glob.glob(os.path.join(d, "*coveragedetail*.csv")))
         if cov_files:
             _parse_coverage_csv(cov_files[-1], diag)
             return
-
-    # 如果还是找不到，也不报错：coverage 字段保持 None 即可
+        # 也检查父目录（分支B 把 csv 写在 project_dir 下）
+        parent = os.path.dirname(d)
+        cov_files_p = sorted(glob.glob(os.path.join(parent, "*coveragedetail*.csv")))
+        if cov_files_p:
+            _parse_coverage_csv(cov_files_p[-1], diag)
+            return
 
 
 def _parse_coverage_csv(csv_path: str, diag: dict):
@@ -377,7 +371,6 @@ def _parse_coverage_csv(csv_path: str, diag: dict):
                 if not tc:
                     continue
                 entry = _ensure(diag, tc)
-                # focal method 行覆盖率（0~100）
                 lr = row.get("f_per_line_rate", "").strip()
                 br = row.get("f_per_branch_rate", "").strip()
                 if lr:
@@ -395,14 +388,10 @@ def _parse_coverage_csv(csv_path: str, diag: dict):
 
 
 # ════════════════════════════════════════════════════════════════════
-# 读取已有的 suite_diagnosis.json（给 Refine Agent 用）
+# 读取 suite_diagnosis.json
 # ════════════════════════════════════════════════════════════════════
 
 def load_suite_diagnosis(tests_output_dir: str) -> Dict[str, dict]:
-    """
-    从 tests_output_dir 读取 suite_diagnosis.json。
-    返回 {test_name: diag_dict} 或 {}（文件不存在时）。
-    """
     path = os.path.join(tests_output_dir, DIAG_JSON_NAME)
     if not os.path.exists(path):
         logger.warning("suite_diagnosis.json not found: %s", path)
@@ -413,20 +402,3 @@ def load_suite_diagnosis(tests_output_dir: str) -> Dict[str, dict]:
     except Exception as e:
         logger.warning("failed to load suite_diagnosis.json: %s", e)
         return {}
-
-
-# ════════════════════════════════════════════════════════════════════
-# 目录查找工具
-# ════════════════════════════════════════════════════════════════════
-
-def _find_latest_tests_dir(project_dir: str) -> Optional[str]:
-    """在 project_dir 下找最新的 tests%YYYYMMDDHHMMSS/ 目录。"""
-    try:
-        candidates = [
-            os.path.join(project_dir, d)
-            for d in os.listdir(project_dir)
-            if d.startswith("tests%") and os.path.isdir(os.path.join(project_dir, d))
-        ]
-        return max(candidates, key=os.path.getmtime) if candidates else None
-    except Exception:
-        return None

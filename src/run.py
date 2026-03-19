@@ -104,7 +104,7 @@ def run(
     print("📌 Step 4: 启动 RefineTestGen pipeline...")
     if sql_query is None:
         project_name = os.path.basename(os.path.normpath(project_dir))
-        sql_query = f"SELECT id FROM method WHERE project_name='{project_name}' AND is_public=1;;"
+        sql_query = f"SELECT id FROM method WHERE project_name='{project_name}' ;"
     start_generation(sql_query, multiprocess=multiprocess, confirmed=confirmed)
 
     print("\n✅ 全流程完成！")

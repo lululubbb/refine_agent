@@ -81,19 +81,20 @@ RefineTestGen/
             └── 1%Csv_1_b%Token%reset%d3/  ← 每个 focal method 一个目录
                 │   (命名：methodId%proj%class%method%dir)
                 │
-                ├── test_cases/            ← ★ TestRunner 读取的最终 .java 文件
+                ├── test_cases/            ← TestRunner 读取的最终 .java 文件
                 │   └── Token_1_1Test.java
-                │
-                └── 1/                    ← test_num=1 的迭代过程记录
-                    ├── 1_GEN_0.json      ← Generator 初始生成 LLM 原始输出
-                    ├── 2_SUITE_0.java    ← 初始 suite 源码快照
-                    ├── 3_tool_diag_1.json ← Round 1: 工具调用诊断结果
-                    ├── 4_REFINE_1.json   ← Round 1: Refiner LLM 输出 + token
-                    ├── 5_GEN_1.json      ← Round 1: Generator 精修 LLM 输出
-                    ├── 6_SUITE_1.java    ← Round 1 精修后 suite 快照
-                    ├── ...（Round 2, 3...）
-                    ├── time_stats.json
-                    └── token_stats.json
+                ├── gen_logs
+                │   └── 1/                    ← test_num=1 的迭代过程记录
+                │       ├── 1_GEN_0.json      ← Generator 初始生成 LLM 原始输出
+                │       └── 2_JAVA_0.java    ← 初始 suite 源码快照
+                ├── refine_logs
+                │   └── round_1
+                │       └── fix_ExtendedBufferedReader_2_1Test
+                │           ├── fix_gen.json
+                │           └── new.java
+                ├── logs
+                ├── token_stats.json
+                └── time_stats.json
 ```
 
 ## 二、数据流：从上传项目到生成测试用例

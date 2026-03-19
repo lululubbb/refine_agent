@@ -116,8 +116,8 @@ class LLMClient:
                 # ── 429: 限速，强制睡眠后重试 ──────────────────────
                 if resp.status_code == 429:
                     last_error = f"429 Too Many Requests"
-                    time.sleep(10)
-                    # _rate_limit_sleep(attempt, self.name)
+                    # time.sleep(10)
+                    _rate_limit_sleep(attempt, self.name)
                     print(f"  ⚠️  [{self.name}] 触发 429 限速，准备进行第 {attempt}/{self.max_retries} 次重试...", flush=True)
                     continue
 
@@ -156,8 +156,8 @@ class LLMClient:
                 logger.warning("[%s] HTTP error: %s", self.name, e)
                 if status_code == 429:
                     # 也有可能在 raise_for_status() 前被捕获
-                    # _rate_limit_sleep(attempt, self.name)
-                    time.sleep(10)
+                    _rate_limit_sleep(attempt, self.name)
+                    # time.sleep(10)
                     print(f"  ⚠️  [{self.name}] 触发 429 限速，准备进行第 {attempt}/{self.max_retries} 次重试...", flush=True)
                     continue
                 if status_code in (400, 401, 403):

@@ -1,43 +1,3 @@
-"""
-refine_agent.py  (v3 — 概念修正版)
-=====================================
-
-概念定义
-─────────────────────────────────────────────────────────────────
-Test  = 一个 Java 测试文件，如 Token_1_1Test.java
-Suite = 针对同一 focal method 的 test_number 个 Test 文件集合
-─────────────────────────────────────────────────────────────────
-
-Refine Agent 流程
-─────────────────────────────────────────────────────────────────
-输入：test_cases/ 目录下已生成的所有 Test 文件（N 个）
-
-[Tool 1] TestRunner.start_all_test()
-         → 对每个 Test 文件：compile_ok / exec_ok / compile_errors / exec_errors
-         → 读 diagnosis.log + per_test_status_*.csv
-
-[Tool 2] 覆盖率（JaCoCo）
-         → 对每个 Test 文件：focal_line_rate / focal_branch_rate
-         → 读 *coveragedetail*.csv（TestRunner 已生成）
-
-[Tool 3] Bug Revealing（可选）
-         → 对每个 Test 文件：bug_revealing True/False
-         → 调用 scripts/bug_revealing.py → bugrevealing.csv
-
-[Tool 4] 相似度（Suite 内 Test 间）
-         → 对每对 (Test_i, Test_j)：AST pairwise 相似度
-         → 调用 code_to_ast + measure_similarity → *_bigSims.csv
-         → 此处相似度是 Test 文件间的，不是 @Test 方法间的
-
-计算得分：
-  - 每个 Test 文件 → TestScore（5 维度，无综合分）
-  - N 个 Test 合成 → SuiteScore（5 维度统计 + 问题分类汇总）
-
-调用 Refiner LLM：
-  - 传入：SuiteScore（整体视图）+ 每个 Test 的 TestScore + 原始诊断
-  - 输出：per-Test 修复指令（指向哪些 Test 文件需要修复、如何修复）
-─────────────────────────────────────────────────────────────────
-"""
 from __future__ import annotations
 
 import csv
@@ -62,36 +22,31 @@ if HERE not in sys.path:
 
 
 # ════════════════════════════════════════════════════════════════════
-# TestDiag：一个 Test 文件的工具诊断原始数据
+# TestDiag
 # ════════════════════════════════════════════════════════════════════
 
 @dataclass
 class TestDiag:
-    """
-    单个 Test 文件（Token_1_{seq}Test.java）的原始诊断数据。
-    由 4 个工具依次填充。
-    """
-    test_name: str              # e.g. "Token_1_1Test"
+    test_name: str
 
-    # Tool 1: 编译 / 执行
     compile_ok:     bool      = False
     exec_ok:        bool      = False
     exec_timeout:   bool      = False
-    compile_errors: List[str] = field(default_factory=list)   # 核心编译错误行（截断）
-    exec_errors:    List[str] = field(default_factory=list)   # 核心运行时异常行
+    compile_errors: List[str] = field(default_factory=list)
+    exec_errors:    List[str] = field(default_factory=list)
 
-    # Tool 2: focal method 行/分支覆盖率（0~100，TestRunner 从 JaCoCo 获取）
     focal_line_rate:   Optional[float] = None
     focal_branch_rate: Optional[float] = None
-    missed_methods:    List[str] = field(default_factory=list)   # focal class 未覆盖方法
-    partial_methods:   List[str] = field(default_factory=list)   # 部分覆盖方法
+    missed_methods:    List[str] = field(default_factory=list)
+    partial_methods:   List[str] = field(default_factory=list)
 
-    # Tool 3: bug revealing
-    bug_revealing: Optional[bool] = None   # None = 未检测
+    bug_revealing: Optional[bool] = None
 
-    # Tool 4: 与 Suite 内其他 Test 文件的最高 AST 相似度
-    redundancy_score: Optional[float] = None   # 0~1，越高越冗余
-    most_similar_to:  Optional[str]   = None   # 最相似的另一个 Test 文件名
+    redundancy_score: Optional[float] = None
+    most_similar_to:  Optional[str]   = None
+
+    # 标记诊断数据是否可信（路径问题时数据为默认值，不可信）
+    diag_data_valid: bool = False
 
     def to_dict(self) -> dict:
         return {k: v for k, v in self.__dict__.items()}
@@ -106,25 +61,14 @@ class RefineResult:
     class_name:   str
     iteration:    int
 
-    # 每个 Test 文件的原始诊断（工具调用）
-    test_diags: Dict[str, TestDiag] = field(default_factory=dict)
-
-    # 每个 Test 文件的多维度评分（脚本计算，无加权综合分）
+    test_diags:  Dict[str, TestDiag]  = field(default_factory=dict)
     test_scores: Dict[str, TestScore] = field(default_factory=dict)
-
-    # Suite 整体多维度统计（脚本计算）
     suite_score: Optional[SuiteScore] = None
 
-    # Refiner LLM 输出
     instructions:  Dict[str, List[str]] = field(default_factory=dict)
-    # {test_name: ["具体修复指令1", "指令2", ...]}
+    delete_tests:  List[str]            = field(default_factory=list)
+    suite_summary: str                  = ""
 
-    delete_tests:  List[str] = field(default_factory=list)
-    # 建议删除的 Test（与其他 Test 高度冗余）
-
-    suite_summary: str = ""   # Refiner LLM 对 Suite 整体问题的描述
-
-    # Refiner LLM token/time 统计
     refiner_prompt_tokens:     int   = 0
     refiner_completion_tokens: int   = 0
     refiner_elapsed_seconds:   float = 0.0
@@ -188,18 +132,7 @@ def _find_latest_tests_dir(project_dir: str) -> Optional[str]:
 
 
 # ════════════════════════════════════════════════════════════════════
-# Tool 1+2: 编译 + 执行 + 覆盖率（通过 tool_runner_adapter）
-# ════════════════════════════════════════════════════════════════════
-#
-# 改进说明：
-#   旧方式：直接用正则解析 diagnosis.log（自定义文本格式），
-#           用 glob 在错误路径下找 coveragedetail.csv，
-#           导致 missed_methods 永远为空、coverage 永远回退到 JaCoCo XML。
-#
-#   新方式：tool_runner_adapter.run_and_export() 调用 TestRunner，然后
-#           从多个输出文件提取数据，正确解析（block 方式解析 log），
-#           并在 tests_output_dir 下写出统一的 suite_diagnosis.json。
-#           Refine Agent 只需 json.load() 一次即可获取 Tool 1+2 的全部数据。
+# Tool 1+2
 # ════════════════════════════════════════════════════════════════════
 
 def tool_compile_run_and_coverage(
@@ -225,7 +158,10 @@ def tool_compile_run_and_coverage(
     # 读取统一 JSON（一次调用，包含 compile/exec/coverage 全部数据）
     diag_map = load_suite_diagnosis(tests_output_dir)
     if not diag_map:
-        logger.warning("[Tool 1+2] suite_diagnosis.json empty")
+        logger.warning("[Tool 1+2] suite_diagnosis.json empty — diag data invalid")
+        # ★ 标记数据不可信
+        for d in diags.values():
+            d.diag_data_valid = False
         return diags, tests_output_dir
 
     # 填充 TestDiag 对象
@@ -246,18 +182,17 @@ def tool_compile_run_and_coverage(
         br = raw.get("focal_branch_rate")
         d.focal_line_rate   = float(lr) if lr is not None else None
         d.focal_branch_rate = float(br) if br is not None else None
+        # ★ 有真实数据，标记为可信
+        d.diag_data_valid = True
 
-    logger.info(
-        "[Tool 1+2] loaded %d/%d tests from suite_diagnosis.json",
-        sum(1 for v in diags.values() if v.compile_ok or v.compile_errors),
-        len(diags),
-    )
+    valid_count = sum(1 for d in diags.values() if d.diag_data_valid)
+    logger.info("[Tool 1+2] loaded %d/%d tests from suite_diagnosis.json",
+                valid_count, len(diags))
     return diags, tests_output_dir
 
 
 # ── 保留 tool_compile_run 作为向后兼容别名 ────────────────────────
 def tool_compile_run(focal_method_result_dir, project_dir, test_names):
-    """向后兼容：调用新版 tool_compile_run_and_coverage。"""
     return tool_compile_run_and_coverage(focal_method_result_dir, project_dir, test_names)
 
 
@@ -280,7 +215,7 @@ def tool_coverage(
 
 
 # ════════════════════════════════════════════════════════════════════
-# Tool 3: Bug Revealing（每个 Test 文件 vs buggy/fixed）
+# Tool 3: Bug Revealing
 # ════════════════════════════════════════════════════════════════════
 
 def tool_bug_revealing(
@@ -323,35 +258,49 @@ def tool_bug_revealing(
 
 
 # ════════════════════════════════════════════════════════════════════
-# Tool 4: 相似度（Suite 内 Test 文件间 pairwise AST 相似度）
+# Tool 4: 相似度
+#
+# Bug Fix (Issue 3):
+#   传给 code_to_ast 和 measure_similarity 的路径改为
+#   focal_method_result_dir/test_cases
+#   → process_tests_dir() 走 'test_cases' 分支：
+#     top_tests_dir = focal_method_result_dir  ✓
+#     test_cases_dir = focal_method_result_dir/test_cases/  ✓
+#     AST/ 和 Similarity/ 都写在 focal_method_result_dir 下  ✓
 # ════════════════════════════════════════════════════════════════════
 
 def tool_similarity(
     focal_method_result_dir: str,
     diags: Dict[str, TestDiag],
 ) -> List[Tuple[str, str, float]]:
-    """
-    调用 code_to_ast.py + measure_similarity.py，
-    计算 Suite 内所有 Test 文件对之间的 AST 相似度。
-    同时填充 diags[tc].redundancy_score（该 Test 与其他 Test 中的最高相似度）。
-
-    返回：所有 pair 的相似度列表 [(tc1, tc2, score), ...]，供 SuiteScore 使用。
-    """
     scripts_dir = os.path.join(HERE, "scripts")
+
+    # ★ 修复：传 test_cases 子目录路径，让脚本走正确的分支
+    tc_dir = os.path.join(focal_method_result_dir, "test_cases")
+    if not os.path.isdir(tc_dir):
+        logger.warning("[Tool 4] test_cases dir not found: %s", tc_dir)
+        return []
+
     for sname, timeout in [("code_to_ast.py", 120), ("measure_similarity.py", 300)]:
         sc = os.path.join(scripts_dir, sname)
         if not os.path.exists(sc):
             logger.warning("[Tool 4] %s not found", sname)
             return []
-        _run([sys.executable, sc, focal_method_result_dir], timeout=timeout)
+        rc, stdout, stderr = _run([sys.executable, sc, tc_dir], timeout=timeout)
+        if rc != 0:
+            logger.warning("[Tool 4] %s rc=%d stderr=%s", sname, rc, stderr[:300])
+        else:
+            logger.info("[Tool 4] %s OK", sname)
 
+    # Similarity CSV 写在 focal_method_result_dir/Similarity/ 下
     sim_dir    = os.path.join(focal_method_result_dir, "Similarity")
     bsim_files = sorted(glob.glob(os.path.join(sim_dir, "*_bigSims.csv")))
     if not bsim_files:
+        logger.warning("[Tool 4] No bigSims.csv found in %s", sim_dir)
         return []
 
     all_pairs: List[Tuple[str, str, float]] = []
-    best: Dict[str, Tuple[float, str]] = {}   # {tc: (max_score, partner)}
+    best: Dict[str, Tuple[float, str]] = {}
 
     try:
         with open(bsim_files[-1], newline="", encoding="utf-8") as f:
@@ -373,6 +322,8 @@ def tool_similarity(
                 diags[tc].redundancy_score = round(score, 4)
                 diags[tc].most_similar_to  = partner
 
+        logger.info("[Tool 4] %d pairs loaded from %s", len(all_pairs), bsim_files[-1])
+
     except Exception as e:
         logger.warning("[Tool 4] bigSims parse: %s", e)
 
@@ -380,14 +331,14 @@ def tool_similarity(
 
 
 # ════════════════════════════════════════════════════════════════════
-# Refiner Prompt 构建（两级评分数据 → Jinja2 模板）
+# Refiner Prompt 构建
 # ════════════════════════════════════════════════════════════════════
 
 def _build_refiner_messages(
     focal_method: str,
     class_name: str,
     focal_method_code: str,
-    test_file_codes: Dict[str, str],    # {test_name: java_source}
+    test_file_codes: Dict[str, str],
     diags: Dict[str, TestDiag],
     test_scores: Dict[str, TestScore],
     suite_score: SuiteScore,
@@ -403,11 +354,21 @@ def _build_refiner_messages(
     # 合并 diag + score，只保留有问题的 Test
     problematic_data = []
     for tname in diags:
-        if not test_scores.get(tname, TestScore(tname)).issues:
+        score = test_scores.get(tname, TestScore(tname))
+        if not score.issues:
             continue
         entry = diags[tname].to_dict()
-        entry["scores"] = test_scores[tname].to_dict() if tname in test_scores else {}
+        entry["scores"] = score.to_dict()
         entry["source_code"] = test_file_codes.get(tname, "// [source not available]")
+
+        # ★ 修复：如果诊断数据不可信，注明警告，防止 Refiner 给出基于错误诊断的指令
+        if not diags[tname].diag_data_valid:
+            entry["_WARNING"] = (
+                "诊断数据缺失（工具链路径问题），compile_errors/exec_errors 均为空。"
+                "请勿基于 COMPILE_FAIL 标签给出具体编译错误修复指令。"
+                "仅根据 source_code 判断代码质量并给出改进建议。"
+            )
+
         problematic_data.append(entry)
 
     try:
@@ -438,10 +399,23 @@ def _build_refiner_messages(
 
 
 def _fallback_prompt(focal_method, class_name, focal_method_code,
-                     problematic_data, suite_score, iteration) -> str:
+                     problematic_data, suite_score, iteration, template_dir) -> str:
     suite_json = json.dumps(suite_score.to_dict(), indent=2, ensure_ascii=False)
-    tests_json = json.dumps(problematic_data, indent=2, ensure_ascii=False)
-    return f"""You are a Java test quality analyst (Refine Agent).
+    tests_json = json.dumps(problematic_data,      indent=2, ensure_ascii=False)
+    try:
+        from jinja2 import Environment, FileSystemLoader
+        tenv = Environment(loader=FileSystemLoader(template_dir))
+        return tenv.get_template("fallback_refine_agent.jinja2").render(
+            focal_method=focal_method,
+            class_name=class_name,
+            focal_method_code=focal_method_code,
+            suite_json=suite_json,
+            tests_json=tests_json,
+            iteration=iteration,
+        )
+    except Exception as e:
+        logger.warning("Fallback template render failed (%s), using hardcoded", e)
+        return f"""You are a Java test quality analyst (Refine Agent).
 
 ## Context
 Focal method: `{focal_method}` in `{class_name}` | Iteration {iteration}
@@ -451,54 +425,41 @@ Focal method: `{focal_method}` in `{class_name}` | Iteration {iteration}
 {focal_method_code}
 ```
 
-## Suite-Level Scores (N Test files for this focal method, script-computed)
+## Suite-Level Scores
 ```json
 {suite_json}
 ```
 
-## Problematic Test Files — Diagnostics + Per-Test Scores (script-computed)
-Each entry includes:
-- test_name: the Java file name (e.g. Token_1_1Test)
-- compile_ok / exec_ok / compile_errors / exec_errors: Tool 1 results
-- focal_line_rate / focal_branch_rate: Tool 2 coverage (0-100)
-- missed_methods / partial_methods: uncovered focal class methods
-- bug_revealing: Tool 3 result (true/false/null)
-- redundancy_score / most_similar_to: Tool 4 pairwise similarity
-- scores.issues: list of problem labels for this Test
-- source_code: full Java source of this Test file
+## Problematic Test Files
 ```json
 {tests_json}
 ```
 
 ## Your Task
-Analyze the above data and produce repair instructions.
 Output ONLY a JSON object:
 {{
-  "suite_summary": "<2-4 sentences: overall assessment using suite_score data>",
+  "suite_summary": "<2-4 sentences>",
   "test_instructions": {{
     "<test_name>": ["<instruction1>", "<instruction2>"]
   }},
-  "delete_tests": ["<test_name_to_delete>"]
+  "delete_tests": ["<test_name>"]
 }}
 
 Rules:
-- test_name keys must match exactly (e.g. "Token_1_2Test")
-- Only include tests that have issues (see scores.issues field)
-- delete_tests: only near-identical tests (redundancy_score > 0.95)
-- Priority order: COMPILE_FAIL > EXEC_FAIL > LOW_LINE_COV/LOW_BRANCH_COV > NOT_BUG_REVEALING > HIGH_REDUNDANCY
-- Each instruction must be concrete: quote exact compile_errors or exec_errors lines,
-  name specific missed_methods, reference most_similar_to for redundancy
-- Max 4 instructions per test"""
+- If _WARNING is present for a test, do NOT give compile-error fix instructions;
+  instead focus on coverage improvement and assertion quality.
+- test_name keys must match exactly
+- Only include tests with issues
+- delete_tests: only similarity > 0.95
+- Max 4 instructions per test, must be concrete
+"""
 
 
 # ════════════════════════════════════════════════════════════════════
-# Refine Agent 主类
+# Refine Agent
 # ════════════════════════════════════════════════════════════════════
 
 class RefineAgent:
-    """
-    对 Suite（N 个 Test 文件）执行全量评估，输出 RefineResult。
-    """
 
     def __init__(
         self,
@@ -518,13 +479,13 @@ class RefineAgent:
 
     def run(
         self,
-        focal_method_result_dir: str,   # base_dir（含 test_cases/ 子目录）
+        focal_method_result_dir: str,
         project_dir: str,
         focal_method: str,
         class_name: str,
         target_class_fqn: str,
         focal_method_code: str,
-        test_file_codes: Dict[str, str],    # {test_name: java_source}，所有 Test 文件
+        test_file_codes: Dict[str, str],
         iteration: int,
         save_dir: str,
         step_counter_start: int = 1,
@@ -556,15 +517,24 @@ class RefineAgent:
         diags, tests_output_dir = tool_compile_run_and_coverage(
             focal_method_result_dir, project_dir, test_names
         )
+        valid_count = sum(1 for d in diags.values() if d.diag_data_valid)
         logger.info(
-            "[RefineAgent] [Tool 1+2] %.1fs  tests_dir=%s  "
+            "[RefineAgent] [Tool 1+2] %.1fs  valid_diags=%d/%d  "
             "compile_ok=%d/%d  exec_ok=%d/%d",
-            time.time() - t0, tests_output_dir,
+            time.time() - t0, valid_count, len(diags),
             sum(1 for d in diags.values() if d.compile_ok), len(diags),
             sum(1 for d in diags.values() if d.exec_ok),    len(diags),
         )
 
-        # ── Tool 3: Bug Revealing ─────────────────────────────────
+        # ★ 打印诊断数据有效性警告
+        if valid_count == 0:
+            logger.warning(
+                "[RefineAgent] ⚠️  ALL diag data invalid (suite_diagnosis.json empty). "
+                "Refiner will work with source code only, without real compile/exec status. "
+                "Check tool_runner_adapter logs for TestRunner path issues."
+            )
+
+        # Tool 3
         if not self.skip_bug_revealing and self.buggy_dir and self.fixed_dir:
             t0 = time.time()
             tool_bug_revealing(
@@ -572,7 +542,7 @@ class RefineAgent:
             )
             logger.info("[RefineAgent] [Tool 3] %.1fs", time.time() - t0)
 
-        # ── Tool 4: 相似度（Suite 内 Test 文件间）────────────────
+        # Tool 4 (★ 路径修复已在 tool_similarity 内部实现)
         pairwise_sims: List[Tuple[str, str, float]] = []
         if not self.skip_similarity and len(test_names) > 1:
             t0 = time.time()
@@ -601,21 +571,22 @@ class RefineAgent:
         if suite_score.problem_tests:
             logger.info("[RefineAgent] Problems: %s", suite_score.problem_tests)
 
-        # ── 保存工具诊断 + 两级得分 ───────────────────────────────
+        # 保存诊断
         diag_path = os.path.join(save_dir, f"{step}_tool_diag_{iteration}.json")
         with open(diag_path, "w", encoding="utf-8") as f:
             json.dump({
-                "test_diags":     {k: v.to_dict() for k, v in diags.items()},
-                "test_scores":    {k: v.to_dict() for k, v in test_scores.items()},
-                "suite_score":    suite_score.to_dict(),
-                "pairwise_sims":  [
+                "test_diags":    {k: v.to_dict() for k, v in diags.items()},
+                "test_scores":   {k: v.to_dict() for k, v in test_scores.items()},
+                "suite_score":   suite_score.to_dict(),
+                "pairwise_sims": [
                     {"tc1": t1, "tc2": t2, "score": round(s, 4)}
                     for t1, t2, s in pairwise_sims
                 ],
+                "diag_data_valid_count": valid_count,
             }, f, indent=2, ensure_ascii=False)
         step += 1; files_written += 1
 
-        # ── 检查是否有需要处理的问题 ─────────────────────────────
+        # 检查是否有问题
         problematic = [n for n, s in test_scores.items() if s.issues]
         if not problematic:
             logger.info("[RefineAgent] all Tests OK, skipping Refiner LLM")
@@ -629,7 +600,7 @@ class RefineAgent:
         logger.info("[RefineAgent] %d/%d Tests have issues: %s",
                     len(problematic), len(test_names), problematic)
 
-        # ── Refiner LLM（只传有问题的 Test 数据） ────────────────
+        # Refiner LLM
         filtered_diags  = {n: diags[n]       for n in problematic}
         filtered_scores = {n: test_scores[n] for n in problematic}
         filtered_codes  = {n: test_file_codes.get(n, "") for n in problematic}
@@ -644,7 +615,6 @@ class RefineAgent:
         )
         parsed, llm_result = self.client.chat_json(messages)
 
-        # 保存 Refiner LLM 输出
         ref_path = os.path.join(save_dir, f"{step}_REFINE_{iteration}.json")
         with open(ref_path, "w", encoding="utf-8") as f:
             json.dump({
