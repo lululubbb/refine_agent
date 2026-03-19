@@ -289,9 +289,9 @@ def focal_method_pipeline(
     try:
         with open(get_dataset_path(method_id, proj_name, class_name, method_name, "raw")) as f:
             raw_data = json.load(f)
-        with open(get_dataset_path(method_id, proj_name, class_name, method_name, 1)) as f:
+        with open(get_dataset_path(method_id, proj_name, class_name, method_name, "1")) as f:
             ctx_d1 = json.load(f)
-        with open(get_dataset_path(method_id, proj_name, class_name, method_name, 3)) as f:
+        with open(get_dataset_path(method_id, proj_name, class_name, method_name, "3")) as f:
             ctx_d3 = json.load(f)
     except FileNotFoundError as e:
         logger.error("%s dataset not found: %s", progress_tag, e)
@@ -490,7 +490,7 @@ def start_whole_process(
     source_dir: str,
     result_path: str,
     method_ids: Optional[List[str]] = None,
-    multiprocess: bool = True,
+    multiprocess: bool = False,
 ):
     """
     扫描 source_dir（direction_1/）下所有 .json，

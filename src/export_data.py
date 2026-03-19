@@ -10,7 +10,6 @@ import os
 import json
 from database import database
 from config import config
-from scripts.cfg_extractor import build_cfg_text
 
 
 dataset_path = config.get("database", "dataset_dir")

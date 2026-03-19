@@ -62,7 +62,7 @@ def create_result_folder() -> str:
 
 def start_generation(
     sql_query: str,
-    multiprocess: bool = True,
+    multiprocess: bool = False,
     confirmed: bool = True,
 ):
     """

@@ -209,7 +209,7 @@ def create_table():
 def drop_table():
     db = database()
     sql_script = """
-        DROP TABLE IF EXISTS chatunitest.class;
-        DROP TABLE IF EXISTS chatunitest.method;
+        DROP TABLE IF EXISTS refine_test_gen.class;
+        DROP TABLE IF EXISTS refine_test_gen.method;
     """
     db.execute(sql_script)

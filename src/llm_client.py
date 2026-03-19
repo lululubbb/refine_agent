@@ -12,7 +12,7 @@ import json
 import logging
 import time
 from typing import Dict, List, Optional, Tuple
-
+from config import *
 import requests
 
 logger = logging.getLogger(__name__)

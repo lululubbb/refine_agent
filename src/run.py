@@ -57,7 +57,7 @@ def _save_progress(step: str, status: str):
 
 def run(
     sql_query: str = None,
-    multiprocess: bool = True,
+    multiprocess: bool = False,
     skip_parse: bool = False,
     skip_export: bool = False,
     confirmed: bool = True,
@@ -111,9 +111,10 @@ def run(
 
 
 if __name__ == "__main__":
-    # 示例：测试 Csv_1_b 项目的 Token 类
-    run(
-        sql_query="SELECT id FROM method WHERE project_name='Csv_1_b' AND class_name='Token' AND is_constructor=0;",
-        multiprocess=False,
-        confirmed=True,
-    )
+    print("Make sure the config.ini is correctly configured.")
+    seconds = 1
+    while seconds > 0:
+        print(seconds)
+        time.sleep(1)  # Pause for 1 second
+        seconds -= 1
+    run()

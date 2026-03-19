@@ -47,23 +47,66 @@ def process_error_message(error_message: str, allowed_tokens: int) -> str:
             break
     return error_message
 
+def find_processes_created_by(pid):
+    """
+    Find the process's and all subprocesses' pid
+    """
+    parent_process = psutil.Process(pid)
+    child_processes = parent_process.children(recursive=True)
+    pids = [process.pid for process in child_processes]
+    return pids.append(pid)
+
+def find_result_in_projects():
+    """
+    Find the new directory.
+    :return: The new directory.
+    """
+    all_results = [x for x in os.listdir(project_dir) if '%' in x]
+    all_results = sorted(all_results, key=get_date_string)
+    return os.path.join(result_dir, all_results[-1])
+
+
+def check_java_version():
+    java_home = os.environ.get('JAVA_HOME')
+    if 'jdk-17' in java_home:
+        return 17
+    elif 'jdk-11' in java_home:
+        return 11
 
 # ── 数据集路径工具（复用 ChatUniTest 约定） ────────────────────────────
 
 def gen_file_name(method_id, project_name, class_name, method_name, direction) -> str:
     return f"{method_id}%{project_name}%{class_name}%{method_name}%{direction}.json"
 
+def get_project_abspath():
+    return os.path.abspath(project_dir)
 
-def get_dataset_path(method_id, project_name, class_name, method_name, direction) -> str:
+
+def get_dataset_path(method_id, project_name, class_name, method_name, direction):
+    """
+    Get the dataset path
+    :return:
+    """
     if direction == "raw":
-        sub = "raw_data"
-    elif isinstance(direction, int):
-        sub = f"direction_{direction}"
-    else:
-        sub = str(direction)
-    fname = gen_file_name(method_id, project_name, class_name, method_name,
-                           direction if direction == "raw" else direction)
-    return os.path.join(dataset_dir, sub, fname)
+        return os.path.join(dataset_dir, "raw_data",
+                            method_id + "%" + project_name + "%" + class_name + "%" + method_name + "%raw.json")
+    return os.path.join(dataset_dir, "direction_" + str(direction),
+                        method_id + "%" + project_name + "%" + class_name + "%" + method_name + "%d" + str(
+                            direction) + ".json")
+
+def remove_single_test_output_dirs(project_path):
+    prefix = "test_"
+
+    # Get a list of all directories in the current directory with the prefix
+    directories = [d for d in os.listdir(project_path) if os.path.isdir(d) and d.startswith(prefix)]
+
+    # Iterate through the directories and delete them if they are not empty
+    for d in directories:
+        try:
+            shutil.rmtree(d)
+            print(f"Directory {d} deleted successfully.")
+        except Exception as e:
+            print(f"Error deleting directory {d}: {e}")
 
 
 def parse_file_name(base_name: str):
