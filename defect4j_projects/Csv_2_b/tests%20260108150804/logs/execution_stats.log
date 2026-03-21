@@ -1,0 +1,34 @@
+[PER_TEST_RUN] CSVRecord_11_1Test.java exec_ok=True exec_size=106047
+[PER_TEST_RUN] CSVRecord_1_1Test.java exec_ok=True exec_size=32792
+[PER_TEST_RUN] CSVRecord_12_1Test.java exec_ok=True exec_size=32454
+[PER_TEST_RUN] CSVRecord_8_1Test.java exec_ok=True exec_size=32526
+[PER_TEST_RUN] CSVRecord_9_1Test.java exec_ok=True exec_size=32611
+[PER_TEST_RUN] CSVRecord_2_1Test.java exec_ok=True exec_size=32504
+[PER_TEST_RUN] CSVRecord_3_1Test.java exec_ok=True exec_size=109800
+[PER_TEST_RUN] CSVRecord_5_1Test.java exec_ok=True exec_size=32436
+[PER_TEST_RUN] CSVRecord_10_1Test.java exec_ok=True exec_size=32398
+[PER_TEST_RUN] CSVRecord_7_1Test.java exec_ok=True exec_size=106248
+[PER_TEST_RUN] CSVRecord_4_1Test.java exec_ok=True exec_size=32437
+[PER_TEST_RUN] CSVRecord_6_1Test.java exec_ok=True exec_size=32549
+[PER_TEST_RUN] CSVRecord_10_2Test.java exec_ok=True exec_size=32511
+[PER_TEST_RUN] CSVRecord_9_2Test.java exec_ok=True exec_size=32499
+[PER_TEST_RUN] CSVRecord_6_2Test.java exec_ok=True exec_size=32550
+[PER_TEST_RUN] CSVRecord_4_2Test.java exec_ok=True exec_size=32549
+[PER_TEST_RUN] CSVRecord_11_2Test.java exec_ok=True exec_size=106095
+[PER_TEST_RUN] CSVRecord_7_2Test.java exec_ok=True exec_size=106050
+[PER_TEST_RUN] CSVRecord_2_2Test.java exec_ok=True exec_size=32504
+[PER_TEST_RUN] CSVRecord_8_2Test.java exec_ok=True exec_size=32418
+[PER_TEST_RUN] CSVRecord_1_2Test.java exec_ok=False exec_size=33233
+[PER_TEST_RUN] CSVRecord_3_2Test.java exec_ok=True exec_size=32550
+[PER_TEST_RUN] CSVRecord_5_2Test.java exec_ok=True exec_size=109687
+[PER_TEST_RUN] CSVRecord_12_2Test.java exec_ok=True exec_size=32455
+[ALL ATTEMPTS]
+  total_tests=24
+  syntax_errors=0
+  compile_errors=0
+  test_run_errors=1
+  全项目行覆盖率: 3.49% (21/601)
+  全项目分支覆盖率: 3.89% (16/411)
+  target_class: CSVRecord
+  modified class行覆盖率: 100.0% (21/21)
+  modified class分支覆盖率: 100.0% (16/16)

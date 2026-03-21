@@ -1,0 +1,90 @@
+{
+  "test_diags": {
+    "ExtendedBufferedReader_1_1Test": {
+      "test_name": "ExtendedBufferedReader_1_1Test",
+      "compile_ok": true,
+      "exec_ok": true,
+      "exec_timeout": false,
+      "compile_errors": [
+        "/home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/1%Csv_1_b%ExtendedBufferedReader%ExtendedBufferedReader%d3/test_cases/ExtendedBufferedReader_1_1Test.java:20: 错误: 找不到符号"
+      ],
+      "exec_errors": [],
+      "focal_line_rate": null,
+      "focal_branch_rate": null,
+      "missed_methods": [],
+      "partial_methods": [],
+      "bug_revealing": null,
+      "redundancy_score": null,
+      "most_similar_to": null,
+      "diag_data_valid": true
+    },
+    "ExtendedBufferedReader_1_2Test": {
+      "test_name": "ExtendedBufferedReader_1_2Test",
+      "compile_ok": true,
+      "exec_ok": true,
+      "exec_timeout": false,
+      "compile_errors": [
+        "/home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/1%Csv_1_b%ExtendedBufferedReader%ExtendedBufferedReader%d3/test_cases/ExtendedBufferedReader_1_2Test.java:3: 错误: 找不到符号"
+      ],
+      "exec_errors": [],
+      "focal_line_rate": null,
+      "focal_branch_rate": null,
+      "missed_methods": [],
+      "partial_methods": [],
+      "bug_revealing": null,
+      "redundancy_score": null,
+      "most_similar_to": null,
+      "diag_data_valid": true
+    }
+  },
+  "test_scores": {
+    "ExtendedBufferedReader_1_1Test": {
+      "test_name": "ExtendedBufferedReader_1_1Test",
+      "compile_score": 1.0,
+      "exec_score": 1.0,
+      "focal_line_coverage": null,
+      "focal_branch_coverage": null,
+      "bug_reveal_score": null,
+      "max_similarity": null,
+      "most_similar_to": null,
+      "issues": []
+    },
+    "ExtendedBufferedReader_1_2Test": {
+      "test_name": "ExtendedBufferedReader_1_2Test",
+      "compile_score": 1.0,
+      "exec_score": 1.0,
+      "focal_line_coverage": null,
+      "focal_branch_coverage": null,
+      "bug_reveal_score": null,
+      "max_similarity": null,
+      "most_similar_to": null,
+      "issues": []
+    }
+  },
+  "suite_score": {
+    "n_tests": 2,
+    "compile_pass_count": 2,
+    "compile_pass_rate": 1.0,
+    "exec_pass_count": 2,
+    "exec_pass_rate": 1.0,
+    "per_test_line_coverage": [
+      null,
+      null
+    ],
+    "per_test_branch_coverage": [
+      null,
+      null
+    ],
+    "coverage_line_avg": null,
+    "coverage_line_max": null,
+    "coverage_line_min": null,
+    "coverage_branch_avg": null,
+    "bug_reveal_count": 0,
+    "bug_reveal_checked": 0,
+    "bug_reveal_rate": 0.0,
+    "max_pairwise_similarity": null,
+    "high_redundancy_pairs": [],
+    "problem_tests": {}
+  },
+  "pairwise_sims": []
+}

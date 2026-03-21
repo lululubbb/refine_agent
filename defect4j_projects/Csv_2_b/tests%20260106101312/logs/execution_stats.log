@@ -1,0 +1,82 @@
+[PER_TEST_RUN] CSVRecord_11_1Test.java exec_ok=True exec_exists=True size=32513
+[PER_TEST_RUN] CSVRecord_1_1Test.java exec_ok=False exec_exists=True size=32997
+[PER_TEST_RUN] CSVRecord_12_1Test.java exec_ok=True exec_exists=True size=32455
+[PER_TEST_RUN] CSVRecord_8_1Test.java exec_ok=True exec_exists=True size=32418
+[PER_TEST_RUN] CSVRecord_9_1Test.java exec_ok=True exec_exists=True size=32566
+[PER_TEST_RUN] CSVRecord_2_1Test.java exec_ok=True exec_exists=True size=32840
+[PER_TEST_RUN] CSVRecord_3_1Test.java exec_ok=True exec_exists=True size=32710
+[PER_TEST_RUN] CSVRecord_5_1Test.java exec_ok=True exec_exists=True size=32436
+[PER_TEST_RUN] CSVRecord_10_1Test.java exec_ok=True exec_exists=True size=32399
+[PER_TEST_RUN] CSVRecord_7_1Test.java exec_ok=True exec_exists=True size=106097
+[PER_TEST_RUN] CSVRecord_4_1Test.java exec_ok=True exec_exists=True size=32550
+[PER_TEST_RUN] CSVRecord_6_1Test.java exec_ok=True exec_exists=True size=32436
+[PER_TEST_RUN] CSVRecord_10_2Test.java exec_ok=True exec_exists=True size=32512
+[PER_TEST_RUN] CSVRecord_9_2Test.java exec_ok=True exec_exists=True size=32499
+[PER_TEST_RUN] CSVRecord_6_2Test.java exec_ok=True exec_exists=True size=32549
+[PER_TEST_RUN] CSVRecord_4_2Test.java exec_ok=True exec_exists=True size=32550
+[PER_TEST_RUN] CSVRecord_11_2Test.java exec_ok=True exec_exists=True size=32562
+[PER_TEST_RUN] CSVRecord_7_2Test.java exec_ok=True exec_exists=True size=106199
+[PER_TEST_RUN] CSVRecord_2_2Test.java exec_ok=True exec_exists=True size=32501
+[PER_TEST_RUN] CSVRecord_8_2Test.java exec_ok=True exec_exists=True size=32527
+[PER_TEST_RUN] CSVRecord_1_2Test.java exec_ok=False exec_exists=True size=33137
+[PER_TEST_RUN] CSVRecord_3_2Test.java exec_ok=True exec_exists=True size=32661
+[PER_TEST_RUN] CSVRecord_5_2Test.java exec_ok=True exec_exists=True size=32436
+[PER_TEST_RUN] CSVRecord_12_2Test.java exec_ok=False exec_exists=True size=32788
+[PER_TEST_RUN] CSVRecord_1_3Test.java exec_ok=False exec_exists=True size=33155
+[PER_TEST_RUN] CSVRecord_9_3Test.java exec_ok=True exec_exists=True size=32612
+[PER_TEST_RUN] CSVRecord_2_3Test.java exec_ok=True exec_exists=True size=106374
+[PER_TEST_RUN] CSVRecord_6_3Test.java exec_ok=True exec_exists=True size=32550
+[PER_TEST_RUN] CSVRecord_7_3Test.java exec_ok=True exec_exists=True size=106277
+[PER_TEST_RUN] CSVRecord_3_3Test.java exec_ok=True exec_exists=True size=32662
+[PER_TEST_RUN] CSVRecord_4_3Test.java exec_ok=True exec_exists=True size=32549
+[PER_TEST_RUN] CSVRecord_10_3Test.java exec_ok=True exec_exists=True size=32512
+[PER_TEST_RUN] CSVRecord_12_3Test.java exec_ok=False exec_exists=True size=32738
+[PER_TEST_RUN] CSVRecord_5_3Test.java exec_ok=True exec_exists=True size=32436
+[PER_TEST_RUN] CSVRecord_8_3Test.java exec_ok=True exec_exists=True size=106173
+[PER_TEST_RUN] CSVRecord_11_3Test.java exec_ok=True exec_exists=True size=32513
+[PER_TEST_RUN] CSVRecord_6_4Test.java exec_ok=True exec_exists=True size=32436
+[PER_TEST_RUN] CSVRecord_8_4Test.java exec_ok=True exec_exists=True size=32574
+[PER_TEST_RUN] CSVRecord_10_4Test.java exec_ok=True exec_exists=True size=32398
+[PER_TEST_RUN] CSVRecord_11_4Test.java exec_ok=True exec_exists=True size=32399
+[PER_TEST_RUN] CSVRecord_4_4Test.java exec_ok=True exec_exists=True size=32436
+[PER_TEST_RUN] CSVRecord_5_4Test.java exec_ok=True exec_exists=True size=109575
+[PER_TEST_RUN] CSVRecord_7_4Test.java exec_ok=True exec_exists=True size=106086
+[PER_TEST_RUN] CSVRecord_2_4Test.java exec_ok=True exec_exists=True size=32677
+[PER_TEST_RUN] CSVRecord_1_4Test.java exec_ok=True exec_exists=True size=32630
+[PER_TEST_RUN] CSVRecord_9_4Test.java exec_ok=True exec_exists=True size=32612
+[PER_TEST_RUN] CSVRecord_3_4Test.java exec_ok=True exec_exists=True size=32597
+[PER_TEST_RUN] CSVRecord_12_4Test.java exec_ok=True exec_exists=True size=32568
+[PER_TEST_RUN] CSVRecord_4_5Test.java exec_ok=True exec_exists=True size=32550
+[PER_TEST_RUN] CSVRecord_10_5Test.java exec_ok=True exec_exists=True size=32398
+[PER_TEST_RUN] CSVRecord_11_5Test.java exec_ok=True exec_exists=True size=32514
+[PER_TEST_RUN] CSVRecord_6_5Test.java exec_ok=True exec_exists=True size=32436
+[PER_TEST_RUN] CSVRecord_1_5Test.java exec_ok=False exec_exists=True size=33043
+[PER_TEST_RUN] CSVRecord_3_5Test.java exec_ok=True exec_exists=True size=32663
+[PER_TEST_RUN] CSVRecord_12_5Test.java exec_ok=False exec_exists=True size=33007
+[PER_TEST_RUN] CSVRecord_2_5Test.java exec_ok=True exec_exists=True size=106228
+[PER_TEST_RUN] CSVRecord_5_5Test.java exec_ok=True exec_exists=True size=32435
+[PER_TEST_RUN] CSVRecord_9_5Test.java exec_ok=True exec_exists=True size=32500
+[PER_TEST_RUN] CSVRecord_8_6Test.java exec_ok=True exec_exists=True size=32532
+[PER_TEST_RUN] CSVRecord_12_6Test.java exec_ok=True exec_exists=True size=32567
+[PER_TEST_RUN] CSVRecord_10_6Test.java exec_ok=True exec_exists=True size=32398
+[PER_TEST_RUN] CSVRecord_11_6Test.java exec_ok=True exec_exists=True size=32513
+[PER_TEST_RUN] CSVRecord_6_6Test.java exec_ok=True exec_exists=True size=32436
+[PER_TEST_RUN] CSVRecord_3_6Test.java exec_ok=True exec_exists=True size=32549
+[PER_TEST_RUN] CSVRecord_9_6Test.java exec_ok=True exec_exists=True size=32499
+[PER_TEST_RUN] CSVRecord_5_6Test.java exec_ok=True exec_exists=True size=32436
+[PER_TEST_RUN] CSVRecord_2_6Test.java exec_ok=True exec_exists=True size=32504
+[PER_TEST_RUN] CSVRecord_7_6Test.java exec_ok=True exec_exists=True size=106002
+[PER_TEST_RUN] CSVRecord_1_6Test.java exec_ok=False exec_exists=True size=33232
+[PER_TEST_RUN] CSVRecord_4_6Test.java exec_ok=True exec_exists=True size=32551
+[TESTCASE_COVERAGE_DETAIL] saved to /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/testcase_coverage_detail.csv
+[CSV_SUMMARY] saved to /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/project_coverage_summary_global.csv
+[ALL ATTEMPTS]
+  total_tests=72
+  syntax_errors=0
+  compile_errors=2
+  test_run_errors=8
+  - 全项目 行覆盖率: 3.49%（覆盖行数: 21 / 总行数: 601）
+  - 全项目 分支覆盖率: 3.89%（覆盖分支数: 16 / 总分支数: 411）
+  - 针对 Modified Class: CSVRecord
+    - 行覆盖率: 100.0%（覆盖行数: 21 / 总行数: 21）
+    - 分支覆盖率: 100.0%（覆盖分支数: 16 / 总分支数: 16）

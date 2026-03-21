@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import org.apache.commons.csv.ExtendedBufferedReader;\nimport org.junit.jupiter.api.Test;\nimport org.junit.jupiter.api.BeforeEach;\n\nimport java.io.IOException;\nimport java.io.Reader;\nimport java.io.StringReader;\nimport java.lang.reflect.Field;\n\nimport static org.junit.jupiter.api.Assertions.*;\n\nclass ExtendedBufferedReaderTest {\n\n    ExtendedBufferedReader reader;\n\n    @BeforeEach\n    void setUp() {\n        reader = new ExtendedBufferedReader(new StringReader(\"test\"));\n    }\n\n    @Test\n    void testReadAgain_initialValue() throws Exception {\n        // lastChar defaults to UNDEFINED (-2)\n        int result = reader.readAgain();\n        assertEquals(-2, result);\n    }\n\n    @Test\n    void testReadAgain_afterSettingLastCharPositive() throws Exception {\n        setLastChar(10);\n        int result = reader.readAgain();\n        assertEquals(10, result);\n    }\n\n    @Test\n    void testReadAgain_afterSettingLastCharZero() throws Exception {\n        setLastChar(0);\n        int result = reader.readAgain();\n        assertEquals(0, result);\n    }\n\n    @Test\n    void testReadAgain_afterSettingLastCharNegativeButNotConstants() throws Exception {\n        setLastChar(-5);\n        int result = reader.readAgain();\n        assertEquals(-5, result);\n    }\n\n    @Test\n    void testReadAgain_afterSettingLastCharEndOfStream() throws Exception {\n        setLastChar(ExtendedBufferedReader.END_OF_STREAM);\n        int result = reader.readAgain();\n        assertEquals(ExtendedBufferedReader.END_OF_STREAM, result);\n    }\n\n    private void setLastChar(int value) throws Exception {\n        Field lastCharField = ExtendedBufferedReader.class.getDeclaredField(\"lastChar\");\n        lastCharField.setAccessible(true);\n        lastCharField.setInt(reader, value);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 405,
+    "completion_tokens": 375,
+    "total_tokens": 780,
+    "llm_elapsed_time_seconds": 5.511
+  }
+}

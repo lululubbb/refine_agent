@@ -18,8 +18,8 @@ import requests
 logger = logging.getLogger(__name__)
 
 # 429 限速时的基础等待秒数（每次重试翻倍）
-RATE_LIMIT_BASE_SLEEP = 10   # seconds
-RATE_LIMIT_MAX_SLEEP  = 120  # seconds cap
+RATE_LIMIT_BASE_SLEEP = 20   # seconds
+RATE_LIMIT_MAX_SLEEP  = 180  # seconds cap
 
 
 def _rate_limit_sleep(attempt: int, client_name: str = "LLM"):

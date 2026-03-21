@@ -1,0 +1,417 @@
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_11_1Test.java
+[EXEC_FAILED] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_1_1Test.java:
+[EXEC_RETURN_CODE] 返回码：1
+[EXEC_CORE_ERROR] 核心异常：未提取到明确异常信息
+[EXEC_FULL_ERROR_LOG] 完整失败日志（含JUnit详情、错误栈）：
+    无标准错误输出（stderr为空）
+[EXEC_STDOUT] 标准输出补充（辅助排查）：
+    
+    Failures (1):
+      JUnit Jupiter:CSVRecord_1_1Test:testCSVRecordConstructorAndMethods()
+        MethodSource [className = 'org.apache.commons.csv.CSVRecord_1_1Test', methodName = 'testCSVRecordConstructorAndMethods', methodParameterTypes = '']
+        => org.opentest4j.AssertionFailedError: Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.
+           org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+           org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:73)
+           org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+           org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)
+           org.apache.commons.csv.CSVRecord_1_1Test.testCSVRecordConstructorAndMethods(CSVRecord_1_1Test.java:45)
+           java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+           java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+           java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+           java.base/java.lang.reflect.Method.invoke(Method.java:566)
+           org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+           [...]
+    
+    Test run finished after 218 ms
+    [         4 containers found      ]
+    [         0 containers skipped    ]
+    [         4 containers started    ]
+    [         0 containers aborted    ]
+    [         4 containers successful ]
+    [         0 containers failed     ]
+    [         2 tests found           ]
+    [         0 tests skipped         ]
+    [         2 tests started         ]
+    [         0 tests aborted         ]
+    [         1 tests successful      ]
+    [         1 tests failed          ]
+    
+[EXEC_DETAIL_FILE] 完整错误文件（未截断）：/home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_output/TestOutput-CSVRecord_1_1Test.java.txt
+====================================================================================================
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_12_1Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_8_1Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_9_1Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_2_1Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_3_1Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_5_1Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_10_1Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_7_1Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_4_1Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_6_1Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_10_2Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_9_2Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_6_2Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_4_2Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_11_2Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_7_2Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_2_2Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_8_2Test.java
+[EXEC_FAILED] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_1_2Test.java:
+[EXEC_RETURN_CODE] 返回码：1
+[EXEC_CORE_ERROR] 核心异常：未提取到明确异常信息
+[EXEC_FULL_ERROR_LOG] 完整失败日志（含JUnit详情、错误栈）：
+    无标准错误输出（stderr为空）
+[EXEC_STDOUT] 标准输出补充（辅助排查）：
+    
+    Failures (3):
+      JUnit Jupiter:CSVRecord_1_2Test:testCSVRecordConstructor_nullValues_emptyArrayAssigned()
+        MethodSource [className = 'org.apache.commons.csv.CSVRecord_1_2Test', methodName = 'testCSVRecordConstructor_nullValues_emptyArrayAssigned', methodParameterTypes = '']
+        => org.opentest4j.AssertionFailedError: expected: <false> but was: <true>
+           org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+           org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+           org.junit.jupiter.api.AssertFalse.failNotFalse(AssertFalse.java:63)
+           org.junit.jupiter.api.AssertFalse.assertFalse(AssertFalse.java:36)
+           org.junit.jupiter.api.AssertFalse.assertFalse(AssertFalse.java:31)
+           org.junit.jupiter.api.Assertions.assertFalse(Assertions.java:228)
+           org.apache.commons.csv.CSVRecord_1_2Test.testCSVRecordConstructor_nullValues_emptyArrayAssigned(CSVRecord_1_2Test.java:35)
+           java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+           java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+           java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+           [...]
+      JUnit Jupiter:CSVRecord_1_2Test:testCSVRecordConstructor_nonNullValues()
+        MethodSource [className = 'org.apache.commons.csv.CSVRecord_1_2Test', methodName = 'testCSVRecordConstructor_nonNullValues', methodParameterTypes = '']
+        => org.opentest4j.AssertionFailedError: expected: <CSVRecord [comment=null, recordNumber=5, values=[val1, val2]]> but was: <[val1, val2]>
+           org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+           org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+           org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+           org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+           org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+           org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1142)
+           org.apache.commons.csv.CSVRecord_1_2Test.testCSVRecordConstructor_nonNullValues(CSVRecord_1_2Test.java:70)
+           java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+           java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+           java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+           [...]
+      JUnit Jupiter:CSVRecord_1_2Test:testCSVRecordConstructor_emptyMapping()
+        MethodSource [className = 'org.apache.commons.csv.CSVRecord_1_2Test', methodName = 'testCSVRecordConstructor_emptyMapping', methodParameterTypes = '']
+        => org.opentest4j.AssertionFailedError: Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.
+           org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+           org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:73)
+           org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+           org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)
+           org.apache.commons.csv.CSVRecord_1_2Test.testCSVRecordConstructor_emptyMapping(CSVRecord_1_2Test.java:86)
+           java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+           java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+           java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+           java.base/java.lang.reflect.Method.invoke(Method.java:566)
+           org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+           [...]
+    
+    Test run finished after 218 ms
+    [         4 containers found      ]
+    [         0 containers skipped    ]
+    [         4 containers started    ]
+    [         0 containers aborted    ]
+    [         4 containers successful ]
+    [...后续内容截断，完整信息请查看：/home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_output/TestOutput-CSVRecord_1_2Test.java.txt]
+[EXEC_DETAIL_FILE] 完整错误文件（未截断）：/home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_output/TestOutput-CSVRecord_1_2Test.java.txt
+====================================================================================================
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_3_2Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_5_2Test.java
+[EXEC_FAILED] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_12_2Test.java:
+[EXEC_RETURN_CODE] 返回码：1
+[EXEC_CORE_ERROR] 核心异常：未提取到明确异常信息
+[EXEC_FULL_ERROR_LOG] 完整失败日志（含JUnit详情、错误栈）：
+    WARNING: An illegal reflective access operation has occurred
+    WARNING: Illegal reflective access by org.apache.commons.csv.CSVRecord_12_2Test (file:/home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%2520260106101312/tests_ChatGPT/) to field java.lang.reflect.Field.modifiers
+    WARNING: Please consider reporting this to the maintainers of org.apache.commons.csv.CSVRecord_12_2Test
+    WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+    WARNING: All illegal access operations will be denied in a future release
+[EXEC_STDOUT] 标准输出补充（辅助排查）：
+    
+    Failures (1):
+      JUnit Jupiter:CSVRecord_12_2Test:testToStringWithNullValuesField()
+        MethodSource [className = 'org.apache.commons.csv.CSVRecord_12_2Test', methodName = 'testToStringWithNullValuesField', methodParameterTypes = '']
+        => org.opentest4j.AssertionFailedError: Expected NullPointerException when values field is null
+           org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:38)
+           org.junit.jupiter.api.Assertions.fail(Assertions.java:135)
+           org.apache.commons.csv.CSVRecord_12_2Test.testToStringWithNullValuesField(CSVRecord_12_2Test.java:78)
+           java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+           java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+           java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+           java.base/java.lang.reflect.Method.invoke(Method.java:566)
+           org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+           org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+           org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+           [...]
+    
+    Test run finished after 200 ms
+    [         4 containers found      ]
+    [         0 containers skipped    ]
+    [         4 containers started    ]
+    [         0 containers aborted    ]
+    [         4 containers successful ]
+    [         0 containers failed     ]
+    [         3 tests found           ]
+    [         0 tests skipped         ]
+    [         3 tests started         ]
+    [         0 tests aborted         ]
+    [         2 tests successful      ]
+    [         1 tests failed          ]
+    
+[EXEC_DETAIL_FILE] 完整错误文件（未截断）：/home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_output/TestOutput-CSVRecord_12_2Test.java.txt
+====================================================================================================
+[EXEC_FAILED] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_1_3Test.java:
+[EXEC_RETURN_CODE] 返回码：1
+[EXEC_CORE_ERROR] 核心异常：未提取到明确异常信息
+[EXEC_FULL_ERROR_LOG] 完整失败日志（含JUnit详情、错误栈）：
+    无标准错误输出（stderr为空）
+[EXEC_STDOUT] 标准输出补充（辅助排查）：
+    
+    Failures (2):
+      JUnit Jupiter:CSVRecord_1_3Test:testConstructorAndGetters()
+        MethodSource [className = 'org.apache.commons.csv.CSVRecord_1_3Test', methodName = 'testConstructorAndGetters', methodParameterTypes = '']
+        => org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
+           org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+           org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+           org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+           org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+           org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:31)
+           org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:180)
+           org.apache.commons.csv.CSVRecord_1_3Test.testConstructorAndGetters(CSVRecord_1_3Test.java:45)
+           java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+           java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+           java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+           [...]
+      JUnit Jupiter:CSVRecord_1_3Test:testGetWithInvalidName()
+        MethodSource [className = 'org.apache.commons.csv.CSVRecord_1_3Test', methodName = 'testGetWithInvalidName', methodParameterTypes = '']
+        => org.opentest4j.AssertionFailedError: Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.
+           org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+           org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:73)
+           org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+           org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)
+           org.apache.commons.csv.CSVRecord_1_3Test.testGetWithInvalidName(CSVRecord_1_3Test.java:104)
+           java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+           java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+           java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+           java.base/java.lang.reflect.Method.invoke(Method.java:566)
+           org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+           [...]
+    
+    Test run finished after 221 ms
+    [         4 containers found      ]
+    [         0 containers skipped    ]
+    [         4 containers started    ]
+    [         0 containers aborted    ]
+    [         4 containers successful ]
+    [         0 containers failed     ]
+    [         5 tests found           ]
+    [         0 tests skipped         ]
+    [         5 tests started         ]
+    [         0 tests aborted         ]
+    [         3 tests successful      ]
+    [         2 tests failed          ]
+    
+[EXEC_DETAIL_FILE] 完整错误文件（未截断）：/home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_output/TestOutput-CSVRecord_1_3Test.java.txt
+====================================================================================================
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_9_3Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_2_3Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_6_3Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_7_3Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_3_3Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_4_3Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_10_3Test.java
+[EXEC_FAILED] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_12_3Test.java:
+[EXEC_RETURN_CODE] 返回码：1
+[EXEC_CORE_ERROR] 核心异常：未提取到明确异常信息
+[EXEC_FULL_ERROR_LOG] 完整失败日志（含JUnit详情、错误栈）：
+    WARNING: An illegal reflective access operation has occurred
+    WARNING: Illegal reflective access by org.apache.commons.csv.CSVRecord_12_3Test (file:/home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%2520260106101312/tests_ChatGPT/) to field java.lang.reflect.Field.modifiers
+    WARNING: Please consider reporting this to the maintainers of org.apache.commons.csv.CSVRecord_12_3Test
+    WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+    WARNING: All illegal access operations will be denied in a future release
+[EXEC_STDOUT] 标准输出补充（辅助排查）：
+    
+    Failures (1):
+      JUnit Jupiter:CSVRecord_12_3Test:testToString_withNullValuesField()
+        MethodSource [className = 'org.apache.commons.csv.CSVRecord_12_3Test', methodName = 'testToString_withNullValuesField', methodParameterTypes = '']
+        => java.lang.AssertionError: Expected NullPointerException when values is null
+           org.apache.commons.csv.CSVRecord_12_3Test.testToString_withNullValuesField(CSVRecord_12_3Test.java:87)
+           java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+           java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+           java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+           java.base/java.lang.reflect.Method.invoke(Method.java:566)
+           org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+           org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+           org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+           org.junit.jupiter.engine.extension.SameThreadTimeoutInvocation.proceed(SameThreadTimeoutInvocation.java:45)
+           org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)
+           [...]
+    
+    Test run finished after 216 ms
+    [         4 containers found      ]
+    [         0 containers skipped    ]
+    [         4 containers started    ]
+    [         0 containers aborted    ]
+    [         4 containers successful ]
+    [         0 containers failed     ]
+    [         3 tests found           ]
+    [         0 tests skipped         ]
+    [         3 tests started         ]
+    [         0 tests aborted         ]
+    [         2 tests successful      ]
+    [         1 tests failed          ]
+    
+[EXEC_DETAIL_FILE] 完整错误文件（未截断）：/home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_output/TestOutput-CSVRecord_12_3Test.java.txt
+====================================================================================================
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_5_3Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_8_3Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_11_3Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_6_4Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_8_4Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_10_4Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_11_4Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_4_4Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_5_4Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_7_4Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_2_4Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_1_4Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_9_4Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_3_4Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_12_4Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_4_5Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_10_5Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_11_5Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_6_5Test.java
+[EXEC_FAILED] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_1_5Test.java:
+[EXEC_RETURN_CODE] 返回码：1
+[EXEC_CORE_ERROR] 核心异常：未提取到明确异常信息
+[EXEC_FULL_ERROR_LOG] 完整失败日志（含JUnit详情、错误栈）：
+    无标准错误输出（stderr为空）
+[EXEC_STDOUT] 标准输出补充（辅助排查）：
+    
+    Failures (1):
+      JUnit Jupiter:CSVRecord_1_5Test:testCSVRecordConstructorAndGetters()
+        MethodSource [className = 'org.apache.commons.csv.CSVRecord_1_5Test', methodName = 'testCSVRecordConstructorAndGetters', methodParameterTypes = '']
+        => org.opentest4j.AssertionFailedError: Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.
+           org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+           org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:73)
+           org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+           org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)
+           org.apache.commons.csv.CSVRecord_1_5Test.testCSVRecordConstructorAndGetters(CSVRecord_1_5Test.java:45)
+           java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+           java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+           java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+           java.base/java.lang.reflect.Method.invoke(Method.java:566)
+           org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+           [...]
+    
+    Test run finished after 240 ms
+    [         4 containers found      ]
+    [         0 containers skipped    ]
+    [         4 containers started    ]
+    [         0 containers aborted    ]
+    [         4 containers successful ]
+    [         0 containers failed     ]
+    [         2 tests found           ]
+    [         0 tests skipped         ]
+    [         2 tests started         ]
+    [         0 tests aborted         ]
+    [         1 tests successful      ]
+    [         1 tests failed          ]
+    
+[EXEC_DETAIL_FILE] 完整错误文件（未截断）：/home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_output/TestOutput-CSVRecord_1_5Test.java.txt
+====================================================================================================
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_3_5Test.java
+[EXEC_FAILED] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_12_5Test.java:
+[EXEC_RETURN_CODE] 返回码：1
+[EXEC_CORE_ERROR] 核心异常：未提取到明确异常信息
+[EXEC_FULL_ERROR_LOG] 完整失败日志（含JUnit详情、错误栈）：
+    无标准错误输出（stderr为空）
+[EXEC_STDOUT] 标准输出补充（辅助排查）：
+    
+    Failures (1):
+      JUnit Jupiter:CSVRecord_12_5Test:testToString_withNullValues()
+        MethodSource [className = 'org.apache.commons.csv.CSVRecord_12_5Test', methodName = 'testToString_withNullValues', methodParameterTypes = '']
+        => org.opentest4j.AssertionFailedError: expected: <null> but was: <[]>
+           org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+           org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+           org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+           org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+           org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+           org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1142)
+           org.apache.commons.csv.CSVRecord_12_5Test.testToString_withNullValues(CSVRecord_12_5Test.java:50)
+           java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+           java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+           java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+           [...]
+    
+    Test run finished after 225 ms
+    [         4 containers found      ]
+    [         0 containers skipped    ]
+    [         4 containers started    ]
+    [         0 containers aborted    ]
+    [         4 containers successful ]
+    [         0 containers failed     ]
+    [         3 tests found           ]
+    [         0 tests skipped         ]
+    [         3 tests started         ]
+    [         0 tests aborted         ]
+    [         2 tests successful      ]
+    [         1 tests failed          ]
+    
+[EXEC_DETAIL_FILE] 完整错误文件（未截断）：/home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_output/TestOutput-CSVRecord_12_5Test.java.txt
+====================================================================================================
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_2_5Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_5_5Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_9_5Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_8_6Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_12_6Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_10_6Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_11_6Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_6_6Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_3_6Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_9_6Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_5_6Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_2_6Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_7_6Test.java
+[EXEC_FAILED] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_1_6Test.java:
+[EXEC_RETURN_CODE] 返回码：1
+[EXEC_CORE_ERROR] 核心异常：未提取到明确异常信息
+[EXEC_FULL_ERROR_LOG] 完整失败日志（含JUnit详情、错误栈）：
+    无标准错误输出（stderr为空）
+[EXEC_STDOUT] 标准输出补充（辅助排查）：
+    
+    Failures (1):
+      JUnit Jupiter:CSVRecord_1_6Test:testCSVRecordConstructorAndGetters()
+        MethodSource [className = 'org.apache.commons.csv.CSVRecord_1_6Test', methodName = 'testCSVRecordConstructorAndGetters', methodParameterTypes = '']
+        => org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
+           org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+           org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+           org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+           org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+           org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:31)
+           org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:180)
+           org.apache.commons.csv.CSVRecord_1_6Test.testCSVRecordConstructorAndGetters(CSVRecord_1_6Test.java:60)
+           java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+           java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+           java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+           [...]
+    
+    Test run finished after 209 ms
+    [         4 containers found      ]
+    [         0 containers skipped    ]
+    [         4 containers started    ]
+    [         0 containers aborted    ]
+    [         4 containers successful ]
+    [         0 containers failed     ]
+    [         1 tests found           ]
+    [         0 tests skipped         ]
+    [         1 tests started         ]
+    [         0 tests aborted         ]
+    [         0 tests successful      ]
+    [         1 tests failed          ]
+    
+[EXEC_DETAIL_FILE] 完整错误文件（未截断）：/home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_output/TestOutput-CSVRecord_1_6Test.java.txt
+====================================================================================================
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/test_cases/CSVRecord_4_6Test.java

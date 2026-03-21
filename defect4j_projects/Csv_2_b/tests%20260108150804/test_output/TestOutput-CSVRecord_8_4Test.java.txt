@@ -1,0 +1,36 @@
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_8_4Test:testValuesMethodReturnsEmptyArrayWhenValuesNull()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_8_4Test', methodName = 'testValuesMethodReturnsEmptyArrayWhenValuesNull', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: expected: not <null>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertNotNull.failNull(AssertNotNull.java:49)
+       org.junit.jupiter.api.AssertNotNull.assertNotNull(AssertNotNull.java:35)
+       org.junit.jupiter.api.AssertNotNull.assertNotNull(AssertNotNull.java:30)
+       org.junit.jupiter.api.Assertions.assertNotNull(Assertions.java:301)
+       org.apache.commons.csv.CSVRecord_8_4Test.testValuesMethodReturnsEmptyArrayWhenValuesNull(CSVRecord_8_4Test.java:62)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       [...]
+
+Test run finished after 169 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         2 tests found           ]
+[         0 tests skipped         ]
+[         2 tests started         ]
+[         0 tests aborted         ]
+[         1 tests successful      ]
+[         1 tests failed          ]
+
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by org.apache.commons.csv.CSVRecord_8_4Test (file:/home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%2520260108150804/tests_ChatGPT/) to field java.lang.reflect.Field.modifiers
+WARNING: Please consider reporting this to the maintainers of org.apache.commons.csv.CSVRecord_8_4Test
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release

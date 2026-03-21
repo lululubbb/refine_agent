@@ -1,0 +1,45 @@
+
+Failures (2):
+  JUnit Jupiter:CSVRecord_9_4Test:testGetCommentReturnsComment()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_9_4Test', methodName = 'testGetCommentReturnsComment', methodParameterTypes = '']
+    => java.lang.NoSuchMethodException: org.apache.commons.csv.CSVRecord.<init>([Ljava.lang.String;, java.util.Map, java.lang.String, long, boolean)
+       java.base/java.lang.Class.getConstructor0(Class.java:3349)
+       java.base/java.lang.Class.getDeclaredConstructor(Class.java:2553)
+       org.apache.commons.csv.CSVRecord_9_4Test.createCSVRecord(CSVRecord_9_4Test.java:18)
+       org.apache.commons.csv.CSVRecord_9_4Test.testGetCommentReturnsComment(CSVRecord_9_4Test.java:31)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+       org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+       [...]
+  JUnit Jupiter:CSVRecord_9_4Test:testGetCommentReturnsNullWhenNoComment()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_9_4Test', methodName = 'testGetCommentReturnsNullWhenNoComment', methodParameterTypes = '']
+    => java.lang.NoSuchMethodException: org.apache.commons.csv.CSVRecord.<init>([Ljava.lang.String;, java.util.Map, java.lang.String, long, boolean)
+       java.base/java.lang.Class.getConstructor0(Class.java:3349)
+       java.base/java.lang.Class.getDeclaredConstructor(Class.java:2553)
+       org.apache.commons.csv.CSVRecord_9_4Test.createCSVRecord(CSVRecord_9_4Test.java:18)
+       org.apache.commons.csv.CSVRecord_9_4Test.testGetCommentReturnsNullWhenNoComment(CSVRecord_9_4Test.java:44)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+       org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+       [...]
+
+Test run finished after 120 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         2 tests found           ]
+[         0 tests skipped         ]
+[         2 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         2 tests failed          ]
+

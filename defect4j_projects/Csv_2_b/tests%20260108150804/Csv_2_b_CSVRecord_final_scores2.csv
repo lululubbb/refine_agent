@@ -1,0 +1,13 @@
+test_class,focal_method,compile_score,exec_score,coverage_score,bug_revealing_score,redundancy_score,final_score,valid_weight_pct
+org.apache.commons.csv.CSVRecord_11,size,1.0,1.0,0.5,0.0,0.054288,0.639142,1.0
+org.apache.commons.csv.CSVRecord_1,CSVRecord,1.0,0.5,1.0,0.0,0.209486,0.683103,1.0
+org.apache.commons.csv.CSVRecord_12,toString,1.0,1.0,0.5,0.0,0.191764,0.611647,1.0
+org.apache.commons.csv.CSVRecord_8,values,1.0,1.0,0.5,0.0,0.215536,0.606893,1.0
+org.apache.commons.csv.CSVRecord_9,getComment,1.0,1.0,0.5,0.0,0.007692,0.648462,1.0
+org.apache.commons.csv.CSVRecord_2,get,1.0,1.0,0.1,0.0,0.2366,0.48268,1.0
+org.apache.commons.csv.CSVRecord_3,get,1.0,1.0,0.9,0.0,0.393072,0.691386,1.0
+org.apache.commons.csv.CSVRecord_5,isMapped,1.0,1.0,1.0,0.0,0.238962,0.752208,1.0
+org.apache.commons.csv.CSVRecord_10,getRecordNumber,1.0,1.0,0.5,0.0,0.271978,0.595604,1.0
+org.apache.commons.csv.CSVRecord_7,iterator,1.0,1.0,0.5,0.0,0.176405,0.614719,1.0
+org.apache.commons.csv.CSVRecord_4,isConsistent,1.0,1.0,1.0,0.0,0.12641,0.774718,1.0
+org.apache.commons.csv.CSVRecord_6,isSet,1.0,1.0,1.0,0.0,0.235002,0.753,1.0

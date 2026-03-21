@@ -1,0 +1,3 @@
+project,target_class,test_class,focal_method,exec_status,m_per_line_cov,m_per_line_total,m_per_line_rate,m_per_branch_cov,m_per_branch_total,m_per_branch_rate,m_line_contrib_pct,m_branch_contrib_pct,m_coverage_score,f_per_line_cov,f_per_line_total,f_per_line_rate,f_per_branch_cov,f_per_branch_total,f_per_branch_rate,f_line_contrib_pct,f_branch_contrib_pct,f_coverage_score
+Csv_1_b,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_1Test,ExtendedBufferedReader,compile_fail,,,,,,,0.0,0.0,0.0,,,,,,,0.0,0.0,0.0
+Csv_1_b,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_2Test,ExtendedBufferedReader,compile_fail,,,,,,,0.0,0.0,0.0,,,,,,,0.0,0.0,0.0

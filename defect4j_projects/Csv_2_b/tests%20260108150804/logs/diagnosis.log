@@ -1,0 +1,549 @@
+# diagnosis.log — 测试用例问题诊断
+# 每个 [DIAGNOSIS] 块对应一个测试类，供优化指令生成使用
+# status 取值: compile_fail | exec_fail | exec_timeout | exec_ok
+# =============================================================
+
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_1_2Test
+  project=Csv_2_b  target_class=CSVRecord
+  status=exec_fail
+  core_errors:
+    - org.opentest4j.AssertionFailedError: expected: <false> but was: <true>
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_11_1Test
+  project=Csv_2_b  target_class=CSVRecord
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=38.0952%  (8/21)
+  branch_rate=6.2500%  (1/16)
+  coverage_score=0.221726
+  uncovered_methods (10):
+    - line 64: get() — completely uncovered
+    - line 80: get() — completely uncovered
+    - line 96: isConsistent() — completely uncovered
+    - line 107: isMapped() — completely uncovered
+    - line 118: isSet() — completely uncovered
+    - line 127: iterator() — completely uncovered
+    - line 131: values() — completely uncovered
+    - line 141: getComment() — completely uncovered
+    - line 150: getRecordNumber() — completely uncovered
+    - line 164: toString() — completely uncovered
+  partial_branch_methods (1):
+    - line 49: CSVRecord()() — 1/2 branches missed
+  bug_revealing=false  → 当前测试未触发已知缺陷，建议针对边界条件/异常路径生成更强的断言
+  redundancy_score=0.047970  → 测试结构与已有用例高度相似，建议生成覆盖不同方法/分支的差异化测试
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_1_1Test
+  project=Csv_2_b  target_class=CSVRecord
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=95.2381%  (20/21)
+  branch_rate=62.5000%  (10/16)
+  coverage_score=0.78869
+  uncovered_methods: none
+  partial_branch_methods (4):
+    - line 80: get() — 2/4 branches missed
+    - line 96: isConsistent() — 2/4 branches missed
+    - line 107: isMapped() — 1/2 branches missed
+    - line 118: isSet() — 1/4 branches missed
+  bug_revealing=false  → 当前测试未触发已知缺陷，建议针对边界条件/异常路径生成更强的断言
+  redundancy_score=0.209486  → 测试结构与已有用例高度相似，建议生成覆盖不同方法/分支的差异化测试
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_12_1Test
+  project=Csv_2_b  target_class=CSVRecord
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=38.0952%  (8/21)
+  branch_rate=6.2500%  (1/16)
+  coverage_score=0.221726
+  uncovered_methods (10):
+    - line 64: get() — completely uncovered
+    - line 80: get() — completely uncovered
+    - line 96: isConsistent() — completely uncovered
+    - line 107: isMapped() — completely uncovered
+    - line 118: isSet() — completely uncovered
+    - line 127: iterator() — completely uncovered
+    - line 131: values() — completely uncovered
+    - line 141: getComment() — completely uncovered
+    - line 150: getRecordNumber() — completely uncovered
+    - line 159: size() — completely uncovered
+  partial_branch_methods (1):
+    - line 49: CSVRecord()() — 1/2 branches missed
+  bug_revealing=false  → 当前测试未触发已知缺陷，建议针对边界条件/异常路径生成更强的断言
+  redundancy_score=0.105590  → 测试结构与已有用例高度相似，建议生成覆盖不同方法/分支的差异化测试
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_8_1Test
+  project=Csv_2_b  target_class=CSVRecord
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=38.0952%  (8/21)
+  branch_rate=6.2500%  (1/16)
+  coverage_score=0.221726
+  uncovered_methods (10):
+    - line 64: get() — completely uncovered
+    - line 80: get() — completely uncovered
+    - line 96: isConsistent() — completely uncovered
+    - line 107: isMapped() — completely uncovered
+    - line 118: isSet() — completely uncovered
+    - line 127: iterator() — completely uncovered
+    - line 141: getComment() — completely uncovered
+    - line 150: getRecordNumber() — completely uncovered
+    - line 159: size() — completely uncovered
+    - line 164: toString() — completely uncovered
+  partial_branch_methods (1):
+    - line 49: CSVRecord()() — 1/2 branches missed
+  bug_revealing=false  → 当前测试未触发已知缺陷，建议针对边界条件/异常路径生成更强的断言
+  redundancy_score=0.255814  → 测试结构与已有用例高度相似，建议生成覆盖不同方法/分支的差异化测试
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_9_1Test
+  project=Csv_2_b  target_class=CSVRecord
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=38.0952%  (8/21)
+  branch_rate=6.2500%  (1/16)
+  coverage_score=0.221726
+  uncovered_methods (10):
+    - line 64: get() — completely uncovered
+    - line 80: get() — completely uncovered
+    - line 96: isConsistent() — completely uncovered
+    - line 107: isMapped() — completely uncovered
+    - line 118: isSet() — completely uncovered
+    - line 127: iterator() — completely uncovered
+    - line 131: values() — completely uncovered
+    - line 150: getRecordNumber() — completely uncovered
+    - line 159: size() — completely uncovered
+    - line 164: toString() — completely uncovered
+  partial_branch_methods (1):
+    - line 49: CSVRecord()() — 1/2 branches missed
+  bug_revealing=false  → 当前测试未触发已知缺陷，建议针对边界条件/异常路径生成更强的断言
+  redundancy_score=0.015385  → 测试结构与已有用例高度相似，建议生成覆盖不同方法/分支的差异化测试
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_2_1Test
+  project=Csv_2_b  target_class=CSVRecord
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=38.0952%  (8/21)
+  branch_rate=6.2500%  (1/16)
+  coverage_score=0.221726
+  uncovered_methods (10):
+    - line 80: get() — completely uncovered
+    - line 96: isConsistent() — completely uncovered
+    - line 107: isMapped() — completely uncovered
+    - line 118: isSet() — completely uncovered
+    - line 127: iterator() — completely uncovered
+    - line 131: values() — completely uncovered
+    - line 141: getComment() — completely uncovered
+    - line 150: getRecordNumber() — completely uncovered
+    - line 159: size() — completely uncovered
+    - line 164: toString() — completely uncovered
+  partial_branch_methods (1):
+    - line 49: CSVRecord()() — 1/2 branches missed
+  bug_revealing=false  → 当前测试未触发已知缺陷，建议针对边界条件/异常路径生成更强的断言
+  redundancy_score=0.057143  → 测试结构与已有用例高度相似，建议生成覆盖不同方法/分支的差异化测试
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_3_1Test
+  project=Csv_2_b  target_class=CSVRecord
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=52.3810%  (11/21)
+  branch_rate=31.2500%  (5/16)
+  coverage_score=0.418155
+  uncovered_methods (10):
+    - line 64: get() — completely uncovered
+    - line 96: isConsistent() — completely uncovered
+    - line 107: isMapped() — completely uncovered
+    - line 118: isSet() — completely uncovered
+    - line 127: iterator() — completely uncovered
+    - line 131: values() — completely uncovered
+    - line 141: getComment() — completely uncovered
+    - line 150: getRecordNumber() — completely uncovered
+    - line 159: size() — completely uncovered
+    - line 164: toString() — completely uncovered
+  partial_branch_methods (1):
+    - line 49: CSVRecord()() — 1/2 branches missed
+  bug_revealing=false  → 当前测试未触发已知缺陷，建议针对边界条件/异常路径生成更强的断言
+  redundancy_score=0.417722  → 结构多样性可接受✓
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_5_1Test
+  project=Csv_2_b  target_class=CSVRecord
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=38.0952%  (8/21)
+  branch_rate=18.7500%  (3/16)
+  coverage_score=0.284226
+  uncovered_methods (10):
+    - line 64: get() — completely uncovered
+    - line 80: get() — completely uncovered
+    - line 96: isConsistent() — completely uncovered
+    - line 118: isSet() — completely uncovered
+    - line 127: iterator() — completely uncovered
+    - line 131: values() — completely uncovered
+    - line 141: getComment() — completely uncovered
+    - line 150: getRecordNumber() — completely uncovered
+    - line 159: size() — completely uncovered
+    - line 164: toString() — completely uncovered
+  partial_branch_methods (1):
+    - line 49: CSVRecord()() — 1/2 branches missed
+  bug_revealing=false  → 当前测试未触发已知缺陷，建议针对边界条件/异常路径生成更强的断言
+  redundancy_score=0.009174  → 测试结构与已有用例高度相似，建议生成覆盖不同方法/分支的差异化测试
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_10_1Test
+  project=Csv_2_b  target_class=CSVRecord
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=38.0952%  (8/21)
+  branch_rate=6.2500%  (1/16)
+  coverage_score=0.221726
+  uncovered_methods (10):
+    - line 64: get() — completely uncovered
+    - line 80: get() — completely uncovered
+    - line 96: isConsistent() — completely uncovered
+    - line 107: isMapped() — completely uncovered
+    - line 118: isSet() — completely uncovered
+    - line 127: iterator() — completely uncovered
+    - line 131: values() — completely uncovered
+    - line 141: getComment() — completely uncovered
+    - line 159: size() — completely uncovered
+    - line 164: toString() — completely uncovered
+  partial_branch_methods (1):
+    - line 49: CSVRecord()() — 1/2 branches missed
+  bug_revealing=false  → 当前测试未触发已知缺陷，建议针对边界条件/异常路径生成更强的断言
+  redundancy_score=0.428571  → 结构多样性可接受✓
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_7_1Test
+  project=Csv_2_b  target_class=CSVRecord
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=38.0952%  (8/21)
+  branch_rate=6.2500%  (1/16)
+  coverage_score=0.221726
+  uncovered_methods (10):
+    - line 64: get() — completely uncovered
+    - line 80: get() — completely uncovered
+    - line 96: isConsistent() — completely uncovered
+    - line 107: isMapped() — completely uncovered
+    - line 118: isSet() — completely uncovered
+    - line 131: values() — completely uncovered
+    - line 141: getComment() — completely uncovered
+    - line 150: getRecordNumber() — completely uncovered
+    - line 159: size() — completely uncovered
+    - line 164: toString() — completely uncovered
+  partial_branch_methods (1):
+    - line 49: CSVRecord()() — 1/2 branches missed
+  bug_revealing=false  → 当前测试未触发已知缺陷，建议针对边界条件/异常路径生成更强的断言
+  redundancy_score=0.123894  → 测试结构与已有用例高度相似，建议生成覆盖不同方法/分支的差异化测试
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_4_1Test
+  project=Csv_2_b  target_class=CSVRecord
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=38.0952%  (8/21)
+  branch_rate=31.2500%  (5/16)
+  coverage_score=0.346726
+  uncovered_methods (10):
+    - line 64: get() — completely uncovered
+    - line 80: get() — completely uncovered
+    - line 107: isMapped() — completely uncovered
+    - line 118: isSet() — completely uncovered
+    - line 127: iterator() — completely uncovered
+    - line 131: values() — completely uncovered
+    - line 141: getComment() — completely uncovered
+    - line 150: getRecordNumber() — completely uncovered
+    - line 159: size() — completely uncovered
+    - line 164: toString() — completely uncovered
+  partial_branch_methods (1):
+    - line 49: CSVRecord()() — 1/2 branches missed
+  bug_revealing=false  → 当前测试未触发已知缺陷，建议针对边界条件/异常路径生成更强的断言
+  redundancy_score=0.210084  → 测试结构与已有用例高度相似，建议生成覆盖不同方法/分支的差异化测试
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_6_1Test
+  project=Csv_2_b  target_class=CSVRecord
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=42.8571%  (9/21)
+  branch_rate=37.5000%  (6/16)
+  coverage_score=0.401786
+  uncovered_methods (9):
+    - line 64: get() — completely uncovered
+    - line 80: get() — completely uncovered
+    - line 96: isConsistent() — completely uncovered
+    - line 127: iterator() — completely uncovered
+    - line 131: values() — completely uncovered
+    - line 141: getComment() — completely uncovered
+    - line 150: getRecordNumber() — completely uncovered
+    - line 159: size() — completely uncovered
+    - line 164: toString() — completely uncovered
+  partial_branch_methods (2):
+    - line 49: CSVRecord()() — 1/2 branches missed
+    - line 107: isMapped() — 1/2 branches missed
+  bug_revealing=false  → 当前测试未触发已知缺陷，建议针对边界条件/异常路径生成更强的断言
+  redundancy_score=0.236842  → 测试结构与已有用例高度相似，建议生成覆盖不同方法/分支的差异化测试
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_10_2Test
+  project=Csv_2_b  target_class=CSVRecord
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=38.0952%  (8/21)
+  branch_rate=6.2500%  (1/16)
+  coverage_score=0.221726
+  uncovered_methods (10):
+    - line 64: get() — completely uncovered
+    - line 80: get() — completely uncovered
+    - line 96: isConsistent() — completely uncovered
+    - line 107: isMapped() — completely uncovered
+    - line 118: isSet() — completely uncovered
+    - line 127: iterator() — completely uncovered
+    - line 131: values() — completely uncovered
+    - line 141: getComment() — completely uncovered
+    - line 159: size() — completely uncovered
+    - line 164: toString() — completely uncovered
+  partial_branch_methods (1):
+    - line 49: CSVRecord()() — 1/2 branches missed
+  bug_revealing=false  → 当前测试未触发已知缺陷，建议针对边界条件/异常路径生成更强的断言
+  redundancy_score=0.115385  → 测试结构与已有用例高度相似，建议生成覆盖不同方法/分支的差异化测试
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_9_2Test
+  project=Csv_2_b  target_class=CSVRecord
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=38.0952%  (8/21)
+  branch_rate=6.2500%  (1/16)
+  coverage_score=0.221726
+  uncovered_methods (10):
+    - line 64: get() — completely uncovered
+    - line 80: get() — completely uncovered
+    - line 96: isConsistent() — completely uncovered
+    - line 107: isMapped() — completely uncovered
+    - line 118: isSet() — completely uncovered
+    - line 127: iterator() — completely uncovered
+    - line 131: values() — completely uncovered
+    - line 150: getRecordNumber() — completely uncovered
+    - line 159: size() — completely uncovered
+    - line 164: toString() — completely uncovered
+  partial_branch_methods (1):
+    - line 49: CSVRecord()() — 1/2 branches missed
+  bug_revealing=false  → 当前测试未触发已知缺陷，建议针对边界条件/异常路径生成更强的断言
+  redundancy_score=0.000000  → 测试结构与已有用例高度相似，建议生成覆盖不同方法/分支的差异化测试
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_6_2Test
+  project=Csv_2_b  target_class=CSVRecord
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=42.8571%  (9/21)
+  branch_rate=37.5000%  (6/16)
+  coverage_score=0.401786
+  uncovered_methods (9):
+    - line 64: get() — completely uncovered
+    - line 80: get() — completely uncovered
+    - line 96: isConsistent() — completely uncovered
+    - line 127: iterator() — completely uncovered
+    - line 131: values() — completely uncovered
+    - line 141: getComment() — completely uncovered
+    - line 150: getRecordNumber() — completely uncovered
+    - line 159: size() — completely uncovered
+    - line 164: toString() — completely uncovered
+  partial_branch_methods (2):
+    - line 49: CSVRecord()() — 1/2 branches missed
+    - line 107: isMapped() — 1/2 branches missed
+  bug_revealing=false  → 当前测试未触发已知缺陷，建议针对边界条件/异常路径生成更强的断言
+  redundancy_score=0.233161  → 测试结构与已有用例高度相似，建议生成覆盖不同方法/分支的差异化测试
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_4_2Test
+  project=Csv_2_b  target_class=CSVRecord
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=38.0952%  (8/21)
+  branch_rate=31.2500%  (5/16)
+  coverage_score=0.346726
+  uncovered_methods (10):
+    - line 64: get() — completely uncovered
+    - line 80: get() — completely uncovered
+    - line 107: isMapped() — completely uncovered
+    - line 118: isSet() — completely uncovered
+    - line 127: iterator() — completely uncovered
+    - line 131: values() — completely uncovered
+    - line 141: getComment() — completely uncovered
+    - line 150: getRecordNumber() — completely uncovered
+    - line 159: size() — completely uncovered
+    - line 164: toString() — completely uncovered
+  partial_branch_methods (1):
+    - line 49: CSVRecord()() — 1/2 branches missed
+  bug_revealing=false  → 当前测试未触发已知缺陷，建议针对边界条件/异常路径生成更强的断言
+  redundancy_score=0.042735  → 测试结构与已有用例高度相似，建议生成覆盖不同方法/分支的差异化测试
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_11_2Test
+  project=Csv_2_b  target_class=CSVRecord
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=38.0952%  (8/21)
+  branch_rate=6.2500%  (1/16)
+  coverage_score=0.221726
+  uncovered_methods (10):
+    - line 64: get() — completely uncovered
+    - line 80: get() — completely uncovered
+    - line 96: isConsistent() — completely uncovered
+    - line 107: isMapped() — completely uncovered
+    - line 118: isSet() — completely uncovered
+    - line 127: iterator() — completely uncovered
+    - line 131: values() — completely uncovered
+    - line 141: getComment() — completely uncovered
+    - line 150: getRecordNumber() — completely uncovered
+    - line 164: toString() — completely uncovered
+  partial_branch_methods (1):
+    - line 49: CSVRecord()() — 1/2 branches missed
+  bug_revealing=false  → 当前测试未触发已知缺陷，建议针对边界条件/异常路径生成更强的断言
+  redundancy_score=0.060606  → 测试结构与已有用例高度相似，建议生成覆盖不同方法/分支的差异化测试
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_7_2Test
+  project=Csv_2_b  target_class=CSVRecord
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=38.0952%  (8/21)
+  branch_rate=6.2500%  (1/16)
+  coverage_score=0.221726
+  uncovered_methods (10):
+    - line 64: get() — completely uncovered
+    - line 80: get() — completely uncovered
+    - line 96: isConsistent() — completely uncovered
+    - line 107: isMapped() — completely uncovered
+    - line 118: isSet() — completely uncovered
+    - line 131: values() — completely uncovered
+    - line 141: getComment() — completely uncovered
+    - line 150: getRecordNumber() — completely uncovered
+    - line 159: size() — completely uncovered
+    - line 164: toString() — completely uncovered
+  partial_branch_methods (1):
+    - line 49: CSVRecord()() — 1/2 branches missed
+  bug_revealing=false  → 当前测试未触发已知缺陷，建议针对边界条件/异常路径生成更强的断言
+  redundancy_score=0.228916  → 测试结构与已有用例高度相似，建议生成覆盖不同方法/分支的差异化测试
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_2_2Test
+  project=Csv_2_b  target_class=CSVRecord
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=38.0952%  (8/21)
+  branch_rate=6.2500%  (1/16)
+  coverage_score=0.221726
+  uncovered_methods (10):
+    - line 80: get() — completely uncovered
+    - line 96: isConsistent() — completely uncovered
+    - line 107: isMapped() — completely uncovered
+    - line 118: isSet() — completely uncovered
+    - line 127: iterator() — completely uncovered
+    - line 131: values() — completely uncovered
+    - line 141: getComment() — completely uncovered
+    - line 150: getRecordNumber() — completely uncovered
+    - line 159: size() — completely uncovered
+    - line 164: toString() — completely uncovered
+  partial_branch_methods (1):
+    - line 49: CSVRecord()() — 1/2 branches missed
+  bug_revealing=false  → 当前测试未触发已知缺陷，建议针对边界条件/异常路径生成更强的断言
+  redundancy_score=0.416058  → 结构多样性可接受✓
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_8_2Test
+  project=Csv_2_b  target_class=CSVRecord
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=38.0952%  (8/21)
+  branch_rate=6.2500%  (1/16)
+  coverage_score=0.221726
+  uncovered_methods (10):
+    - line 64: get() — completely uncovered
+    - line 80: get() — completely uncovered
+    - line 96: isConsistent() — completely uncovered
+    - line 107: isMapped() — completely uncovered
+    - line 118: isSet() — completely uncovered
+    - line 127: iterator() — completely uncovered
+    - line 141: getComment() — completely uncovered
+    - line 150: getRecordNumber() — completely uncovered
+    - line 159: size() — completely uncovered
+    - line 164: toString() — completely uncovered
+  partial_branch_methods (1):
+    - line 49: CSVRecord()() — 1/2 branches missed
+  bug_revealing=false  → 当前测试未触发已知缺陷，建议针对边界条件/异常路径生成更强的断言
+  redundancy_score=0.175258  → 测试结构与已有用例高度相似，建议生成覆盖不同方法/分支的差异化测试
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_1_2Test
+  project=Csv_2_b  target_class=CSVRecord
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=95.2381%  (20/21)
+  branch_rate=62.5000%  (10/16)
+  coverage_score=0.78869
+  uncovered_methods: none
+  partial_branch_methods (4):
+    - line 80: get() — 2/4 branches missed
+    - line 96: isConsistent() — 2/4 branches missed
+    - line 107: isMapped() — 1/2 branches missed
+    - line 118: isSet() — 1/4 branches missed
+  bug_revealing=false  → 当前测试未触发已知缺陷，建议针对边界条件/异常路径生成更强的断言
+  redundancy_score=0.209486  → 测试结构与已有用例高度相似，建议生成覆盖不同方法/分支的差异化测试
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_3_2Test
+  project=Csv_2_b  target_class=CSVRecord
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=52.3810%  (11/21)
+  branch_rate=31.2500%  (5/16)
+  coverage_score=0.418155
+  uncovered_methods (10):
+    - line 64: get() — completely uncovered
+    - line 96: isConsistent() — completely uncovered
+    - line 107: isMapped() — completely uncovered
+    - line 118: isSet() — completely uncovered
+    - line 127: iterator() — completely uncovered
+    - line 131: values() — completely uncovered
+    - line 141: getComment() — completely uncovered
+    - line 150: getRecordNumber() — completely uncovered
+    - line 159: size() — completely uncovered
+    - line 164: toString() — completely uncovered
+  partial_branch_methods (1):
+    - line 49: CSVRecord()() — 1/2 branches missed
+  bug_revealing=false  → 当前测试未触发已知缺陷，建议针对边界条件/异常路径生成更强的断言
+  redundancy_score=0.368421  → 结构多样性可接受✓
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_5_2Test
+  project=Csv_2_b  target_class=CSVRecord
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=38.0952%  (8/21)
+  branch_rate=18.7500%  (3/16)
+  coverage_score=0.284226
+  uncovered_methods (10):
+    - line 64: get() — completely uncovered
+    - line 80: get() — completely uncovered
+    - line 96: isConsistent() — completely uncovered
+    - line 118: isSet() — completely uncovered
+    - line 127: iterator() — completely uncovered
+    - line 131: values() — completely uncovered
+    - line 141: getComment() — completely uncovered
+    - line 150: getRecordNumber() — completely uncovered
+    - line 159: size() — completely uncovered
+    - line 164: toString() — completely uncovered
+  partial_branch_methods (1):
+    - line 49: CSVRecord()() — 1/2 branches missed
+  bug_revealing=false  → 当前测试未触发已知缺陷，建议针对边界条件/异常路径生成更强的断言
+  redundancy_score=0.468750  → 结构多样性可接受✓
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_12_2Test
+  project=Csv_2_b  target_class=CSVRecord
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=38.0952%  (8/21)
+  branch_rate=6.2500%  (1/16)
+  coverage_score=0.221726
+  uncovered_methods (10):
+    - line 64: get() — completely uncovered
+    - line 80: get() — completely uncovered
+    - line 96: isConsistent() — completely uncovered
+    - line 107: isMapped() — completely uncovered
+    - line 118: isSet() — completely uncovered
+    - line 127: iterator() — completely uncovered
+    - line 131: values() — completely uncovered
+    - line 141: getComment() — completely uncovered
+    - line 150: getRecordNumber() — completely uncovered
+    - line 159: size() — completely uncovered
+  partial_branch_methods (1):
+    - line 49: CSVRecord()() — 1/2 branches missed
+  bug_revealing=false  → 当前测试未触发已知缺陷，建议针对边界条件/异常路径生成更强的断言
+  redundancy_score=0.277937  → 测试结构与已有用例高度相似，建议生成覆盖不同方法/分支的差异化测试
+---

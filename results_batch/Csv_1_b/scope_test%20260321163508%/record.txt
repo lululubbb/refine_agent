@@ -1,0 +1,4 @@
+RefineTestGen scope test record
+Result path: /home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%
+SQL: "SELECT id FROM method WHERE project_name='Csv_1_b' ;"
+Methods (7): ['1', '2', '3', '4', '5', '6', '7']

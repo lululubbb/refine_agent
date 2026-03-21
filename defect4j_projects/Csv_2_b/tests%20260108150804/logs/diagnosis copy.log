@@ -1,0 +1,7 @@
+# diagnosis.log — 测试用例问题诊断
+# 每个 [DIAGNOSIS] 块对应一个测试类，供优化指令生成使用
+# status 取值: compile_fail | exec_fail | exec_timeout | exec_ok
+# =============================================================
+
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_1_2Test\n  project=Csv_2_b  target_class=CSVRecord\n  status=exec_fail\n  error_type=runtime_exception\n  core_errors:\n    - org.opentest4j.AssertionFailedError: expected: <false> but was: <true>
+       org.ju\n---\n[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_12_3Test\n  project=Csv_2_b  target_class=CSVRecord\n  status=exec_fail\n  error_type=runtime_exception\n  core_errors:\n    - org.opentest4j.AssertionFailedError: Expected java.la\n    - ng.NullPointerException to be throw\n---\n[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_8_4Test\n  project=Csv_2_b  target_class=CSVRecord\n  status=exec_fail\n  error_type=runtime_exception\n  core_errors:\n    - org.opentest4j.AssertionFailedError: expected:\n---\n[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_9_4Test\n  project=Csv_2_b  target_class=CSVRecord\n  status=exec_fail\n  error_type=runtime_exception\n  core_errors:\n    - java.lang.NoSuchMethodException: org.apache.commo\n    - java.lang.NoSuchMethodException: org.apache.commo\n---\n

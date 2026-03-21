@@ -1,0 +1,3 @@
+project,target_class,test_class,compile_status,exec_status,exec_timeout,jacoco_exec_size,compile_score,exec_score
+Csv_1_b,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_1Test,fail,skip,False,0,0.0,0.0
+Csv_1_b,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_2Test,fail,skip,False,0,0.0,0.0

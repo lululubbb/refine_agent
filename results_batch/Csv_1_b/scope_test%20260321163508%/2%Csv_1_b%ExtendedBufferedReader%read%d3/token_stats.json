@@ -1,0 +1,41 @@
+{
+  "generator": {
+    "prompt": 870,
+    "completion": 1536,
+    "total": 2406
+  },
+  "refiner": {
+    "prompt": 0,
+    "completion": 0,
+    "total": 0
+  },
+  "all_total": 2406,
+  "rounds": {
+    "phase1": {
+      "generator": {
+        "prompt": 870,
+        "completion": 1536,
+        "total": 2406
+      },
+      "refiner": {
+        "prompt": 0,
+        "completion": 0,
+        "total": 0
+      },
+      "round_total": 2406
+    },
+    "round_1": {
+      "generator": {
+        "prompt": 0,
+        "completion": 0,
+        "total": 0
+      },
+      "refiner": {
+        "prompt": 0,
+        "completion": 0,
+        "total": 0
+      },
+      "round_total": 0
+    }
+  }
+}

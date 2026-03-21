@@ -1,0 +1,36 @@
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_12_2Test:testToStringWithNullValuesField()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_12_2Test', methodName = 'testToStringWithNullValuesField', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: Expected NullPointerException when values field is null
+       org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:38)
+       org.junit.jupiter.api.Assertions.fail(Assertions.java:135)
+       org.apache.commons.csv.CSVRecord_12_2Test.testToStringWithNullValuesField(CSVRecord_12_2Test.java:78)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+       org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+       org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+       [...]
+
+Test run finished after 200 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         3 tests found           ]
+[         0 tests skipped         ]
+[         3 tests started         ]
+[         0 tests aborted         ]
+[         2 tests successful      ]
+[         1 tests failed          ]
+
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by org.apache.commons.csv.CSVRecord_12_2Test (file:/home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%2520260106101312/tests_ChatGPT/) to field java.lang.reflect.Field.modifiers
+WARNING: Please consider reporting this to the maintainers of org.apache.commons.csv.CSVRecord_12_2Test
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release

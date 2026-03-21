@@ -1,0 +1,149 @@
+bug_revealing log started: 2026-03-21T16:35:53.505681
+buggy=/home/chenlu/refine_test_gen_v5/defect4j_projects/Csv_1_b
+fixed=/home/chenlu/refine_test_gen_v5/defect4j_projects/Csv_1_f
+tests_dir=/home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/1%Csv_1_b%ExtendedBufferedReader%ExtendedBufferedReader%d3/test_cases
+
+Note: TestRunner initialization skipped; using precompiled classes in tests_ChatGPT if available.
+Running org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testExtendedBufferedReader_normalInput on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testExtendedBufferedReader_normalInput on fixed...
+  -> fail
+---
+[2026-03-21T16:35:54.696843] buggy org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testExtendedBufferedReader_normalInput discovery_failed
+---
+[2026-03-21T16:35:54.696875] fixed org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testExtendedBufferedReader_normalInput discovery_failed
+Running org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testExtendedBufferedReader_emptyInput on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testExtendedBufferedReader_emptyInput on fixed...
+  -> fail
+---
+[2026-03-21T16:35:55.889022] buggy org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testExtendedBufferedReader_emptyInput discovery_failed
+---
+[2026-03-21T16:35:55.889055] fixed org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testExtendedBufferedReader_emptyInput discovery_failed
+Running org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testExtendedBufferedReader_nullReader_throwsNullPointerException on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testExtendedBufferedReader_nullReader_throwsNullPointerException on fixed...
+  -> fail
+---
+[2026-03-21T16:35:57.091649] buggy org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testExtendedBufferedReader_nullReader_throwsNullPointerException discovery_failed
+---
+[2026-03-21T16:35:57.091682] fixed org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testExtendedBufferedReader_nullReader_throwsNullPointerException discovery_failed
+Running org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testExtendedBufferedReader_readCharArray_zeroLength on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testExtendedBufferedReader_readCharArray_zeroLength on fixed...
+  -> fail
+---
+[2026-03-21T16:35:58.325060] buggy org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testExtendedBufferedReader_readCharArray_zeroLength discovery_failed
+---
+[2026-03-21T16:35:58.325091] fixed org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testExtendedBufferedReader_readCharArray_zeroLength discovery_failed
+Running org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testExtendedBufferedReader_readCharArray_negativeLength_throwsIndexOutOfBoundsException on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testExtendedBufferedReader_readCharArray_negativeLength_throwsIndexOutOfBoundsException on fixed...
+  -> fail
+---
+[2026-03-21T16:35:59.537911] buggy org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testExtendedBufferedReader_readCharArray_negativeLength_throwsIndexOutOfBoundsException discovery_failed
+---
+[2026-03-21T16:35:59.537982] fixed org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testExtendedBufferedReader_readCharArray_negativeLength_throwsIndexOutOfBoundsException discovery_failed
+Running org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testLookAhead_privateMethod on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testLookAhead_privateMethod on fixed...
+  -> fail
+---
+[2026-03-21T16:36:00.792720] buggy org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testLookAhead_privateMethod discovery_failed
+---
+[2026-03-21T16:36:00.792791] fixed org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testLookAhead_privateMethod discovery_failed
+Running org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testReadAgain_privateMethod on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testReadAgain_privateMethod on fixed...
+  -> fail
+---
+[2026-03-21T16:36:01.989772] buggy org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testReadAgain_privateMethod discovery_failed
+---
+[2026-03-21T16:36:01.989804] fixed org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testReadAgain_privateMethod discovery_failed
+Running org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testGetLineNumber_initialValue on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testGetLineNumber_initialValue on fixed...
+  -> fail
+---
+[2026-03-21T16:36:03.159160] buggy org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testGetLineNumber_initialValue discovery_failed
+---
+[2026-03-21T16:36:03.159191] fixed org.apache.commons.csv.ExtendedBufferedReader_1_1Test#testGetLineNumber_initialValue discovery_failed
+Running org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testExtendedBufferedReader_normalInput on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testExtendedBufferedReader_normalInput on fixed...
+  -> fail
+---
+[2026-03-21T16:36:04.372546] buggy org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testExtendedBufferedReader_normalInput discovery_failed
+---
+[2026-03-21T16:36:04.372578] fixed org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testExtendedBufferedReader_normalInput discovery_failed
+Running org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testExtendedBufferedReader_nullInput on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testExtendedBufferedReader_nullInput on fixed...
+  -> fail
+---
+[2026-03-21T16:36:05.580372] buggy org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testExtendedBufferedReader_nullInput discovery_failed
+---
+[2026-03-21T16:36:05.580405] fixed org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testExtendedBufferedReader_nullInput discovery_failed
+Running org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testExtendedBufferedReader_emptyInput on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testExtendedBufferedReader_emptyInput on fixed...
+  -> fail
+---
+[2026-03-21T16:36:06.782745] buggy org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testExtendedBufferedReader_emptyInput discovery_failed
+---
+[2026-03-21T16:36:06.782800] fixed org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testExtendedBufferedReader_emptyInput discovery_failed
+Running org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testExtendedBufferedReader_readCharArrayWithZeroLength on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testExtendedBufferedReader_readCharArrayWithZeroLength on fixed...
+  -> fail
+---
+[2026-03-21T16:36:08.018890] buggy org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testExtendedBufferedReader_readCharArrayWithZeroLength discovery_failed
+---
+[2026-03-21T16:36:08.018924] fixed org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testExtendedBufferedReader_readCharArrayWithZeroLength discovery_failed
+Running org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testExtendedBufferedReader_readCharArrayWithNegativeLength on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testExtendedBufferedReader_readCharArrayWithNegativeLength on fixed...
+  -> fail
+---
+[2026-03-21T16:36:09.278000] buggy org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testExtendedBufferedReader_readCharArrayWithNegativeLength discovery_failed
+---
+[2026-03-21T16:36:09.278067] fixed org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testExtendedBufferedReader_readCharArrayWithNegativeLength discovery_failed
+Running org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testLookAhead_privateMethod_behavior on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testLookAhead_privateMethod_behavior on fixed...
+  -> fail
+---
+[2026-03-21T16:36:10.471501] buggy org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testLookAhead_privateMethod_behavior discovery_failed
+---
+[2026-03-21T16:36:10.471582] fixed org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testLookAhead_privateMethod_behavior discovery_failed
+Running org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testReadAgain_privateMethod_behavior on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testReadAgain_privateMethod_behavior on fixed...
+  -> fail
+---
+[2026-03-21T16:36:11.654819] buggy org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testReadAgain_privateMethod_behavior discovery_failed
+---
+[2026-03-21T16:36:11.654871] fixed org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testReadAgain_privateMethod_behavior discovery_failed
+Running org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testGetLineNumber_initiallyZero on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testGetLineNumber_initiallyZero on fixed...
+  -> fail
+---
+[2026-03-21T16:36:12.841840] buggy org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testGetLineNumber_initiallyZero discovery_failed
+---
+[2026-03-21T16:36:12.841907] fixed org.apache.commons.csv.ExtendedBufferedReader_1_2Test#testGetLineNumber_initiallyZero discovery_failed
+Class-level summary: /home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/1%Csv_1_b%ExtendedBufferedReader%ExtendedBufferedReader%d3/Csv_1_ExtendedBufferedReader_bugrevealing_class_level.csv
+Class-level CSV: /home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/1%Csv_1_b%ExtendedBufferedReader%ExtendedBufferedReader%d3/Csv_1_ExtendedBufferedReader_bugrevealing_class_level.csv
+
+===== SUMMARY =====
+Total tests evaluated: 16
+Bug revealing tests: 0
+Summary CSV: /home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/1%Csv_1_b%ExtendedBufferedReader%ExtendedBufferedReader%d3/Csv_1_ExtendedBufferedReader_bugrevealing.csv
+
+===== SUMMARY =====
+Total tests evaluated: 16
+Bug revealing tests: 0
+Summary CSV: /home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/1%Csv_1_b%ExtendedBufferedReader%ExtendedBufferedReader%d3/Csv_1_ExtendedBufferedReader_bugrevealing.csv
+Per-project counts CSV: /home/chenlu/refine_test_gen_v5/defect4j_projects/bugrevealing_counts.csv
+
+log finished: 2026-03-21T16:36:12.843075

@@ -9,7 +9,6 @@ from datetime import datetime
 from config import *
 import xml.etree.ElementTree as ET
 
-
 class TestRunner:
 
     def __init__(self, test_path, target_path, tool="jacoco"):
@@ -58,22 +57,39 @@ class TestRunner:
         """
         Initialize configurations and run all tests
         """
+        print(f"[DEBUG TestRunner] test_path: {repr(self.test_path)}")
+        print(f"[DEBUG TestRunner] test_path exists: {os.path.isdir(self.test_path)}")
+        print(f"[DEBUG TestRunner] test_cases path: {repr(os.path.join(self.test_path, 'test_cases'))}")
+        print(f"[DEBUG TestRunner] test_cases exists: {os.path.isdir(os.path.join(self.test_path, 'test_cases'))}")
+        
         if os.path.isdir(self.test_path) and os.path.isdir(os.path.join(self.test_path, 'test_cases')):
             tests_dir = self.test_path
             compiler_output_dir = os.path.join(tests_dir, "compiler_output")
             test_output_dir = os.path.join(tests_dir, "test_output")
             report_dir = os.path.join(tests_dir, "report")
-
+ 
             compiler_output = os.path.join(compiler_output_dir, "CompilerOutput")
             test_output = os.path.join(test_output_dir, "TestOutput")
             compiled_test_dir = os.path.join(tests_dir, "tests_ChatGPT")
-
+ 
+            # ★ 修复：必须提前创建这些目录。
+            # 原始代码只声明了路径字符串，没有 makedirs。
+            # run_all_tests() 在编译失败时会写
+            #   compiler_output/CompilerOutput-XXX.java.txt
+            # 父目录不存在 → FileNotFoundError → TestRunner 整体崩溃
+            # → tool_runner_adapter 捕获异常 → 返回 None
+            # → suite_diagnosis.json 永远不生成 → 假阳性 COMPILE_FAIL
+            os.makedirs(compiler_output_dir, exist_ok=True)
+            os.makedirs(test_output_dir, exist_ok=True)
+            os.makedirs(report_dir, exist_ok=True)
+            os.makedirs(compiled_test_dir, exist_ok=True)
+ 
             logs_dir = os.path.join(tests_dir, "logs")
             os.makedirs(logs_dir, exist_ok=True)
             logs = self._make_logs(logs_dir)
-
+ 
             return self.run_all_tests(tests_dir, compiled_test_dir, compiler_output, test_output, report_dir, logs)
-
+        
         date = datetime.now().strftime("%Y%m%d%H%M%S")
         tests_dir = os.path.join(self.target_path, f"tests%{date}")
         compiler_output_dir = os.path.join(tests_dir, "compiler_output")
@@ -1605,7 +1621,7 @@ class TestRunner:
                         print(f"    分支覆盖率: N/A")
                 if not any_data:
                     print("  [注意] focal method 名称未解析到，无法从 jacoco.xml 提取数据。")
-                    print(f"  [调试] focal_method='{focal_method}'  mid_to_name={mid_to_name}")
+                    print(f"  [调试] focal_method='{fm_p}'  mid_to_name={mid_to_name}")
             else:
                 print("  未获取到 focal method 覆盖率数据")
             print("-" * 50)

@@ -1,0 +1,13 @@
+project,target_class,focal_method,exec_status,f_per_line_cov,f_per_line_total,f_per_line_rate,f_per_branch_cov,f_per_branch_total,f_per_branch_rate,line_contrib_pct,branch_contrib_pct,coverage_score
+Csv_2_b,CSVRecord,size,ok,1,1,100.0,0,0,0.0,100.0,0.0,0.5
+Csv_2_b,CSVRecord,CSVRecord,ok,6,6,100.0,2,2,100.0,100.0,100.0,1.0
+Csv_2_b,CSVRecord,toString,ok,1,1,100.0,0,0,0.0,100.0,0.0,0.5
+Csv_2_b,CSVRecord,values,ok,1,1,100.0,0,0,0.0,100.0,0.0,0.5
+Csv_2_b,CSVRecord,getComment,ok,1,1,100.0,0,0,0.0,100.0,0.0,0.5
+Csv_2_b,CSVRecord,get,ok,1,5,20.0,0,4,0.0,20.0,0.0,0.1
+Csv_2_b,CSVRecord,get,ok,4,5,80.0,4,4,100.0,80.0,100.0,0.9
+Csv_2_b,CSVRecord,isMapped,ok,1,1,100.0,2,2,100.0,100.0,100.0,1.0
+Csv_2_b,CSVRecord,getRecordNumber,ok,1,1,100.0,0,0,0.0,100.0,0.0,0.5
+Csv_2_b,CSVRecord,iterator,ok,1,1,100.0,0,0,0.0,100.0,0.0,0.5
+Csv_2_b,CSVRecord,isConsistent,ok,1,1,100.0,4,4,100.0,100.0,100.0,1.0
+Csv_2_b,CSVRecord,isSet,ok,1,1,100.0,4,4,100.0,100.0,100.0,1.0

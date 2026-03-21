@@ -1,0 +1,26 @@
+{
+  "ExtendedBufferedReader_2_1Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [
+      "/home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/2%Csv_1_b%ExtendedBufferedReader%read%d3/test_cases/ExtendedBufferedReader_2_1Test.java:3: 错误: 找不到符号"
+    ],
+    "exec_errors": [],
+    "focal_line_rate": null,
+    "focal_branch_rate": null,
+    "missed_methods": [],
+    "partial_methods": []
+  },
+  "ExtendedBufferedReader_2_2Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [
+      "/home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/2%Csv_1_b%ExtendedBufferedReader%read%d3/test_cases/ExtendedBufferedReader_2_2Test.java:3: 错误: 找不到符号"
+    ],
+    "exec_errors": [],
+    "focal_line_rate": null,
+    "focal_branch_rate": null,
+    "missed_methods": [],
+    "partial_methods": []
+  }
+}

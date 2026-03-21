@@ -1,0 +1,2 @@
+[COMPILE_FAILED] org.apache.commons.csv.ExtendedBufferedReader_1_1Test: /home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/1%Csv_1_b%ExtendedBufferedReader%ExtendedBufferedReader%d3/test_cases/ExtendedBufferedReader_1_1Test.java:20: 错误: 找不到符号
+[COMPILE_FAILED] org.apache.commons.csv.ExtendedBufferedReader_1_2Test: /home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/1%Csv_1_b%ExtendedBufferedReader%ExtendedBufferedReader%d3/test_cases/ExtendedBufferedReader_1_2Test.java:3: 错误: 找不到符号

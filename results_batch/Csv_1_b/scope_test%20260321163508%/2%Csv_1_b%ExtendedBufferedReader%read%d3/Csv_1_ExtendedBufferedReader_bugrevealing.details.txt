@@ -1,0 +1,101 @@
+bug_revealing log started: 2026-03-21T16:36:56.874215
+buggy=/home/chenlu/refine_test_gen_v5/defect4j_projects/Csv_1_b
+fixed=/home/chenlu/refine_test_gen_v5/defect4j_projects/Csv_1_f
+tests_dir=/home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/2%Csv_1_b%ExtendedBufferedReader%read%d3/test_cases
+
+Note: TestRunner initialization skipped; using precompiled classes in tests_ChatGPT if available.
+Running org.apache.commons.csv.ExtendedBufferedReader_2_1Test#testRead_normalPath_incrementsLineCounterOnNewline on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_2_1Test#testRead_normalPath_incrementsLineCounterOnNewline on fixed...
+  -> fail
+---
+[2026-03-21T16:36:58.169152] buggy org.apache.commons.csv.ExtendedBufferedReader_2_1Test#testRead_normalPath_incrementsLineCounterOnNewline discovery_failed
+---
+[2026-03-21T16:36:58.169190] fixed org.apache.commons.csv.ExtendedBufferedReader_2_1Test#testRead_normalPath_incrementsLineCounterOnNewline discovery_failed
+Running org.apache.commons.csv.ExtendedBufferedReader_2_1Test#testRead_emptyStream_returnsEndOfStreamImmediately on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_2_1Test#testRead_emptyStream_returnsEndOfStreamImmediately on fixed...
+  -> fail
+---
+[2026-03-21T16:36:59.375722] buggy org.apache.commons.csv.ExtendedBufferedReader_2_1Test#testRead_emptyStream_returnsEndOfStreamImmediately discovery_failed
+---
+[2026-03-21T16:36:59.375790] fixed org.apache.commons.csv.ExtendedBufferedReader_2_1Test#testRead_emptyStream_returnsEndOfStreamImmediately discovery_failed
+Running org.apache.commons.csv.ExtendedBufferedReader_2_1Test#testRead_onlyNewlineCharacters_incrementsLineCounterCorrectly on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_2_1Test#testRead_onlyNewlineCharacters_incrementsLineCounterCorrectly on fixed...
+  -> fail
+---
+[2026-03-21T16:37:00.587415] buggy org.apache.commons.csv.ExtendedBufferedReader_2_1Test#testRead_onlyNewlineCharacters_incrementsLineCounterCorrectly discovery_failed
+---
+[2026-03-21T16:37:00.587499] fixed org.apache.commons.csv.ExtendedBufferedReader_2_1Test#testRead_onlyNewlineCharacters_incrementsLineCounterCorrectly discovery_failed
+Running org.apache.commons.csv.ExtendedBufferedReader_2_1Test#testRead_afterEndOfStream_returnsEndOfStream on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_2_1Test#testRead_afterEndOfStream_returnsEndOfStream on fixed...
+  -> fail
+---
+[2026-03-21T16:37:01.765898] buggy org.apache.commons.csv.ExtendedBufferedReader_2_1Test#testRead_afterEndOfStream_returnsEndOfStream discovery_failed
+---
+[2026-03-21T16:37:01.765961] fixed org.apache.commons.csv.ExtendedBufferedReader_2_1Test#testRead_afterEndOfStream_returnsEndOfStream discovery_failed
+Running org.apache.commons.csv.ExtendedBufferedReader_2_1Test#testRead_throwsIOException_whenUnderlyingReaderThrows on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_2_1Test#testRead_throwsIOException_whenUnderlyingReaderThrows on fixed...
+  -> fail
+---
+[2026-03-21T16:37:03.018684] buggy org.apache.commons.csv.ExtendedBufferedReader_2_1Test#testRead_throwsIOException_whenUnderlyingReaderThrows discovery_failed
+---
+[2026-03-21T16:37:03.018757] fixed org.apache.commons.csv.ExtendedBufferedReader_2_1Test#testRead_throwsIOException_whenUnderlyingReaderThrows discovery_failed
+Running org.apache.commons.csv.ExtendedBufferedReader_2_2Test#testRead_normalPath_readsCharactersAndCountsLines on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_2_2Test#testRead_normalPath_readsCharactersAndCountsLines on fixed...
+  -> fail
+---
+[2026-03-21T16:37:04.197467] buggy org.apache.commons.csv.ExtendedBufferedReader_2_2Test#testRead_normalPath_readsCharactersAndCountsLines discovery_failed
+---
+[2026-03-21T16:37:04.197510] fixed org.apache.commons.csv.ExtendedBufferedReader_2_2Test#testRead_normalPath_readsCharactersAndCountsLines discovery_failed
+Running org.apache.commons.csv.ExtendedBufferedReader_2_2Test#testRead_emptyInput_returnsEndOfStream on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_2_2Test#testRead_emptyInput_returnsEndOfStream on fixed...
+  -> fail
+---
+[2026-03-21T16:37:05.391557] buggy org.apache.commons.csv.ExtendedBufferedReader_2_2Test#testRead_emptyInput_returnsEndOfStream discovery_failed
+---
+[2026-03-21T16:37:05.391589] fixed org.apache.commons.csv.ExtendedBufferedReader_2_2Test#testRead_emptyInput_returnsEndOfStream discovery_failed
+Running org.apache.commons.csv.ExtendedBufferedReader_2_2Test#testRead_onlyNewLineInInput_incrementsLineCounter on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_2_2Test#testRead_onlyNewLineInInput_incrementsLineCounter on fixed...
+  -> fail
+---
+[2026-03-21T16:37:06.627239] buggy org.apache.commons.csv.ExtendedBufferedReader_2_2Test#testRead_onlyNewLineInInput_incrementsLineCounter discovery_failed
+---
+[2026-03-21T16:37:06.627277] fixed org.apache.commons.csv.ExtendedBufferedReader_2_2Test#testRead_onlyNewLineInInput_incrementsLineCounter discovery_failed
+Running org.apache.commons.csv.ExtendedBufferedReader_2_2Test#testRead_multipleSequentialNewLines_incrementsLineCounterCorrectly on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_2_2Test#testRead_multipleSequentialNewLines_incrementsLineCounterCorrectly on fixed...
+  -> fail
+---
+[2026-03-21T16:37:07.858324] buggy org.apache.commons.csv.ExtendedBufferedReader_2_2Test#testRead_multipleSequentialNewLines_incrementsLineCounterCorrectly discovery_failed
+---
+[2026-03-21T16:37:07.858360] fixed org.apache.commons.csv.ExtendedBufferedReader_2_2Test#testRead_multipleSequentialNewLines_incrementsLineCounterCorrectly discovery_failed
+Running org.apache.commons.csv.ExtendedBufferedReader_2_2Test#testRead_throwsIOExceptionOnClosedReader on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_2_2Test#testRead_throwsIOExceptionOnClosedReader on fixed...
+  -> fail
+---
+[2026-03-21T16:37:09.049116] buggy org.apache.commons.csv.ExtendedBufferedReader_2_2Test#testRead_throwsIOExceptionOnClosedReader discovery_failed
+---
+[2026-03-21T16:37:09.049147] fixed org.apache.commons.csv.ExtendedBufferedReader_2_2Test#testRead_throwsIOExceptionOnClosedReader discovery_failed
+Class-level summary: /home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/2%Csv_1_b%ExtendedBufferedReader%read%d3/Csv_1_ExtendedBufferedReader_bugrevealing_class_level.csv
+Class-level CSV: /home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/2%Csv_1_b%ExtendedBufferedReader%read%d3/Csv_1_ExtendedBufferedReader_bugrevealing_class_level.csv
+
+===== SUMMARY =====
+Total tests evaluated: 10
+Bug revealing tests: 0
+Summary CSV: /home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/2%Csv_1_b%ExtendedBufferedReader%read%d3/Csv_1_ExtendedBufferedReader_bugrevealing.csv
+
+===== SUMMARY =====
+Total tests evaluated: 10
+Bug revealing tests: 0
+Summary CSV: /home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/2%Csv_1_b%ExtendedBufferedReader%read%d3/Csv_1_ExtendedBufferedReader_bugrevealing.csv
+Per-project counts CSV: /home/chenlu/refine_test_gen_v5/defect4j_projects/bugrevealing_counts.csv
+
+log finished: 2026-03-21T16:37:09.049650

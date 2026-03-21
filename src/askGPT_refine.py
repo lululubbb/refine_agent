@@ -64,7 +64,17 @@ askGPT_refine.py  (v3 — 概念修正版 + 进度日志增强版)
       · 每次 fix 后的状态变化
   - 彩色 ANSI 输出，按严重程度染色
   - 生成 refine_quality.jsonl 日志，方便后期离线分析覆盖率提升瓶颈
- 
+
+修复内容：
+  Bug 1:  token_stats["rounds"] 始终为空 {}
+          → 新增 _acc_round_tokens()，在 phase1 结束和每轮 round 结束时
+            通过"快照基线 → 结束时相减"得到增量，写入 stats["rounds"]
+  Bug 1b: 缺少 all_total 字段
+          → _acc_gen / _acc_ref 每次累加后同步更新 token_stats["all_total"]
+  Bug 3:  fix_gen.json 和 new.java 未生成
+          → fix_gen.json 由 call_generator() 明确写出；
+            new.java 在所有路径（成功/提取失败/LLM失败）都明确写出，
+            失败时写注释占位，便于调试
 """
 from __future__ import annotations
 
@@ -73,6 +83,7 @@ import copy
 import json
 import logging
 import os
+import re
 import sys
 import time
 from datetime import datetime
@@ -172,14 +183,30 @@ def _print_suite_score(suite_score, tag=""):
     if ss.coverage_branch_avg is not None:
         bc = ss.coverage_branch_avg
         bc_c = Fore.GREEN if bc >= 0.7 else (Fore.YELLOW if bc >= 0.4 else Fore.RED)
-        print(f"  {'分支覆盖率(avg)':<16}: {bc_c}{bc*100:.1f}%{Style.RESET_ALL}", flush=True)
+        print(f"  {'分支覆盖率(avg)':<16}: {bc_c}{bc*100:.1f}%  "
+              f"(min={ss.coverage_branch_min*100:.1f}%  max={ss.coverage_branch_max*100:.1f}%){Style.RESET_ALL}"
+              if hasattr(ss, 'coverage_branch_min') and ss.coverage_branch_min is not None
+              else f"  {'分支覆盖率(avg)':<16}: {bc_c}{bc*100:.1f}%{Style.RESET_ALL}",
+              flush=True)
+    else:
+        print(f"  {'分支覆盖率(avg)':<16}: {Fore.WHITE}N/A{Style.RESET_ALL}", flush=True)
 
     if ss.bug_reveal_checked > 0:
         br = ss.bug_reveal_rate
         br_c = Fore.GREEN if br >= 0.5 else (Fore.YELLOW if br > 0 else Fore.RED)
         print(f"  {'Bug揭示率':<16}: {br_c}{ss.bug_reveal_count}/{ss.bug_reveal_checked} ({br*100:.0f}%){Style.RESET_ALL}", flush=True)
     else:
-        print(f"  {'Bug揭示率':<16}: {Fore.WHITE}未检测{Style.RESET_ALL}", flush=True)
+        # ★ 修复问题3：区分不同的"未检测"原因
+        skip_reason = getattr(ss, '_bug_reveal_skip_reason', None)
+        if skip_reason == "fixed_dir not provided":
+            reason_str = f"未检测 {Fore.RED}(fixed project 目录不存在，请确认 _f 版本路径){Style.RESET_ALL}"
+        elif skip_reason == "skip_bug_revealing=True":
+            reason_str = f"未检测 {Fore.YELLOW}(skip_bug_revealing=True){Style.RESET_ALL}"
+        elif ss.exec_pass_count == 0:
+            reason_str = f"未检测 {Fore.YELLOW}(所有测试编译/执行失败，无法检测){Style.RESET_ALL}"
+        else:
+            reason_str = f"{Fore.WHITE}未检测{Style.RESET_ALL}"
+        print(f"  {'Bug揭示率':<16}: {reason_str}", flush=True)
 
     if ss.max_pairwise_similarity is not None:
         sim = ss.max_pairwise_similarity
@@ -206,7 +233,17 @@ def _print_suite_score(suite_score, tag=""):
                 c = issue_colors.get(iss, Fore.WHITE)
                 print(f"    {c}[{iss}]{Style.RESET_ALL} → {', '.join(ss.problem_tests[iss])}", flush=True)
     else:
-        print(f"\n  ✅ 无问题！Suite 全部通过质量检查。", flush=True)
+        print(f"\\n  ✅ 无问题！Suite 全部通过质量检查。", flush=True)
+        # ★ 修复问题5：说明质量检查标准，避免歧义
+        print(f"  {Fore.WHITE}  质量标准: 编译通过 + 执行无异常 + 行覆盖率≥50%"
+              f" + 分支覆盖率≥50% + 无高冗余(≤70%){Style.RESET_ALL}", flush=True)
+        # 如果 bug_revealing 未检测，单独说明
+        if ss.bug_reveal_checked == 0:
+            skip_reason = getattr(ss, '_bug_reveal_skip_reason', None)
+            if skip_reason == "fixed_dir not provided":
+                print(f"  {Fore.RED}  ⚠ Bug揭示率未检测：_f 版本项目不存在{Style.RESET_ALL}", flush=True)
+            elif ss.exec_pass_count == 0:
+                print(f"  {Fore.YELLOW}  ⚠ Bug揭示率未检测：所有测试执行失败{Style.RESET_ALL}", flush=True)
 
     _divider("·", color=Fore.YELLOW)
     print(flush=True)
@@ -310,6 +347,53 @@ def _log_refine_quality(save_dir: str, focal_method: str, round_num: int,
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
     except Exception as e:
         logger.debug("refine_quality.jsonl write error: %s", e)
+
+
+# ════════════════════════════════════════════════════════════════════
+# ★ Bug 1 & Bug 1b 修复：Token 统计工具函数
+# ════════════════════════════════════════════════════════════════════
+
+def _make_token_stats() -> dict:
+    """
+    ★ Bug 1b 修复：创建包含 all_total 和 rounds 字段的初始统计字典。
+    统一由此函数创建，避免遗漏字段。
+    """
+    return {
+        "generator": {"prompt": 0, "completion": 0, "total": 0},
+        "refiner":   {"prompt": 0, "completion": 0, "total": 0},
+        "all_total": 0,   # ★ Bug 1b：generator.total + refiner.total 的合计
+        "rounds":    {},  # ★ Bug 1：按 phase1 / round_1 / round_2 ... 分别记录增量
+    }
+
+
+def _acc_round_tokens(stats: dict, round_key: str,
+                      gen_prompt: int, gen_completion: int,
+                      ref_prompt: int, ref_completion: int):
+    """
+    ★ Bug 1 修复核心：将本阶段（phase1 / round_N）的 token 增量写入 stats["rounds"]。
+
+    调用方式：
+      1. 在 phase1 结束后，传入 phase1 期间所有 Generator 调用的累计增量。
+      2. 在每个 round_N 结束后，传入该轮 Generator + Refiner 的累计增量。
+
+    增量计算方法（调用方负责）：
+      在阶段开始前快照当前累计值，阶段结束后相减，得到本阶段增量。
+    """
+    gen_total = gen_prompt + gen_completion
+    ref_total = ref_prompt + ref_completion
+    stats["rounds"][round_key] = {
+        "generator": {
+            "prompt":     gen_prompt,
+            "completion": gen_completion,
+            "total":      gen_total,
+        },
+        "refiner": {
+            "prompt":     ref_prompt,
+            "completion": ref_completion,
+            "total":      ref_total,
+        },
+        "round_total": gen_total + ref_total,
+    }
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -442,7 +526,6 @@ def generate_one_test(
 
 def _ensure_package_first(code: str, pkg_decl: str) -> str:
     """确保 package 声明是 Java 文件最前面的有效语句。"""
-    import re
     lines = code.splitlines()
     pkg_idx = None
     for i, line in enumerate(lines):
@@ -466,7 +549,7 @@ def _ensure_package_first(code: str, pkg_decl: str) -> str:
 
 
 # ════════════════════════════════════════════════════════════════════
-# Fix 单个 Test（Bug Fix: 增加 diff 检测 + 更强的 prompt 要求）
+# Fix 单个 Test（含 diff 检测 + 强化 prompt）
 # ════════════════════════════════════════════════════════════════════
 
 def build_fix_messages(
@@ -479,19 +562,12 @@ def build_fix_messages(
     ctx_d3: dict,
     imports: str,
     suite_summary: str,
-    prev_unchanged: bool = False,   # ★ 新增：上次输出是否与原始相同
+    prev_unchanged: bool = False,
 ) -> List[Dict]:
-    """
-    Bug Fix (Issue 2):
-      增加 prev_unchanged 参数：若上次 fix 输出与原始相同，
-      在 prompt 里加入额外强调，要求 Generator 必须修改代码。
-    """
-    # ★ 构建指令摘要（让 Generator 明确知道要改什么）
     instructions_summary = "\n".join(
         f"  {i+1}. {instr}" for i, instr in enumerate(instructions)
     )
 
-    # ★ 若上次输出未改变，加入强调语
     unchanged_warning = ""
     if prev_unchanged:
         unchanged_warning = (
@@ -501,16 +577,15 @@ def build_fix_messages(
         )
 
     context = {
-        "class_name":        class_name,
-        "focal_method":      focal_method,
-        "test_name":         test_name,
-        "current_suite":     current_code,
-        "suite_summary":     suite_summary,
-        "instructions_json": json.dumps(instructions, indent=2, ensure_ascii=False),
-        "delete_tests_json": "[]",
-        "method_code":       ctx_d1.get("information", ctx_d3.get("full_fm", "")),
-        "imports":           imports,
-        # ★ 额外字段：指令摘要 + 未改变警告
+        "class_name":           class_name,
+        "focal_method":         focal_method,
+        "test_name":            test_name,
+        "current_suite":        current_code,
+        "suite_summary":        suite_summary,
+        "instructions_json":    json.dumps(instructions, indent=2, ensure_ascii=False),
+        "delete_tests_json":    "[]",
+        "method_code":          ctx_d1.get("information", ctx_d3.get("full_fm", "")),
+        "imports":              imports,
         "instructions_summary": instructions_summary,
         "unchanged_warning":    unchanged_warning,
     }
@@ -571,14 +646,10 @@ def focal_method_pipeline(
     print(f"  {Fore.CYAN}计划: 生成 {test_number} 个 Test 文件，最多 {max_rounds} 轮 Refine{Style.RESET_ALL}", flush=True)
 
     # ── Token / 时间统计 ───────────────────────────────────────────
-    token_stats = {
-        "generator": {"prompt": 0, "completion": 0, "total": 0},
-        "refiner":   {"prompt": 0, "completion": 0, "total": 0},
-        "rounds":    {},
-    }
-    time_stats = {"start": process_start, "end": 0, "total": 0, "rounds": {}}
+    # ★ Bug 1 & 1b 修复：使用工厂函数创建，包含 all_total 和 rounds 字段
+    token_stats = _make_token_stats()
+    time_stats  = {"start": process_start, "end": 0, "total": 0, "rounds": {}}
 
-    # ── 加载数据集 ────────────────────────────────────────────────
     try:
         with open(get_dataset_path(method_id, proj_name, class_name, method_name, "raw")) as f:
             raw_data = json.load(f)
@@ -603,10 +674,32 @@ def focal_method_pipeline(
 
     proj_base = os.path.dirname(os.path.abspath(project_dir))
     buggy_dir = os.path.abspath(project_dir)
-    fixed_dir_candidate = os.path.join(
+    
+    # ★ 修复问题3：尝试多个候选路径找 fixed_dir
+    # 候选1：同级目录，_b → _f
+    fixed_dir_candidate1 = os.path.join(
         proj_base, proj_name.replace("_b", "_f").replace("_B", "_F")
     )
-    fixed_dir = fixed_dir_candidate if os.path.isdir(fixed_dir_candidate) else None
+    # 候选2：proj_name 本身可能已经是 _f（不含 _b）
+    fixed_dir_candidate2 = os.path.join(
+        proj_base, os.path.basename(os.path.abspath(project_dir)).replace("_b", "_f")
+    )
+    # 候选3：在 project_dir 的父目录下找任何含 _f 的同名项目
+    _proj_base_name = re.sub(r'_b$', '', proj_name, flags=re.IGNORECASE)
+    fixed_dir_candidate3 = os.path.join(proj_base, f"{_proj_base_name}_f")
+    
+    fixed_dir = None
+    for cand in [fixed_dir_candidate1, fixed_dir_candidate2, fixed_dir_candidate3]:
+        if os.path.isdir(cand):
+            fixed_dir = cand
+            print(f"  {Fore.GREEN}✅ found fixed_dir: {cand}{Style.RESET_ALL}", flush=True)
+            break
+    
+    if fixed_dir is None:
+        print(f"  {Fore.RED}⚠ fixed_dir not found, bug_revealing will be skipped.\\n"
+              f"    Tried: {fixed_dir_candidate1}\\n"
+              f"    Tried: {fixed_dir_candidate2}\\n"
+              f"    Tried: {fixed_dir_candidate3}{Style.RESET_ALL}", flush=True)
 
     agent = RefineAgent(
         refiner_client     = ref_client,
@@ -627,6 +720,10 @@ def focal_method_pipeline(
     current_codes: Dict[str, str] = {}
     gen_failures = []
 
+    # ★ Bug 1 修复：快照 phase1 开始前的 generator token 基线
+    gen_snap_prompt_phase1     = token_stats["generator"]["prompt"]
+    gen_snap_completion_phase1 = token_stats["generator"]["completion"]
+
     for seq in range(1, test_number + 1):
         tc_name = f"{class_name}_{method_id}_{seq}Test"
         result = generate_one_test(
@@ -635,7 +732,7 @@ def focal_method_pipeline(
             ctx_d1      = ctx_d1,
             ctx_d3      = ctx_d3,
             imports     = imports,
-            package     = package,   # 传原始值，函数内部会规范化
+            package     = package,
             class_name  = class_name,
             method_id   = method_id,
             tc_dir      = tc_dir,
@@ -653,6 +750,14 @@ def focal_method_pipeline(
     phase1_elapsed = time.time() - phase1_start
     time_stats["rounds"]["phase1"] = round(phase1_elapsed, 2)
 
+    # ★ Bug 1 修复：phase1 结束，写入本阶段 token 增量到 rounds["phase1"]
+    _acc_round_tokens(
+        token_stats, "phase1",
+        token_stats["generator"]["prompt"]     - gen_snap_prompt_phase1,
+        token_stats["generator"]["completion"] - gen_snap_completion_phase1,
+        0, 0,  # phase1 无 refiner 调用
+    )
+
     success_n, fail_n = len(current_codes), len(gen_failures)
     sc = Fore.GREEN if fail_n == 0 else (Fore.YELLOW if success_n > 0 else Fore.RED)
     print(sc + f"\n  ✔ Phase 1 完成 {_progress_bar(success_n, test_number)}  "
@@ -662,7 +767,7 @@ def focal_method_pipeline(
         print(f"  {Fore.RED}❌ 全部 Test 生成失败{Style.RESET_ALL}", flush=True)
         return token_stats
 
-    # ════════════════════════════════════════════════
+    # ════════════════════════════════════════════════════════════════
     # Phase 2: 迭代 Refine
     # ════════════════════════════════════════════════
     # 记录每个 tc 的 unchanged 次数（用于 prev_unchanged 提示）
@@ -670,8 +775,15 @@ def focal_method_pipeline(
 
     for r in range(1, max_rounds + 1):
         round_start   = time.time()
-        round_log_dir = os.path.join(ref_log_dir, f"round_{r}")
+        round_key     = f"round_{r}"
+        round_log_dir = os.path.join(ref_log_dir, round_key)
         os.makedirs(round_log_dir, exist_ok=True)
+
+        # ★ Bug 1 修复：快照本轮开始前的 token 值，用于计算本轮增量
+        gen_snap_prompt     = token_stats["generator"]["prompt"]
+        gen_snap_completion = token_stats["generator"]["completion"]
+        ref_snap_prompt     = token_stats["refiner"]["prompt"]
+        ref_snap_completion = token_stats["refiner"]["completion"]
 
         print(flush=True)
         _divider("═", color=Fore.MAGENTA)
@@ -696,9 +808,9 @@ def focal_method_pipeline(
             step_counter_start      = 1,
         )
         print(f"  [{_ts()}] 工具链完成  耗时: {time.time() - t0_agent:.1f}s", flush=True)
-        _acc_ref(token_stats, refine_result)
 
-        # ── 打印 Suite Score ──────────────────────────────────────
+        _acc_ref(token_stats, refine_result)  # ★ Bug 1b：_acc_ref 内同步更新 all_total
+
         if refine_result.suite_score:
             _print_suite_score(refine_result.suite_score, tag=f"Round {r}")
 
@@ -723,7 +835,15 @@ def focal_method_pipeline(
 
         if not refine_result.has_actionable_instructions():
             print(Fore.GREEN + f"\n  🎉 Round {r}: 无修复指令，提前结束" + Style.RESET_ALL, flush=True)
-            time_stats["rounds"][f"round_{r}"] = round(time.time() - round_start, 2)
+            time_stats["rounds"][round_key] = round(time.time() - round_start, 2)
+            # ★ Bug 1 修复：early stop 也记录本轮 token 增量（主要是 refiner）
+            _acc_round_tokens(
+                token_stats, round_key,
+                token_stats["generator"]["prompt"]     - gen_snap_prompt,
+                token_stats["generator"]["completion"] - gen_snap_completion,
+                token_stats["refiner"]["prompt"]       - ref_snap_prompt,
+                token_stats["refiner"]["completion"]   - ref_snap_completion,
+            )
             _log_refine_quality(round_log_dir, f"{class_name}.{method_name}", r,
                                 refine_result.suite_score, refine_result.test_scores,
                                 refine_result.instructions, refine_result.suite_summary)
@@ -741,7 +861,7 @@ def focal_method_pipeline(
                 os.remove(tc_path)
                 print(f"  🗑  已删除冗余 Test: {del_tc}", flush=True)
 
-        # ── Fix 循环（含 diff 检测）────────────────────────────────
+        # ── Fix 循环 ─────────────────────────────────────────────
         fix_results = {"ok": [], "unchanged": [], "no_code": [], "fail": []}
         print(f"\n  🔧 开始精修 {len(refine_result.instructions)} 个 Test ...", flush=True)
 
@@ -749,6 +869,7 @@ def focal_method_pipeline(
             if tc_name not in current_codes:
                 continue
 
+            # ★ Bug 3 修复：fix 子目录结构与旧版保持一致
             fix_dir = os.path.join(round_log_dir, f"fix_{tc_name}")
             os.makedirs(fix_dir, exist_ok=True)
 
@@ -759,23 +880,27 @@ def focal_method_pipeline(
                   flush=True)
 
             fix_msgs = build_fix_messages(
-                test_name    = tc_name,
-                current_code = current_codes[tc_name],
-                instructions = instructions,
-                focal_method = method_name,
-                class_name   = class_name,
-                ctx_d1       = ctx_d1,
-                ctx_d3       = ctx_d3,
-                imports      = imports,
-                suite_summary= refine_result.suite_summary,
-                prev_unchanged = prev_unchanged,   # ★
+                test_name      = tc_name,
+                current_code   = current_codes[tc_name],
+                instructions   = instructions,
+                focal_method   = method_name,
+                class_name     = class_name,
+                ctx_d1         = ctx_d1,
+                ctx_d3         = ctx_d3,
+                imports        = imports,
+                suite_summary  = refine_result.suite_summary,
+                prev_unchanged = prev_unchanged,
             )
 
+            # ★ Bug 3 修复：明确路径 fix_dir/fix_gen.json，call_generator 写出
             fix_gen_path = os.path.join(fix_dir, "fix_gen.json")
             t0_fix = time.time()
             ok, fix_result = call_generator(gen_client, fix_msgs, fix_gen_path)
             t_fix = time.time() - t0_fix
-            _acc_gen(token_stats, fix_result)
+            _acc_gen(token_stats, fix_result)  # ★ Bug 1b：同步更新 all_total
+
+            # ★ Bug 3 修复：new.java 在所有路径都明确写出（成功/提取失败/LLM失败）
+            new_java_path = os.path.join(fix_dir, "new.java")
 
             if ok:
                 has_code, new_code, _ = extract_code(fix_result.content)
@@ -785,13 +910,16 @@ def focal_method_pipeline(
                     new_code = repair_imports(new_code, imports)
                     if pkg_decl:
                         new_code = _ensure_package_first(new_code, pkg_decl)
-                    seq_num  = int(tc_name.split("_")[-1].replace("Test", ""))
+                    try:
+                        seq_num = int(tc_name.split("_")[-1].replace("Test", ""))
+                    except ValueError:
+                        seq_num = 1
                     new_code = change_class_name(new_code, class_name, method_id, seq_num)
                     if pkg_decl:
                         new_code = repair_package(new_code, pkg_decl)
                         new_code = _ensure_package_first(new_code, pkg_decl)
 
-                    # ★ Bug Fix (Issue 2): diff 检测
+                    # diff 检测
                     changed = _code_changed(current_codes[tc_name], new_code)
                     if not changed:
                         unchanged_counts[tc_name] = unchanged_counts.get(tc_name, 0) + 1
@@ -799,8 +927,9 @@ def focal_method_pipeline(
                         print(f"    ⚠️  {Fore.YELLOW}{tc_name} 输出与原始完全相同，未更新文件 "
                               f"(连续相同: {unchanged_counts[tc_name]} 次){Style.RESET_ALL}",
                               flush=True)
-                        # 保存"未改变"快照用于分析
-                        with open(os.path.join(fix_dir, "new_UNCHANGED.java"), "w", encoding="utf-8") as f:
+                        # ★ Bug 3 修复：未改变时仍写出 new.java（带注释说明）
+                        with open(new_java_path, "w", encoding="utf-8") as f:
+                            f.write(f"// [UNCHANGED] Output identical to input (attempt {unchanged_counts[tc_name]})\n")
                             f.write(new_code)
                     else:
                         unchanged_counts[tc_name] = 0
@@ -808,21 +937,39 @@ def focal_method_pipeline(
                         tc_path = os.path.join(tc_dir, f"{tc_name}.java")
                         with open(tc_path, "w", encoding="utf-8") as f:
                             f.write(new_code)
-                        with open(os.path.join(fix_dir, "new.java"), "w", encoding="utf-8") as f:
+                        # ★ Bug 3 修复：成功时写出 new.java
+                        with open(new_java_path, "w", encoding="utf-8") as f:
                             f.write(new_code)
                         fix_results["ok"].append(tc_name)
-                        print(f"    ✅ {tc_name} 精修成功 (代码有实质变化) | "
+                        print(f"    ✅ {tc_name} 精修成功 | "
                               f"tokens={fix_result.prompt_tokens}+{fix_result.completion_tokens} | "
                               f"{t_fix:.1f}s", flush=True)
                 else:
                     fix_results["no_code"].append(tc_name)
+                    # ★ Bug 3 修复：未提取到代码时写出占位 new.java
+                    with open(new_java_path, "w", encoding="utf-8") as f:
+                        f.write(f"// [EXTRACT_FAILED] LLM returned no valid Java code\n"
+                                f"// raw content ({len(fix_result.content)} chars):\n"
+                                f"// {fix_result.content[:300].replace(chr(10), ' ')}\n")
                     print(f"    ⚠️  {tc_name} 未提取到有效代码 ({t_fix:.1f}s)", flush=True)
             else:
                 fix_results["fail"].append(tc_name)
+                # ★ Bug 3 修复：LLM 调用失败时写出占位 new.java
+                with open(new_java_path, "w", encoding="utf-8") as f:
+                    f.write(f"// [LLM_ERROR] Generator call failed for {tc_name}\n")
                 print(f"    ❌ {tc_name} LLM 调用失败 ({t_fix:.1f}s)", flush=True)
 
         round_elapsed = time.time() - round_start
-        time_stats["rounds"][f"round_{r}"] = round(round_elapsed, 2)
+        time_stats["rounds"][round_key] = round(round_elapsed, 2)
+
+        # ★ Bug 1 修复：round_N 结束，写入本轮实际消耗的 token 增量
+        _acc_round_tokens(
+            token_stats, round_key,
+            token_stats["generator"]["prompt"]     - gen_snap_prompt,
+            token_stats["generator"]["completion"] - gen_snap_completion,
+            token_stats["refiner"]["prompt"]       - ref_snap_prompt,
+            token_stats["refiner"]["completion"]   - ref_snap_completion,
+        )
 
         _log_refine_quality(
             round_log_dir, f"{class_name}.{method_name}", r,
@@ -848,23 +995,29 @@ def focal_method_pipeline(
                   f"     3. Generator 模型能力限制\n"
                   f"  下一轮将加入 'prev_unchanged' 强化提示。" + Style.RESET_ALL, flush=True)
 
-    # 保存统计
+    # ── 保存统计 ──────────────────────────────────────────────────
     time_stats["end"]   = time.time()
     time_stats["total"] = round(time_stats["end"] - process_start, 2)
+
+    # ★ Bug 1b 修复：最终确保 all_total 正确（防止浮点累加误差）
+    token_stats["all_total"] = (
+        token_stats["generator"]["total"] + token_stats["refiner"]["total"]
+    )
+
     with open(os.path.join(base_dir, "time_stats.json"),  "w", encoding="utf-8") as f:
         json.dump(time_stats,  f, indent=2, ensure_ascii=False)
     with open(os.path.join(base_dir, "token_stats.json"), "w", encoding="utf-8") as f:
         json.dump(token_stats, f, indent=2, ensure_ascii=False)
 
-    total_tok = token_stats["generator"]["total"] + token_stats["refiner"]["total"]
+    total_tok = token_stats["all_total"]
     print(flush=True)
     _divider("═", color=Fore.BLUE)
     print(Fore.BLUE +
           f"  🏁 {progress_tag} {class_name}.{method_name} 全部完成\n"
           f"     总耗时: {time_stats['total']}s  |  "
-          f"Generator tokens: {token_stats['generator']['total']}  |  "
-          f"Refiner tokens: {token_stats['refiner']['total']}  |  "
-          f"合计: {total_tok}"
+          f"Generator: {token_stats['generator']['total']}  |  "
+          f"Refiner: {token_stats['refiner']['total']}  |  "
+          f"合计(all_total): {total_tok}"
           + Style.RESET_ALL, flush=True)
     _divider("═", color=Fore.BLUE)
     return token_stats
@@ -885,10 +1038,8 @@ def start_whole_process(
     对每个 focal method 调用 focal_method_pipeline。
     """
     global_start = time.time()
-    global_stats = {
-        "generator": {"prompt": 0, "completion": 0, "total": 0},
-        "refiner":   {"prompt": 0, "completion": 0, "total": 0},
-    }
+    # ★ Bug 1b 修复：全局统计也含 all_total
+    global_stats = _make_token_stats()
 
     file_paths = []
     for root, _, files in os.walk(source_dir):
@@ -930,31 +1081,51 @@ def start_whole_process(
             _acc_global(global_stats, focal_method_pipeline(*t))
 
     elapsed = round(time.time() - global_start, 2)
-    global_stats.update({"elapsed_seconds": elapsed, "total_focal_methods": total})
+    global_stats["elapsed_seconds"]     = elapsed
+    global_stats["total_focal_methods"] = total
+    # ★ Bug 1b 修复：全局 all_total 最终值
+    global_stats["all_total"] = (
+        global_stats["generator"]["total"] + global_stats["refiner"]["total"]
+    )
+
     with open(os.path.join(result_path, "global_stats.json"), "w", encoding="utf-8") as f:
         json.dump(global_stats, f, indent=2, ensure_ascii=False)
 
     print(flush=True)
     _section("全局统计", Fore.MAGENTA)
-    print(Fore.MAGENTA + f"  focal methods: {total}  总耗时: {elapsed}s" + Style.RESET_ALL, flush=True)
-    print(Fore.MAGENTA + f"  Generator: {global_stats['generator']['total']} tokens" + Style.RESET_ALL, flush=True)
-    print(Fore.MAGENTA + f"  Refiner:   {global_stats['refiner']['total']} tokens" + Style.RESET_ALL, flush=True)
+    print(Fore.MAGENTA + f"  focal methods : {total}  总耗时: {elapsed}s" + Style.RESET_ALL, flush=True)
+    print(Fore.MAGENTA + f"  Generator     : {global_stats['generator']['total']} tokens" + Style.RESET_ALL, flush=True)
+    print(Fore.MAGENTA + f"  Refiner       : {global_stats['refiner']['total']} tokens"   + Style.RESET_ALL, flush=True)
+    print(Fore.MAGENTA + f"  All total     : {global_stats['all_total']} tokens"           + Style.RESET_ALL, flush=True)
 
 
-def _acc_gen(stats, r):
+# ════════════════════════════════════════════════════════════════════
+# 辅助累加函数
+# ════════════════════════════════════════════════════════════════════
+
+def _acc_gen(stats: dict, r: LLMCallResult):
+    """
+    ★ Bug 1b 修复：累加 Generator token，并同步更新 all_total。
+    """
     stats["generator"]["prompt"]     += r.prompt_tokens
     stats["generator"]["completion"] += r.completion_tokens
     stats["generator"]["total"]      += r.total_tokens
+    stats["all_total"] = stats["generator"]["total"] + stats["refiner"]["total"]
 
 
-def _acc_ref(stats, r):
+def _acc_ref(stats: dict, r: RefineResult):
+    """
+    ★ Bug 1b 修复：累加 Refiner token，并同步更新 all_total。
+    """
     stats["refiner"]["prompt"]     += r.refiner_prompt_tokens
     stats["refiner"]["completion"] += r.refiner_completion_tokens
-    stats["refiner"]["total"]      += r.refiner_prompt_tokens + r.refiner_completion_tokens
+    stats["refiner"]["total"]      += (r.refiner_prompt_tokens
+                                       + r.refiner_completion_tokens)
+    stats["all_total"] = stats["generator"]["total"] + stats["refiner"]["total"]
 
 
-def _acc_global(g, s):
-    import re
+def _acc_global(g: dict, s: dict):
     for role in ("generator", "refiner"):
         for k in ("prompt", "completion", "total"):
             g[role][k] += s.get(role, {}).get(k, 0)
+    g["all_total"] = g["generator"]["total"] + g["refiner"]["total"]

@@ -1,0 +1,19 @@
+===== Coverage report (all attempts) =====
+--- STDOUT ---
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------< org.apache.commons:commons-csv >-------------------
+[INFO] Building Commons CSV 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.11:report (default-cli) @ commons-csv ---
+[INFO] Loading execution data file /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260106101312/tests_ChatGPT/jacoco_merged.exec
+[INFO] Analyzed bundle 'Commons CSV' with 13 classes
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  1.018 s
+[INFO] Finished at: 2026-01-18T13:03:33+08:00
+[INFO] ------------------------------------------------------------------------
+

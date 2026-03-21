@@ -1,0 +1,26 @@
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260108150804/test_cases/CSVRecord_11_1Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260108150804/test_cases/CSVRecord_1_1Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260108150804/test_cases/CSVRecord_12_1Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260108150804/test_cases/CSVRecord_8_1Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260108150804/test_cases/CSVRecord_9_1Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260108150804/test_cases/CSVRecord_2_1Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260108150804/test_cases/CSVRecord_3_1Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260108150804/test_cases/CSVRecord_5_1Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260108150804/test_cases/CSVRecord_10_1Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260108150804/test_cases/CSVRecord_7_1Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260108150804/test_cases/CSVRecord_4_1Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260108150804/test_cases/CSVRecord_6_1Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260108150804/test_cases/CSVRecord_10_2Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260108150804/test_cases/CSVRecord_9_2Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260108150804/test_cases/CSVRecord_6_2Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260108150804/test_cases/CSVRecord_4_2Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260108150804/test_cases/CSVRecord_11_2Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260108150804/test_cases/CSVRecord_7_2Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260108150804/test_cases/CSVRecord_2_2Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260108150804/test_cases/CSVRecord_8_2Test.java
+[EXEC_FAILED] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260108150804/test_cases/CSVRecord_1_2Test.java:
+[EXEC_CORE_ERROR] 未提取到明确异常信息
+================================================================================
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260108150804/test_cases/CSVRecord_3_2Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260108150804/test_cases/CSVRecord_5_2Test.java
+[EXEC_OK] /home/chenlu/ChatUniTest_GPT3.5/defect4j_projects/Csv_2_b/tests%20260108150804/test_cases/CSVRecord_12_2Test.java

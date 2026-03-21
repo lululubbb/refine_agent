@@ -1,0 +1,66 @@
+/home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/2%Csv_1_b%ExtendedBufferedReader%read%d3/test_cases/ExtendedBufferedReader_2_1Test.java:3: 错误: 找不到符号
+import org.apache.commons.csv.ExtendedBufferedReader;
+                             ^
+  符号:   类 ExtendedBufferedReader
+  位置: 程序包 org.apache.commons.csv
+/home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/2%Csv_1_b%ExtendedBufferedReader%read%d3/test_cases/ExtendedBufferedReader_2_1Test.java:15: 错误: 找不到符号
+    private ExtendedBufferedReader reader;
+            ^
+  符号:   类 ExtendedBufferedReader
+  位置: 类 ExtendedBufferedReader_2_1Test
+/home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/2%Csv_1_b%ExtendedBufferedReader%read%d3/test_cases/ExtendedBufferedReader_2_1Test.java:91: 错误: 找不到符号
+    private int getPrivateLineCounter(ExtendedBufferedReader reader) {
+                                      ^
+  符号:   类 ExtendedBufferedReader
+  位置: 类 ExtendedBufferedReader_2_1Test
+/home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/2%Csv_1_b%ExtendedBufferedReader%read%d3/test_cases/ExtendedBufferedReader_2_1Test.java:20: 错误: 找不到符号
+        reader = new ExtendedBufferedReader(new StringReader("line1\nline2\nline3"));
+                     ^
+  符号:   类 ExtendedBufferedReader
+  位置: 类 ExtendedBufferedReader_2_1Test
+/home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/2%Csv_1_b%ExtendedBufferedReader%read%d3/test_cases/ExtendedBufferedReader_2_1Test.java:41: 错误: 找不到符号
+        ExtendedBufferedReader emptyReader = new ExtendedBufferedReader(new StringReader(""));
+        ^
+  符号:   类 ExtendedBufferedReader
+  位置: 类 ExtendedBufferedReader_2_1Test
+/home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/2%Csv_1_b%ExtendedBufferedReader%read%d3/test_cases/ExtendedBufferedReader_2_1Test.java:41: 错误: 找不到符号
+        ExtendedBufferedReader emptyReader = new ExtendedBufferedReader(new StringReader(""));
+                                                 ^
+  符号:   类 ExtendedBufferedReader
+  位置: 类 ExtendedBufferedReader_2_1Test
+/home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/2%Csv_1_b%ExtendedBufferedReader%read%d3/test_cases/ExtendedBufferedReader_2_1Test.java:51: 错误: 找不到符号
+        ExtendedBufferedReader newlineReader = new ExtendedBufferedReader(new StringReader("\n\n\n"));
+        ^
+  符号:   类 ExtendedBufferedReader
+  位置: 类 ExtendedBufferedReader_2_1Test
+/home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/2%Csv_1_b%ExtendedBufferedReader%read%d3/test_cases/ExtendedBufferedReader_2_1Test.java:51: 错误: 找不到符号
+        ExtendedBufferedReader newlineReader = new ExtendedBufferedReader(new StringReader("\n\n\n"));
+                                                   ^
+  符号:   类 ExtendedBufferedReader
+  位置: 类 ExtendedBufferedReader_2_1Test
+/home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/2%Csv_1_b%ExtendedBufferedReader%read%d3/test_cases/ExtendedBufferedReader_2_1Test.java:65: 错误: 找不到符号
+        ExtendedBufferedReader singleCharReader = new ExtendedBufferedReader(new StringReader("a"));
+        ^
+  符号:   类 ExtendedBufferedReader
+  位置: 类 ExtendedBufferedReader_2_1Test
+/home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/2%Csv_1_b%ExtendedBufferedReader%read%d3/test_cases/ExtendedBufferedReader_2_1Test.java:65: 错误: 找不到符号
+        ExtendedBufferedReader singleCharReader = new ExtendedBufferedReader(new StringReader("a"));
+                                                      ^
+  符号:   类 ExtendedBufferedReader
+  位置: 类 ExtendedBufferedReader_2_1Test
+/home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/2%Csv_1_b%ExtendedBufferedReader%read%d3/test_cases/ExtendedBufferedReader_2_1Test.java:86: 错误: 找不到符号
+        ExtendedBufferedReader failingExtendedReader = new ExtendedBufferedReader(failingReader);
+        ^
+  符号:   类 ExtendedBufferedReader
+  位置: 类 ExtendedBufferedReader_2_1Test
+/home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/2%Csv_1_b%ExtendedBufferedReader%read%d3/test_cases/ExtendedBufferedReader_2_1Test.java:86: 错误: 找不到符号
+        ExtendedBufferedReader failingExtendedReader = new ExtendedBufferedReader(failingReader);
+                                                           ^
+  符号:   类 ExtendedBufferedReader
+  位置: 类 ExtendedBufferedReader_2_1Test
+/home/chenlu/refine_test_gen_v5/results_batch/Csv_1_b/scope_test%20260321163508%/2%Csv_1_b%ExtendedBufferedReader%read%d3/test_cases/ExtendedBufferedReader_2_1Test.java:93: 错误: 找不到符号
+            var field = ExtendedBufferedReader.class.getDeclaredField("lineCounter");
+                        ^
+  符号:   类 ExtendedBufferedReader
+  位置: 类 ExtendedBufferedReader_2_1Test
+13 个错误

@@ -1,0 +1,2 @@
+test_class,focal_method,compile_score,exec_score,coverage_score,bug_revealing_score,redundancy_score,final_score,valid_weight_pct
+org.apache.commons.csv.ExtendedBufferedReader_1,ExtendedBufferedReader,0.0,0.0,,,,0.0,0.3

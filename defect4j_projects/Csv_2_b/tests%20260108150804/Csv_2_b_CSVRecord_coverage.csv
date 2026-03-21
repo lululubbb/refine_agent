@@ -1,0 +1,2 @@
+project,modified_class,Attempts,Aborted,SyntaxError,SyntaxRate,CompileError,CompileRate,RuntimeError,RunRate,Passed,PassRate,line_cov,line_total,line_rate,branch_cov,branch_total,branch_rate,m_line_cov,m_line_total,m_line_rate,m_branch_cov,m_branch_total,m_branch_rate,run_time
+Csv_2_b,CSVRecord,24,0,0,1.0,0,1.0,1,0.9583,23,0.9583,21,601,3.49,16,411,3.89,21,21,100.0,16,16,100.0,203.92

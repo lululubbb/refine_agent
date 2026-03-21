@@ -1,0 +1,6 @@
+[ALL ATTEMPTS]
+  total_tests=2
+  syntax_errors=0
+  compile_errors=2
+  test_run_errors=0
+  target_class: ExtendedBufferedReader
