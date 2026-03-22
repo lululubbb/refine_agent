@@ -1,7 +1,3 @@
-{# refine_fix.jinja2 (v3) — Generator fix prompt for ONE Test file #}
-{# Variables: class_name, focal_method, test_name, current_suite,
-              suite_summary, instructions_json, method_code, imports #}
-
 You are an expert Java developer. Fix the following Test file based on the repair instructions.
 
 ## Test File: `{{ test_name }}.java`
@@ -19,6 +15,78 @@ You are an expert Java developer. Fix the following Test file based on the repai
 ## Suite Assessment (context)
 {{ suite_summary }}
 
+{% if not compile_ok %}
+## COMPILE ERRORS (MUST FIX — test will not run until these are resolved)
+The test file currently FAILS TO COMPILE. All compile errors must be fixed before anything else.
+```
+{% for err in compile_errors %}
+{{ err }}
+{% endfor %}
+```
+
+**Common causes and fixes:**
+- "cannot find symbol: class X" → The class X is not imported or the package declaration is wrong.
+  If the test is in package `org.apache.commons.csv`, the class must be in the classpath.
+  Check that `package org.apache.commons.csv;` is at the top of the file.
+  Do NOT use `import org.apache.commons.csv.X;` if the test is already in that package —
+  the class is already visible without import.
+- "cannot find symbol: variable X" → You are using a static field (e.g., `ExtendedBufferedReader.END_OF_STREAM`)
+  but the class is not visible. Fix the package declaration or import.
+- Missing imports → Add the required import statement.
+
+{% elif not exec_ok %}
+
+## UNEXPECTED_EXEC_FAIL ERRORS (MUST FIX — tests are running but failing and not revealing the bug)
+The test file compiles but has RUNTIME FAILURES. Fix the assertion logic or test setup.
+```
+{% for err in exec_errors %}
+{{ err }}
+{% endfor %}
+```
+
+**How to fix execution failures:**
+- "expected: <X> but was: <Y>" → Your assertion expected the wrong value. Verify the actual
+  behavior of the focal method and correct the expected value.
+- "NullPointerException" → Add null checks or ensure objects are properly initialized before use.
+- "NoSuchMethodException" / "NoSuchFieldException" → The private method/field name is wrong.
+  Use the correct field/method name as it appears in the source code.
+- IOException not thrown → The mock/setup is not correctly triggering the exception path.
+  Review the test setup and use a properly configured mock or failing Reader.
+
+{% else %}
+
+## COVERAGE ISSUES (tests run but coverage is low)
+{% if missed_methods %}
+**Completely uncovered methods (add test cases for these):**
+{% for m in missed_methods %}
+- {{ m }}
+{% endfor %}
+{% endif %}
+{% if partial_methods %}
+**Partially covered methods (add cases for uncovered branches):**
+{% for m in partial_methods %}
+- {{ m }}
+{% endfor %}
+{% endif %}
+{% endif %}
+
+## BUG_REVEALING ISSUES (tests run but do not reveal the bug)
+Transform tests into bug-seeking ones:
+- Break assumptions: null, empty, invalid, extreme inputs
+- Force rare paths: error conditions, edge branches
+- Stateful testing: multiple calls, reuse objects, check state consistency
+- Exception testing: trigger and assert exceptions
+- Strengthen assertions: exact values, invariants, expected failures
+- Do not only tweak assertions — change inputs and test structure.
+
+## HIGH_REDUNDANCY (Exploration Diversity)
+For similar tests:
+- Transform into a different scenario:
+    - new input domain
+    - different state setup
+    - different execution path
+Goal: maximize behavioral diversity, not similarity.
+
 ## Repair Instructions for THIS Test File
 ```json
 {{ instructions_json }}
@@ -35,4 +103,7 @@ You are an expert Java developer. Fix the following Test file based on the repai
 3. Keep all @Test methods that are NOT mentioned in the instructions UNCHANGED.
 4. Add or fix import statements as needed.
 5. The output must be syntactically valid and compilable.
-6. Output ONLY the complete updated Java class — no prose, no markdown fences.
+6. If the test is in package `org.apache.commons.csv`, do NOT import classes from that same package
+   (they are already visible). Only import classes from OTHER packages.
+7. For compile errors about "cannot find symbol", check the package declaration first.
+8. Output ONLY the complete updated Java class — no prose, no markdown fences.

@@ -217,11 +217,12 @@ def _print_suite_score(suite_score, tag=""):
 
     if ss.problem_tests:
         print(f"\n  ⚠️  问题分布：", flush=True)
-        issue_order = ["COMPILE_FAIL", "EXEC_FAIL", "EXEC_TIMEOUT",
+        issue_order = ["COMPILE_FAIL", "UNEXPECTED_EXEC_FAIL", "EXEC_TIMEOUT",
                        "LOW_LINE_COV", "LOW_BRANCH_COV", "NOT_BUG_REVEALING", "HIGH_REDUNDANCY"]
         issue_colors = {
             "COMPILE_FAIL":       Fore.RED,
-            "EXEC_FAIL":          Fore.RED,
+            "EXPECTED_EXEC_FAIL": Fore.GREEN,  # good fail
+            "UNEXPECTED_EXEC_FAIL": Fore.RED,  # bad fail
             "EXEC_TIMEOUT":       Fore.RED,
             "LOW_LINE_COV":       Fore.YELLOW,
             "LOW_BRANCH_COV":     Fore.YELLOW,
@@ -256,7 +257,7 @@ def _print_test_diag(tc_name: str, diag, score):
         return
 
     issue_colors = {
-        "COMPILE_FAIL": Fore.RED, "EXEC_FAIL": Fore.RED, "EXEC_TIMEOUT": Fore.RED,
+        "COMPILE_FAIL": Fore.RED, "EXPECTED_EXEC_FAIL": Fore.GREEN, "UNEXPECTED_EXEC_FAIL": Fore.RED, "EXEC_TIMEOUT": Fore.RED,
         "LOW_LINE_COV": Fore.YELLOW, "LOW_BRANCH_COV": Fore.YELLOW,
         "NOT_BUG_REVEALING": Fore.MAGENTA, "HIGH_REDUNDANCY": Fore.CYAN,
     }
@@ -280,7 +281,7 @@ def _print_test_diag(tc_name: str, diag, score):
             print(f"      • {e}", flush=True)
 
     # 执行错误
-    if ("EXEC_FAIL" in issues or "EXEC_TIMEOUT" in issues) and diag.exec_errors:
+    if ("EXPECTED_EXEC_FAIL" in issues or "UNEXPECTED_EXEC_FAIL" in issues or "EXEC_TIMEOUT" in issues) and diag.exec_errors:
         print(f"    {Fore.RED}运行错误 (前5条):{Style.RESET_ALL}", flush=True)
         for e in diag.exec_errors[:5]:
             print(f"      • {e}", flush=True)
@@ -563,7 +564,16 @@ def build_fix_messages(
     imports: str,
     suite_summary: str,
     prev_unchanged: bool = False,
+    diag=None,
 ) -> List[Dict]:
+    # ★ 从 diag 提取详细信息
+    compile_ok      = getattr(diag, 'compile_ok',      True)  if diag else True
+    exec_ok         = getattr(diag, 'exec_ok',         True)  if diag else True
+    compile_errors  = getattr(diag, 'compile_errors',  [])    if diag else []
+    exec_errors     = getattr(diag, 'exec_errors',     [])    if diag else []
+    missed_methods  = getattr(diag, 'missed_methods',  [])    if diag else []
+    partial_methods = getattr(diag, 'partial_methods', [])    if diag else []
+
     instructions_summary = "\n".join(
         f"  {i+1}. {instr}" for i, instr in enumerate(instructions)
     )
@@ -588,6 +598,12 @@ def build_fix_messages(
         "imports":              imports,
         "instructions_summary": instructions_summary,
         "unchanged_warning":    unchanged_warning,
+        "compile_ok":      compile_ok,
+        "exec_ok":         exec_ok,
+        "compile_errors":  compile_errors[:10],
+        "exec_errors":     exec_errors[:10],
+        "missed_methods":  missed_methods[:20],
+        "partial_methods": partial_methods[:10],
     }
     msgs = generate_messages(TEMPLATE_FIX, context)
     if remain_prompt_tokens(msgs) < 0:
@@ -608,6 +624,16 @@ def build_fix_messages(
                 "This time you MUST make concrete, visible changes to the code."
             )
         msgs[-1]["content"] += suffix
+        if not compile_ok and compile_errors:
+            suffix += (
+                f"\n\n## COMPILE ERRORS REMINDER (MUST FIX FIRST)\n"
+                + "\n".join(f"  {e}" for e in compile_errors[:5])
+            )
+        if not exec_ok and exec_errors:
+            suffix += (
+                f"\n\n## EXECUTION ERRORS REMINDER\n"
+                + "\n".join(f"  {e}" for e in exec_errors[:5])
+            )
 
     return msgs
 
@@ -877,6 +903,7 @@ def focal_method_pipeline(
                   f"({len(instructions)} 条指令)"
                   + (f" {Fore.YELLOW}[上轮未改变，加强提示]{Style.RESET_ALL}" if prev_unchanged else ""),
                   flush=True)
+            tc_diag = refine_result.test_diags.get(tc_name)
 
             fix_msgs = build_fix_messages(
                 test_name      = tc_name,
@@ -889,6 +916,7 @@ def focal_method_pipeline(
                 imports        = imports,
                 suite_summary  = refine_result.suite_summary,
                 prev_unchanged = prev_unchanged,
+                diag=tc_diag, 
             )
 
             # ★ Bug 3 修复：明确路径 fix_dir/fix_gen.json，call_generator 写出

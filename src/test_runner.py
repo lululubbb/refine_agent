@@ -977,13 +977,21 @@ class TestRunner:
                                 _df.write(f"    - Exceeded TIMEOUT limit\n")
                             else:
                                 _df.write(f"  status=exec_fail\n")
+                                _df.write(f"  error_type=runtime_error\n")
                                 _rt_file = f"{test_output}-{test_case_file}.txt"
                                 _exc_lines = []
                                 if os.path.exists(_rt_file):
                                     try:
                                         _rt_all = open(_rt_file, errors='ignore').read()
-                                        _exc_lines = re.findall(
-                                            r'([\w\\.]+(?:Exception|Error)[^\n]{0,200})', _rt_all)[:5]
+                                        # 捕获断言失败的完整信息
+                                        _exc_lines = []
+                                        for _line in _rt_all.splitlines():
+                                            if re.search(r'(?:AssertionFailedError|expected:|but was:|Exception|Error|FAILED)', _line):
+                                                _clean = _line.strip()
+                                                if _clean and not _clean.startswith('at '):
+                                                    _exc_lines.append(_clean[:300])
+                                            if len(_exc_lines) >= 8:
+                                                break
                                     except Exception:
                                         pass
                                 if not _exc_lines:
@@ -1310,7 +1318,7 @@ class TestRunner:
                     ])
 
                     # diagnosis
-                    if logs and 'diagnosis' in logs:
+                    if logs and 'diagnosis' in logs and rec.get('exec_note', '') == 'ok':
                         try:
                             _snap = rec.get('per_test_jacoco_xml')
                             _global_xml2 = os.path.join(

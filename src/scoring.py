@@ -68,7 +68,7 @@ class TestScore:
 
     # ── 问题标签（脚本判定，供 Refiner 快速定位）─────────────────
     issues: List[str] = field(default_factory=list)
-    # 可能的值：COMPILE_FAIL | EXEC_FAIL | EXEC_TIMEOUT |
+    # 可能的值：COMPILE_FAIL | EXPECTED_EXEC_FAIL | UNEXPECTED_EXEC_FAIL | EXEC_TIMEOUT |
     #           LOW_LINE_COV | LOW_BRANCH_COV | NOT_BUG_REVEALING | HIGH_REDUNDANCY
 
     def to_dict(self) -> dict:
@@ -115,8 +115,8 @@ class SuiteScore:
     coverage_branch_avg: Optional[float] = None
 
     # ── 维度 4：Bug Revealing ────────────────────────────────────
-    bug_reveal_count:   int   = 0     # exec_ok 且 bug_revealing=True 的数量
-    bug_reveal_checked: int   = 0     # exec_ok 且检测过 bug_revealing 的数量
+    bug_reveal_count:   int   = 0     # compile_ok 且 bug_revealing=True 的数量
+    bug_reveal_checked: int   = 0     # compile_ok 且检测过 bug_revealing 的数量
     bug_reveal_rate:    float = 0.0   # bug_reveal_count / bug_reveal_checked
 
     # ── 维度 5：Suite 内 Test 间相似度（冗余风险） ───────────────
@@ -185,7 +185,11 @@ def compute_test_score(diag) -> TestScore:
         issues.append("COMPILE_FAIL")
     else:
         if not diag.exec_ok:
-            issues.append("EXEC_TIMEOUT" if diag.exec_timeout else "EXEC_FAIL")
+            # 区分 expected fail (good, if bugrevealing) 和 unexpected fail (bad)
+            if diag.bug_revealing is True:
+                issues.append("EXPECTED_EXEC_FAIL")  # good fail
+            else:
+                issues.append("UNEXPECTED_EXEC_FAIL")  # bad fail
 
     if diag.exec_ok:
         if line_cov is not None and line_cov < 0.7:
@@ -247,8 +251,8 @@ def compute_suite_score(
     branch_vals= [v for v in per_branch if v is not None]
 
     # ── 维度 4：Bug Revealing ────────────────────────────────────
-    exec_ok_scores = [s for s in scores if s.exec_score > 0.5]
-    br_checked = [s for s in exec_ok_scores if s.bug_reveal_score is not None]
+    compile_ok_scores = [s for s in scores if s.compile_score > 0.5]
+    br_checked = [s for s in compile_ok_scores if s.bug_reveal_score is not None]
     br_yes     = [s for s in br_checked    if s.bug_reveal_score is True]
 
     # ── 维度 5：相似度（Suite 内 pair 冗余）──────────────────────

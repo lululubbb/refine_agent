@@ -5,6 +5,8 @@ refine_agent.py  (v3 — 问题修复版)
   质量检查标准（当前 scoring.py compute_test_score 里）：
     COMPILE_FAIL:      compile_ok=False
     EXEC_FAIL:         exec_ok=False（非超时）
+    EXPECTED_EXEC_FAIL:   exec_ok=False 且 bug_revealing=True（good fail）
+    UNEXPECTED_EXEC_FAIL: exec_ok=False 且 bug_revealing=False（bad fail）
     EXEC_TIMEOUT:      exec_timeout=True
     LOW_LINE_COV:      exec_ok=True 且 focal_line_coverage < 0.7
     LOW_BRANCH_COV:    exec_ok=True 且 focal_branch_coverage < 0.7
@@ -210,10 +212,10 @@ def tool_bug_revealing(
     fixed_dir: str,
     diags: Dict[str, TestDiag],
 ):
-    # ★ 修复问题3：先检查是否有可执行的 Test（编译成功的）
-    exec_ok_tests = [name for name, d in diags.items() if d.exec_ok]
-    if not exec_ok_tests:
-        logger.info("[Tool 3] skip: no exec_ok tests (all compile/exec failed)")
+    # ★ 修改：只有编译失败的测试才不检测bug_revealing，其他都检测
+    compile_ok_tests = [name for name, d in diags.items() if d.compile_ok]
+    if not compile_ok_tests:
+        logger.info("[Tool 3] skip: no compile_ok tests (all compile failed)")
         return
 
     script = os.path.join(HERE, "scripts", "bug_revealing.py")
