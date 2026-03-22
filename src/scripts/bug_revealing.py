@@ -311,7 +311,7 @@ def main():
         print('No Test.java files found. Exiting.')
         if args.fail_if_no_tests:
             sys.exit(2)
-        with open(out_path, 'w', newline='') as csvfile:
+        with open(out_path, 'a', newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(['project_name', 'target_class', 'test_class', 'test_method',
                              'buggy_status', 'fixed_status', 'bug_revealing',
@@ -517,11 +517,13 @@ def main():
                 out_rows[-1][9] = notes
 
     # ── write per-method CSV ──────────────────────────────────────────────────
-    with open(out_path, 'w', newline='') as csvfile:
+    with open(out_path, 'a', newline='') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(['project_name', 'target_class', 'test_class', 'test_method',
-                         'buggy_status', 'fixed_status', 'bug_revealing',
-                         'buggy_rc', 'fixed_rc', 'notes'])
+        # Only write header if file doesn't exist or is empty
+        if not os.path.exists(out_path) or os.path.getsize(out_path) == 0:
+            writer.writerow(['project_name', 'target_class', 'test_class', 'test_method',
+                             'buggy_status', 'fixed_status', 'bug_revealing',
+                             'buggy_rc', 'fixed_rc', 'notes'])
         for r in out_rows:
             writer.writerow(r)
 
@@ -539,7 +541,7 @@ def main():
             class_stats[_key]['total'] += 1
             if _br:
                 class_stats[_key]['revealing'] += 1
-        with open(class_level_out, 'w', newline='', encoding='utf-8') as _clf:
+        with open(class_level_out, 'a', newline='', encoding='utf-8') as _clf:
             _cl_writer = csv.writer(_clf)
             _cl_writer.writerow(['project_name', 'target_class', 'test_class',
                                   'total_methods', 'bug_revealing_methods',

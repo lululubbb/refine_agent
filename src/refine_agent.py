@@ -2,135 +2,15 @@
 refine_agent.py  (v3 — 问题修复版)
 =====================================
 
-修复内容：
-─────────────────────────────────────────────────────────────────
-问题2：focal_method 识别错误
-  现象：focal_method='ExtendedBufferedReader'（类名而非方法名）
-  原因：_resolve_focal_method() 扫 raw_data 目录，但 raw_data 目录里
-        method id=1 对应的是构造函数（类名=方法名），
-        而 run() 传入的 focal_method 是从 base_dir 名推断的
-        1%Csv_1_b%ExtendedBufferedReader%ExtendedBufferedReader%d3
-        → method_name = 第4段 = 'ExtendedBufferedReader'（构造函数）
-        这本身是正确的，但 TestRunner 里的 focal_method 解析用的是
-        _resolve_focal_method() 扫 raw_data 目录，
-        拿到的是 id=1 的方法名（也是 ExtendedBufferedReader），
-        所以 focal_method='ExtendedBufferedReader' 是正确的——
-        这个测试 suite 本来就是测构造函数的。
-        问题是 JaCoCo XML 里构造函数的 method.name 是 '<init>'，
-        不是 'ExtendedBufferedReader'，所以匹配不到。
-        
-  修复：test_runner.py 的 _is_focal_method_match() 已经处理了 <init>，
-        但 _resolve_focal_method() 传回的 focal_method 是类名，
-        TestRunner 的 _is_focal_method_match 里：
-          if method_name == '<init>' and modified_class_name:
-            simple_class = modified_class_name.split('.')[-1].split('$')[0]
-            if focal_name in (modified_class_name, simple_class):
-              return True
-        这里 focal_name='ExtendedBufferedReader'，
-        simple_class='ExtendedBufferedReader' → 匹配！应该能工作。
-        
-        但日志说"focal method 名称未解析到"，说明 focal_method 在
-        run_all_tests() 里被某步骤设为空了，或者 group key 推断有误。
-        
-  实际根本原因：group key 是 '{class}_{mid}'
-    full_name = 'org.apache.commons.csv.ExtendedBufferedReader_1_1Test'
-    _group_from_test_class(full_name) = ?
-    
-    _parse_test_name('org.apache.commons.csv.ExtendedBufferedReader_1_1Test'):
-      m = re.match(r'^(?P<class>.*)_(?P<mid>[^_]+)_(?P<seq>\d+)Test$', tc_name)
-      → class='org.apache.commons.csv.ExtendedBufferedReader', mid='1', seq='1'
-    
-    _group_from_test_class = f"{cls}_{mid}" = 'org.apache.commons.csv.ExtendedBufferedReader_1'
-    
-    _focal_info_from_group('org.apache.commons.csv.ExtendedBufferedReader_1', ...):
-      mid = grp.split('_')[-1] = '1'
-      mid_to_focal_map['1'] = {'name': 'ExtendedBufferedReader', 'descriptor': None}
-      → focal_name = 'ExtendedBufferedReader' ← 正确！
-    
-    然后 _is_focal_method_match(method_name='<init>', focal_name='ExtendedBufferedReader', ...):
-      method_name == '<init>' and modified_class_name='ExtendedBufferedReader'
-      simple_class = 'ExtendedBufferedReader'
-      focal_name in (modified_class_name, simple_class) → True ✓
-    
-    那为什么报"focal method 名称未解析到"？
-    
-    看日志：
-      FOCAL METHOD COVERAGE (per group):
-        group=org.apache.commons.csv.ExtendedBufferedReader_1
-        focal_method=ExtendedBufferedReader
-        行覆盖率: N/A
-      [注意] focal method 名称未解析到，无法从 jacoco.xml 提取数据。
-      [调试] focal_method='ExtendedBufferedReader' mid_to_name={...}
-    
-    "focal method 名称未解析到"这行日志在 run_all_tests() 末尾：
-      if focal_totals:
-        any_data = False
-        for grp_k, ft_p in focal_totals.items():
-          ...
-          if flr_p is not None: any_data = True
-        if not any_data:
-          print("[注意] focal method 名称未解析到...")
-    
-    any_data=False 说明所有 group 的 f_line_total 都是 None。
-    
-    _compute_focal_totals_from_merged_jacoco() 返回全 None，说明：
-      merged_ok = self._merge_jacoco_execs(exec_paths, grp_exec) 返回 False
-      原因：exec_paths 里的 exec 文件都不存在（COMPILE ERROR COUNT=2，
-           编译失败，没有执行，没有 jacoco.exec）
-    
-    所以覆盖率 N/A 是正确的——因为编译失败了，没有执行，没有覆盖率数据。
-    
-    "focal method 名称未解析到"这个消息有误导性，实际原因是编译失败。
-    
-  Fix：改进此处日志提示，区分"编译失败导致无覆盖率"和"focal method 名称推断失败"。
-
-问题3：bug_revealing 未检测
-  现象：Bug揭示率: 未检测
-  原因：
-    1. RefineAgent.__init__ 里：
-       skip_bug_revealing = (fixed_dir is None)
-    2. askGPT_refine.py focal_method_pipeline() 里：
-       fixed_dir_candidate = os.path.join(proj_base,
-           proj_name.replace("_b", "_f").replace("_B", "_F"))
-       fixed_dir = fixed_dir_candidate if os.path.isdir(fixed_dir_candidate) else None
-    3. proj_base = os.path.dirname(os.path.abspath(project_dir))
-       project_dir = /defect4j_projects/Csv_1_b
-       proj_base   = /defect4j_projects/
-       fixed_dir_candidate = /defect4j_projects/Csv_1_f
-    4. 如果 /defect4j_projects/Csv_1_f 存在，skip_bug_revealing=False
-       如果不存在，skip_bug_revealing=True → "未检测"
-    5. 另外，即使 fixed_dir 存在，tool_bug_revealing() 里：
-       exec_ok Tests 里 bug_revealing 才检测，
-       如果全部编译失败 → exec_ok=0 → 没有可检测的
-    
-  Fix：在打印时区分"fixed_dir不存在"和"编译失败无法检测"两种情况。
-       另外修复 askGPT_refine.py 里的路径推断（见下文）。
-
-问题4：只显示行覆盖率，不显示分支覆盖率
-  现象：coverage_branch_avg is not None 才打印分支覆盖率
-  原因：当没有分支数据时（score.focal_branch_coverage=None），
-        _print_suite_score 不打印分支行。
-  Fix：始终打印分支覆盖率行（N/A时也打印）。
-
-问题5："通过质量检查"的判断标准
-  现象：COMPILE ERROR COUNT=2 但显示"无问题"
-  原因：issues 列表为空（见问题1分析）。
-       Suite Score 里 n_tests=2 但 issues 统计错误。
-  核心：问题5的根本是问题1——suite_diagnosis.json 数据不正确。
-       修复问题1后，编译失败会正确传播到 issues=['COMPILE_FAIL']。
-  
   质量检查标准（当前 scoring.py compute_test_score 里）：
     COMPILE_FAIL:      compile_ok=False
     EXEC_FAIL:         exec_ok=False（非超时）
     EXEC_TIMEOUT:      exec_timeout=True
-    LOW_LINE_COV:      exec_ok=True 且 focal_line_coverage < 0.5
-    LOW_BRANCH_COV:    exec_ok=True 且 focal_branch_coverage < 0.5
+    LOW_LINE_COV:      exec_ok=True 且 focal_line_coverage < 0.7
+    LOW_BRANCH_COV:    exec_ok=True 且 focal_branch_coverage < 0.7
     NOT_BUG_REVEALING: exec_ok=True 且 bug_revealing=False
-    HIGH_REDUNDANCY:   redundancy_score > 0.7
+    HIGH_REDUNDANCY:   redundancy_score > 0.5
   
-  所有这些 issues 都为空时，显示"无问题"。
-  在 _print_suite_score 里，低覆盖率阈值0.5可能偏低，
-  但这是设计问题而非bug。
 ─────────────────────────────────────────────────────────────────
 """
 from __future__ import annotations
@@ -146,6 +26,7 @@ import sys
 import time
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
+from jinja2 import Environment, FileSystemLoader
 
 from llm_client import LLMClient, LLMCallResult
 from scoring import TestScore, SuiteScore, compute_test_score, compute_suite_score
@@ -176,11 +57,10 @@ class TestDiag:
     partial_methods:   List[str] = field(default_factory=list)
 
     bug_revealing: Optional[bool] = None
-
+    # 整个其实是1-相似性，越大越好
     redundancy_score: Optional[float] = None
     most_similar_to:  Optional[str]   = None
 
-    # ★ 新增：标记诊断数据是否有效（来自真实 suite_diagnosis.json）
     diag_data_valid: bool = False
 
     def to_dict(self) -> dict:
@@ -321,14 +201,6 @@ def tool_compile_run(focal_method_result_dir, project_dir, test_names):
 
 
 # ════════════════════════════════════════════════════════════════════
-# Tool 2: 覆盖率（已在 tool_compile_run_and_coverage 中处理）
-# ════════════════════════════════════════════════════════════════════
-
-def tool_coverage(tests_output_dir, target_class_simple, focal_method, diags):
-    pass
-
-
-# ════════════════════════════════════════════════════════════════════
 # Tool 3: Bug Revealing
 # ════════════════════════════════════════════════════════════════════
 
@@ -349,18 +221,59 @@ def tool_bug_revealing(
         logger.warning("[Tool 3] bug_revealing.py not found: %s", script)
         return
 
-    out_csv = os.path.join(focal_method_result_dir, "bugrevealing.csv")
+    # 脚本会自动推断 --tests 和 --out，如果不提供 --tests，会找 buggy_dir 下的最新 tests* 目录
+    # --out 如果不提供，会自动生成文件名 {proj_prefix}_{_tgt_slug}_bugrevealing.csv
+    # 为了匹配，我们提供 --tests 和 --out，但让脚本处理文件名
     cmd = [sys.executable, script,
            "--buggy", buggy_dir,
            "--fixed", fixed_dir,
-           "--tests", focal_method_result_dir,
-           "--out",   out_csv]
+           "--tests", focal_method_result_dir]  # 不指定 --out，让脚本自动生成
     rc, _, err = _run(cmd, timeout=300)
     if rc != 0:
         logger.warning("[Tool 3] bug_revealing rc=%d: %s", rc, err[:300])
+        return
+
+    # 脚本生成的文件名模式：{proj_prefix}_{_tgt_slug}_bugrevealing.csv
+    # proj_prefix 从 buggy_dir 推断，_tgt_slug 从 target_class 推断
+    proj_basename = os.path.basename(buggy_dir)
+    if proj_basename.lower().endswith('_b') or proj_basename.lower().endswith('_f'):
+        proj_prefix = proj_basename[:-2]
+    else:
+        proj_prefix = proj_basename
+
+    # 推断 _tgt_slug（target_class）
+    _tgt_slug = "unknown"  # 默认
+    meta_file = os.path.join(buggy_dir, 'modified_classes.src')
+    if os.path.exists(meta_file):
+        try:
+            with open(meta_file) as f:
+                line = f.readline().strip()
+            if line:
+                _tgt_slug = line.split('.')[-1]
+        except Exception:
+            pass
+    else:
+        prop_file = os.path.join(buggy_dir, 'defects4j.build.properties')
+        if os.path.exists(prop_file):
+            try:
+                with open(prop_file) as f:
+                    for l in f:
+                        if 'd4j.classes.modified' in l and '=' in l:
+                            val = l.split('=', 1)[1].strip()
+                            first_class = val.split(',')[0].strip()
+                            if first_class:
+                                _tgt_slug = first_class.split('.')[-1]
+                            break
+            except Exception:
+                pass
+
+    expected_filename = f"{proj_prefix}_{_tgt_slug}_bugrevealing.csv"
+    out_csv = os.path.join(focal_method_result_dir, expected_filename)
 
     if not os.path.exists(out_csv):
+        logger.warning("[Tool 3] Expected output file not found: %s", out_csv)
         return
+
     try:
         with open(out_csv, newline="", encoding="utf-8") as f:
             for row in csv.DictReader(f):
@@ -382,16 +295,29 @@ def tool_similarity(
     diags: Dict[str, TestDiag],
 ) -> List[Tuple[str, str, float]]:
     scripts_dir = os.path.join(HERE, "scripts")
+
+    # ★ 修复：传 test_cases 子目录路径，让脚本走正确的分支
+    tc_dir = os.path.join(focal_method_result_dir, "test_cases")
+    if not os.path.isdir(tc_dir):
+        logger.warning("[Tool 4] test_cases dir not found: %s", tc_dir)
+        return []
+
     for sname, timeout in [("code_to_ast.py", 120), ("measure_similarity.py", 300)]:
         sc = os.path.join(scripts_dir, sname)
         if not os.path.exists(sc):
             logger.warning("[Tool 4] %s not found", sname)
             return []
-        _run([sys.executable, sc, focal_method_result_dir], timeout=timeout)
+        rc, stdout, stderr = _run([sys.executable, sc, tc_dir], timeout=timeout)
+        if rc != 0:
+            logger.warning("[Tool 4] %s rc=%d stderr=%s", sname, rc, stderr[:300])
+        else:
+            logger.info("[Tool 4] %s OK", sname)
 
+    # Similarity CSV 写在 focal_method_result_dir/Similarity/ 下
     sim_dir    = os.path.join(focal_method_result_dir, "Similarity")
     bsim_files = sorted(glob.glob(os.path.join(sim_dir, "*_bigSims.csv")))
     if not bsim_files:
+        logger.warning("[Tool 4] No bigSims.csv found in %s", sim_dir)
         return []
 
     all_pairs: List[Tuple[str, str, float]] = []
@@ -414,8 +340,10 @@ def tool_similarity(
 
         for tc, (score, partner) in best.items():
             if tc in diags:
-                diags[tc].redundancy_score = round(score, 4)
+                diags[tc].redundancy_score = 1 - round(score, 4)  # 纠正：rs是冗余度（相似度），但之前用1-相似度；现在设为相似度
                 diags[tc].most_similar_to  = partner
+
+        logger.info("[Tool 4] %d pairs loaded from %s", len(all_pairs), bsim_files[-1])
 
     except Exception as e:
         logger.warning("[Tool 4] bigSims parse: %s", e)
@@ -455,7 +383,7 @@ def _build_refiner_messages(
     except Exception as e:
         logger.warning("Template render failed (%s), using fallback", e)
         user = _fallback_prompt(focal_method, class_name, focal_method_code,
-                                problematic_data, suite_score, iteration)
+                                problematic_data, suite_score, iteration, template_dir)
 
     messages = []
     sys_path = os.path.join(template_dir, "refine_agent_system.jinja2")
@@ -467,36 +395,19 @@ def _build_refiner_messages(
 
 
 def _fallback_prompt(focal_method, class_name, focal_method_code,
-                     problematic_data, suite_score, iteration) -> str:
+                     problematic_data, suite_score, iteration, template_dir) -> str:
     suite_json = json.dumps(suite_score.to_dict(), indent=2, ensure_ascii=False)
-    tests_json = json.dumps(problematic_data, indent=2, ensure_ascii=False)
-    return f"""You are a Java test quality analyst (Refine Agent).
+    tests_json = json.dumps(problematic_data,      indent=2, ensure_ascii=False)
 
-## Context
-Focal method: `{focal_method}` in `{class_name}` | Iteration {iteration}
-
-## Focal Method Source
-```java
-{focal_method_code}
-```
-
-## Suite-Level Scores
-```json
-{suite_json}
-```
-
-## Problematic Test Files
-```json
-{tests_json}
-```
-
-## Your Task
-Output ONLY a JSON object:
-{{
-  "suite_summary": "<2-4 sentences>",
-  "test_instructions": {{"<test_name>": ["<instruction1>"]}},
-  "delete_tests": ["<test_name>"]
-}}"""
+    tenv = Environment(loader=FileSystemLoader(template_dir))
+    return tenv.get_template("fallback_refine_agent.jinja2").render(
+        focal_method=focal_method,
+        class_name=class_name,
+        focal_method_code=focal_method_code,
+        suite_json=suite_json,
+        tests_json=tests_json,
+        iteration=iteration,
+        )
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -672,6 +583,24 @@ class RefineAgent:
             if t in diags and isinstance(instr, list) and instr
         }
         delete_tests = [t for t in parsed.get("delete_tests", []) if t in diags]
+
+        # ★ 新增：验证修复效果（编译检查）
+        if instructions:
+            logger.info("[Refine] Validating %d modified tests for compilation...", len(instructions))
+            validation_passed = 0
+            for test_name in instructions:
+                test_file = os.path.join(focal_method_result_dir, "test_cases", f"{test_name}.java")
+                if os.path.exists(test_file):
+                    # 简单语法检查
+                    try:
+                        import javalang
+                        with open(test_file, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                        javalang.parse.parse(content)
+                        validation_passed += 1
+                    except Exception as e:
+                        logger.warning("[Refine] Validation failed for %s: %s", test_name, str(e)[:100])
+            logger.info("[Refine] Validation: %d/%d tests passed syntax check", validation_passed, len(instructions))
 
         return RefineResult(
             focal_method=focal_method, class_name=class_name, iteration=iteration,

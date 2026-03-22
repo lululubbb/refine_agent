@@ -188,10 +188,14 @@ def compute_test_score(diag) -> TestScore:
             issues.append("EXEC_TIMEOUT" if diag.exec_timeout else "EXEC_FAIL")
 
     if diag.exec_ok:
-        if line_cov is not None and line_cov < 0.5:
+        if line_cov is not None and line_cov < 0.7:
             issues.append("LOW_LINE_COV")
-        if branch_cov is not None and branch_cov < 0.5:
-            issues.append("LOW_BRANCH_COV")
+        # ★ 修复问题6：分支覆盖率为0也应该视为不满足标准（低于50%）
+        # 当focal_branch_rate不为None时，包括0都应该检查
+        if diag.focal_branch_rate is not None:
+            branch_cov_pct = diag.focal_branch_rate / 100.0
+            if branch_cov_pct < 0.7:
+                issues.append("LOW_BRANCH_COV")
         if diag.bug_revealing is False:
             issues.append("NOT_BUG_REVEALING")
 

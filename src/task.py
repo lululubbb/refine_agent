@@ -183,7 +183,7 @@ class ParseTask:
         os.makedirs(self.output, exist_ok=True)
         if target_path.endswith("_f") or target_path.endswith("_b"):
             print(f"\n【ParseTask识别结果】✅ 识别为Defects4J项目")
-            _, output_path = self.process_d4j_revisions(target_path, '/home/chenlu/ChatUniTest_GPT3.5/src/scripts/focal_classes.json')
+            _, output_path = self.process_d4j_revisions(target_path, '/home/chenlu/refine_test_gen_v5/src/scripts/focal_classes.json')
             return output_path
         tot_m, output_path = self.find_classes(target_path)
         return output_path

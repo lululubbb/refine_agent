@@ -96,7 +96,29 @@ RefineTestGen/
                 ├── token_stats.json
                 └── time_stats.json
 ```
-
+└── results_batch/               ← LLM 生成的测试用例及迭代记录
+    └── Csv_1_b/                 ← 每项目一个目录（与 ChatUniTest 完全相同）
+        └── scope_test%YYYYMMDDHHMMSS%/   ← start_generation 创建的时间戳目录
+            ├── record.txt
+            ├── global_stats.json 
+            └── 1%Csv_1_b%Token%reset%d3/  ← 每个 focal method 一个目录
+                │   (命名：methodId%proj%class%method%dir)
+                │
+                ├── temp/                   ← 用于编译执行看是否有错误的文件夹
+                │   ├── Token_1_1Test.java  ← TestRunner 读取的最终 .java 文件
+                │   └── compile_error.txt
+                ├── gen_logs
+                │   └── 1/                    ← test_num=1 的迭代过程记录
+                │       ├── 1_GEN_0.json      ← Generator 初始生成 LLM 原始输出
+                │       └── 2_JAVA_0.java     ← 初始 suite 源码快照
+                ├── refine_logs
+                │   └── 1/                    ← test_num=1 的迭代过程记录
+                │       └── round_1           ← 第一轮修复过程记录
+                │         ├── fix_gen.json
+                │         └── fix_ExtendedBufferedReader_2_1Test.java      
+                ├── logs
+                ├── token_stats.json
+                └── time_stats.json
 ## 二、数据流：从上传项目到生成测试用例
 
 ```

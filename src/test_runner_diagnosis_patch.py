@@ -59,7 +59,7 @@ def ensure_diagnosis_log(tests_output_dir: str):
     # 从 *_status.csv 获取所有测试状态
     status_rows = _read_status_rows(tests_output_dir)
     if not status_rows:
-        logger.debug("[DiagPatch] no status rows found, skip patching")
+        # logger.debug("[DiagPatch] no status rows found, skip patching")
         return
 
     new_entries = 0

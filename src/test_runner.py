@@ -57,10 +57,6 @@ class TestRunner:
         """
         Initialize configurations and run all tests
         """
-        print(f"[DEBUG TestRunner] test_path: {repr(self.test_path)}")
-        print(f"[DEBUG TestRunner] test_path exists: {os.path.isdir(self.test_path)}")
-        print(f"[DEBUG TestRunner] test_cases path: {repr(os.path.join(self.test_path, 'test_cases'))}")
-        print(f"[DEBUG TestRunner] test_cases exists: {os.path.isdir(os.path.join(self.test_path, 'test_cases'))}")
         
         if os.path.isdir(self.test_path) and os.path.isdir(os.path.join(self.test_path, 'test_cases')):
             tests_dir = self.test_path
@@ -72,13 +68,6 @@ class TestRunner:
             test_output = os.path.join(test_output_dir, "TestOutput")
             compiled_test_dir = os.path.join(tests_dir, "tests_ChatGPT")
  
-            # ★ 修复：必须提前创建这些目录。
-            # 原始代码只声明了路径字符串，没有 makedirs。
-            # run_all_tests() 在编译失败时会写
-            #   compiler_output/CompilerOutput-XXX.java.txt
-            # 父目录不存在 → FileNotFoundError → TestRunner 整体崩溃
-            # → tool_runner_adapter 捕获异常 → 返回 None
-            # → suite_diagnosis.json 永远不生成 → 假阳性 COMPILE_FAIL
             os.makedirs(compiler_output_dir, exist_ok=True)
             os.makedirs(test_output_dir, exist_ok=True)
             os.makedirs(report_dir, exist_ok=True)
@@ -665,8 +654,6 @@ class TestRunner:
                         desc_prefix = jvm_desc[:paren_close + 1] if paren_close >= 0 else jvm_desc
                         entry['descriptor'] = desc_prefix
                         result[mid] = entry
-                        print(f"[DEBUG] mid={mid} name={entry['name']} "
-                              f"desc={entry['descriptor']} [from jvm_descriptor field]")
                         continue
 
                     # ── 子优先级 b：参数类型 list 字段 ─────────────────────
@@ -735,8 +722,6 @@ class TestRunner:
                     pass  # JSON 解析失败，保持 descriptor=None
 
                 result[mid] = entry
-                print(f"[DEBUG] mid={mid} name={entry['name']} "
-                      f"desc={entry['descriptor']} params={entry['params']}")
 
         except Exception as e:
             print("[WARN] _build_mid_to_focal_map failed:", e)
@@ -817,9 +802,6 @@ class TestRunner:
                             break
             except Exception:
                 pass
-        print(f"[INFO] focal_method='{focal_method}'  "
-              f"raw_data_dir='{self._find_raw_data_dir(tests_dir)}'  "
-              f"mid_to_focal_map={mid_to_focal_map}")
 
         for t in range(1, 1 + test_number):
             print("Processing attempt: ", str(t))
@@ -1219,10 +1201,20 @@ class TestRunner:
                 grp_r = self._group_from_test_class(tc_r)
                 groups_cd.setdefault(grp_r, []).append(rec)
 
+            # Compute group totals for modified class coverage (sum of per-test coverage)
             # 每组 focal totals（优先基于合并后的 jacoco.xml，避免同一行/分支被多次计入）
             focal_totals_cd: dict = self._compute_focal_totals_from_merged_jacoco(
                 groups_cd, modified_class_name, mid_to_name, focal_method,
                 mid_to_focal_map=mid_to_focal_map)
+            
+            group_modified_totals = {}
+            for grp_k, members_k in groups_cd.items():
+                total_m_line_cov = sum(m.get('m_per_line_cov', 0) or 0 for m in members_k)
+                total_m_branch_cov = sum(m.get('m_per_branch_cov', 0) or 0 for m in members_k)
+                group_modified_totals[grp_k] = {
+                    'm_line_cov': total_m_line_cov,
+                    'm_branch_cov': total_m_branch_cov
+                }
 
             # 若合并 jacoco 未命中 focal method，则回退到 per-test 覆盖率的上确界（取 max，避免重复累加）
             # 注意：不能用 sum，因为同一行被多个 test 覆盖时 total 不变，只有 covered 可能更高。
@@ -1266,15 +1258,16 @@ class TestRunner:
                     # line_contrib_pct / branch_contrib_pct：
                     # 单测在 modified class 上的覆盖行(分支)数 /
                     # 该 focal 组合并后在 modified class 上的总覆盖行(分支)数
-                    # 分母来自 focal_totals_cd 中 modified class 级别的组覆盖数
+                    # 分母来自 group_modified_totals 中 modified class 级别的组覆盖数
                     tc_r = rec.get('test_class', '')
                     grp_r = self._group_from_test_class(tc_r)
                     fm_r = self._focal_method_from_group(grp_r, mid_to_name, focal_method)
                     gtot = focal_totals_cd.get(grp_r, {})
+                    gmod_tot = group_modified_totals.get(grp_r, {})
 
-                    # focal 组在 modified class 上的合并覆盖数（coveragemethod 里记录的值）
-                    grp_m_line_cov   = gtot.get('f_line_cov')   or 0
-                    grp_m_branch_cov = gtot.get('f_branch_cov') or 0
+                    # focal 组在 modified class 上的合并覆盖数（coverage table 的 m_line_cov/m_branch_cov 之和）
+                    grp_m_line_cov   = gmod_tot.get('m_line_cov')   or 0
+                    grp_m_branch_cov = gmod_tot.get('m_branch_cov') or 0
 
                     # 贡献度 = 单测覆盖数 / 组合并覆盖数（分母为0时置0，避免除零）
                     line_contrib_pct   = round(100.0 * mlc / grp_m_line_cov,   4) if grp_m_line_cov   and mlc else 0.0
@@ -1355,7 +1348,7 @@ class TestRunner:
                                 pass
                             with open(logs['diagnosis'], 'a', encoding='utf-8') as _df:
                                 _df.write(f"[DIAGNOSIS] test_class={_tc_name}\n")
-                                _df.write(f"  project={project_name}  target_class={target_class}\n")
+                                _df.write(f"  project={project_name}  target_class={target_class}  focal_method={fm_r}\n")
                                 _df.write(f"  status=exec_ok\n")
                                 _df.write(f"  error_type=coverage_gap\n")
                                 _df.write(f"  line_rate={mlr:.4f}%  ({mlc}/{mlt})\n")
@@ -1379,27 +1372,6 @@ class TestRunner:
                                         _df.write(f"    ... [{len(_partial_methods)-20} more]\n")
                                 else:
                                     _df.write(f"  partial_branch_methods: none\n")
-                                # ── bug_revealing指导 ──
-                                if _br_hint == 'true':
-                                    _df.write(f"  bug_revealing=true   → 当前测试已触发缺陷✓\n")
-                                elif _br_hint == 'false':
-                                    _df.write(f"  bug_revealing=false  → 当前测试未触发已知缺陷，"
-                                              f"建议针对边界条件/异常路径生成更强的断言\n")
-                                else:
-                                    _df.write(f"  bug_revealing=N/A    → 未找到 bug_revealing 数据\n")
-                                # ── redundancy指导 ──
-                                if _sim_hint:
-                                    try:
-                                        _rs_val = float(_sim_hint)
-                                        if _rs_val < 0.3:
-                                            _df.write(f"  redundancy_score={_sim_hint}  → 测试结构与已有用例高度相似，"
-                                                      f"建议生成覆盖不同方法/分支的差异化测试\n")
-                                        else:
-                                            _df.write(f"  redundancy_score={_sim_hint}  → 结构多样性可接受✓\n")
-                                    except ValueError:
-                                        _df.write(f"  redundancy_score={_sim_hint}  → 解析失败\n")
-                                else:
-                                    _df.write(f"  redundancy_score=N/A → 未找到相似度数据\n")
                                 _df.write("---\n")
                         except Exception as _diag_err:
                             import traceback

@@ -130,6 +130,6 @@ if __name__ == "__main__":
     # 示例
     start_generation(
         sql_query  = "SELECT id FROM method WHERE project_name='Csv_1_b';",
-        multiprocess = False,
+        multiprocess = True,
         confirmed    = True,
     )

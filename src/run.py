@@ -57,7 +57,7 @@ def _save_progress(step: str, status: str):
 
 def run(
     sql_query: str = None,
-    multiprocess: bool = False,
+    multiprocess: bool = True,
     skip_parse: bool = False,
     skip_export: bool = False,
     confirmed: bool = True,

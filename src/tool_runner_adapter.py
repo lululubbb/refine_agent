@@ -3,19 +3,7 @@ tool_runner_adapter.py
 ======================
 TestRunner 适配器：调用 TestRunner.start_all_test()，然后从已有输出文件
 提取所有 Tool 1+2 的诊断数据，序列化为统一的 suite_diagnosis.json。
-
-问题1根本原因修复（suite_diagnosis.json 数据错误）：
-─────────────────────────────────────────────────────────────────
-  每次 run_and_export() 前必须删除旧的 suite_diagnosis.json，
-  防止 TestRunner 崩溃时读到上一轮残留的旧文件。
-
-  另外 _load_status_csv 增加详细日志，方便排查 compile_status 来源。
-
-问题2根本原因修复（tests_output_dir 定位错误）：
-─────────────────────────────────────────────────────────────────
-  TestRunner 分支1（test_cases/存在）→ 输出在 FOCAL_DIR 本身
-  _resolve_tests_output_dir() 先检查 FOCAL_DIR，再回退到 project_dir/tests%T/
-─────────────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────────
 """
 from __future__ import annotations
 
@@ -117,7 +105,6 @@ def _clear_stale_diag(focal_method_result_dir: str, project_dir: str):
         if os.path.exists(path):
             try:
                 os.remove(path)
-                logger.debug("[ToolRunner] cleared stale %s", path)
             except Exception as e:
                 logger.debug("[ToolRunner] failed to clear %s: %s", path, e)
 
@@ -144,17 +131,14 @@ def _resolve_tests_output_dir(focal_method_result_dir: str,
     ]
     for indicator in branch1_indicators:
         if os.path.exists(indicator):
-            logger.debug("[ToolRunner] branch1 → tests_output_dir = FOCAL_DIR")
             return focal_method_result_dir
 
     # 分支2检测
     latest = _find_latest_tests_dir(project_dir)
     if latest:
-        logger.debug("[ToolRunner] branch2 → tests_output_dir = %s", latest)
         return latest
 
     # 兜底：直接用 focal_method_result_dir（比返回 None 导致假阳性要好）
-    logger.warning("[ToolRunner] no indicator found, fallback to focal_method_result_dir")
     return focal_method_result_dir
 
 
@@ -167,7 +151,6 @@ def _build_diag_map(tests_output_dir: str) -> Dict[str, dict]:
     _load_status_csv(tests_output_dir, diag)
     _load_diagnosis_log(tests_output_dir, diag)
     _load_coverage_csv(tests_output_dir, diag)
-    logger.info("[ToolRunner] diag_map built: %d entries from %s", len(diag), tests_output_dir)
     return diag
 
 
@@ -226,8 +209,7 @@ def _parse_status_csv(csv_path: str, diag: dict):
                     is_timeout = str(row.get("exec_timeout", "false")).lower() in ("true", "1")
                     entry["exec_status"] = "timeout" if (is_timeout and es == "fail") else es
                 rows_read += 1
-                logger.debug("[ToolRunner] status csv row: tc=%s compile=%s exec=%s", tc, cs, es)
-        logger.info("[ToolRunner] status csv parsed: %d rows from %s", rows_read, csv_path)
+        # logger.info("[ToolRunner] status csv parsed: %d rows from %s", rows_read, csv_path)
     except Exception as e:
         logger.warning("status csv %s: %s", csv_path, e)
 
@@ -244,20 +226,20 @@ def _load_diagnosis_log(tests_output_dir: str, diag: dict):
     for c in candidates:
         if os.path.exists(c) and os.path.getsize(c) > 0:
             log_path = c
-            logger.debug("[ToolRunner] diagnosis.log found: %s", log_path)
+            # logger.debug("[ToolRunner] diagnosis.log found: %s", log_path)
             break
 
     if not log_path:
-        logger.warning("[ToolRunner] diagnosis.log not found under %s", tests_output_dir)
+        # logger.warning("[ToolRunner] diagnosis.log not found under %s", tests_output_dir)
         return
 
-    logger.debug("[ToolRunner] loading diagnosis.log: %s", log_path)
+    # logger.debug("[ToolRunner] loading diagnosis.log: %s", log_path)
 
     try:
         with open(log_path, encoding="utf-8", errors="ignore") as f:
             content = f.read()
     except Exception as e:
-        logger.warning("diagnosis.log read error: %s", e)
+        # logger.warning("diagnosis.log read error: %s", e)
         return
 
     raw_blocks = re.split(r'\[DIAGNOSIS\]', content)
@@ -265,7 +247,7 @@ def _load_diagnosis_log(tests_output_dir: str, diag: dict):
     for block in raw_blocks[1:]:
         _parse_diag_block(block, diag)
         parsed += 1
-    logger.info("[ToolRunner] parsed %d [DIAGNOSIS] blocks from %s", parsed, log_path)
+    # logger.info("[ToolRunner] parsed %d [DIAGNOSIS] blocks from %s", parsed, log_path)
 
 
 def _parse_diag_block(block: str, diag: dict):
@@ -277,7 +259,21 @@ def _parse_diag_block(block: str, diag: dict):
     if not tc_match:
         return
     tc = _short(tc_match.group(1).strip())
+    
+    # ★ 修复：检查是否已有该 test_class 的诊断
+    # 优先级：compile_fail > exec_fail/timeout > exec_ok
+    # 即：只有更高优先级的状态才覆盖现有状态
+    if tc in diag and diag[tc].get("compile_status") == "fail":
+        # 已有编译失败，不再覆盖
+        return
+    
     entry = _ensure(diag, tc)
+    current_status = (
+        "compile_fail" if entry.get("compile_status") == "fail"
+        else "exec_fail" if entry.get("exec_status") == "fail"
+        else "exec_timeout" if entry.get("exec_status") == "timeout"
+        else "exec_ok"
+    )
 
     in_core_errors     = False
     in_missed_methods  = False
@@ -291,16 +287,32 @@ def _parse_diag_block(block: str, diag: dict):
 
         sm = re.match(r'status=(\S+)', stripped)
         if sm:
-            status = sm.group(1)
-            entry["compile_status"] = "pass"
-            entry["exec_status"]    = "pass"
-            if status == "compile_fail":
-                entry["compile_status"] = "fail"
-                entry["exec_status"]    = "skip"
-            elif status == "exec_fail":
-                entry["exec_status"] = "fail"
-            elif status == "exec_timeout":
-                entry["exec_status"] = "timeout"
+            new_status = sm.group(1)
+            
+            # ★ 修复：只有更高优先级的状态才覆盖
+            # 优先级顺序：compile_fail（最高）> exec_timeout > exec_fail > exec_ok（最低）
+            status_priority = {
+                "compile_fail": 3,
+                "exec_timeout": 2,
+                "exec_fail": 1,
+                "exec_ok": 0,
+            }
+            
+            new_prio = status_priority.get(new_status, -1)
+            curr_prio = status_priority.get(current_status, -1)
+            
+            if new_prio >= curr_prio:
+                # 新状态的优先级不低于当前状态，才进行覆盖
+                entry["compile_status"] = "pass"
+                entry["exec_status"]    = "pass"
+                if new_status == "compile_fail":
+                    entry["compile_status"] = "fail"
+                    entry["exec_status"]    = "skip"
+                elif new_status == "exec_fail":
+                    entry["exec_status"] = "fail"
+                elif new_status == "exec_timeout":
+                    entry["exec_status"] = "timeout"
+                current_status = new_status
             in_core_errors = in_missed_methods = in_partial_methods = in_full_stderr = False
             continue
 

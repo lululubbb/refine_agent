@@ -326,12 +326,14 @@ def process_tests_dir(tests_dir: str):
 
     best_map = {}   # {test_name: (src, dst, nodes_per_tree, comb_sim)}
 
-    with open(sims_csv, 'w', newline='', encoding='utf-8') as sf:
+    with open(sims_csv, 'a', newline='', encoding='utf-8') as sf:
         w = csv.writer(sf)
-        w.writerow(['project', 'target_class', 'test_case_1', 'test_case_2',
-                    'topdown_subtree_size', 'topdown_similarity',
-                    'bottomup_subtree_size', 'bottomup_similarity',
-                    'combined_subtree_size', 'combined_similarity', 'redundancy_score'])
+        # Only write header if file doesn't exist or is empty
+        if not os.path.exists(sims_csv) or os.path.getsize(sims_csv) == 0:
+            w.writerow(['project', 'target_class', 'test_case_1', 'test_case_2',
+                        'topdown_subtree_size', 'topdown_similarity',
+                        'bottomup_subtree_size', 'bottomup_similarity',
+                        'combined_subtree_size', 'combined_similarity', 'redundancy_score'])
 
         for key, members in groups.items():
             for i in range(len(members)):
@@ -383,10 +385,12 @@ def process_tests_dir(tests_dir: str):
             print(f'  [UNMATCHED] {tc}: no valid pair found, sim=0.0')
 
     # bigSims
-    with open(big_csv, 'w', newline='', encoding='utf-8') as bf:
+    with open(big_csv, 'a', newline='', encoding='utf-8') as bf:
         w = csv.writer(bf)
-        w.writerow(['project', 'target_class', 'test_case_1', 'test_case_2',
-                    'combined_subtree_size', 'combined_similarity', 'redundancy_score'])
+        # Only write header if file doesn't exist or is empty
+        if not os.path.exists(big_csv) or os.path.getsize(big_csv) == 0:
+            w.writerow(['project', 'target_class', 'test_case_1', 'test_case_2',
+                        'combined_subtree_size', 'combined_similarity', 'redundancy_score'])
         for tc, rec in best_map.items():
             w.writerow([proj_short, target_class, rec[0], rec[1],
                         rec[2], f'{rec[3]:.6f}', f'{1.0 - rec[3]:.6f}'])
@@ -396,9 +400,11 @@ def process_tests_dir(tests_dir: str):
     n      = len(vals)
     sumsq  = sum(v * v for v in vals)
     meansq = sumsq / n if n > 0 else 0.0
-    with open(bigsum_csv, 'w', newline='', encoding='utf-8') as bs:
+    with open(bigsum_csv, 'a', newline='', encoding='utf-8') as bs:
         w = csv.writer(bs)
-        w.writerow(['project', 'n_tests', 'sum_of_squares', 'mean_of_squares'])
+        # Only write header if file doesn't exist or is empty
+        if not os.path.exists(bigsum_csv) or os.path.getsize(bigsum_csv) == 0:
+            w.writerow(['project', 'n_tests', 'sum_of_squares', 'mean_of_squares'])
         w.writerow([proj_short, n, f'{sumsq:.6f}', f'{meansq:.6f}'])
 
     complete = len(best_map) == len(all_test_names)

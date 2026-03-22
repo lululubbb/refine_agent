@@ -174,7 +174,7 @@ def _print_suite_score(suite_score, tag=""):
 
     if ss.coverage_line_avg is not None:
         lc = ss.coverage_line_avg
-        lc_c = Fore.GREEN if lc >= 0.7 else (Fore.YELLOW if lc >= 0.4 else Fore.RED)
+        lc_c = Fore.GREEN if lc >= 0.8 else (Fore.YELLOW if lc >= 0.7 else Fore.RED)
         print(f"  {'行覆盖率(avg)':<16}: {lc_c}{lc*100:.1f}%  "
               f"(min={ss.coverage_line_min*100:.1f}%  max={ss.coverage_line_max*100:.1f}%){Style.RESET_ALL}", flush=True)
     else:
@@ -182,7 +182,7 @@ def _print_suite_score(suite_score, tag=""):
 
     if ss.coverage_branch_avg is not None:
         bc = ss.coverage_branch_avg
-        bc_c = Fore.GREEN if bc >= 0.7 else (Fore.YELLOW if bc >= 0.4 else Fore.RED)
+        bc_c = Fore.GREEN if bc >= 0.8 else (Fore.YELLOW if bc >= 0.7 else Fore.RED)
         print(f"  {'分支覆盖率(avg)':<16}: {bc_c}{bc*100:.1f}%  "
               f"(min={ss.coverage_branch_min*100:.1f}%  max={ss.coverage_branch_max*100:.1f}%){Style.RESET_ALL}"
               if hasattr(ss, 'coverage_branch_min') and ss.coverage_branch_min is not None
@@ -210,8 +210,8 @@ def _print_suite_score(suite_score, tag=""):
 
     if ss.max_pairwise_similarity is not None:
         sim = ss.max_pairwise_similarity
-        sim_c = Fore.RED if sim > 0.9 else (Fore.YELLOW if sim > 0.7 else Fore.GREEN)
-        print(f"  {'最大用例相似度':<16}: {sim_c}{sim:.3f}{Style.RESET_ALL}", flush=True)
+        sim_c = Fore.RED if 1-sim > 0.9 else (Fore.YELLOW if 1-sim > 0.7 else Fore.GREEN)
+        print(f"  {'最大用例相似度':<16}: {sim_c}{1-sim:.3f}{Style.RESET_ALL}", flush=True)
     else:
         print(f"  {'最大用例相似度':<16}: {Fore.RED}N/A (相似度计算失败，检查 Tool 4 日志){Style.RESET_ALL}", flush=True)
 
@@ -235,8 +235,8 @@ def _print_suite_score(suite_score, tag=""):
     else:
         print(f"\\n  ✅ 无问题！Suite 全部通过质量检查。", flush=True)
         # ★ 修复问题5：说明质量检查标准，避免歧义
-        print(f"  {Fore.WHITE}  质量标准: 编译通过 + 执行无异常 + 行覆盖率≥50%"
-              f" + 分支覆盖率≥50% + 无高冗余(≤70%){Style.RESET_ALL}", flush=True)
+        print(f"  {Fore.WHITE}  质量标准: 编译通过 + 执行无异常 + 行覆盖率≥70%"
+              f" + 分支覆盖率≥70% + 冗余度(≤70%){Style.RESET_ALL}", flush=True)
         # 如果 bug_revealing 未检测，单独说明
         if ss.bug_reveal_checked == 0:
             skip_reason = getattr(ss, '_bug_reveal_skip_reason', None)
@@ -275,14 +275,14 @@ def _print_test_diag(tc_name: str, diag, score):
         return
 
     if "COMPILE_FAIL" in issues and diag.compile_errors:
-        print(f"    {Fore.RED}编译错误 (前3条):{Style.RESET_ALL}", flush=True)
-        for e in diag.compile_errors[:3]:
+        print(f"    {Fore.RED}编译错误 (前5条):{Style.RESET_ALL}", flush=True)
+        for e in diag.compile_errors[:5]:
             print(f"      • {e}", flush=True)
 
     # 执行错误
     if ("EXEC_FAIL" in issues or "EXEC_TIMEOUT" in issues) and diag.exec_errors:
-        print(f"    {Fore.RED}运行错误 (前3条):{Style.RESET_ALL}", flush=True)
-        for e in diag.exec_errors[:3]:
+        print(f"    {Fore.RED}运行错误 (前5条):{Style.RESET_ALL}", flush=True)
+        for e in diag.exec_errors[:5]:
             print(f"      • {e}", flush=True)
 
     # 覆盖率
@@ -667,7 +667,6 @@ def focal_method_pipeline(
     focal_method_code = raw_data.get("source_code", ctx_d1.get("information", ""))
     pkg_decl          = canonical_package_decl(package)
 
-    print(f"  package raw: {repr(package[:60])}  →  pkg_decl: {repr(pkg_decl)}", flush=True)
 
     gen_client = make_generator_client()
     ref_client = make_refiner_client()
@@ -1091,12 +1090,49 @@ def start_whole_process(
     with open(os.path.join(result_path, "global_stats.json"), "w", encoding="utf-8") as f:
         json.dump(global_stats, f, indent=2, ensure_ascii=False)
 
-    print(flush=True)
-    _section("全局统计", Fore.MAGENTA)
-    print(Fore.MAGENTA + f"  focal methods : {total}  总耗时: {elapsed}s" + Style.RESET_ALL, flush=True)
-    print(Fore.MAGENTA + f"  Generator     : {global_stats['generator']['total']} tokens" + Style.RESET_ALL, flush=True)
-    print(Fore.MAGENTA + f"  Refiner       : {global_stats['refiner']['total']} tokens"   + Style.RESET_ALL, flush=True)
-    print(Fore.MAGENTA + f"  All total     : {global_stats['all_total']} tokens"           + Style.RESET_ALL, flush=True)
+    global_elapsed_time = elapsed
+    submits = total
+    avg_task_time = round(global_elapsed_time / total, 2) if total > 0 else 0.0
+    global_token_stats = {
+        'total_prompt_tokens': global_stats['generator']['prompt'] + global_stats['refiner']['prompt'],
+        'total_completion_tokens': global_stats['generator']['completion'] + global_stats['refiner']['completion'],
+        'total_tokens': global_stats['all_total'],
+    }
+    global_time_stats = {
+        'avg_task_time_seconds': avg_task_time
+    }
+    global_stats_summary = {
+        'avg_tokens_per_task': round(global_token_stats['total_tokens'] / total, 2) if total > 0 else 0.0,
+        'avg_prompt_tokens_per_task': round(global_token_stats['total_prompt_tokens'] / total, 2) if total > 0 else 0.0,
+        'avg_completion_tokens_per_task': round(global_token_stats['total_completion_tokens'] / total, 2) if total > 0 else 0.0,
+    }
+
+    global_stats_path = os.path.join(result_path, "global_stats.json")
+
+    print(Fore.MAGENTA + "\n===== 全局统计 =====" + Style.RESET_ALL)
+    print(f"总任务数：{total}")
+    print(f"已完成任务数：{submits}")
+    print(f"全局总耗时：{global_elapsed_time}秒")
+    print(f"平均每个任务耗时：{global_time_stats['avg_task_time_seconds']}秒")
+    print(f"\n=== Token 统计 ===")
+    print(f"总Prompt Tokens：{global_token_stats['total_prompt_tokens']}")
+    print(f"总Completion Tokens：{global_token_stats['total_completion_tokens']}")
+    print(f"总Tokens：{global_token_stats['total_tokens']}")
+    print(f"平均每个任务Token：{global_stats_summary['avg_tokens_per_task']}")
+    print(f"平均每个任务Prompt Token：{global_stats_summary['avg_prompt_tokens_per_task']}")
+    print(f"平均每个任务Completion Token：{global_stats_summary['avg_completion_tokens_per_task']}")
+    print(f"\n全局统计已保存到：{global_stats_path}")
+    print("=======================" + Style.RESET_ALL)
+
+    return {
+        'total_tasks': total,
+        'completed_tasks': submits,
+        'global_elapsed_time_seconds': global_elapsed_time,
+        'avg_task_time_seconds': global_time_stats['avg_task_time_seconds'],
+        'global_token_stats': global_token_stats,
+        'global_stats_summary': global_stats_summary,
+        'global_stats_path': global_stats_path,
+    }
 
 
 # ════════════════════════════════════════════════════════════════════

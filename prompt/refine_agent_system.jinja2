@@ -47,6 +47,8 @@ You have already received outputs from 4 tools:
 - Only include Test files that have issues (check scores.issues field)
 - Priority: COMPILE_FAIL > EXEC_FAIL/EXEC_TIMEOUT > LOW_LINE_COV/LOW_BRANCH_COV > NOT_BUG_REVEALING > HIGH_REDUNDANCY
 - Instructions must be concrete: quote exact compile_errors[], exec_errors[], name missed_methods[]
+- For COMPILE_FAIL: Focus on fixing syntax errors, missing imports, undefined symbols. Avoid changing test logic.
+- For EXEC_FAIL/EXEC_TIMEOUT: Focus on fixing runtime exceptions, assertion failures, null pointer issues. Preserve test intent.
 - For HIGH_REDUNDANCY: specify most_similar_to and suggest how to differentiate
-- delete_tests: only for Test files with max_similarity > 0.95 (near-identical)
-- Max 4 instructions per Test file. Be specific and actionable.
+- Max 3 instructions per test, keep each instruction focused on one specific issue
+- delete_tests: only for Test files with max_similarity > 0.90 (near-identical)
