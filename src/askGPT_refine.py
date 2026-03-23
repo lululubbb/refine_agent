@@ -443,12 +443,12 @@ def generate_one_test(
 
     if not ok:
         print(f"    ❌ LLM 调用失败 ({elapsed:.1f}s)", flush=True)
-        return None
+        return None, gen_result
 
     has_code, code, has_err = extract_code(gen_result.content)
     if not has_code or not code.strip():
         print(f"    ❌ 未提取到有效 Java 代码 ({elapsed:.1f}s)", flush=True)
-        return None
+        return None, gen_result
 
     if pkg_decl:
         code = repair_package(code, pkg_decl)
@@ -647,30 +647,55 @@ def focal_method_pipeline(
     gen_client = make_generator_client()
     ref_client = make_refiner_client()
 
-    proj_base = os.path.dirname(os.path.abspath(project_dir))
-    buggy_dir = os.path.abspath(project_dir)
-
-    _proj_base_name = re.sub(r'_b$', '', proj_name, flags=re.IGNORECASE)
-    fixed_dir = None
-    for cand in [
-        os.path.join(proj_base, proj_name.replace("_b", "_f").replace("_B", "_F")),
-        os.path.join(proj_base, os.path.basename(os.path.abspath(project_dir)).replace("_b", "_f")),
-        os.path.join(proj_base, f"{_proj_base_name}_f"),
-    ]:
-        if os.path.isdir(cand):
-            fixed_dir = cand
-            print(f"  {Fore.GREEN}✅ found fixed_dir: {cand}{Style.RESET_ALL}", flush=True)
-            break
-
-    if fixed_dir is None:
-        print(f"  {Fore.RED}⚠ fixed_dir not found, bug_revealing will be skipped.{Style.RESET_ALL}", flush=True)
-
+    proj_base     = os.path.dirname(os.path.abspath(project_dir))
+    current_dir   = os.path.abspath(project_dir)
+    current_name  = os.path.basename(current_dir)
+ 
+    # ── Determine fixed_dir (for test generation) and buggy_dir (for bug_revealing) ──
+    # Support both _f-first (new default) and _b-first (legacy) workflows.
+    if current_name.endswith("_f") or current_name.endswith("_F"):
+        # New workflow: project_dir points to the fixed version.
+        # Tests are generated and evaluated on the fixed version.
+        # Bug revealing is tested on the buggy (_b) sibling.
+        fixed_dir = current_dir
+        _proj_base_name = re.sub(r'_f$', '', current_name, flags=re.IGNORECASE)
+        buggy_dir = None
+        for cand in [
+            os.path.join(proj_base, current_name.replace("_f", "_b").replace("_F", "_B")),
+            os.path.join(proj_base, f"{_proj_base_name}_b"),
+        ]:
+            if os.path.isdir(cand):
+                buggy_dir = cand
+                print(f"  {Fore.GREEN}✅ found buggy_dir (for bug_revealing): {cand}{Style.RESET_ALL}", flush=True)
+                break
+        if buggy_dir is None:
+            print(f"  {Fore.RED}⚠ buggy_dir (_b) not found, bug_revealing will be skipped.{Style.RESET_ALL}", flush=True)
+        # The TestRunner compiles/runs tests on the fixed project
+        test_project_dir = fixed_dir
+    else:
+        # Legacy workflow: project_dir points to the buggy version (original behaviour).
+        buggy_dir = current_dir
+        _proj_base_name = re.sub(r'_b$', '', current_name, flags=re.IGNORECASE)
+        fixed_dir = None
+        for cand in [
+            os.path.join(proj_base, current_name.replace("_b", "_f").replace("_B", "_F")),
+            os.path.join(proj_base, f"{_proj_base_name}_f"),
+        ]:
+            if os.path.isdir(cand):
+                fixed_dir = cand
+                print(f"  {Fore.GREEN}✅ found fixed_dir: {cand}{Style.RESET_ALL}", flush=True)
+                break
+        if fixed_dir is None:
+            print(f"  {Fore.RED}⚠ fixed_dir not found, bug_revealing will be skipped.{Style.RESET_ALL}", flush=True)
+        # The TestRunner compiles/runs tests on the buggy project (legacy)
+        test_project_dir = buggy_dir
+ 
     agent = RefineAgent(
         refiner_client     = ref_client,
         template_dir       = _PROMPT_DIR,
         buggy_dir          = buggy_dir,
         fixed_dir          = fixed_dir,
-        skip_bug_revealing = (fixed_dir is None),
+        skip_bug_revealing = (buggy_dir is None or fixed_dir is None),
     )
 
     # ════════════════════════════════════════════════════════════════
@@ -704,9 +729,13 @@ def focal_method_pipeline(
             logger.warning("%s test_%d generation failed", progress_tag, seq)
             continue
         code, gen_result = result
-        current_codes[tc_name] = code
         # ★ 按 HITS 口径记录：role="generator", phase="phase1", 纯 LLM 调用时间
         tracker.record("generator", "phase1", gen_result)
+        print(f"  📊 [TokenLog] Recorded generator phase1: {gen_result.prompt_tokens}+{gen_result.completion_tokens} tokens", flush=True)
+        if code is None:
+            gen_failures.append(seq)
+            continue
+        current_codes[tc_name] = code
 
     phase1_elapsed = time.time() - phase1_start
     time_stats["rounds"]["phase1"] = round(phase1_elapsed, 2)
@@ -744,7 +773,7 @@ def focal_method_pipeline(
         t0_agent = time.time()
         refine_result: RefineResult = agent.run(
             focal_method_result_dir = base_dir,
-            project_dir             = buggy_dir,
+            project_dir             = test_project_dir,
             focal_method            = method_name,
             class_name              = class_name,
             target_class_fqn        = (
@@ -775,6 +804,7 @@ def focal_method_pipeline(
                 elapsed_seconds   = refine_result.refiner_elapsed_seconds,
             )
             tracker.record("refiner", round_key, _ref_result)
+            print(f"  📊 [TokenLog] Recorded refiner {round_key}: {_ref_result.prompt_tokens}+{_ref_result.completion_tokens} tokens", flush=True)
 
         if refine_result.suite_score:
             _print_suite_score(refine_result.suite_score, tag=f"Round {r}")
@@ -832,6 +862,7 @@ def focal_method_pipeline(
                   + (f" {Fore.YELLOW}[上轮未改变，加强提示]{Style.RESET_ALL}" if prev_unchanged else ""),
                   flush=True)
 
+            tc_diag = refine_result.test_diags.get(tc_name)
             fix_msgs = build_fix_messages(
                 test_name      = tc_name,
                 current_code   = current_codes[tc_name],
@@ -853,6 +884,7 @@ def focal_method_pipeline(
 
             # ★ 记录 fix 的 Generator token
             tracker.record("generator", round_key, fix_result)
+            print(f"  📊 [TokenLog] Recorded generator {round_key} fix: {fix_result.prompt_tokens}+{fix_result.completion_tokens} tokens", flush=True)
 
             new_java_path = os.path.join(fix_dir, "new.java")
 
@@ -982,7 +1014,10 @@ def _save_stats(base_dir: str, tracker: LLMStatsTracker,
           f"LLM time (纯API): {llm_time}s  |  "
           f"Generator: {token_stats['generator']['total_tokens']}  |  "
           f"Refiner: {token_stats['refiner']['total_tokens']}  |  "
-          f"all_total: {total_tok}"
+          f"all_total: {total_tok}\n"
+          f"     Generator breakdown: prompt={token_stats['generator']['prompt_tokens']}, completion={token_stats['generator']['completion_tokens']}\n"
+          f"     Refiner breakdown: prompt={token_stats['refiner']['prompt_tokens']}, completion={token_stats['refiner']['completion_tokens']}\n"
+          f"     Rounds: {list(token_stats.get('rounds', {}).keys())}"
           + Style.RESET_ALL, flush=True)
     _divider("═", color=Fore.BLUE)
 
@@ -1090,7 +1125,7 @@ def start_whole_process(
     print(Fore.MAGENTA + "\n===== 全局统计 =====" + Style.RESET_ALL)
     print(f"总任务数          : {total}")
     print(f"全局总耗时        : {elapsed}s")
-    print(f"\n=== Token 统计（与 HITS 口径一致）===")
+    print(f"\n=== Token 统计===")
     print(f"Generator prompt  : {global_stats['generator']['prompt_tokens']}")
     print(f"Generator compl.  : {global_stats['generator']['completion_tokens']}")
     print(f"Generator total   : {global_stats['generator']['total_tokens']}")
@@ -1102,6 +1137,8 @@ def start_whole_process(
     print(f"ALL total_tokens  : {gt['total_tokens']}")
     print(f"ALL LLM time      : {gt['llm_elapsed_seconds']:.1f}s  (纯 API 调用，不含工具链)")
     print(f"avg tokens/task   : {round(gt['total_tokens']/total, 1) if total else 0}")
+    print(f"Generator per task: {round(global_stats['generator']['total_tokens']/total, 1) if total else 0}")
+    print(f"Refiner per task  : {round(global_stats['refiner']['total_tokens']/total, 1) if total else 0}")
     print("=======================" + Style.RESET_ALL)
 
     return global_stats

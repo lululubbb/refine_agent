@@ -1,34 +1,15 @@
 """
-scoring.py  (v3 — 概念修正版)
-==============================
+scoring.py  (v4 — fixed-version workflow, single EXEC_FAIL type)
+=================================================================
 
-概念定义（与用户需求完全对齐）
-─────────────────────────────────────────────────────────────────
-Test  = 一个 Java 测试文件，如 Token_1_1Test.java
-        （里面可以含多个 @Test 方法，但评估粒度是文件级别）
-Suite = 针对同一 focal method 生成的 test_number 个 Test 文件集合
-        e.g. Token_1_1Test.java + Token_1_2Test.java + ... + Token_1_5Test.java
-─────────────────────────────────────────────────────────────────
-
-评分原则
-─────────────────────────────────────────────────────────────────
-1. 不需要加权综合分（final_score）——去掉
-2. 每个维度独立打分，供 Refiner 分别分析
-3. Test 级（针对单个 Test 文件）：
-     - compile_score:   0/1，该 Test 文件是否能编译
-     - exec_score:      0/1，该 Test 文件是否能执行无异常
-     - coverage_score:  该 Test 文件对 focal method 的行/分支覆盖率（0~1）
-     - bug_reveal_score:该 Test 文件是否能揭示 bug（0/1/None）
-     - redundancy_score:该 Test 文件与 Suite 中其他 Test 的最高 AST 相似度（0~1）
-4. Suite 级（针对 N 个 Test 文件整体）：
-     - compile_pass_count / compile_pass_rate
-     - exec_pass_count / exec_pass_rate
-     - coverage_values:   每个 Test 的覆盖率列表（不聚合，保留细节）
-     - coverage_avg / coverage_max / coverage_min
-     - bug_reveal_count / bug_reveal_rate（只统计 exec_ok 的 Test）
-     - max_pairwise_similarity: 所有 Test pair 中最高的相似度（整体冗余风险）
-     - problem_tests: {issue_type: [test_names]}  按问题类型分类的 Test 列表
-─────────────────────────────────────────────────────────────────
+Changes from v3:
+  - Removed EXPECTED_EXEC_FAIL / UNEXPECTED_EXEC_FAIL distinction.
+    When tests are generated on the fixed version, exec_fail is always
+    an unwanted failure (no "good fail" exists on fixed code).
+  - Bug revealing is checked separately on the buggy version by Tool 3.
+    A test that is bug-revealing will PASS on fixed AND FAIL on buggy —
+    there is no exec_fail on the fixed version for such a test.
+  - NOT_BUG_REVEALING is still tracked (test passes on both versions).
 """
 from __future__ import annotations
 
@@ -68,8 +49,9 @@ class TestScore:
 
     # ── 问题标签（脚本判定，供 Refiner 快速定位）─────────────────
     issues: List[str] = field(default_factory=list)
-    # 可能的值：COMPILE_FAIL | EXPECTED_EXEC_FAIL | UNEXPECTED_EXEC_FAIL | EXEC_TIMEOUT |
-    #           LOW_LINE_COV | LOW_BRANCH_COV | NOT_BUG_REVEALING | HIGH_REDUNDANCY
+    # Possible values:
+    #   COMPILE_FAIL | EXEC_FAIL | EXEC_TIMEOUT |
+    #   LOW_LINE_COV | LOW_BRANCH_COV | NOT_BUG_REVEALING | HIGH_REDUNDANCY
 
     def to_dict(self) -> dict:
         return {
@@ -99,7 +81,7 @@ class SuiteScore:
 
     # ── 维度 1：编译通过情况 ──────────────────────────────────────
     compile_pass_count: int   = 0
-    compile_pass_rate:  float = 0.0    # 通过数 / 总数
+    compile_pass_rate:  float = 0.0
 
     # ── 维度 2：执行通过情况 ──────────────────────────────────────
     exec_pass_count: int   = 0
@@ -131,30 +113,24 @@ class SuiteScore:
     def to_dict(self) -> dict:
         return {
             "n_tests":           self.n_tests,
-            # 维度 1
             "compile_pass_count": self.compile_pass_count,
             "compile_pass_rate":  round(self.compile_pass_rate, 4),
-            # 维度 2
             "exec_pass_count":    self.exec_pass_count,
             "exec_pass_rate":     round(self.exec_pass_rate, 4),
-            # 维度 3
             "per_test_line_coverage":   self.per_test_line_coverage,
             "per_test_branch_coverage": self.per_test_branch_coverage,
             "coverage_line_avg":   _r(self.coverage_line_avg),
             "coverage_line_max":   _r(self.coverage_line_max),
             "coverage_line_min":   _r(self.coverage_line_min),
             "coverage_branch_avg": _r(self.coverage_branch_avg),
-            # 维度 4
             "bug_reveal_count":   self.bug_reveal_count,
             "bug_reveal_checked": self.bug_reveal_checked,
             "bug_reveal_rate":    round(self.bug_reveal_rate, 4),
-            # 维度 5
             "max_pairwise_similarity": _r(self.max_pairwise_similarity),
             "high_redundancy_pairs": [
                 {"test1": p[0], "test2": p[1], "similarity": round(p[2], 4)}
                 for p in self.high_redundancy_pairs
             ],
-            # 问题汇总
             "problem_tests": self.problem_tests,
         }
 
@@ -169,40 +145,41 @@ def _r(v: Optional[float]) -> Optional[float]:
 
 def compute_test_score(diag) -> TestScore:
     """
-    从 TestDiag（工具调用原始数据）计算 TestScore。
-    diag 是 refine_agent.TestDiag 实例，代表一个 Test 文件的诊断结果。
+    Compute TestScore from TestDiag.
+    Tests are generated on the FIXED version, so exec_fail is always unwanted.
+    Bug revealing (fail on buggy, pass on fixed) is tracked separately via Tool 3.
     """
     compile_s = 1.0 if diag.compile_ok else 0.0
     exec_s    = 1.0 if diag.exec_ok    else 0.0
 
-    # 覆盖率：保持原始 0~1 值（TestRunner 已从 JaCoCo 获取）
     line_cov   = (diag.focal_line_rate   / 100.0) if diag.focal_line_rate   is not None else None
     branch_cov = (diag.focal_branch_rate / 100.0) if diag.focal_branch_rate is not None else None
 
-    # 问题标签
     issues: List[str] = []
+
+    # ── Compile failure ────────────────────────────────────────────
     if not diag.compile_ok:
         issues.append("COMPILE_FAIL")
     else:
+        # ── Execution failure (single type — no "good fail" on fixed version) ──
         if not diag.exec_ok:
-            # 区分 expected fail (good, if bugrevealing) 和 unexpected fail (bad)
-            if diag.bug_revealing is True:
-                issues.append("EXPECTED_EXEC_FAIL")  # good fail
+            if diag.exec_timeout:
+                issues.append("EXEC_TIMEOUT")
             else:
-                issues.append("UNEXPECTED_EXEC_FAIL")  # bad fail
+                issues.append("EXEC_FAIL")
 
+    # ── Coverage (only meaningful when exec passes) ────────────────
     if diag.exec_ok:
         if line_cov is not None and line_cov < 0.7:
             issues.append("LOW_LINE_COV")
-        # ★ 修复问题6：分支覆盖率为0也应该视为不满足标准（低于50%）
-        # 当focal_branch_rate不为None时，包括0都应该检查
         if diag.focal_branch_rate is not None:
-            branch_cov_pct = diag.focal_branch_rate / 100.0
-            if branch_cov_pct < 0.7:
+            if (diag.focal_branch_rate / 100.0) < 0.7:
                 issues.append("LOW_BRANCH_COV")
+        # ── Bug revealing: test passes on fixed but does NOT fail on buggy ──
         if diag.bug_revealing is False:
             issues.append("NOT_BUG_REVEALING")
 
+    # ── Redundancy ─────────────────────────────────────────────────
     if diag.redundancy_score is not None and diag.redundancy_score > 0.7:
         issues.append("HIGH_REDUNDANCY")
 

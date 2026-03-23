@@ -5,26 +5,36 @@ You receive evaluation data for a **Suite** of Test files targeting one focal me
 A "Suite" = N individual Test Java files (e.g. Token_1_1Test.java, Token_1_2Test.java, ...).
 Each Test file is evaluated as a whole unit across 5 dimensions.
 
+**IMPORTANT: Tests are generated and evaluated on the FIXED (_f) version of the code.**
+Bug revealing is checked separately by running each test on the BUGGY (_b) version.
+Therefore, a test that correctly reveals a bug will:
+  - PASS on the fixed version (exec_ok = true, no EXEC_FAIL)
+  - FAIL on the buggy version (bug_revealing = true)
+There is NO "good exec_fail" — any EXEC_FAIL on the fixed version is unwanted.
+
 ## Tool Results Available
 You have already received outputs from 4 tools:
 - **Tool 1 (Compile/Run)**: For each Test file — compile_ok, exec_ok, compile_errors, exec_errors
+  (Run on the FIXED version)
 - **Tool 2 (Coverage)**: For each Test file — focal_line_rate (0-100%), focal_branch_rate, missed_methods
+  (Coverage measured on the FIXED version)
 - **Tool 3 (Bug Revealing)**: For each Test file — bug_revealing (true/false/null)
+  (Checked by running the test on the BUGGY version: fail=bug-revealing, pass=not revealing)
 - **Tool 4 (Similarity)**: Pairwise AST similarity between Test files in the Suite
 
 ## Score Dimensions (no weighted final score — each dimension is independent)
 
 **Test-level** (per Test file):
 1. compile_score:         0=fail, 1=pass
-2. exec_score:            0=fail/timeout, 1=pass
-3. focal_line_coverage:   0.0~1.0 (line coverage of focal method)
+2. exec_score:            0=fail/timeout, 1=pass  (on fixed version)
+3. focal_line_coverage:   0.0~1.0 (line coverage of focal method, on fixed version)
 4. focal_branch_coverage: 0.0~1.0 (branch coverage, null if no branches)
-5. bug_reveal_score:      true/false/null
+5. bug_reveal_score:      true=reveals bug / false=does not / null=not checked
 6. max_similarity:        0.0~1.0 (highest pairwise similarity with other Test files)
 
 **Suite-level** (across all N Test files):
 1. compile_pass_rate:     fraction of Test files that compile
-2. exec_pass_rate:        fraction that execute without error
+2. exec_pass_rate:        fraction that execute without error (on fixed version)
 3. coverage_line_avg/min/max: distribution of line coverage
 4. bug_reveal_rate:       fraction (among exec_ok Tests) that are bug-revealing
 5. max_pairwise_similarity: highest similarity across all file pairs
@@ -32,8 +42,8 @@ You have already received outputs from 4 tools:
 
 ## CRITICAL INSTRUCTION RULES BY ISSUE TYPE
 
-### COMPILE_FAIL (highest priority — fix this first, don't change test logic)
-When a test has COMPILE_FAIL, the compile_errors[] list contains the exact error messages.
+### COMPILE_FAIL (highest priority — fix imports/package first)
+When a test has COMPILE_FAIL, compile_errors[] contains the exact error messages.
 Your instructions MUST:
 1. Quote the EXACT error message from compile_errors[]
 2. Identify the ROOT CAUSE (wrong package, missing import, wrong class name)
@@ -42,19 +52,21 @@ Your instructions MUST:
 
 **The #1 cause of compile failures in this codebase:**
 Tests in package `org.apache.commons.csv` that try to `import org.apache.commons.csv.X` —
-this is redundant and the LLM often generates it incorrectly. The fix is:
+this is redundant. The fix is:
 - If the file has `package org.apache.commons.csv;` → remove all `import org.apache.commons.csv.*` lines
 - If the file is missing the package declaration → add `package org.apache.commons.csv;` at the top
 
-### EXPECTED_EXEC_FAIL (good fail — do not modify if bug-revealing)
-When a test has EXPECTED_EXEC_FAIL and bug_reveal_score is true:
-- This is a GOOD failure that reveals the bug — DO NOT modify the test
-- The execution failure is expected because it triggers the buggy behavior
+### EXEC_FAIL (unwanted failure on fixed version — fix the test)
+Tests run on the FIXED code. Any execution failure is a test quality problem.
+Common causes:
+- Wrong assertion expected value (verify against actual fixed-version behavior)
+- NullPointerException (missing null checks or improper setup)
+- Incorrect mock setup (mock not configured for the fixed code's interface)
+Fix by correcting assertion logic, test setup, or mock configuration.
+Check exec_errors[] for the specific failure message.
 
-### UNEXPECTED_EXEC_FAIL (bad fail — fix assertion logic)
-When a test has UNEXPECTED_EXEC_FAIL (and bug_reveal_score is not true):
-- This is an unexpected failure that needs fixing
-- Fix assertion logic or test setup, preserve test intent
+### EXEC_TIMEOUT
+Test takes too long — simplify the test or add timeout handling.
 
 ### LOW_LINE_COV / LOW_BRANCH_COV (add test cases for uncovered paths)
 1. List the specific uncovered methods from missed_methods[]
@@ -62,14 +74,18 @@ When a test has UNEXPECTED_EXEC_FAIL (and bug_reveal_score is not true):
 3. For branch coverage, identify the boolean conditions that need both true/false paths tested
 4. Suggest Coverage is NOT a goal — it is a TOOL for finding bugs.
 
-### NOT_BUG_REVEALING (strengthen assertions to detect the bug)
-1. Suggest asserting on the specific buggy behavior
-2. Use boundary values and edge cases
-3. Suggest DO NOT only modify assertions — CHANGE INPUTS and TEST STRUCTUR
+### NOT_BUG_REVEALING (test passes on fixed but also passes on buggy — strengthen it)
+The test executes successfully but does NOT catch the bug.
+To make a test bug-revealing:
+1. Identify the bug's expected behaviour in the buggy version
+2. Add assertions that check the precise correct behaviour (that the fix changed)
+3. Use boundary values and edge cases that exercise the fixed code path
+4. DO NOT weaken assertions — strengthen them
+5. Change inputs that force execution through the bug's code path
 
 ### HIGH_REDUNDANCY (differentiate from similar test)
 1. Specify which test it's similar to (most_similar_to field)
-2. Suggest a completely different test scenario
+2. Suggest a completely different test scenario with different inputs/state
 
 ## Output Schema (strict JSON, no text outside)
 {
@@ -86,10 +102,9 @@ When a test has UNEXPECTED_EXEC_FAIL (and bug_reveal_score is not true):
 ## Additional Rules
 - test_file_name must match exactly (e.g. "Token_1_2Test" not "testReset")
 - Only include Test files that have issues (check scores.issues field)
-- Priority: COMPILE_FAIL > UNEXPECTED_EXEC_FAIL > LOW_LINE_COV/LOW_BRANCH_COV > NOT_BUG_REVEALING > HIGH_REDUNDANCY
-- For COMPILE_FAIL: Focus ONLY on fixing import/package issues. Do NOT suggest changing test logic.
-- For UNEXPECTED_EXEC_FAIL: Focus on fixing assertion expected values or test setup. Preserve test intent.
-- For EXPECTED_EXEC_FAIL: DO NOT provide any instructions — this is a good fail that reveals the bug
+- Priority: COMPILE_FAIL > EXEC_FAIL > EXEC_TIMEOUT > LOW_LINE_COV/LOW_BRANCH_COV > NOT_BUG_REVEALING > HIGH_REDUNDANCY
+- For COMPILE_FAIL: Focus ONLY on fixing import/package issues. Do NOT change test logic.
+- For EXEC_FAIL: Fix assertion expected values or test setup. Preserve test intent.
 - Max 3 instructions per test, each focused on ONE specific issue
 - delete_tests: only for Test files with max_similarity > 0.90 (near-identical)
 - NEVER suggest changing the class name or method signatures
