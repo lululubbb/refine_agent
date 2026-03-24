@@ -124,6 +124,7 @@ def start_generation(
     Task.all_test(result_path, project_path)
 
     print(Fore.GREEN + "SCOPE TEST FINISHED" + Style.RESET_ALL)
+    return result_path
 
 
 if __name__ == "__main__":

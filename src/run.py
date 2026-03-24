@@ -12,16 +12,18 @@ run.py
 """
 import json
 import os
+import re
 import shutil
+import subprocess
 import sys
 import time
-
+import glob
 # ── sys.path 配置（在 src/ 目录下运行）──────────────────────────────
 HERE = os.path.dirname(os.path.abspath(__file__))
 if HERE not in sys.path:
     sys.path.insert(0, HERE)
 
-from tools import dataset_dir, result_dir, project_dir
+from tools import dataset_dir, result_dir, project_dir, find_result_in_projects
 from database import drop_table, create_table
 from parse_data import parse_data
 from export_data import export_data
@@ -106,6 +108,34 @@ def run(
         project_name = os.path.basename(os.path.normpath(project_dir))
         sql_query = f"SELECT id FROM method WHERE project_name='{project_name}' ;"
     start_generation(sql_query, multiprocess=multiprocess, confirmed=confirmed)
+
+    # ── Step 5: 数据后处理（bug_revealing + similarity）──────────────────
+    # 生成后：自动运行 bug_revealing 与 similarity（针对当前 project）
+    try:
+        # project_dir 在 config.py 中定义，指向当前处理的 defects4j 单个项目（可能带 _b 后缀）
+        proj = os.path.abspath(project_dir)
+        # 找到该项目下最新的 tests%* 目录（如果存在）
+        tests_dirs = sorted(glob.glob(os.path.join(proj, 'tests%*')))
+        tests_dir = tests_dirs[-1] if tests_dirs else None
+
+        # 1) 运行 bug_revealing（使用 src/run_bug_revealing.py，传入项目路径以批量处理）
+        rb = [sys.executable, os.path.join(os.path.dirname(__file__), 'run_bug_revealing.py'), proj]
+        print(f"📌 运行 bug_revealing: {' '.join(rb)}")
+        subprocess.run(rb, check=False)
+
+        # 2) 运行 code_to_ast + measure_similarity（对最新 tests_dir）
+        if tests_dir and os.path.isdir(tests_dir):
+            code_to_ast = [sys.executable, os.path.join(os.path.dirname(__file__), 'scripts', 'code_to_ast.py'), tests_dir]
+            print(f"📌 运行 code_to_ast: {' '.join(code_to_ast)}")
+            subprocess.run(code_to_ast, check=False)
+
+            measure_sim = [sys.executable, os.path.join(os.path.dirname(__file__), 'scripts', 'measure_similarity.py'), tests_dir]
+            print(f"📌 运行 measure_similarity: {' '.join(measure_sim)}")
+            subprocess.run(measure_sim, check=False)
+        else:
+            print(f"⚠️ 未找到 tests 目录，跳过 similarity 计算: {proj}")
+    except Exception as e:
+        print(f"⚠️ 自动运行 bug_revealing/similarity 失败: {e}")
 
     print("\n✅ 全流程完成！")
 
