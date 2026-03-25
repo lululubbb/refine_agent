@@ -88,7 +88,12 @@ import sys
 import time
 from datetime import datetime
 from typing import Dict, List, Optional
-
+from contract_integration import (
+    extract_contract_for_focal_method,
+    save_contract,
+    enrich_ctx_with_contract,
+    get_contract_text,
+)
 from colorama import Fore, Style, init, Back
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -513,6 +518,7 @@ def build_fix_messages(
     suite_summary: str,
     prev_unchanged: bool = False,
     diag=None,
+    contract_text: str = "",
 ) -> List[Dict]:
     # ★ 从 diag 提取详细信息
     compile_ok      = getattr(diag, 'compile_ok',      True)  if diag else True
@@ -552,6 +558,7 @@ def build_fix_messages(
         "exec_errors":     exec_errors[:10],
         "missed_methods":  missed_methods[:20],
         "partial_methods": partial_methods[:10],
+        "contract_text":   contract_text, 
     }
     msgs = generate_messages(TEMPLATE_FIX, context)
     if remain_prompt_tokens(msgs) < 0:
@@ -571,7 +578,14 @@ def build_fix_messages(
                 "\n\n⚠️ WARNING: The previous attempt produced output identical to the input. "
                 "This time you MUST make concrete, visible changes to the code."
             )
-        msgs[-1]["content"] += suffix
+        if contract_text:
+            suffix += (
+                f"\\n\\n## Program Contract Reminder\\n"
+                f"Your fixed tests MUST include:\\n"
+                f"  - At least one assertion verifying each POSTCONDITION\\n"
+                f"  - At least one assertThrows for each EXCEPTION CONTRACT\\n"
+                f"  - Both valid-input (happy path) and invalid-input (violation) tests for each PRECONDITION"
+            )
         if not compile_ok and compile_errors:
             suffix += (
                 f"\n\n## COMPILE ERRORS REMINDER (MUST FIX FIRST)\n"
@@ -582,6 +596,8 @@ def build_fix_messages(
                 f"\n\n## EXECUTION ERRORS REMINDER\n"
                 + "\n".join(f"  {e}" for e in exec_errors[:5])
             )
+            msgs[-1]["content"] += suffix
+
 
     return msgs
 
@@ -642,7 +658,28 @@ def focal_method_pipeline(
     imports           = raw_data.get("imports", "")
     focal_method_code = raw_data.get("source_code", ctx_d1.get("information", ""))
     pkg_decl          = canonical_package_decl(package)
-
+    
+    # ── Program Contract 提取 ─────────────────────────────────────
+    # 从 focal method 源码静态分析前/后置条件，注入 Prompt 提升测试质量
+    contract = extract_contract_for_focal_method(raw_data, ctx_d1)
+    if contract and not contract.is_empty():
+        save_contract(contract, base_dir)
+        _divider("·", color=Fore.BLUE)
+        print(Fore.BLUE + f"  📋 Program Contract for {class_name}.{method_name}:" + Style.RESET_ALL, flush=True)
+        if contract.preconditions:
+            print(f"     ✓ Preconditions  ({len(contract.preconditions)}): " +
+                  str(contract.preconditions[:2]), flush=True)
+        if contract.postconditions:
+            print(f"     ✓ Postconditions ({len(contract.postconditions)}): " +
+                  str(contract.postconditions[:2]), flush=True)
+        if contract.exception_contracts:
+            print(f"     ✓ Exceptions     ({len(contract.exception_contracts)}): " +
+                  str(contract.exception_contracts[:2]), flush=True)
+        _divider("·", color=Fore.BLUE)
+    else:
+        contract = None   # 确保后续代码安全使用
+        print(f"  ℹ️  No program contract extracted for {class_name}.{method_name} "
+              f"(normal: contract inference is best-effort)", flush=True)
 
     gen_client = make_generator_client()
     ref_client = make_refiner_client()
@@ -714,8 +751,8 @@ def focal_method_pipeline(
         result = generate_one_test(
             seq         = seq,
             gen_client  = gen_client,
-            ctx_d1      = ctx_d1,
-            ctx_d3      = ctx_d3,
+            ctx_d1      = enrich_ctx_with_contract(ctx_d1, contract),
+            ctx_d3      = enrich_ctx_with_contract(ctx_d3, contract),
             imports     = imports,
             package     = package,
             class_name  = class_name,
@@ -875,6 +912,7 @@ def focal_method_pipeline(
                 suite_summary  = refine_result.suite_summary,
                 prev_unchanged = prev_unchanged,
                 diag=tc_diag, 
+                contract_text  = get_contract_text(contract), 
             )
 
             fix_gen_path = os.path.join(fix_dir, "fix_gen.json")

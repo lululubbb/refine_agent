@@ -30,6 +30,10 @@ Method: `{{ focal_method }}`
 ```
 {% endfor %}
 {% endif %}
+{% if contract_text %}
+
+{{ contract_text }}
+{% endif %}
 
 ### Requirements
 - Class name: `{{ class_name }}Test`
@@ -37,4 +41,10 @@ Method: `{{ focal_method }}`
 - Generate at least 5 diverse test methods covering: normal path, edge cases, boundary values, and expected exceptions.
 - Each test name must be descriptive (e.g., `test{{ focal_method }}_normalCase`).
 - Include all necessary `import` statements.
+- Output **ONLY** the complete Java class — no prose, no markdown fences.
+{% if contract_text %}
+- CRITICAL: Your tests MUST verify the postconditions listed in the contract above.
+- CRITICAL: Generate at least one test for each exception contract listed above (using `assertThrows`).
+- CRITICAL: For each precondition, generate one test that satisfies it (happy path) and one that violates it (error path).
+{% endif %}
 - Output **ONLY** the complete Java class — no prose, no markdown fences.

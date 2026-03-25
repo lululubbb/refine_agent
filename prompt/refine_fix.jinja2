@@ -6,6 +6,10 @@ You are an expert Java developer. Fix the following Test file based on the repai
 ```java
 {{ method_code }}
 ```
+{% if contract_text %}
+
+{{ contract_text }}
+{% endif %}
 
 ## Current Test File Source
 ```java
@@ -78,6 +82,10 @@ Transform tests into bug-seeking ones:
 - Exception testing: trigger and assert exceptions
 - Strengthen assertions: exact values, invariants, expected failures
 - Do not only tweak assertions — change inputs and test structure.
+{% if contract_text %}
+- Use the Program Contract above to identify what the method GUARANTEES — then assert those guarantees hold.
+- For each precondition violation, use assertThrows to verify proper error handling.
+{% endif %}
 
 ## HIGH_REDUNDANCY (Exploration Diversity)
 For similar tests:
@@ -106,4 +114,8 @@ Goal: maximize behavioral diversity, not similarity.
 6. If the test is in package `org.apache.commons.csv`, do NOT import classes from that same package
    (they are already visible). Only import classes from OTHER packages.
 7. For compile errors about "cannot find symbol", check the package declaration first.
+{% if contract_text %}
+8. MANDATORY: At least one test must verify each postcondition from the Program Contract.
+9. MANDATORY: At least one test must use assertThrows for each exception contract listed.
+{% endif %}
 8. Output ONLY the complete updated Java class — no prose, no markdown fences.
