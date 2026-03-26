@@ -4,7 +4,7 @@
 repos=(Csv)
 
 revisions_dir=/home/chenlu/refine_test_gen_v5/defect4j_projects
-repo_type=f
+repo_type=b
 
 export_revisions() {
 	for repo in ${repos[@]}; do

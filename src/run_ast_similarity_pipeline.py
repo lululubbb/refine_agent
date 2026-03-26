@@ -190,7 +190,7 @@ def main():
 
     def extract_project_number(project_path):
         basename = os.path.basename(project_path)
-        num_part = basename.replace('Csv_', '').replace('_b', '').split('_')[0]
+        num_part = basename.replace('Csv_', '').replace('_f', '').split('_')[0]
         try:
             return int(num_part)
         except Exception:
@@ -206,17 +206,17 @@ def main():
                     print(f"Warning: provided project path does not exist: {p}")
                     continue
                 # If the provided path is a defects4j root containing many Csv*_*_b projects, expand them
-                children = sorted(glob.glob(os.path.join(ap, 'Csv*_*_b')))
+                children = sorted(glob.glob(os.path.join(ap, 'Csv*_*_f')))
                 if children:
                     for c in children:
                         seen.append(os.path.abspath(c))
                     continue
                 base = os.path.basename(ap)
-                if base.startswith('Csv') and base.endswith('_b') and os.path.isdir(ap):
+                if base.startswith('Csv') and base.endswith('_f') and os.path.isdir(ap):
                     seen.append(ap)
                     continue
                 # try to find Csv*_*_b under this path (one level deep)
-                children2 = sorted(glob.glob(os.path.join(ap, '*', 'Csv*_*_b')))
+                children2 = sorted(glob.glob(os.path.join(ap, '*', 'Csv*_*_f')))
                 if children2:
                     for c in children2:
                         seen.append(os.path.abspath(c))
@@ -235,7 +235,7 @@ def main():
         if not os.path.isdir(root_dir):
             print('Root not found:', root_dir)
             return []
-        candidate_projects = glob.glob(os.path.join(root_dir, 'Csv*_*_b'))
+        candidate_projects = glob.glob(os.path.join(root_dir, 'Csv*_*_f'))
         projects = [os.path.abspath(p) for p in sorted(candidate_projects, key=extract_project_number)]
         return projects
 

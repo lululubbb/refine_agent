@@ -861,7 +861,13 @@ class TestRunner:
 
                     if logs:
                         with open(logs['compile'], 'a') as f:
-                            f.write(f"[COMPILE_FAILED] {full_name}: {result.stderr.splitlines()[0] if result.stderr else 'compile error'}\n")
+                            f.write(f"[COMPILE_FAILED] {full_name}:\n")
+                            if result.stderr:
+                                for line in result.stderr.splitlines():
+                                    f.write(f"    {line}\n")
+                            else:
+                                f.write("    compile error\n")
+                            f.write("=" * 80 + "\n")
                         with open(logs['compile_failed'], 'a') as f:
                             f.write(f"{full_name}\t{test_case_file}\n")
 
@@ -1762,17 +1768,22 @@ class TestRunner:
                     for pat in [
                         re.compile(r"=>\s*([\w\.]+Exception):\s*(.*?)(?=\n\s+at|$)", re.DOTALL),
                         re.compile(r"([\w\.]+Exception):\s*(.*?)(?=\n\s+at|$)", re.DOTALL),
+                        re.compile(r"([\w\.]+Error):\s*(.*?)(?=\n\s+at|$)", re.DOTALL),
+                        re.compile(r"([\w\.]+Exception)$", re.MULTILINE),
+                        re.compile(r"([\w\.]+Error)$", re.MULTILINE),
                     ]:
                         m = pat.search(stderr_content)
                         if m:
-                            core_exception = f"{m.group(1)}：{m.group(2).strip()}"
+                            if len(m.groups()) > 1 and m.group(2):
+                                core_exception = f"{m.group(1)}：{m.group(2).strip()}"
+                            else:
+                                core_exception = m.group(1)
                             break
                     with open(logs['exec'], 'a') as f:
                         f.write(f"[EXEC_FAILED] {test_file}:\n")
                         f.write(f"[EXEC_CORE_ERROR] {core_exception}\n")
-                        for i, line in enumerate(stderr_content.splitlines()):
-                            if i > 50:
-                                break
+                        f.write("[EXEC_STDERR]\n")
+                        for line in stderr_content.splitlines():
                             f.write(f"    {line}\n")
                         f.write("=" * 80 + "\n")
                 return False, False

@@ -49,6 +49,8 @@ Each entry below is one Test file with issues. It contains:
 - **Tool 4**: redundancy_score (0-1), most_similar_to
 - **scores.issues**: problem labels for this Test file
 - **source_code**: full Java source of this Test file
+- **auto_fix_hints**: Pre-analyzed fix suggestions (FOLLOW THESE FIRST for compile/runtime errors)
+- **error_summary**: Classified error type codes (CE-1..CE-10, RE-1..RE-6)
 
 ```json
 {{ test_diagnostics | tojson(indent=2) }}
@@ -58,5 +60,23 @@ Each entry below is one Test file with issues. It contains:
 
 ## Task
 Analyze the above data and produce repair instructions per Test file.
-Use the suite_score for overall context, then diagnose each problematic Test individually.
+
+**PRIORITY ORDER for instructions:**
+1. **COMPILE_FAIL first**: If `compile_ok=false`, ALL instructions must fix compile errors.
+   Use the `auto_fix_hints` field — these are pre-analyzed fixes for the exact errors found.
+   Do NOT mix compile fixes with coverage instructions in the same test.
+2. **EXEC_FAIL second**: If `exec_ok=false`, fix the runtime errors using `exec_errors[]`.
+   Use `auto_fix_hints` for specific fix guidance.
+3. **Coverage/Bug-Revealing last**: Only address these if compile AND exec both pass.
+
+**For COMPILE_FAIL tests**, your instructions MUST:
+- Quote the exact error from `compile_errors[]`
+- Reference the specific CE-X type from `error_summary`
+- Give the EXACT code change (e.g., "Replace `reader.lastChar` with reflection: Field f = ...")
+
+**For EXEC_FAIL tests**, your instructions MUST:
+- Quote the exact error from `exec_errors[]`
+- For wrong assertion values: trace the focal method and give the correct expected value
+- For wrong exception types: specify the correct parent exception class
+
 Output ONLY the JSON object as specified in your system prompt.

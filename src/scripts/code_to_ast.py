@@ -333,7 +333,10 @@ class CodeToAST:
                         body_xml += self._node_to_xml(stmt, var_map)
 
                 sig = fix_chars(name)
-                method_tree = f'"{test_file_name}.{name}","{escape_xml("<TESTCASE><SIGNATURE>"+sig+"</SIGNATURE><BODY>"+body_xml+"</BODY></TESTCASE>")}"'
+                raw_xml = "<TESTCASE><SIGNATURE>"+sig+"</SIGNATURE><BODY>"+body_xml+"</BODY></TESTCASE>"
+                # 强制清洗：先转为 bytes 再转回 str，忽略无法处理的 surrogate
+                clean_xml = escape_xml(raw_xml).encode('utf-8', 'replace').decode('utf-8')
+                method_tree = f'"{test_file_name}.{name}","{clean_xml}"'
                 method_trees.append(method_tree)
 
                 end_ns = time.time_ns()
@@ -464,8 +467,18 @@ class CodeToAST:
                 except Exception:
                     pass
 
-        with open(out_csv, 'w', encoding='utf-8') as outf:
-            outf.write('\n'.join(version_code_asts))
+        UNUSUAL_LINE_TERMINATORS = ['\u2028', '\u2029']
+        def clean_unusual_chars(text):
+            if not isinstance(text, str):
+                return text
+            for char in UNUSUAL_LINE_TERMINATORS:
+                text = text.replace(char, ' ') # 将 LS/PS 替换为空格
+            return text
+
+        # 在你的写入循环里应用它
+        safe_asts = [clean_unusual_chars(ast) for ast in version_code_asts]
+        with open(out_csv, 'w', encoding='utf-8', errors='replace') as outf:
+            outf.write('\n'.join(safe_asts))
         end_version_ns = time.time_ns()
         with open(per_version_time_path, 'a', encoding='utf-8') as per_ver_f:
             per_ver_f.write(f'{proj_prefix},{os.path.basename(top_tests_dir)},{end_version_ns - start_version_ns}\n')

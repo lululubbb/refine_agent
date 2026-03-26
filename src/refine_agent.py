@@ -32,6 +32,7 @@ from jinja2 import Environment, FileSystemLoader
 
 from llm_client import LLMClient, LLMCallResult
 from scoring import TestScore, SuiteScore, compute_test_score, compute_suite_score
+from compile_error_analyzer import enrich_diag_with_fix_hints, get_error_summary
 
 logger = logging.getLogger(__name__)
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -369,6 +370,11 @@ def _build_refiner_messages(
         entry = diags[tname].to_dict()
         entry["scores"]      = test_scores[tname].to_dict() if tname in test_scores else {}
         entry["source_code"] = test_file_codes.get(tname, "// [source not available]")
+        # ★ 新增：自动生成针对性的编译/运行时修复提示
+        entry["auto_fix_hints"] = enrich_diag_with_fix_hints(diags[tname])
+        entry["error_summary"]  = get_error_summary(
+            diags[tname].compile_errors, diags[tname].exec_errors
+        )
         problematic_data.append(entry)
 
     try:

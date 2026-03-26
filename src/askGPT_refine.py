@@ -116,6 +116,7 @@ from tools import (
     canonical_package_decl,
 )
 from jinja2 import Environment, FileSystemLoader
+from compile_error_analyzer import enrich_diag_with_fix_hints, get_error_summary
 
 init()
 logger = logging.getLogger(__name__)
@@ -527,78 +528,91 @@ def build_fix_messages(
     exec_errors     = getattr(diag, 'exec_errors',     [])    if diag else []
     missed_methods  = getattr(diag, 'missed_methods',  [])    if diag else []
     partial_methods = getattr(diag, 'partial_methods', [])    if diag else []
-
-    instructions_summary = "\n".join(
-        f"  {i+1}. {instr}" for i, instr in enumerate(instructions)
+    # ★ 自动分析编译/运行时错误，生成具体修复提示
+    auto_fix_hints = enrich_diag_with_fix_hints(diag) if diag else []
+    error_summary  = get_error_summary(compile_errors, exec_errors) if diag else ""
+ 
+    # 若有自动修复提示，将其合并到 instructions 的开头（优先级最高）
+    merged_instructions = list(instructions)
+    if not compile_ok and auto_fix_hints:
+        # 编译错误：自动提示优先级最高，放最前面
+        merged_instructions = auto_fix_hints + [
+            i for i in instructions
+            if not any(hint[:30] in i for hint in auto_fix_hints)
+        ]
+    elif not exec_ok and auto_fix_hints:
+        # 运行时错误：自动提示辅助
+        merged_instructions = [instructions[0]] + auto_fix_hints + instructions[1:] if instructions else auto_fix_hints
+ 
+    instructions_summary = "\\n".join(
+        f"  {i+1}. {instr}" for i, instr in enumerate(merged_instructions[:5])
     )
-
+ 
     unchanged_warning = ""
     if prev_unchanged:
         unchanged_warning = (
-            "\n\n⚠️ CRITICAL: Your previous output was IDENTICAL to the input. "
-            "You MUST make substantial changes this time. "
-            "The output MUST differ meaningfully from the current_suite below."
+            "\\n\\n⚠️ CRITICAL: Your previous output was IDENTICAL to the input. "
+            "You MUST make substantial changes this time."
         )
-
+ 
     context = {
         "class_name":           class_name,
         "focal_method":         focal_method,
         "test_name":            test_name,
         "current_suite":        current_code,
         "suite_summary":        suite_summary,
-        "instructions_json":    json.dumps(instructions, indent=2, ensure_ascii=False),
+        "instructions_json":    json.dumps(merged_instructions[:5], indent=2, ensure_ascii=False),
         "delete_tests_json":    "[]",
         "method_code":          ctx_d1.get("information", ctx_d3.get("full_fm", "")),
         "imports":              imports,
         "instructions_summary": instructions_summary,
         "unchanged_warning":    unchanged_warning,
-        "compile_ok":      compile_ok,
-        "exec_ok":         exec_ok,
-        "compile_errors":  compile_errors[:10],
-        "exec_errors":     exec_errors[:10],
-        "missed_methods":  missed_methods[:20],
-        "partial_methods": partial_methods[:10],
-        "contract_text":   contract_text, 
+        "compile_ok":           compile_ok,
+        "exec_ok":              exec_ok,
+        "compile_errors":       compile_errors[:10],
+        "exec_errors":          exec_errors[:10],
+        "missed_methods":       missed_methods[:20],
+        "partial_methods":      partial_methods[:10],
+        "contract_text":        contract_text,
+        "auto_fix_hints":       auto_fix_hints,       # ★ 新增
+        "error_summary":        error_summary,         # ★ 新增
     }
     msgs = generate_messages(TEMPLATE_FIX, context)
     if remain_prompt_tokens(msgs) < 0:
         context["method_code"] = ctx_d3.get("full_fm", "")
         msgs = generate_messages(TEMPLATE_FIX, context)
-
-    # ★ 在 user message 末尾追加强制要求（无论模板是否支持 unchanged_warning 变量）
+ 
     if msgs and msgs[-1]["role"] == "user":
         suffix = (
-            f"\n\n## Repair Instructions Summary\n{instructions_summary}"
-            f"\n\n## MANDATORY REQUIREMENT\n"
+            f"\\n\\n## Repair Instructions Summary\\n{instructions_summary}"
+            f"\\n\\n## MANDATORY REQUIREMENT\\n"
             f"Your output MUST be substantially different from the current test file. "
-            f"Apply ALL instructions above. Do NOT output the same code as the input."
+            f"Apply ALL instructions above."
         )
-        if prev_unchanged:
+        if not compile_ok and compile_errors:
             suffix += (
-                "\n\n⚠️ WARNING: The previous attempt produced output identical to the input. "
-                "This time you MUST make concrete, visible changes to the code."
+                f"\\n\\n## COMPILE ERRORS — FIX THESE FIRST:\\n"
+                + "\\n".join(f"  {e}" for e in compile_errors[:5])
+            )
+            if auto_fix_hints:
+                suffix += f"\\n\\n## AUTO-ANALYZED FIXES:\\n"
+                suffix += "\\n".join(f"  {i+1}. {h[:200]}" for i, h in enumerate(auto_fix_hints))
+        if not exec_ok and exec_errors:
+            suffix += (
+                f"\\n\\n## EXECUTION ERRORS:\\n"
+                + "\\n".join(f"  {e}" for e in exec_errors[:5])
             )
         if contract_text:
             suffix += (
                 f"\\n\\n## Program Contract Reminder\\n"
-                f"Your fixed tests MUST include:\\n"
-                f"  - At least one assertion verifying each POSTCONDITION\\n"
-                f"  - At least one assertThrows for each EXCEPTION CONTRACT\\n"
-                f"  - Both valid-input (happy path) and invalid-input (violation) tests for each PRECONDITION"
+                f"Tests MUST verify postconditions and test exception contracts."
             )
-        if not compile_ok and compile_errors:
+        if prev_unchanged:
             suffix += (
-                f"\n\n## COMPILE ERRORS REMINDER (MUST FIX FIRST)\n"
-                + "\n".join(f"  {e}" for e in compile_errors[:5])
+                "\\n\\n⚠️ MUST CHANGE: Previous output was identical to input. Make concrete changes."
             )
-        if not exec_ok and exec_errors:
-            suffix += (
-                f"\n\n## EXECUTION ERRORS REMINDER\n"
-                + "\n".join(f"  {e}" for e in exec_errors[:5])
-            )
-            msgs[-1]["content"] += suffix
-
-
+        msgs[-1]["content"] += suffix
+ 
     return msgs
 
 
