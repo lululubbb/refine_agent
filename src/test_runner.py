@@ -189,10 +189,19 @@ class TestRunner:
     # 辅助：从 test_cases 目录文件名推断 target_class（modified_class）
     # 优先级: modified_classes.src > defects4j.build.properties > 文件名前缀
     # ------------------------------------------------------------------
-    def _resolve_target_class(self, tests_dir):
-        """返回 target_class 简单类名（如 CSVRecord），失败返回空字符串"""
-        project_root = self.target_path
+    def _resolve_all_target_classes(self) -> list:
+        """返回所有 modified class 的简单类名列表（支持多个）。"""
+        from test_runner_focal_fix import resolve_all_target_classes
+        return resolve_all_target_classes(self.target_path)
 
+    def _resolve_target_class(self, tests_dir):
+        """返回主要 target_class 简单类名（如 CSVRecord），失败返回空字符串
+        [PATCHED] 内部使用 _resolve_all_target_classes，返回第一个"""
+        all_classes = self._resolve_all_target_classes()
+        if all_classes:
+            return all_classes[0]
+
+        project_root = self.target_path
         meta_file = os.path.join(project_root, 'modified_classes.src')
         if os.path.exists(meta_file):
             try:
@@ -397,7 +406,16 @@ class TestRunner:
 
         # ── 方法名匹配：有重载 descriptor 时精确匹配，否则接受所有重载 ────
         if focal_descriptor and method_desc:
-            return method_desc.startswith(focal_descriptor)
+            # ★ PATCH: 完整参数部分匹配（提取括号内内容），而非 startswith
+            # 这修复了 getOrder() descriptor="()" 无法匹配 desc="()I" 的问题
+            if focal_descriptor.endswith(')'):
+                # 完整参数 descriptor: 提取 method_desc 的参数部分对比
+                close_idx = method_desc.find(')')
+                method_params = method_desc[:close_idx + 1] if close_idx >= 0 else method_desc
+                return method_params == focal_descriptor
+            else:
+                # 前缀匹配（部分 descriptor）
+                return method_desc.startswith(focal_descriptor)
 
         return True
 
@@ -734,8 +752,12 @@ class TestRunner:
         只有当所有参数都是基本类型或基本类型数组时，才能生成可靠的 descriptor。
         对象类型（如 String、Reader）因无包名信息无法准确转换，返回 None 以避免误匹配。
         这样设计确保：有 descriptor → 精确匹配；无 descriptor → 退化为按名匹配所有重载。
+
+        [PATCHED] 无参方法返回 "()" 而非 None，修复 getOrder() 等无参方法无法匹配的问题。
         """
         primitives = set(self._JAVA_PRIMITIVE_MAP.keys())
+        if not param_types:
+            return "()"  # ★ PATCH: 无参方法返回 "()" 而非 None
         result_parts = []
         for t in param_types:
             t = t.strip()
@@ -1630,6 +1652,10 @@ class TestRunner:
                 if branch_rate is not None:
                     f.write(f"  全项目分支覆盖率: {branch_rate}% ({branch_cov}/{branch_total})\n")
                 if modified_class_name:
+                    # ★ PATCH: 输出所有 modified classes
+                    _all_classes = self._resolve_all_target_classes()
+                    if len(_all_classes) > 1:
+                        f.write(f"  target_classes: {_all_classes}\n")
                     f.write(f"  target_class: {modified_class_name}\n")
                     if m_line_rate is not None:
                         f.write(f"  modified class行覆盖率: {m_line_rate}% ({m_line_cov}/{m_line_total})\n")

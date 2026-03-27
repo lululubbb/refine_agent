@@ -2,6 +2,10 @@ You are an expert Java developer. Fix the following Test file based on the repai
 You MUST follow ALL compilation rules below or the test will STILL fail to compile.
 
 ## Test File: `{{ test_name }}.java`
+{% if version_constraints %}
+
+{{ version_constraints }}
+{% endif %}
 
 ## Focal Method Context
 ```java
@@ -185,8 +189,10 @@ Before writing the output, mentally check EACH of these:
 3. Do NOT change @Test methods that are NOT mentioned in instructions.
 4. Add missing imports.
 5. The output MUST be compilable Java.
-6. If the test is in `org.apache.commons.csv`, do NOT import classes from that package.
+6. Strictly Public API Only: Do NOT generate code that accesses private or protected methods/fields. Ensure all method calls and field accesses (e.g., Token.content) match the public API of the library version.
 {% if contract_text %}
 7. At least one test must verify each postcondition from the Program Contract.
 {% endif %}
-8. Output ONLY the complete Java class — no prose, no markdown fences.
+8.Mocking Guardrail: When using Mockito, do NOT mock final classes or final methods. Every mocked call must have a corresponding thenReturn, thenThrow, or thenAnswer to avoid NullPointerException during execution.
+9.Explicit Exception Declaration: All test method signatures MUST include throws Exception to handle IOException and other checked exceptions.
+11.Output ONLY the complete Java class — no prose, no markdown fences.

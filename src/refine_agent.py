@@ -592,6 +592,18 @@ class RefineAgent:
         }
         delete_tests = [t for t in parsed.get("delete_tests", []) if t in diags]
 
+        # ★ 新增：自动删除高冗余用例（max_similarity >= 0.9）
+        # 因为 HIGH_REDUNDANCY 在 compute_test_score 中可由 redundant 计算得出
+        auto_deleted = []
+        for tname, ts in test_scores.items():
+            if tname in diags and "HIGH_REDUNDANCY" in ts.issues:
+                if ts.max_similarity is not None and ts.max_similarity >= 0.9:
+                    if tname not in delete_tests:
+                        delete_tests.append(tname)
+                        auto_deleted.append(tname)
+        if auto_deleted:
+            logger.info("[RefineAgent] auto delete HIGH_REDUNDANCY tests: %s", auto_deleted)
+
         # ★ 新增：验证修复效果（编译检查）
         if instructions:
             logger.info("[Refine] Validating %d modified tests for compilation...", len(instructions))

@@ -93,24 +93,27 @@ Object val = f.get(instance);
 // For private method: use getDeclaredMethod(...).setAccessible(true).invoke(...)"""
         ),
 
-        # CE-2: CSVFormat.Builder不存在
+        # CE-2: 通用的 Builder 模式缺失 (针对旧版 Java 库常见的 API 差异)
         (
-            r'找不到符号.*Builder|CSVFormat\.Builder',
+            r'找不到符号.*\n?.*符号:\s+类\s+(\w+)\.Builder|cannot find symbol.*\n?.*symbol:\s+class\s+(\w+)\.Builder',
             CompileErrorType.SYMBOL_NOT_FOUND,
-            "CSVFormat.Builder does not exist in this Defects4J version. Use withXxx() chaining.",
-            """// Replace Builder pattern with method chaining:
-CSVFormat format = CSVFormat.DEFAULT.withDelimiter(',').withQuote('"');
-// Available methods: withDelimiter, withQuote, withRecordSeparator, 
-// withNullString, withIgnoreEmptyLines, withHeader, etc."""
+            "The Builder nested class for {class} does not exist in this version. "
+            "Check if the library uses static factory methods (e.g., {class}.newXxx()) "
+            "or setter-chaining (e.g., {class}.DEFAULT.withXxx()).",
+            """// The Builder pattern might not be available. 
+// Try using factory methods or fluent 'with' methods:
+{class} instance = {class}.DEFAULT.withProperty(value); 
+// Or check the focal class context for the correct instantiation way."""
         ),
 
-        # CE-2b: 其他找不到符号
+        # CE-2b: 通用的方法/字段找不到 (最常见)
         (
-            r'找不到符号',
+            r'找不到符号.*\n?.*符号:\s+(?:方法|变量|类)\s+(\w+)|cannot find symbol.*\n?.*symbol:\s+(?:method|variable|class)\s+(\w+)',
             CompileErrorType.SYMBOL_NOT_FOUND,
-            "Symbol not found — the class/method/field does not exist in this version. "
-            "Only use APIs visible in the provided class context.",
-            "// Check the focal class context above for available methods and fields."
+            "Symbol '{symbol}' not found. It does not exist in the current version of the library.",
+            """// '{symbol}' is not available. 
+// Please refer to the provided Focal Class context above to see all public APIs 
+// available in this specific Defects4J version."""
         ),
 
         # CE-3: 继承final类
@@ -344,16 +347,32 @@ Reader reader = new StringReader("test content");
 
     def _fill_template(self, template: str, error_msg: str) -> str:
         """用错误信息中提取的具体名称填充代码模板。"""
-        # 提取private字段名
-        m = re.search(r'(\w+)\s+在\s+(\w+)\s+中是\s+private', error_msg)
-        if m:
-            field_name, class_name = m.group(1), m.group(2)
-            template = template.replace('{field}', field_name).replace('{class}', class_name)
+        
+        # 1. 提取 Private 访问冲突 (支持双语)
+        m_priv = re.search(r'(\w+).*(?:private|访问控制)', error_msg, re.I)
+        if m_priv:
+            # 尝试匹配类名，通常在 private 报错的后面
+            m_cls = re.search(r'在\s+(\w+)\s+中|in\s+(\w+)', error_msg)
+            cls_name = m_cls.group(1) or m_cls.group(2) if m_cls else "TargetClass"
+            template = template.replace('{field}', m_priv.group(1)).replace('{class}', cls_name)
 
-        # 提取final类名
-        m = re.search(r'无法从最终(\w+)进行继承', error_msg)
-        if m:
-            template = template.replace('{ClassName}', m.group(1))
+        # 2. 提取 Builder 类名
+        m_builder = re.search(r'类\s+(\w+)\.Builder|class\s+(\w+)\.Builder', error_msg)
+        if m_builder:
+            cls_name = m_builder.group(1) or m_builder.group(2)
+            template = template.replace('{class}', cls_name)
+
+        # 3. 提取通用的缺失符号 (方法名/变量名)
+        m_symbol = re.search(r'符号:\s+(?:方法|变量|类)\s+(\w+)|symbol:\s+(?:method|variable|class)\s+(\w+)', error_msg)
+        if m_symbol:
+            sym_name = m_symbol.group(1) or m_symbol.group(2)
+            template = template.replace('{symbol}', sym_name)
+
+        # 4. 提取 Final 类名 (支持双语)
+        m_final = re.search(r'最终(\w+)|final\s+(\w+)', error_msg)
+        if m_final:
+            cls_name = m_final.group(1) or m_final.group(2)
+            template = template.replace('{ClassName}', cls_name)
 
         return template
 
