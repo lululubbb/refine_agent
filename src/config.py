@@ -48,3 +48,4 @@ REF_MODEL       = config.get("refiner", "model",        fallback="gpt-4o-mini")
 REF_TEMPERATURE = float(config.get("refiner", "temperature", fallback="0.2"))
 REF_MAX_TOKENS  = int(config.get("refiner",  "max_tokens",   fallback="4096"))
 REF_BASE_URL    = config.get("refiner", "base_url",     fallback="https://api.openai.com/v1")
+

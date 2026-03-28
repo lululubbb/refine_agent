@@ -407,6 +407,8 @@ def process_tests_dir(tests_dir: str):
             w.writerow(['project', 'n_tests', 'sum_of_squares', 'mean_of_squares'])
         w.writerow([proj_short, n, f'{sumsq:.6f}', f'{meansq:.6f}'])
 
+    print(f'mean_of_squares: {meansq:.6f}')
+
     complete = len(best_map) == len(all_test_names)
     print(f'Wrote similarity CSVs to {sim_dir}')
     print(f'  bigSims: {len(best_map)}/{len(all_test_names)} '

@@ -3,10 +3,18 @@ import os
 import subprocess
 import re
 import shutil
+import sys
 import tempfile
 import csv
 from datetime import datetime
+
+# ── sys.path 配置（在 src/ 目录下运行）──────────────────────────────
+HERE = os.path.dirname(os.path.abspath(__file__))
+if HERE not in sys.path:
+    sys.path.insert(0, HERE)
+
 from config import *
+from scoring_ablation import global_ablation_config, compute_final_score_ablation
 import xml.etree.ElementTree as ET
 
 class TestRunner:
@@ -791,6 +799,13 @@ class TestRunner:
 
         # ── 推断 target_class ──────────────────────────────────────────
         target_class = self._resolve_target_class(tests_dir)
+        from test_runner_focal_fix import (
+            resolve_all_target_classes as _resolve_all_tcs,
+            resolve_target_class_for_test as _resolve_tc_for_test,
+        )
+        all_target_classes = _resolve_all_tcs(self.target_path)
+        if not all_target_classes:
+            all_target_classes = [target_class] if target_class else []
         project_name = os.path.basename(self.target_path.rstrip('/'))
         global_csv_parent_dir = os.path.abspath(tests_dir)
         os.makedirs(global_csv_parent_dir, exist_ok=True)
@@ -835,6 +850,12 @@ class TestRunner:
                 total_tests += 1
                 test_file = os.path.join(tests, test_case_file)
                 full_name = self.get_full_name(test_file)
+                # ★ 多 modified class 修复：为当前测试推断正确的 target_class
+                per_test_target_class = _resolve_tc_for_test(
+                    test_class_name=test_case_file.replace('.java', ''),
+                    all_modified_classes=all_target_classes,
+                    fallback=target_class,
+                )
 
                 # ── 1) Syntax check ───────────────────────────────────
                 syntax_tmp = tempfile.mkdtemp()
@@ -939,6 +960,7 @@ class TestRunner:
                     per_test_records.append({
                         'test_class': full_name, 'exec_file': None,
                         'exec_note': 'compile_fail',
+                        'per_test_target_class': per_test_target_class,
                         'm_per_line_cov': None, 'm_per_line_total': None,
                         'm_per_branch_cov': None, 'm_per_branch_total': None,
                         'f_per_line_cov': None, 'f_per_line_total': None,
@@ -1058,21 +1080,24 @@ class TestRunner:
                     # ── 提取 target_class 和 focal_method 的覆盖数据 ──────────
                     try:
                         jacoco_xml_path = per_test_jacoco_xml
-                        if jacoco_xml_path and os.path.exists(jacoco_xml_path) and target_class:
+                        # ★ 多 modified class 修复：使用 per_test_target_class 替代固定的 target_class
+                        _eff_target_class = per_test_target_class if per_test_target_class else target_class
+                        if jacoco_xml_path and os.path.exists(jacoco_xml_path) and _eff_target_class:
                             tree_p = ET.parse(jacoco_xml_path)
                             root_p = tree_p.getroot()
-
+ 
                             # 确定本测试类对应的 focal method 名称及 descriptor
                             grp_for_this = self._group_from_test_class(full_name)
                             focal_for_this, focal_desc_for_this = self._focal_info_from_group(
                                 grp_for_this, mid_to_name, focal_method, mid_to_focal_map)
-
+ 
                             for class_elem in root_p.findall('.//class'):
                                 cname = class_elem.attrib.get('name', '')
                                 simple = cname.split('/')[-1].split('$')[0]
-                                if simple != target_class and not cname.endswith('/' + target_class):
+                                # ★ 使用 per_test_target_class 而非全局 target_class
+                                if simple != _eff_target_class and not cname.endswith('/' + _eff_target_class):
                                     continue
-
+ 
                                 # target_class 级别覆盖（class-level counter）
                                 for c in class_elem.findall('counter'):
                                     ctype = c.attrib.get('type', '')
@@ -1084,19 +1109,19 @@ class TestRunner:
                                     elif ctype == 'BRANCH':
                                         m_per_branch_cov = (m_per_branch_cov or 0) + covered
                                         m_per_branch_total = (m_per_branch_total or 0) + covered + missed
-
+ 
                                 # ★ focal method 级别覆盖（method-level counter）
-                                # 使用 descriptor 精确匹配重载方法
+                                # 使用 descriptor 精确匹配重载方法，使用 per_test_target_class
                                 if focal_for_this:
                                     matched_methods = [
                                         me for me in class_elem.findall('method')
                                         if self._is_focal_method_match(
-                                            me.get('name', ''), focal_for_this, target_class,
+                                            me.get('name', ''), focal_for_this, _eff_target_class,
                                             focal_descriptor=focal_desc_for_this,
                                             method_desc=me.get('desc', ''),
                                         )
                                     ]
-
+                                    
                                     if matched_methods:
                                         fl_cov = fl_tot = fb_cov = fb_tot = 0
                                         for me in matched_methods:
@@ -1131,6 +1156,7 @@ class TestRunner:
                     'test_class':          full_name,
                     'exec_file':           per_test_exec,
                     'exec_note':           exec_note,
+                    'per_test_target_class': per_test_target_class,
                     'm_per_line_cov':      m_per_line_cov,
                     'm_per_line_total':    m_per_line_total,
                     'm_per_branch_cov':    m_per_branch_cov,
@@ -1185,6 +1211,8 @@ class TestRunner:
                 pass
 
         jacoco_xml_path = os.path.join(self.target_path, "target", "site", "jacoco", "jacoco.xml")
+        # ★ 多 modified class 修复：分别记录每个 class 的覆盖率
+        per_class_coverage: dict = {}  # {class_simple_name: {line_rate, branch_rate, ...}}
         if os.path.exists(jacoco_xml_path):
             tree = ET.parse(jacoco_xml_path)
             root_elem = tree.getroot()
@@ -1201,20 +1229,41 @@ class TestRunner:
                 branch_cov   = int(bc.attrib.get('covered', 0))
                 branch_total = branch_cov + int(bc.attrib.get('missed', 0))
                 branch_rate  = round(100 * branch_cov / branch_total, 2) if branch_total else 0.0
-
-            if modified_class_name:
+ 
+            # ★ 对所有 modified class 分别提取覆盖率
+            for _tc in all_target_classes:
+                _tc_simple = _tc.split('.')[-1].split('$')[0]
                 for class_elem in root_elem.findall('.//class'):
-                    if class_elem.attrib.get('name', '').endswith(modified_class_name):
-                        for c in class_elem.findall('counter'):
-                            if c.attrib.get('type') == 'LINE':
-                                m_line_cov   = int(c.attrib.get('covered', 0))
-                                m_line_total = m_line_cov + int(c.attrib.get('missed', 0))
-                                m_line_rate  = round(100 * m_line_cov / m_line_total, 2) if m_line_total else 0.0
-                            if c.attrib.get('type') == 'BRANCH':
-                                m_branch_cov   = int(c.attrib.get('covered', 0))
-                                m_branch_total = m_branch_cov + int(c.attrib.get('missed', 0))
-                                m_branch_rate  = round(100 * m_branch_cov / m_branch_total, 2) if m_branch_total else 0.0
-                        break
+                    _cname = class_elem.attrib.get('name', '')
+                    _csimple = _cname.split('/')[-1].split('$')[0]
+                    if _csimple != _tc_simple and not _cname.endswith('/' + _tc_simple):
+                        continue
+                    _lc = _lm = _bc = _bm = 0
+                    for c in class_elem.findall('counter'):
+                        if c.attrib.get('type') == 'LINE':
+                            _lc = int(c.attrib.get('covered', 0))
+                            _lm = int(c.attrib.get('missed', 0))
+                        if c.attrib.get('type') == 'BRANCH':
+                            _bc = int(c.attrib.get('covered', 0))
+                            _bm = int(c.attrib.get('missed', 0))
+                    _lt = _lc + _lm; _bt = _bc + _bm
+                    per_class_coverage[_tc_simple] = {
+                        'line_cov': _lc, 'line_total': _lt,
+                        'line_rate': round(100 * _lc / _lt, 2) if _lt else 0.0,
+                        'branch_cov': _bc, 'branch_total': _bt,
+                        'branch_rate': round(100 * _bc / _bt, 2) if _bt else 0.0,
+                    }
+                    break  # 找到该 class 后跳出
+ 
+            # 向后兼容：m_line_*/m_branch_* 使用第一个（主） modified class 的值
+            if modified_class_name:
+                _pc = per_class_coverage.get(modified_class_name, {})
+                m_line_cov     = _pc.get('line_cov')
+                m_line_total   = _pc.get('line_total')
+                m_line_rate    = _pc.get('line_rate')
+                m_branch_cov   = _pc.get('branch_cov')
+                m_branch_total = _pc.get('branch_total')
+                m_branch_rate  = _pc.get('branch_rate')
 
         # ── coveragedetail.csv ────────────────────────────────────────
         try:
@@ -1518,7 +1567,7 @@ class TestRunner:
             except Exception:
                 pass
 
-            _WC = 0.15; _WE = 0.15; _WV = 0.30; _WB = 0.20; _WR = 0.20
+
 
             # ── final_scores.csv（per-test） ────────────────────────────────────
             per_test_final = os.path.join(
@@ -1544,13 +1593,8 @@ class TestRunner:
                         br_p = br_p if br_p is not None else ''
                         sm_p = sim_map.get(tc_n)
                         sm_p = sm_p if sm_p is not None else ''
-                        sw_p = []; vw_p = 0.0
-                        rd_p = (1.0 - sm_p) if isinstance(sm_p, float) else None
-                        for _v, _w in [(cs_p, _WC), (es_p, _WE), (cv_p, _WV),
-                                       (br_p, _WB), (rd_p, _WR)]:
-                            if isinstance(_v, (int, float)):
-                                sw_p.append(_v * _w); vw_p += _w
-                        fs_p = round(sum(sw_p) / vw_p, 6) if vw_p > 0 else ''
+                        _abl_cfg = global_ablation_config()
+                        fs_p, vw_p = compute_final_score_ablation(cs_p, es_p, cv_p, br_p, sm_p, _abl_cfg)
                         pfw.writerow([tc_n, fm_k, cs_p, es_p, cv_p,
                                       br_p, sm_p, fs_p, round(vw_p, 4)])
 
@@ -1593,13 +1637,8 @@ class TestRunner:
                     smv_g = [v for v in smv_g if isinstance(v, (int, float))]
                     sm_g  = round(sum(smv_g) / len(smv_g), 6) if smv_g else ''
                     # final_score: 按权重加权
-                    sw_g = []; vw_g = 0.0
-                    rd_g = (1.0 - sm_g) if isinstance(sm_g, float) else None
-                    for _v, _w in [(cs_g, _WC), (es_g, _WE), (cv_g, _WV),
-                                   (br_g, _WB), (rd_g, _WR)]:
-                        if isinstance(_v, (int, float)):
-                            sw_g.append(_v * _w); vw_g += _w
-                    fs_g = round(sum(sw_g) / vw_g, 6) if vw_g > 0 else ''
+                    _abl_cfg = global_ablation_config()
+                    fs_g, vw_g = compute_final_score_ablation(cs_g, es_g, cv_g, br_g, sm_g, _abl_cfg)
                     fm_g = self._focal_method_from_group(grp_k, mid_to_name, focal_method)
                     w2.writerow([grp_k, fm_g, cs_g, es_g, cv_g,
                                  br_g, sm_g, fs_g, round(vw_g, 4)])
@@ -1651,17 +1690,16 @@ class TestRunner:
                     f.write(f"  全项目行覆盖率: {line_rate}% ({line_cov}/{line_total})\n")
                 if branch_rate is not None:
                     f.write(f"  全项目分支覆盖率: {branch_rate}% ({branch_cov}/{branch_total})\n")
-                if modified_class_name:
-                    # ★ PATCH: 输出所有 modified classes
-                    _all_classes = self._resolve_all_target_classes()
-                    if len(_all_classes) > 1:
-                        f.write(f"  target_classes: {_all_classes}\n")
-                    f.write(f"  target_class: {modified_class_name}\n")
-                    if m_line_rate is not None:
-                        f.write(f"  modified class行覆盖率: {m_line_rate}% ({m_line_cov}/{m_line_total})\n")
-                    if m_branch_rate is not None:
-                        f.write(f"  modified class分支覆盖率: {m_branch_rate}% ({m_branch_cov}/{m_branch_total})\n")
-
+                if all_target_classes:
+                    f.write(f"  target_classes: {all_target_classes}\n")
+                    for _tc_name in all_target_classes:
+                        _tc_simple = _tc_name.split('.')[-1].split('$')[0]
+                        _pc = per_class_coverage.get(_tc_simple, {})
+                        f.write(f"  target_class: {_tc_simple}\n")
+                        if _pc.get('line_total'):
+                            f.write(f"    行覆盖率: {_pc['line_rate']}% ({_pc['line_cov']}/{_pc['line_total']})\n")
+                        if _pc.get('branch_total'):
+                            f.write(f"    分支覆盖率: {_pc['branch_rate']}% ({_pc['branch_cov']}/{_pc['branch_total']})\n")
         # ── project_test_summary.csv ─────────────────────────────────
         try:
             run_time_seconds = round((datetime.now() - start_time).total_seconds(), 2)
@@ -1736,7 +1774,17 @@ class TestRunner:
             print(f"  全项目 行覆盖率: {line_rate}% ({line_cov}/{line_total})")
         if branch_rate is not None:
             print(f"  全项目 分支覆盖率: {branch_rate}% ({branch_cov}/{branch_total})")
-        if modified_class_name:
+        if all_target_classes:
+            # ★ 多 modified class 修复：分别打印每个 class 的覆盖率
+            for _tc_name in all_target_classes:
+                _tc_simple = _tc_name.split('.')[-1].split('$')[0]
+                _pc = per_class_coverage.get(_tc_simple, {})
+                print(f"  target_class: {_tc_simple}")
+                if _pc.get('line_total'):
+                    print(f"    行覆盖率: {_pc['line_rate']}% ({_pc['line_cov']}/{_pc['line_total']})")
+                if _pc.get('branch_total'):
+                    print(f"    分支覆盖率: {_pc['branch_rate']}% ({_pc['branch_cov']}/{_pc['branch_total']})")
+        elif modified_class_name:
             print(f"  target_class: {modified_class_name}")
             if m_line_rate is not None:
                 print(f"    行覆盖率: {m_line_rate}% ({m_line_cov}/{m_line_total})")

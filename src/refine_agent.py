@@ -31,9 +31,14 @@ from typing import Dict, List, Optional, Tuple
 from jinja2 import Environment, FileSystemLoader
 
 from llm_client import LLMClient, LLMCallResult
-from scoring import TestScore, SuiteScore, compute_test_score, compute_suite_score
+from scoring import TestScore, SuiteScore
 from compile_error_analyzer import enrich_diag_with_fix_hints, get_error_summary
-
+from scoring_ablation import (
+    compute_test_score_ablation as compute_test_score,
+    compute_suite_score_ablation as compute_suite_score,
+    global_ablation_config,
+)
+_cfg = global_ablation_config()
 logger = logging.getLogger(__name__)
 HERE = os.path.dirname(os.path.abspath(__file__))
 if HERE not in sys.path:
@@ -508,10 +513,12 @@ class RefineAgent:
                         time.time() - t0, len(pairwise_sims))
 
         # ── 计算得分 ──────────────────────────────────────────────
-        test_scores: Dict[str, TestScore] = {
-            name: compute_test_score(diag) for name, diag in diags.items()
-        }
-        suite_score: SuiteScore = compute_suite_score(test_scores, pairwise_sims)
+        # test_scores: Dict[str, TestScore] = {
+        #     name: compute_test_score(diag) for name, diag in diags.items()
+        # }
+        # suite_score: SuiteScore = compute_suite_score(test_scores, pairwise_sims)
+        test_scores = {name: compute_test_score(diag, _cfg) for name, diag in diags.items()}
+        suite_score = compute_suite_score(test_scores, pairwise_sims, _cfg)
 
         # ★ 修复问题3：在 SuiteScore 里记录 bug_revealing 跳过原因
         if self.skip_bug_revealing or not self.fixed_dir:
@@ -592,17 +599,16 @@ class RefineAgent:
         }
         delete_tests = [t for t in parsed.get("delete_tests", []) if t in diags]
 
-        # ★ 新增：自动删除高冗余用例（max_similarity >= 0.9）
-        # 因为 HIGH_REDUNDANCY 在 compute_test_score 中可由 redundant 计算得出
-        auto_deleted = []
-        for tname, ts in test_scores.items():
-            if tname in diags and "HIGH_REDUNDANCY" in ts.issues:
-                if ts.max_similarity is not None and ts.max_similarity >= 0.9:
-                    if tname not in delete_tests:
-                        delete_tests.append(tname)
-                        auto_deleted.append(tname)
-        if auto_deleted:
-            logger.info("[RefineAgent] auto delete HIGH_REDUNDANCY tests: %s", auto_deleted)
+        # ★ 注释：取消自动删除高冗余用例操作，只进行提升
+        # auto_deleted = []
+        # for tname, ts in test_scores.items():
+        #     if tname in diags and "HIGH_REDUNDANCY" in ts.issues:
+        #         if ts.max_similarity is not None and ts.max_similarity >= 0.9:
+        #             if tname not in delete_tests:
+        #                 delete_tests.append(tname)
+        #                 auto_deleted.append(tname)
+        # if auto_deleted:
+        #     logger.info("[RefineAgent] auto delete HIGH_REDUNDANCY tests: %s", auto_deleted)
 
         # ★ 新增：验证修复效果（编译检查）
         if instructions:

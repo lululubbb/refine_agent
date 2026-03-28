@@ -1,28 +1,31 @@
 """
-test_runner_focal_fix.py
-========================
-修复 test_runner.py 中两个核心问题的补丁模块：
+test_runner_focal_fix.py  (v2 — multi-modified-class fix)
+==========================================================
 
-问题6修复：JaCoCo descriptor 匹配失败
-  原因：`_safe_params_to_descriptor` 遇到对象类型（如 `double[][]`）返回 None，
-        但 `double[][]` 是基本类型数组，应该能生成 descriptor。
-  
-  具体问题：`estimateError(desc=([[D[D[DD)` 中：
-    - `[[D` = double[][]
-    - `[D`  = double[]
-    - `D`   = double
-    这些全是基本类型，但代码中 `double[][]` 的解析路径有 bug：
-    先 strip `[]` 变 `double`，是基本类型，OK。
-    但原始参数字符串 `[[D[D[DD` 是 JVM descriptor 格式，
-    而 raw_data JSON 里存的是 Java 格式 `double[][], double[], double, double`
-    
-  另一个问题：`getOrder()` 是无参方法，descriptor=`()`，
-  JaCoCo XML 中 `desc="()I"` 或 `desc="()V"`，
-  startswith("()") 是 True，但代码生成的 descriptor 是 "(" 而非 "()"
+修复内容（相比 v1）：
 
-问题4修复：多个 modified class 的覆盖率计算
-  原因：`_resolve_target_class` 只返回第一个 modified class，
-       `modified_classes.src` 中可能有多个类。
+问题1修复：多 modified class 场景下测试与被测类的映射错位
+  根因：test_runner.py 中 _resolve_target_class() 只返回第一个 modified class，
+        导致所有测试（不论其名称前缀是 Metaphone_、SoundexUtils_ 还是 Caverphone_）
+        都被当作只测试 Caverphone 的测试，进而在 Caverphone 类中查找
+        Metaphone/SoundexUtils 的 focal method，当然找不到。
+
+  修复方案：
+    - 新增 build_class_name_to_simple_map()：从所有 modified classes 建立
+      "简单类名 → 全限定简单类名" 的映射表。
+    - 新增 resolve_target_class_for_test()：根据测试类名前缀（如 Metaphone_）
+      匹配到正确的 modified class（如 Metaphone），而非总返回第一个。
+    - test_runner.py 中 run_all_tests() 的每次 per-test 循环，通过
+      resolve_target_class_for_test() 获取该测试对应的 target_class，
+      再去 JaCoCo XML 中定位正确的类，从而准确提取覆盖率。
+
+问题4修复（保留）：多个 modified class 的覆盖率计算
+  - resolve_all_target_classes()：返回所有 modified class 的简单类名列表。
+  - compute_coverage_for_all_classes()：分别提取每个 class 的覆盖率。
+
+问题6修复（保留）：JaCoCo descriptor 匹配失败
+  - safe_params_to_descriptor_fixed()：正确处理多维基本类型数组和无参方法。
+  - is_focal_method_match_fixed()：无参方法 "()" 能正确匹配 desc="()I/()V"。
 """
 from __future__ import annotations
 
@@ -119,6 +122,129 @@ def is_focal_method_match_fixed(
 
 
 # ════════════════════════════════════════════════════════════════════
+# 问题1修复（新增）：测试类名 → 正确的 modified class 映射
+# ════════════════════════════════════════════════════════════════════
+
+def build_class_name_to_simple_map(project_dir: str) -> Dict[str, str]:
+    """
+    建立 "简单类名（小写）→ 原始简单类名" 的映射表，
+    用于从测试类名前缀快速匹配所属的 modified class。
+
+    例：project 有 modified classes: Caverphone, Metaphone, SoundexUtils
+        返回: {"caverphone": "Caverphone", "metaphone": "Metaphone",
+                "soundexutils": "SoundexUtils"}
+
+    Parameters
+    ----------
+    project_dir : str
+        Defects4J 项目根目录（如 /path/to/Codec_1_f）
+
+    Returns
+    -------
+    Dict[str, str]
+        {lower_simple_class_name: simple_class_name}
+    """
+    all_classes = resolve_all_target_classes(project_dir)
+    return {cls.lower(): cls for cls in all_classes}
+
+
+def resolve_target_class_for_test(
+    test_class_name: str,
+    all_modified_classes: List[str],
+    fallback: str = "",
+) -> str:
+    """
+    根据测试类名前缀，推断该测试对应的 modified class。
+
+    命名约定（ChatUniTest/RefineTestGen 标准）：
+        <ClassName>_<method_id>_<seq>Test
+        例: Metaphone_5_1Test  → Metaphone
+            Caverphone_2_1Test → Caverphone
+            SoundexUtils_8_2Test → SoundexUtils
+
+    算法（按优先级）：
+        1. 从测试类名中提取 class_prefix（去掉 _<mid>_<seq>Test 后缀）
+        2. 精确匹配：class_prefix 与某个 modified class 完全相同（大小写不敏感）
+        3. 前缀匹配：某个 modified class 是 class_prefix 的前缀（处理含下划线的类名）
+        4. 后缀匹配：class_prefix 包含某个 modified class 作为子串
+        5. 降级：返回 fallback（第一个 modified class 或空字符串）
+
+    Parameters
+    ----------
+    test_class_name : str
+        测试类名，如 "Metaphone_5_1Test" 或 "Metaphone_5_1Test"（不含 .java）
+    all_modified_classes : List[str]
+        所有 modified class 的简单类名列表，如 ["Caverphone", "Metaphone", "SoundexUtils"]
+    fallback : str
+        当无法推断时返回的默认值
+
+    Returns
+    -------
+    str
+        匹配到的 modified class 简单类名，如 "Metaphone"
+    """
+    if not all_modified_classes:
+        return fallback
+    if len(all_modified_classes) == 1:
+        return all_modified_classes[0]
+
+    # 去掉 .java 后缀（如果有）
+    name = test_class_name.removesuffix('.java') if hasattr(str, 'removesuffix') else (
+        test_class_name[:-5] if test_class_name.endswith('.java') else test_class_name
+    )
+
+    # 去掉 Test 后缀
+    if name.endswith('Test'):
+        name = name[:-4]  # 去掉 "Test"
+
+    # 尝试从末尾去掉 _<seq> 和 _<mid> 两段数字后缀
+    # 例：Metaphone_5_1 → Metaphone_5 → Metaphone
+    # 同时支持 method_id 为非数字（如方法名本身），逐步回退
+    parts = name.split('_')
+    # 从后向前找到最长的 class_prefix（去掉数字/方法名后缀）
+    # 策略：尝试从后剥离 1、2、3 段，直到 prefix 匹配到某个 modified class
+
+    lower_map = {cls.lower(): cls for cls in all_modified_classes}
+
+    for strip_count in range(1, min(4, len(parts))):
+        prefix = '_'.join(parts[:len(parts) - strip_count])
+        if not prefix:
+            continue
+
+        # 精确匹配（大小写不敏感）
+        prefix_lower = prefix.lower()
+        if prefix_lower in lower_map:
+            return lower_map[prefix_lower]
+
+    # 前缀/子串匹配（兜底）
+    # 取去掉最后2段（_mid_seq）后的前缀
+    if len(parts) >= 3:
+        class_prefix = '_'.join(parts[:-2])
+    elif len(parts) >= 2:
+        class_prefix = parts[0]
+    else:
+        class_prefix = name
+
+    class_prefix_lower = class_prefix.lower()
+
+    # 精确
+    if class_prefix_lower in lower_map:
+        return lower_map[class_prefix_lower]
+
+    # modified class 是前缀（处理类名中含下划线，如 My_Class_1_Test → My_Class）
+    for cls_lower, cls in lower_map.items():
+        if class_prefix_lower == cls_lower or class_prefix_lower.startswith(cls_lower + '_'):
+            return cls
+
+    # 子串包含（最后兜底）
+    for cls_lower, cls in lower_map.items():
+        if cls_lower in class_prefix_lower:
+            return cls
+
+    return fallback if fallback else (all_modified_classes[0] if all_modified_classes else "")
+
+
+# ════════════════════════════════════════════════════════════════════
 # 问题4修复：多个 modified class 支持
 # ════════════════════════════════════════════════════════════════════
 
@@ -129,7 +255,7 @@ def resolve_all_target_classes(project_dir: str) -> List[str]:
     数据来源（优先级递减）：
     1. modified_classes.src（每行一个全限定类名）
     2. defects4j.build.properties 的 d4j.classes.modified
-    3. test_cases 文件名推断（退化为单个类）
+    3. 空列表（调用方需要回退到旧逻辑）
     """
     classes = []
 
@@ -178,29 +304,6 @@ def resolve_target_class_primary(project_dir: str) -> str:
 
 
 # ════════════════════════════════════════════════════════════════════
-# Bug Revealing 中 modified class 的作用说明
-# ════════════════════════════════════════════════════════════════════
-
-"""
-关于 Bug Revealing 为何需要 modified_class：
-
-bug_revealing.py 在整个项目中运行测试，会得到所有测试的通过/失败结果。
-但 bug_revealing 的核心判断是：某个测试在 buggy 版本 FAIL，在 fixed 版本 PASS。
-这个判断与 modified_class 无关——只要测试在两个版本上行为不同，就是 bug-revealing。
-
-然而，test_runner.py 中的 "target_class" 主要用于：
-1. 覆盖率计算：只统计 target_class 的行/分支覆盖率
-2. 诊断报告：diagnosis.log 中记录 target_class
-3. CSV 文件命名：`{project}_{targetClass}_coveragedetail.csv`
-
-因此，多个 modified class 的影响主要在覆盖率计算上，而非 bug_revealing 本身。
-
-修复方案：当有多个 modified class 时，分别计算每个 class 的覆盖率，
-然后取加权平均（或分别报告）。
-"""
-
-
-# ════════════════════════════════════════════════════════════════════
 # 覆盖率计算：多个 modified class 的聚合
 # ════════════════════════════════════════════════════════════════════
 
@@ -216,6 +319,7 @@ def compute_coverage_for_all_classes(
     Returns:
         {class_name: {
             'm_line_cov': int, 'm_line_total': int,
+            'm_branch_cov': int, 'm_branch_total': int,
             'f_line_cov': int, 'f_line_total': int,
             'f_branch_cov': int, 'f_branch_total': int,
         }}

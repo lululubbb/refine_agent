@@ -241,7 +241,7 @@ def _print_suite_score(suite_score, tag=""):
     else:
         print(f"  {'最大用例相似度':<16}: {Fore.RED}N/A (相似度计算失败，检查 Tool 4 日志){Style.RESET_ALL}", flush=True)
 
-    if ss.problem_tests:
+    if ss.problem_tests and ss.n_tests > 0:
         print(f"\n  ⚠️  问题分布：", flush=True)
         issue_order = ["COMPILE_FAIL", "UNEXPECTED_EXEC_FAIL", "EXEC_TIMEOUT",
                        "LOW_LINE_COV", "LOW_BRANCH_COV", "NOT_BUG_REVEALING", "HIGH_REDUNDANCY"]
@@ -259,6 +259,8 @@ def _print_suite_score(suite_score, tag=""):
             if iss in ss.problem_tests:
                 c = issue_colors.get(iss, Fore.WHITE)
                 print(f"    {c}[{iss}]{Style.RESET_ALL} → {', '.join(ss.problem_tests[iss])}", flush=True)
+    elif ss.n_tests == 0:
+        print(f"\n  ⚠️  无测试用例，无法进行质量检查。", flush=True)
     else:
         print(f"\\n  ✅ 无问题！Suite 全部通过质量检查。", flush=True)
         # ★ 修复问题5：说明质量检查标准，避免歧义
@@ -867,14 +869,15 @@ def focal_method_pipeline(
 
         _print_refine_instructions(refine_result.instructions, refine_result.delete_tests)
 
-        # 删除高冗余 Test
-        for del_tc in refine_result.delete_tests:
-            current_codes.pop(del_tc, None)
-            unchanged_counts.pop(del_tc, None)
-            tc_path = os.path.join(tc_dir, f"{del_tc}.java")
-            if os.path.exists(tc_path):
-                os.remove(tc_path)
-                print(f"  🗑  已删除冗余 Test: {del_tc}", flush=True)
+        # ★ 注释：取消删除高冗余 Test 操作，只进行提升
+        # # 删除高冗余 Test
+        # for del_tc in refine_result.delete_tests:
+        #     current_codes.pop(del_tc, None)
+        #     unchanged_counts.pop(del_tc, None)
+        #     tc_path = os.path.join(tc_dir, f"{del_tc}.java")
+        #     if os.path.exists(tc_path):
+        #         os.remove(tc_path)
+        #         print(f"  🗑  已删除冗余 Test: {del_tc}", flush=True)
 
         # Fix 循环
         fix_results = {"ok": [], "unchanged": [], "no_code": [], "fail": []}
