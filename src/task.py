@@ -3,6 +3,13 @@ import signal
 import time
 import psutil
 import concurrent.futures
+import test_runner  # 导入模块
+from test_runner_patch import patch_test_runner_coverage
+
+# 立即注入补丁
+patch_test_runner_coverage(test_runner)
+
+# 此时再从已经修补过的模块中获取 TestRunner
 from test_runner import TestRunner
 from class_parser import ClassParser
 from tools import *

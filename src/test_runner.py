@@ -17,6 +17,32 @@ from config import *
 from scoring_ablation import global_ablation_config, compute_final_score_ablation
 import xml.etree.ElementTree as ET
 
+
+# ════════════════════════════════════════════════════════════════════
+# Bug-Coverage-1 修复：统一的 JaCoCo class 匹配辅助函数
+# ════════════════════════════════════════════════════════════════════
+
+def _jacoco_outer_class(jacoco_class_name: str) -> str:
+    """
+    从 JaCoCo class name（如 org/foo/Bar$Inner）提取外部类简单名（Bar）。
+    这是修复 Bug-Coverage-1 的核心：内部类也应属于外部类的覆盖统计。
+    """
+    last = jacoco_class_name.split('/')[-1]  # Bar$Inner
+    return last.split('$')[0]               # Bar
+
+
+def _jacoco_class_matches(jacoco_class_name: str, target_simple: str) -> bool:
+    """
+    判断 JaCoCo <class name="..."> 是否属于 target_simple（含内部类）。
+
+    例：
+      "org/.../PolygonsSet$Edge", "PolygonsSet" → True  ✓ (内部类)
+      "org/.../PolygonsSet",      "PolygonsSet" → True  ✓ (外部类)
+      "org/.../CSVRecord",        "PolygonsSet" → False ✓
+    """
+    return _jacoco_outer_class(jacoco_class_name) == target_simple
+
+
 class TestRunner:
 
     def __init__(self, test_path, target_path, tool="jacoco"):
@@ -151,42 +177,43 @@ class TestRunner:
             simple = target_class.split('.')[-1] if target_class else ''
             all_classes = list(root.iter('class'))
 
-            target_class_elem = None
-            for cls in all_classes:
-                cname = cls.get('name', '')
-                cname_simple = cname.split('/')[-1].split('$')[0]
-                if cname_simple == simple:
-                    target_class_elem = cls
-                    break
+            # ★ Bug-Coverage-2 修复：收集所有匹配的 class 元素（含内部类）
+            # 原来只取第一个，导致内部类的方法覆盖信息丢失
+            target_class_elems = [
+                cls for cls in all_classes
+                if _jacoco_outer_class(cls.get('name', '')) == simple
+            ]
 
-            if target_class_elem is None:
+            if not target_class_elems:
                 return missed_methods, partial_methods
 
-            for method_elem in target_class_elem.findall('method'):
-                mname = method_elem.get('name', '')
-                mline = method_elem.get('line', '?')
-                # 将 <init> 显示为类名（构造函数），<clinit> 仍跳过（静态初始化块）
-                if mname == '<clinit>':
-                    continue
-                display_name = f"{simple}()" if mname == '<init>' else mname
+            # 遍历所有匹配的 class 元素（含内部类）
+            for target_class_elem in target_class_elems:
+                for method_elem in target_class_elem.findall('method'):
+                    mname = method_elem.get('name', '')
+                    mline = method_elem.get('line', '?')
+                    # 将 <init> 显示为类名（构造函数），<clinit> 仍跳过（静态初始化块）
+                    if mname == '<clinit>':
+                        continue
+                    display_name = f"{simple}()" if mname == '<init>' else mname
 
-                line_missed = line_covered = branch_missed = branch_covered = 0
-                for counter in method_elem.findall('counter'):
-                    ctype = counter.get('type', '')
-                    if ctype == 'LINE':
-                        line_missed  = int(counter.get('missed',  0))
-                        line_covered = int(counter.get('covered', 0))
-                    elif ctype == 'BRANCH':
-                        branch_missed  = int(counter.get('missed',  0))
-                        branch_covered = int(counter.get('covered', 0))
+                    line_missed = line_covered = branch_missed = branch_covered = 0
+                    for counter in method_elem.findall('counter'):
+                        ctype = counter.get('type', '')
+                        if ctype == 'LINE':
+                            line_missed  = int(counter.get('missed',  0))
+                            line_covered = int(counter.get('covered', 0))
+                        elif ctype == 'BRANCH':
+                            branch_missed  = int(counter.get('missed',  0))
+                            branch_covered = int(counter.get('covered', 0))
 
-                if line_covered == 0 and line_missed > 0:
-                    missed_methods.append(f"line {mline}: {display_name}() — completely uncovered")
-                elif branch_missed > 0:
-                    total_br = branch_missed + branch_covered
-                    partial_methods.append(
-                        f"line {mline}: {display_name}() — {branch_missed}/{total_br} branches missed"
-                    )
+                    if line_covered == 0 and line_missed > 0:
+                        missed_methods.append(f"line {mline}: {display_name}() — completely uncovered")
+                    elif branch_missed > 0:
+                        total_br = branch_missed + branch_covered
+                        partial_methods.append(
+                            f"line {mline}: {display_name}() — {branch_missed}/{total_br} branches missed"
+                        )
 
         except Exception as _e:
             print(f"[WARN] _extract_missed_coverage failed: {_e}")
@@ -417,9 +444,7 @@ class TestRunner:
             # ★ PATCH: 完整参数部分匹配（提取括号内内容），而非 startswith
             # 这修复了 getOrder() descriptor="()" 无法匹配 desc="()I" 的问题
             if focal_descriptor.endswith(')'):
-                # 完整参数 descriptor: 提取 method_desc 的参数部分对比
-                close_idx = method_desc.find(')')
-                method_params = method_desc[:close_idx + 1] if close_idx >= 0 else method_desc
+                method_params = method_desc[:method_desc.find(')') + 1] if ')' in method_desc else method_desc
                 return method_params == focal_descriptor
             else:
                 # 前缀匹配（部分 descriptor）
@@ -526,11 +551,9 @@ class TestRunner:
 
             for cls_elem in root.findall('.//class'):
                 cname_k = cls_elem.attrib.get('name', '')
-                simple_k = cname_k.split('/')[-1].split('$')[0]
-                if modified_class_name and not (
-                    simple_k == modified_class_name or
-                    cname_k.endswith('/' + modified_class_name)
-                ):
+                # ★ 修复：使用 _jacoco_outer_class 正确匹配含内部类的情况
+                simple_k = _jacoco_outer_class(cname_k)
+                if modified_class_name and simple_k != modified_class_name:
                     continue
 
                 for meth_elem in cls_elem.findall('method'):
@@ -765,11 +788,10 @@ class TestRunner:
         """
         primitives = set(self._JAVA_PRIMITIVE_MAP.keys())
         if not param_types:
-            return "()"  # ★ PATCH: 无参方法返回 "()" 而非 None
+            return "()"
         result_parts = []
         for t in param_types:
             t = t.strip()
-            # 剥离数组维度
             base = t
             array_prefix = ''
             while base.endswith('[]'):
@@ -778,7 +800,6 @@ class TestRunner:
             if base in primitives:
                 result_parts.append(array_prefix + self._JAVA_PRIMITIVE_MAP[base])
             else:
-                # 含对象类型：无法可靠转换，放弃 descriptor 精确匹配
                 return None
         return '(' + ''.join(result_parts)
 
@@ -981,7 +1002,7 @@ class TestRunner:
                         'exec_timeout':    False,
                         'jacoco_exec_size': 0,
                         'compile_score':   1.0,
-                        'exec_score':      0.0,   # 执行结果出来后更新
+                        'exec_score':      0.0,
                     }
 
                 # ── 3) Run test ───────────────────────────────────────
@@ -1033,7 +1054,6 @@ class TestRunner:
                                 if os.path.exists(_rt_file):
                                     try:
                                         _rt_all = open(_rt_file, errors='ignore').read()
-                                        # 捕获断言失败的完整信息
                                         _exc_lines = []
                                         for _line in _rt_all.splitlines():
                                             if re.search(r'(?:AssertionFailedError|expected:|but was:|Exception|Error|FAILED)', _line):
@@ -1093,9 +1113,9 @@ class TestRunner:
  
                             for class_elem in root_p.findall('.//class'):
                                 cname = class_elem.attrib.get('name', '')
-                                simple = cname.split('/')[-1].split('$')[0]
-                                # ★ 使用 per_test_target_class 而非全局 target_class
-                                if simple != _eff_target_class and not cname.endswith('/' + _eff_target_class):
+                                # ★ Bug-Coverage-1 修复：使用 _jacoco_outer_class 匹配（含内部类）
+                                simple = _jacoco_outer_class(cname)
+                                if simple != _eff_target_class:
                                     continue
  
                                 # target_class 级别覆盖（class-level counter）
@@ -1110,8 +1130,7 @@ class TestRunner:
                                         m_per_branch_cov = (m_per_branch_cov or 0) + covered
                                         m_per_branch_total = (m_per_branch_total or 0) + covered + missed
  
-                                # ★ focal method 级别覆盖（method-level counter）
-                                # 使用 descriptor 精确匹配重载方法，使用 per_test_target_class
+                                # focal method 级别覆盖
                                 if focal_for_this:
                                     matched_methods = [
                                         me for me in class_elem.findall('method')
@@ -1145,7 +1164,7 @@ class TestRunner:
                                         print(f"[WARN] focal method '{focal_for_this}'"
                                               f"(desc={focal_desc_for_this}) not found in "
                                               f"class '{simple}' for test '{test_basename}'")
-                                break  # 找到 target_class 后不再遍历
+                                # ★ 不再 break —— 继续遍历该类的内部类（$Edge 等）
 
                     except Exception as _xml_err:
                         if logs:
@@ -1211,8 +1230,8 @@ class TestRunner:
                 pass
 
         jacoco_xml_path = os.path.join(self.target_path, "target", "site", "jacoco", "jacoco.xml")
-        # ★ 多 modified class 修复：分别记录每个 class 的覆盖率
-        per_class_coverage: dict = {}  # {class_simple_name: {line_rate, branch_rate, ...}}
+        # ★ Bug-Coverage-1 修复：使用修复后的函数计算 per_class_coverage（含内部类）
+        per_class_coverage: dict = {}
         if os.path.exists(jacoco_xml_path):
             tree = ET.parse(jacoco_xml_path)
             root_elem = tree.getroot()
@@ -1230,30 +1249,32 @@ class TestRunner:
                 branch_total = branch_cov + int(bc.attrib.get('missed', 0))
                 branch_rate  = round(100 * branch_cov / branch_total, 2) if branch_total else 0.0
  
-            # ★ 对所有 modified class 分别提取覆盖率
+            # ★ Bug-Coverage-1 修复：对每个 modified class，汇总所有内部类的覆盖行数
+            # 原来只匹配 cname.endswith('/' + _tc_simple)，对内部类（Bar$Inner）失效
+            # 修复后使用 _jacoco_outer_class(cname) == _tc_simple，正确匹配内部类
             for _tc in all_target_classes:
                 _tc_simple = _tc.split('.')[-1].split('$')[0]
+                _lc = _lm = _bc = _bm = 0
+                # 遍历所有 class 元素，汇总属于 _tc_simple（含内部类）的覆盖数据
                 for class_elem in root_elem.findall('.//class'):
                     _cname = class_elem.attrib.get('name', '')
-                    _csimple = _cname.split('/')[-1].split('$')[0]
-                    if _csimple != _tc_simple and not _cname.endswith('/' + _tc_simple):
+                    # ★ 关键修复：使用 _jacoco_outer_class 而非 endswith
+                    if _jacoco_outer_class(_cname) != _tc_simple:
                         continue
-                    _lc = _lm = _bc = _bm = 0
                     for c in class_elem.findall('counter'):
                         if c.attrib.get('type') == 'LINE':
-                            _lc = int(c.attrib.get('covered', 0))
-                            _lm = int(c.attrib.get('missed', 0))
+                            _lc += int(c.attrib.get('covered', 0))
+                            _lm += int(c.attrib.get('missed', 0))
                         if c.attrib.get('type') == 'BRANCH':
-                            _bc = int(c.attrib.get('covered', 0))
-                            _bm = int(c.attrib.get('missed', 0))
-                    _lt = _lc + _lm; _bt = _bc + _bm
-                    per_class_coverage[_tc_simple] = {
-                        'line_cov': _lc, 'line_total': _lt,
-                        'line_rate': round(100 * _lc / _lt, 2) if _lt else 0.0,
-                        'branch_cov': _bc, 'branch_total': _bt,
-                        'branch_rate': round(100 * _bc / _bt, 2) if _bt else 0.0,
-                    }
-                    break  # 找到该 class 后跳出
+                            _bc += int(c.attrib.get('covered', 0))
+                            _bm += int(c.attrib.get('missed', 0))
+                _lt = _lc + _lm; _bt = _bc + _bm
+                per_class_coverage[_tc_simple] = {
+                    'line_cov': _lc, 'line_total': _lt,
+                    'line_rate': round(100 * _lc / _lt, 2) if _lt else 0.0,
+                    'branch_cov': _bc, 'branch_total': _bt,
+                    'branch_rate': round(100 * _bc / _bt, 2) if _bt else 0.0,
+                }
  
             # 向后兼容：m_line_*/m_branch_* 使用第一个（主） modified class 的值
             if modified_class_name:
@@ -1643,7 +1664,7 @@ class TestRunner:
                     w2.writerow([grp_k, fm_g, cs_g, es_g, cv_g,
                                  br_g, sm_g, fs_g, round(vw_g, 4)])
 
-            # ── 控制台：focal method 覆盖率（每个 group） ───────────────────────
+            # ── 控制台：focal method 覆盖率 ──────────────────────────────────
             print("-" * 50)
             print("FOCAL METHOD COVERAGE (per group):")
             if focal_totals:
@@ -1700,6 +1721,7 @@ class TestRunner:
                             f.write(f"    行覆盖率: {_pc['line_rate']}% ({_pc['line_cov']}/{_pc['line_total']})\n")
                         if _pc.get('branch_total'):
                             f.write(f"    分支覆盖率: {_pc['branch_rate']}% ({_pc['branch_cov']}/{_pc['branch_total']})\n")
+
         # ── project_test_summary.csv ─────────────────────────────────
         try:
             run_time_seconds = round((datetime.now() - start_time).total_seconds(), 2)
@@ -1775,7 +1797,6 @@ class TestRunner:
         if branch_rate is not None:
             print(f"  全项目 分支覆盖率: {branch_rate}% ({branch_cov}/{branch_total})")
         if all_target_classes:
-            # ★ 多 modified class 修复：分别打印每个 class 的覆盖率
             for _tc_name in all_target_classes:
                 _tc_simple = _tc_name.split('.')[-1].split('$')[0]
                 _pc = per_class_coverage.get(_tc_simple, {})
