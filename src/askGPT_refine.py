@@ -190,13 +190,21 @@ def _print_suite_score(suite_score, tag=""):
     print(Fore.YELLOW + f"  📊 Suite Score{' ' + tag if tag else ''}" + Style.RESET_ALL, flush=True)
     _divider("·", color=Fore.YELLOW)
 
-    cr = ss.compile_pass_rate
-    cr_c = Fore.GREEN if cr >= 0.8 else (Fore.YELLOW if cr >= 0.5 else Fore.RED)
-    print(f"  {'编译通过率':<16}: {cr_c}{ss.compile_pass_count}/{ss.n_tests} ({cr*100:.0f}%){Style.RESET_ALL}", flush=True)
+    # 编译通过率（可能在消融模式下为 None）
+    if ss.compile_pass_rate is not None:
+        cr = ss.compile_pass_rate
+        cr_c = Fore.GREEN if cr >= 0.8 else (Fore.YELLOW if cr >= 0.5 else Fore.RED)
+        print(f"  {'编译通过率':<16}: {cr_c}{ss.compile_pass_count}/{ss.n_tests} ({cr*100:.0f}%){Style.RESET_ALL}", flush=True)
+    else:
+        print(f"  {'编译通过率':<16}: {Fore.WHITE}N/A (消融模式已禁用){Style.RESET_ALL}", flush=True)
 
-    er = ss.exec_pass_rate
-    er_c = Fore.GREEN if er >= 0.8 else (Fore.YELLOW if er >= 0.5 else Fore.RED)
-    print(f"  {'执行通过率':<16}: {er_c}{ss.exec_pass_count}/{ss.n_tests} ({er*100:.0f}%){Style.RESET_ALL}", flush=True)
+    # 执行通过率（可能在消融模式下为 None）
+    if ss.exec_pass_rate is not None:
+        er = ss.exec_pass_rate
+        er_c = Fore.GREEN if er >= 0.8 else (Fore.YELLOW if er >= 0.5 else Fore.RED)
+        print(f"  {'执行通过率':<16}: {er_c}{ss.exec_pass_count}/{ss.n_tests} ({er*100:.0f}%){Style.RESET_ALL}", flush=True)
+    else:
+        print(f"  {'执行通过率':<16}: {Fore.WHITE}N/A (消融模式已禁用){Style.RESET_ALL}", flush=True)
 
     if ss.coverage_line_avg is not None:
         lc = ss.coverage_line_avg

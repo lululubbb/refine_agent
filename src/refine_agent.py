@@ -593,10 +593,38 @@ class RefineAgent:
             }, f, indent=2, ensure_ascii=False)
         files_written += 1
 
-        instructions = {
+        # ★ 改进：确保每个 problematic test 都有修复指令
+        # 1. 收集 LLM 生成的指令
+        llm_instructions = {
             t: instr for t, instr in parsed.get("test_instructions", {}).items()
             if t in diags and isinstance(instr, list) and instr
         }
+        
+        # 2. 对于没有 LLM 指令的 problematic test，使用 rule-based 建议
+        # ★ 新增：Fallback 到 rule-based repair（确保每个 test 都有指令）
+        instructions = dict(llm_instructions)  # 从 LLM 指令开始
+        fallback_used_for = []  # 记录哪些 test 使用了 fallback
+        
+        for tname in problematic:
+            if tname not in instructions:  # 如果 LLM 没生成指令
+                fallback_hints = enrich_diag_with_fix_hints(diags[tname])
+                if fallback_hints:
+                    # 用 rule-based 建议作为 fallback
+                    instructions[tname] = fallback_hints
+                    fallback_used_for.append(tname)
+                    logger.info(
+                        "[RefineAgent] Using rule-based repair for %s (no LLM instructions), "
+                        "%d hints provided",
+                        tname, len(fallback_hints)
+                    )
+        
+        if fallback_used_for:
+            logger.info(
+                "[RefineAgent] Rule-based fallback used for %d/%d problematic tests: %s",
+                len(fallback_used_for), len(problematic), fallback_used_for
+            )
+        
+        # 3. 获取删除建议
         delete_tests = [t for t in parsed.get("delete_tests", []) if t in diags]
 
         # ★ 注释：取消自动删除高冗余用例操作，只进行提升

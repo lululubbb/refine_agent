@@ -59,15 +59,25 @@ Each entry below is one Test file with issues. It contains:
 ---
 
 ## Task
-Analyze the above data and produce repair instructions per Test file.
+Analyze the above data and produce repair instructions for **EVERY** Test file listed.
 
-**PRIORITY ORDER for instructions:**
-1. **COMPILE_FAIL first**: If `compile_ok=false`, ALL instructions must fix compile errors.
+**CRITICAL REQUIREMENT**: You MUST generate repair instructions for ALL problematic Test files, not just some.
+- Even if a Test has only low-priority issues (e.g., coverage), still generate instructions.
+- Do NOT skip any Test file.
+
+**PRIORITY ORDER within a SINGLE Test file** (for which issues to address first):
+1. **COMPILE_FAIL**: If `compile_ok=false`, prioritize fixing compile errors.
    Use the `auto_fix_hints` field — these are pre-analyzed fixes for the exact errors found.
-   Do NOT mix compile fixes with coverage instructions in the same test.
-2. **EXEC_FAIL second**: If `exec_ok=false`, fix the runtime errors using `exec_errors[]`.
+   After fixing compile, address other issues.
+2. **EXEC_FAIL**: If `exec_ok=false`, prioritize fixing runtime errors using `exec_errors[]`.
    Use `auto_fix_hints` for specific fix guidance.
-3. **Coverage/Bug-Revealing last**: Only address these if compile AND exec both pass.
+   After fixing execution, address other issues.
+3. **Coverage/Bug-Revealing**: Address these after compile and exec are fixed.
+   BUT: If a Test only has coverage/bug-revealing issues, STILL generate instructions for them.
+
+**Fallback Rules** (if auto_fix_hints is insufficient):
+- For missing auto_fix_hints on compile errors: analyze `compile_errors[]` directly and suggest fixes
+- For missing auto_fix_hints on exec errors: analyze `exec_errors[]` directly and suggest fixes
 
 **For COMPILE_FAIL tests**, your instructions MUST:
 - Quote the exact error from `compile_errors[]`
@@ -78,5 +88,10 @@ Analyze the above data and produce repair instructions per Test file.
 - Quote the exact error from `exec_errors[]`
 - For wrong assertion values: trace the focal method and give the correct expected value
 - For wrong exception types: specify the correct parent exception class
+
+**For Coverage/Bug-Revealing improvements**, suggest:
+- Additional test methods or edge cases to cover missed lines/branches
+- Stronger assertions that exercise the focal method more thoroughly
+````
 
 Output ONLY the JSON object as specified in your system prompt.

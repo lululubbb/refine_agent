@@ -185,7 +185,12 @@ def compute_test_score_ablation(diag, cfg: Optional[AblationConfig] = None) -> T
     消融版 compute_test_score：根据 AblationConfig 过滤 issues。
 
     先调用原始 compute_test_score 获取完整的 TestScore，
-    再根据消融配置过滤掉不需要的 issues，同时将对应的 score 字段置为满分（不惩罚）。
+    再根据消融配置过滤掉不需要的 issues，同时将对应的 score 字段置为 None（而非满分）。
+    
+    这样做的好处：
+    1. 完全不考虑被关闭维度的数据
+    2. 避免在统计时混淆（None 值会被合理跳过）
+    3. 使消融更加彻底
 
     Parameters
     ----------
@@ -217,10 +222,11 @@ def compute_test_score_ablation(diag, cfg: Optional[AblationConfig] = None) -> T
 
     score.issues = filtered_issues
 
-    # 消融时将关闭维度的 score 字段重置为满分（避免下游统计被拉低）
+    # ★ 改进：消融时将关闭维度的 score 字段置 None（而非满分）
+    # 这样在统计时会被正确地跳过，而不是计为通过
     if not cfg.use_compile_exec:
-        score.compile_score = 1.0
-        score.exec_score    = 1.0
+        score.compile_score = None
+        score.exec_score    = None
     if not cfg.use_coverage:
         score.focal_line_coverage   = None
         score.focal_branch_coverage = None
@@ -244,6 +250,9 @@ def compute_suite_score_ablation(
 ) -> SuiteScore:
     """
     消融版 compute_suite_score：根据 AblationConfig 调整统计维度。
+    
+    关键改进：当关闭某维度时，不仅过滤 issues，还要在统计中完全忽略该维度。
+    例如在 no_compile_exec 模式下，不呈现编译/执行通过率，而是显示 N/A。
 
     Parameters
     ----------
@@ -258,28 +267,100 @@ def compute_suite_score_ablation(
     if cfg is None:
         cfg = AblationConfig()
 
-    # 关闭冗余度维度时，不传入 pairwise_sims（避免影响统计）
-    effective_sims = pairwise_sims if cfg.use_redundancy else None
+    if not test_scores:
+        return SuiteScore()
 
-    # 关闭 Bug Revealing 维度时，将所有 test_score.bug_reveal_score 置 None
-    effective_scores = test_scores
-    if not cfg.use_bug_revealing or not cfg.use_coverage or not cfg.use_compile_exec:
-        effective_scores = {}
-        for name, ts in test_scores.items():
-            ts_copy = TestScore(
-                test_name             = ts.test_name,
-                compile_score         = ts.compile_score if cfg.use_compile_exec else 1.0,
-                exec_score            = ts.exec_score    if cfg.use_compile_exec else 1.0,
-                focal_line_coverage   = ts.focal_line_coverage   if cfg.use_coverage else None,
-                focal_branch_coverage = ts.focal_branch_coverage if cfg.use_coverage else None,
-                bug_reveal_score      = ts.bug_reveal_score if cfg.use_bug_revealing else None,
-                max_similarity        = ts.max_similarity  if cfg.use_redundancy else None,
-                most_similar_to       = ts.most_similar_to if cfg.use_redundancy else None,
-                issues                = ts.issues,
-            )
-            effective_scores[name] = ts_copy
+    scores = list(test_scores.values())
+    n = len(scores)
 
-    return compute_suite_score(effective_scores, effective_sims)
+    # ── 维度 1：编译（可被消融关闭） ─────────────────────────────────────
+    compile_pass_count  = 0
+    compile_pass_rate   = None
+    if cfg.use_compile_exec:
+        compile_pass_count = sum(1 for s in scores if s.compile_score is not None and s.compile_score > 0.5)
+        compile_pass_rate = round(compile_pass_count / n, 4)
+
+    # ── 维度 2：执行（可被消融关闭） ─────────────────────────────────────
+    exec_pass_count = 0
+    exec_pass_rate  = None
+    if cfg.use_compile_exec:
+        exec_pass_count = sum(1 for s in scores if s.exec_score is not None and s.exec_score > 0.5)
+        exec_pass_rate = round(exec_pass_count / n, 4)
+
+    # ── 维度 3：覆盖率（可被消融关闭） ────────────────────────────────────
+    per_line_coverage   = None
+    per_branch_coverage = None
+    coverage_line_avg   = None
+    coverage_line_max   = None
+    coverage_line_min   = None
+    coverage_branch_avg = None
+    if cfg.use_coverage:
+        per_line   = [s.focal_line_coverage   for s in scores]
+        per_branch = [s.focal_branch_coverage for s in scores]
+        line_vals  = [v for v in per_line   if v is not None]
+        branch_vals= [v for v in per_branch if v is not None]
+        per_line_coverage = per_line
+        per_branch_coverage = per_branch
+        coverage_line_avg = round(sum(line_vals)   / len(line_vals),   4) if line_vals   else None
+        coverage_line_max = round(max(line_vals),  4) if line_vals   else None
+        coverage_line_min = round(min(line_vals),  4) if line_vals   else None
+        coverage_branch_avg = round(sum(branch_vals) / len(branch_vals), 4) if branch_vals else None
+
+    # ── 维度 4：Bug Revealing（可被消融关闭） ────────────────────────
+    bug_reveal_count   = 0
+    bug_reveal_checked = 0
+    bug_reveal_rate    = 0.0
+    if cfg.use_bug_revealing and cfg.use_compile_exec:
+        compile_ok_scores = [s for s in scores if s.compile_score > 0.5]
+        br_checked = [s for s in compile_ok_scores if s.bug_reveal_score is not None]
+        br_yes     = [s for s in br_checked    if s.bug_reveal_score is True]
+        bug_reveal_count   = len(br_yes)
+        bug_reveal_checked = len(br_checked)
+        bug_reveal_rate    = round(len(br_yes) / len(br_checked), 4) if br_checked else 0.0
+
+    # ── 维度 5：相似度（可被消融关闭） ──────────────────────────────────
+    high_redund_pairs: List[Tuple[str, str, float]] = []
+    max_pair_sim: Optional[float] = None
+    if cfg.use_redundancy and pairwise_sims:
+        all_sims = sorted(pairwise_sims, key=lambda x: x[2], reverse=True)
+        if all_sims:
+            max_pair_sim = all_sims[0][2]
+        high_redund_pairs = [(t1, t2, sim) for t1, t2, sim in all_sims if sim > 0.7]
+
+    # ── 问题汇总（按消融配置过滤） ──────────────────────────────────────
+    problem_tests: Dict[str, List[str]] = {}
+    for s in scores:
+        for issue in s.issues:
+            # 跳过被消融关闭的维度的 issues
+            if issue in ("COMPILE_FAIL", "EXEC_FAIL", "EXEC_TIMEOUT") and not cfg.use_compile_exec:
+                continue
+            if issue in ("LOW_LINE_COV", "LOW_BRANCH_COV") and not cfg.use_coverage:
+                continue
+            if issue == "NOT_BUG_REVEALING" and not cfg.use_bug_revealing:
+                continue
+            if issue == "HIGH_REDUNDANCY" and not cfg.use_redundancy:
+                continue
+            problem_tests.setdefault(issue, []).append(s.test_name)
+
+    return SuiteScore(
+        n_tests             = n,
+        compile_pass_count  = compile_pass_count,
+        compile_pass_rate   = compile_pass_rate,
+        exec_pass_count     = exec_pass_count,
+        exec_pass_rate      = exec_pass_rate,
+        per_test_line_coverage   = per_line_coverage,
+        per_test_branch_coverage = per_branch_coverage,
+        coverage_line_avg   = coverage_line_avg,
+        coverage_line_max   = coverage_line_max,
+        coverage_line_min   = coverage_line_min,
+        coverage_branch_avg = coverage_branch_avg,
+        bug_reveal_count    = bug_reveal_count,
+        bug_reveal_checked  = bug_reveal_checked,
+        bug_reveal_rate     = bug_reveal_rate,
+        max_pairwise_similarity = round(max_pair_sim, 4) if max_pair_sim is not None else None,
+        high_redundancy_pairs   = high_redund_pairs,
+        problem_tests       = problem_tests,
+    )
 
 
 # ════════════════════════════════════════════════════════════════════

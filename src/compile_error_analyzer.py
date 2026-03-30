@@ -385,21 +385,32 @@ Reader reader = new StringReader("test content");
     ) -> List[str]:
         """
         生成可直接注入到 Refiner prompt 的修复指令列表。
-        优先处理编译错误，其次处理运行时错误。
+        
+        ★ 改进：优先级处理
+        - 编译错误总是首先处理（如果存在）
+        - 执行错误其次处理（如果存在且编译通过）
+        - 对于单个 test，优先级高的 issue 先出现，但不跳过低优先级
+        
+        Parameters
+        ----------
+        compile_errors : 编译错误列表
+        exec_errors    : 执行错误列表
+        compile_ok     : 是否编译成功
+        exec_ok        : 是否执行成功
+        
+        Returns
+        -------
+        instructions   : 修复指令列表（单个 test 内的多个 issues 都会包含）
         """
         instructions = []
 
+        # ★ 高优先级：编译错误（总是优先处理）
         if not compile_ok and compile_errors:
             classified = self.classify_compile_errors(compile_errors)
             # 按错误类型分组，避免重复
             seen = set()
             for ce in classified:
                 if ce.error_type in seen:
-                    # 同类型只添加一次，但提及具体错误
-                    for instr in instructions:
-                        if ce.error_type in instr:
-                            # 追加具体的错误名
-                            break
                     continue
                 seen.add(ce.error_type)
 
@@ -408,7 +419,8 @@ Reader reader = new StringReader("test content");
                     instr += f"\nExample fix:\n{ce.fix_code}"
                 instructions.append(instr)
 
-        elif not exec_ok and exec_errors:
+        # ★ 中优先级：执行错误（编译通过的情况下）
+        if not exec_ok and exec_errors:
             classified = self.classify_exec_errors(exec_errors)
             for re_err in classified:
                 instr = f"[{re_err.error_type}] {re_err.fix_hint}"
