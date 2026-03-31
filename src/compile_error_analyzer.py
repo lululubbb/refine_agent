@@ -3,20 +3,6 @@ compile_error_analyzer.py
 ==========================
 编译错误分类器：将 diagnosis.log 中的编译/运行时错误自动分类，
 并生成结构化的修复提示，注入到 Refiner 的 Prompt 中。
-
-核心思路：
-  - 通过正则模式识别错误类型（CE-1 ~ CE-10，RE-1 ~ RE-6）
-  - 为每种错误生成具体的、代码级别的修复提示
-  - 优先级：编译错误 > 运行时错误 > 覆盖率问题
-  
-这解决了 diagnosis.log 中发现的主要问题类型：
-  - 85次 "找不到符号"（主要是CSVFormat.Builder）
-  - 19次 构造函数参数数量不匹配
-  - 14次 未报告的IOException
-  - 12次 方法引用不明确（null重载）
-  - 10次 private字段/方法访问
-  - 73次 AssertionFailedError（断言值错误）
-  - 11次 IllegalArgumentException（null参数）
 """
 from __future__ import annotations
 
@@ -33,24 +19,27 @@ class CompileErrorType:
     PRIVATE_ACCESS          = "CE-1"   # private字段/方法直接访问
     SYMBOL_NOT_FOUND        = "CE-2"   # 找不到符号（API不存在）
     EXTEND_FINAL            = "CE-3"   # 继承final类
-    TYPE_INCOMPATIBLE       = "CE-4"   # 类型不兼容（Closeable→Appendable等）
+    TYPE_INCOMPATIBLE       = "CE-4"   # 类型不兼容
     UNCHECKED_EXCEPTION     = "CE-5"   # 未声明checked异常
     AMBIGUOUS_METHOD        = "CE-6"   # 方法引用不明确
     ASSERT_THROWS_LAMBDA    = "CE-7"   # assertThrows lambda参数错误
     WRONG_CONSTRUCTOR_ARGS  = "CE-8"   # 构造函数参数错误
     FINAL_VARIABLE_ASSIGN   = "CE-9"   # 赋值给final变量
-    TYPE_MISMATCH           = "CE-10"  # String/long等类型不匹配
+    TYPE_MISMATCH           = "CE-10"  # 类型不匹配
+    GENERIC_TYPE_ERROR      = "CE-11"  # 泛型类型参数错误
+    ACCESS_CONTROL          = "CE-12"  # 访问控制（protected/package-private）
+    ABSTRACT_METHOD         = "CE-13"  # 抽象方法未实现
     UNKNOWN                 = "CE-XX"
 
 
 class RuntimeErrorType:
-    WRONG_ASSERTION_VALUE   = "RE-1"   # expected:<X> but was:<Y>
-    WRONG_EXCEPTION_TYPE    = "RE-2"   # wrong exception subclass
-    EXCEPTION_NOT_THROWN    = "RE-3"   # expected exception not thrown
-    NO_SUCH_FIELD           = "RE-4"   # NoSuchFieldException
-    NO_SUCH_METHOD          = "RE-4b"  # NoSuchMethodException
-    NULL_ARGUMENT           = "RE-5"   # IllegalArgumentException null
-    TYPE_CAST               = "RE-6"   # ClassCastException
+    WRONG_ASSERTION_VALUE   = "RE-1"
+    WRONG_EXCEPTION_TYPE    = "RE-2"
+    EXCEPTION_NOT_THROWN    = "RE-3"
+    NO_SUCH_FIELD           = "RE-4"
+    NO_SUCH_METHOD          = "RE-4b"
+    NULL_ARGUMENT           = "RE-5"
+    TYPE_CAST               = "RE-6"
     UNKNOWN                 = "RE-XX"
 
 
@@ -64,7 +53,7 @@ class ClassifiedError:
     original_message: str
     fix_hint: str
     fix_code: str = ""
-    priority: int = 5   # 1=最高（编译），5=最低（运行时断言值）
+    priority: int = 5
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -73,222 +62,311 @@ class ClassifiedError:
 
 class CompileErrorAnalyzer:
     """
-    将原始错误信息分类并生成具体的、可注入Prompt的修复提示。
+    将原始错误信息分类并生成具体的修复提示。
+    支持中英文双语 javac 输出。
     """
 
-    # ── 编译错误模式 ─────────────────────────────────────────────
+    # ── 编译错误模式（中英双语）────────────────────────────────────
+    # 每条: (pattern, error_type, fix_hint, fix_code_template)
 
     _COMPILE_PATTERNS: List[Tuple[str, str, str, str]] = [
-        # (pattern, error_type, fix_hint, fix_code_template)
 
-        # CE-1: private访问
+        # ── CE-1: private 访问（中文）──────────────────────────────
         (
             r'(\w+)\s+在\s+(\w+)\s+中是\s+private\s+访问控制',
             CompileErrorType.PRIVATE_ACCESS,
-            "Direct access to private member detected. Use Java Reflection instead.",
+            "Direct access to private member. Use Java Reflection instead.",
             """// Replace direct access with reflection:
 Field f = {class}.class.getDeclaredField("{field}");
 f.setAccessible(true);
 Object val = f.get(instance);
-// For private method: use getDeclaredMethod(...).setAccessible(true).invoke(...)"""
+// For private method:
+Method m = {class}.class.getDeclaredMethod("methodName", ArgType.class);
+m.setAccessible(true);
+m.invoke(instance, args);"""
         ),
 
-        # CE-2: 通用的 Builder 模式缺失 (针对旧版 Java 库常见的 API 差异)
+        # ── CE-1: private 访问（英文）──────────────────────────────
+        (
+            r'(\w+) has private access in (\w+)',
+            CompileErrorType.PRIVATE_ACCESS,
+            "Direct access to private member. Use Java Reflection instead.",
+            """// Replace direct access with reflection:
+Field f = {class}.class.getDeclaredField("{field}");
+f.setAccessible(true);
+Object val = f.get(instance);"""
+        ),
+
+        # ── CE-1: private 方法访问（英文备用）──────────────────────
+        (
+            r'(\w+)\(.*?\)\s+has private access in (\w+)',
+            CompileErrorType.PRIVATE_ACCESS,
+            "Private method called directly. Use getDeclaredMethod + setAccessible.",
+            """// Replace with reflection:
+Method m = {class}.class.getDeclaredMethod("{field}", ParamType.class);
+m.setAccessible(true);
+m.invoke(instance, args);"""
+        ),
+
+        # ── CE-11: 泛型类型参数错误（中文）─────────────────────────
+        (
+            r'类型参数\S+不在类型变量\S+的范围内',
+            CompileErrorType.GENERIC_TYPE_ERROR,
+            "Generic type parameter is out of bounds. Use the correct bounded type.",
+            """// Check the generic bounds of the class/method.
+// For example, if T extends Comparable<?>, use Comparable<?> not Object:
+// WRONG: AVLTree<Object> tree = new AVLTree<>();
+// RIGHT: AVLTree<Comparable<?>> tree = new AVLTree<>();
+// For collections: use the actual element type from the focal class context."""
+        ),
+
+        # ── CE-11: 泛型类型参数错误（英文）─────────────────────────
+        (
+            r'type argument \S+ is not within bounds of type-variable \S+',
+            CompileErrorType.GENERIC_TYPE_ERROR,
+            "Generic type argument is not within bounds. Check the type parameter constraints.",
+            """// Check the generic bounds and use the correct type.
+// Example: if T extends Comparable<?>, don't use Object as the type argument."""
+        ),
+
+        # ── CE-2: Builder 不存在（中文）────────────────────────────
         (
             r'找不到符号.*\n?.*符号:\s+类\s+(\w+)\.Builder|cannot find symbol.*\n?.*symbol:\s+class\s+(\w+)\.Builder',
             CompileErrorType.SYMBOL_NOT_FOUND,
-            "The Builder nested class for {class} does not exist in this version. "
-            "Check if the library uses static factory methods (e.g., {class}.newXxx()) "
-            "or setter-chaining (e.g., {class}.DEFAULT.withXxx()).",
-            """// The Builder pattern might not be available. 
-// Try using factory methods or fluent 'with' methods:
-{class} instance = {class}.DEFAULT.withProperty(value); 
-// Or check the focal class context for the correct instantiation way."""
+            "Builder nested class does not exist in this version. Use factory methods or with-chaining.",
+            """// Use static factory + with-chaining instead:
+{class} instance = {class}.DEFAULT.withProperty(value);"""
         ),
 
-        # CE-2b: 通用的方法/字段找不到 (最常见)
+        # ── CE-2: 找不到符号（中文）────────────────────────────────
         (
-            r'找不到符号.*\n?.*符号:\s+(?:方法|变量|类)\s+(\w+)|cannot find symbol.*\n?.*symbol:\s+(?:method|variable|class)\s+(\w+)',
+            r'找不到符号\s*\n?\s*符号:\s+(?:方法|变量|类)\s+(\w+)',
             CompileErrorType.SYMBOL_NOT_FOUND,
-            "Symbol '{symbol}' not found. It does not exist in the current version of the library.",
-            """// '{symbol}' is not available. 
-// Please refer to the provided Focal Class context above to see all public APIs 
-// available in this specific Defects4J version."""
+            "Symbol not found. It does not exist in this version of the library.",
+            """// Check the focal class context for available public APIs in this version."""
         ),
 
-        # CE-3: 继承final类
+        # ── CE-2: cannot find symbol（英文）────────────────────────
+        (
+            r'cannot find symbol\s*\n?\s*symbol:\s+(?:method|variable|class)\s+(\w+)',
+            CompileErrorType.SYMBOL_NOT_FOUND,
+            "Symbol not found. Use only APIs shown in the provided class context.",
+            """// Check the focal class context for the correct API name."""
+        ),
+
+        # ── CE-3: 继承final类（中文）────────────────────────────────
         (
             r'无法从最终(\w+)进行继承',
             CompileErrorType.EXTEND_FINAL,
-            "Cannot extend final class. Use Mockito.spy() to wrap and override behavior.",
-            """// Replace anonymous subclass with Mockito spy:
+            "Cannot extend final class. Use Mockito.spy() instead of anonymous subclass.",
+            """// Replace anonymous subclass:
 {ClassName} spy = Mockito.spy(new {ClassName}(args));
-doThrow(new IOException("test")).when(spy).methodToFail();"""
+doThrow(new IOException()).when(spy).someMethod();"""
         ),
 
-        # CE-4: Closeable→Appendable
+        # ── CE-3: 继承final类（英文）────────────────────────────────
         (
-            r'不兼容的类型.*Closeable.*Appendable|不兼容的类型.*Flushable.*Appendable',
+            r'cannot inherit from final (\w+)',
+            CompileErrorType.EXTEND_FINAL,
+            "Cannot extend final class. Use Mockito.spy() instead.",
+            """// Use spy instead of anonymous subclass:
+{ClassName} spy = Mockito.spy(new {ClassName}(args));"""
+        ),
+
+        # ── CE-4: Closeable→Appendable 类型不兼容（中文）─────────
+        (
+            r'不兼容的类型.*(?:Closeable|Flushable).*(?:Appendable|无法转换)',
             CompileErrorType.TYPE_INCOMPATIBLE,
-            "Closeable/Flushable does not implement Appendable. "
-            "CSVPrinter constructor requires Appendable.",
+            "Closeable/Flushable does not implement Appendable. Use StringWriter instead.",
             """// Use a type that implements Appendable:
-StringWriter out = new StringWriter();           // implements Appendable + Closeable
-// OR: Appendable out = mock(Appendable.class);  // pure Appendable mock
+StringWriter out = new StringWriter();  // implements Appendable + Closeable
 new CSVPrinter(out, format);"""
         ),
 
-        # CE-4b: 其他类型不兼容
+        # ── CE-4: 类型不兼容（通用中文）───────────────────────────
         (
-            r'不兼容的类型',
+            r'不兼容的类型[：:]\s*(\S+)\s*(?:无法转换为|cannot be converted to)\s*(\S+)',
             CompileErrorType.TYPE_INCOMPATIBLE,
-            "Type incompatibility. Check the exact types required by the constructor/method signature.",
+            "Type incompatibility. Check the expected type from the class context.",
             "// Verify the parameter type from the class context and use the correct type."
         ),
 
-        # CE-5: 未报告IOException
+        # ── CE-4: incompatible types（英文）────────────────────────
         (
-            r'未报告的异常错误\s*IOException',
+            r'incompatible types[:\s]+(\S+)\s+cannot be converted to\s+(\S+)',
+            CompileErrorType.TYPE_INCOMPATIBLE,
+            "Type incompatibility. Check the expected type.",
+            "// Use the correct type as shown in the focal class context."
+        ),
+
+        # ── CE-5: 未报告 IOException（中文）────────────────────────
+        (
+            r'未报告的异常错误\s*(?:java\.io\.)?IOException',
             CompileErrorType.UNCHECKED_EXCEPTION,
-            "IOException must be declared or caught. Add 'throws Exception' to the @Test method.",
+            "IOException must be declared. Add 'throws Exception' to the @Test method.",
             """// Add throws Exception to the test method:
 @Test
-void testMethod() throws Exception {
-    // ... your test code
-}"""
+void testMethod() throws Exception { ... }"""
         ),
 
-        # CE-5b: 未报告SQLException
+        # ── CE-5: unreported exception（英文）──────────────────────
         (
-            r'未报告的异常错误\s*SQLException',
+            r'unreported exception\s+(?:java\.io\.)?IOException',
+            CompileErrorType.UNCHECKED_EXCEPTION,
+            "IOException must be declared. Add 'throws Exception' to the @Test method.",
+            """@Test
+void testMethod() throws Exception { ... }"""
+        ),
+
+        # ── CE-5: 未报告 SQLException（中文/英文）──────────────────
+        (
+            r'未报告的异常错误\s*(?:java\.sql\.)?SQLException|unreported exception\s+(?:java\.sql\.)?SQLException',
             CompileErrorType.UNCHECKED_EXCEPTION,
             "SQLException must be declared. Add 'throws Exception' to the @Test method.",
-            """// Add throws Exception to the test method signature:
-@Test
-void testMethod() throws Exception {
-    when(rs.next()).thenReturn(true);  // now allowed
-}"""
+            """@Test
+void testMethod() throws Exception { ... }"""
         ),
 
-        # CE-6: 方法引用不明确
+        # ── CE-6: 引用不明确（中文）────────────────────────────────
         (
             r'对(\w+)的引用不明确',
             CompileErrorType.AMBIGUOUS_METHOD,
-            "Ambiguous method call with null argument. Cast null to the specific overload type.",
-            """// Cast null to disambiguate the overload:
-printer.printRecords((Object[]) null);     // Object[] overload
-printer.printRecords((ResultSet) null);    // ResultSet overload
-// General pattern: method((SpecificType) null)"""
+            "Ambiguous method call with null. Cast null to the specific overload type.",
+            """// Cast null to disambiguate:
+printer.printRecords((Object[]) null);
+printer.printRecords((ResultSet) null);"""
         ),
 
-        # CE-7: assertThrows lambda参数错误
+        # ── CE-6: reference is ambiguous（英文）────────────────────
         (
-            r'对于assertThrows.*\(e\)->',
+            r'reference to (\w+) is ambiguous',
+            CompileErrorType.AMBIGUOUS_METHOD,
+            "Ambiguous method call. Cast the argument to the specific type.",
+            """// Cast null to disambiguate the overload:
+method((SpecificType) null);"""
+        ),
+
+        # ── CE-7: assertThrows lambda 参数错误─────────────────────
+        (
+            r'assertThrows.*\(e\)->|assertThrows.*lambda.*parameter',
             CompileErrorType.ASSERT_THROWS_LAMBDA,
-            "assertThrows requires a zero-argument Executable lambda. Remove the 'e' parameter.",
+            "assertThrows requires zero-argument lambda. Use '() ->' not 'e ->'.",
             """// WRONG: assertThrows(IOException.class, e -> obj.method());
 // RIGHT: assertThrows(IOException.class, () -> obj.method());"""
         ),
 
-        # CE-8: 构造函数参数不匹配
+        # ── CE-8: 构造函数参数不匹配（中文）────────────────────────
         (
             r'无法将类\s+\w+中的构造器.*应用到给定类型',
             CompileErrorType.WRONG_CONSTRUCTOR_ARGS,
-            "Constructor argument types do not match. "
-            "Check the constructor signature in the provided class context.",
-            "// Use only the argument types shown in the constructor signature above."
+            "Constructor argument types do not match the signature.",
+            "// Check the constructor signature in the class context and match exactly."
         ),
 
-        # CE-9: 赋值给final变量
+        # ── CE-8: constructor mismatch（英文）──────────────────────
+        (
+            r'constructor \w+ in class \w+ cannot be applied to given types',
+            CompileErrorType.WRONG_CONSTRUCTOR_ARGS,
+            "Constructor arguments do not match. Check the exact signature.",
+            "// Match constructor arguments exactly as shown in the focal class context."
+        ),
+
+        # ── CE-9: 赋值给final变量（中文）───────────────────────────
         (
             r'无法为最终变量(\w+)分配值',
             CompileErrorType.FINAL_VARIABLE_ASSIGN,
-            "Cannot reassign final variable. Declare a new local variable instead.",
-            """// WRONG: finalVar = newValue;
-// RIGHT: SomeType newVar = newValue;
-//   or:  declare the variable non-final in the first place"""
+            "Cannot reassign final variable. Declare a new variable instead.",
+            "// Declare a new variable instead of reassigning the final one."
         ),
 
-        # CE-10: String→long类型不匹配
+        # ── CE-9: cannot assign to final（英文）────────────────────
+        (
+            r'cannot assign a value to final variable (\w+)',
+            CompileErrorType.FINAL_VARIABLE_ASSIGN,
+            "Cannot reassign final variable. Use a new variable.",
+            "// Use: SomeType newVar = newValue; instead of reassigning final."
+        ),
+
+        # ── CE-10: String→long 类型不匹配（中文）──────────────────
         (
             r'不兼容的类型.*String.*long|不兼容的类型.*String.*StringBuilder',
             CompileErrorType.TYPE_MISMATCH,
             "String cannot be used where long/StringBuilder is expected.",
-            """// For long: Long.parseLong(str)  or use a long literal directly
+            """// For long: Long.parseLong(str)
 // For StringBuilder: new StringBuilder(str)"""
+        ),
+
+        # ── CE-12: 访问控制（protected/package-private）────────────
+        (
+            r'(\w+)\s+在\s+(\w+)\s+中不是公共的.*无法从外部程序包中对其进行访问|'
+            r'(\w+) is not public in (\w+); cannot be accessed from outside package',
+            CompileErrorType.ACCESS_CONTROL,
+            "Method/field is not public. Use reflection or test from same package.",
+            """// Use reflection to access non-public members:
+Method m = ClassName.class.getDeclaredMethod("methodName");
+m.setAccessible(true);
+m.invoke(instance);"""
+        ),
+
+        # ── CE-13: 抽象类未实现──────────────────────────────────────
+        (
+            r'(\w+)是抽象的.*无法实例化|(\w+) is abstract; cannot be instantiated',
+            CompileErrorType.ABSTRACT_METHOD,
+            "Cannot instantiate abstract class. Use a concrete subclass or mock.",
+            """// Use mock or concrete subclass:
+AbstractClass mock = mock(AbstractClass.class);
+// OR find a concrete implementation in the focal class context."""
         ),
     ]
 
-    # ── 运行时错误模式 ────────────────────────────────────────────
+    # ── 运行时错误模式（不变）──────────────────────────────────────
 
     _RUNTIME_PATTERNS: List[Tuple[str, str, str, str]] = [
-        # RE-2: 异常类型不匹配
         (
             r'expected:.*StringIndexOutOfBoundsException.*but was:.*IndexOutOfBoundsException|'
             r'Unexpected exception type thrown',
             RuntimeErrorType.WRONG_EXCEPTION_TYPE,
-            "Wrong exception subclass asserted. Use the parent class or the actual thrown type.",
-            """// Replace StringIndexOutOfBoundsException with its parent:
+            "Wrong exception subclass. Use the parent class in assertThrows.",
+            """// Use the parent exception:
 assertThrows(IndexOutOfBoundsException.class, () -> ...);
-// Or use the general parent: assertThrows(RuntimeException.class, () -> ...);"""
+// Or: assertThrows(RuntimeException.class, () -> ...);"""
         ),
-
-        # RE-3: 期望抛出异常但未抛出
         (
             r'Expected.*to be thrown.*but nothing was thrown',
             RuntimeErrorType.EXCEPTION_NOT_THROWN,
-            "Expected exception was not thrown. "
-            "Either fix the mock setup or remove the invalid assertThrows.",
-            """// Option 1: Fix the mock to trigger the exception path
-// Option 2: If the fixed version doesn't throw, remove assertThrows and add positive assertion:
-// result = obj.method();
-// assertNotNull(result);"""
+            "Expected exception was not thrown. Fix mock setup or remove assertThrows.",
+            """// Fix the mock to trigger the exception, or replace assertThrows with a positive assertion."""
         ),
-
-        # RE-4: 字段不存在
         (
             r'java\.lang\.NoSuchFieldException:\s*(\w+)',
             RuntimeErrorType.NO_SUCH_FIELD,
-            "Field name is wrong. The field does not exist with this name in the actual class.",
-            """// Check the class source for the correct field name.
-// Common mistakes: 'lineCounter' vs 'lineNumber', 'lastChar' vs 'lastRead'
-// Use the exact field name from the focal class source above."""
+            "Field name is wrong in reflection call. Check the exact field name.",
+            "// Check the exact field name from the focal class source above."
         ),
-
-        # RE-4b: 方法不存在
         (
             r'java\.lang\.NoSuchMethodException',
             RuntimeErrorType.NO_SUCH_METHOD,
             "Method name or signature is wrong in reflection call.",
-            "// Check the exact method name and parameter types in the class source above."
+            "// Check the exact method name and parameter types."
         ),
-
-        # RE-5: null参数
         (
             r"Parameter '(\w+)' must not be null|IllegalArgumentException.*null",
             RuntimeErrorType.NULL_ARGUMENT,
-            "Null passed to parameter that requires non-null value.",
-            """// Initialize the argument properly:
-Reader reader = new StringReader("test content");
-// Do NOT pass null where the method requires a real object."""
+            "Null passed where non-null is required. Initialize the argument properly.",
+            """// Initialize properly:
+Reader reader = new StringReader("test content");"""
         ),
-
-        # RE-1: 断言值错误（放最后，最通用）
         (
             r'expected:\s*<([^>]*)>\s*but was:\s*<([^>]*)>',
             RuntimeErrorType.WRONG_ASSERTION_VALUE,
-            "Assertion expected value is wrong. Trace the focal method to find the correct value.",
-            """// Common mistakes:
-// - END_OF_STREAM = -2 (not -1) in ExtendedBufferedReader
-// - UNDEFINED = -3 (not -1)
-// - Character values: 'a'=97, 'b'=98, 'A'=65
-// - Line counting may start at 0 or 1
-// If unsure, use a WEAKER assertion: assertNotNull(result) or assertTrue(result >= 0)"""
+            "Assertion expected value is wrong. Trace the focal method for the correct value.",
+            """// Common fixes:
+// - END_OF_STREAM = -2, UNDEFINED = -3 (not -1)
+// - Use weaker assertion if unsure: assertNotNull(result) or assertTrue(result >= 0)"""
         ),
     ]
 
     def classify_compile_errors(self, compile_errors: List[str]) -> List[ClassifiedError]:
-        """将编译错误列表分类为结构化的 ClassifiedError 列表。"""
         results = []
         for raw_msg in compile_errors:
             classified = self._match_compile(raw_msg)
@@ -296,12 +374,10 @@ Reader reader = new StringReader("test content");
         return results
 
     def classify_exec_errors(self, exec_errors: List[str]) -> List[ClassifiedError]:
-        """将运行时错误列表分类。"""
         results = []
         seen_types = set()
         for raw_msg in exec_errors:
             classified = self._match_runtime(raw_msg)
-            # 同类型错误只报告一次
             if classified.error_type not in seen_types:
                 results.append(classified)
                 seen_types.add(classified.error_type)
@@ -310,7 +386,6 @@ Reader reader = new StringReader("test content");
     def _match_compile(self, msg: str) -> ClassifiedError:
         for pattern, err_type, hint, code in self._COMPILE_PATTERNS:
             if re.search(pattern, msg, re.IGNORECASE | re.DOTALL):
-                # 提取具体的符号名（用于模板替换）
                 code = self._fill_template(code, msg)
                 return ClassifiedError(
                     error_type=err_type,
@@ -346,29 +421,31 @@ Reader reader = new StringReader("test content");
         )
 
     def _fill_template(self, template: str, error_msg: str) -> str:
-        """用错误信息中提取的具体名称填充代码模板。"""
-        
-        # 1. 提取 Private 访问冲突 (支持双语)
-        m_priv = re.search(r'(\w+).*(?:private|访问控制)', error_msg, re.I)
+        """用错误信息中提取的名称填充代码模板。"""
+        # private 字段/方法名
+        m_priv = re.search(
+            r'(\w+)\s+在\s+(\w+)\s+中是\s+private|(\w+) has private access in (\w+)',
+            error_msg, re.I)
         if m_priv:
-            # 尝试匹配类名，通常在 private 报错的后面
-            m_cls = re.search(r'在\s+(\w+)\s+中|in\s+(\w+)', error_msg)
-            cls_name = m_cls.group(1) or m_cls.group(2) if m_cls else "TargetClass"
-            template = template.replace('{field}', m_priv.group(1)).replace('{class}', cls_name)
+            field_name = m_priv.group(1) or m_priv.group(3) or "fieldName"
+            cls_name   = m_priv.group(2) or m_priv.group(4) or "TargetClass"
+            template = template.replace('{field}', field_name).replace('{class}', cls_name)
 
-        # 2. 提取 Builder 类名
+        # Builder 类名
         m_builder = re.search(r'类\s+(\w+)\.Builder|class\s+(\w+)\.Builder', error_msg)
         if m_builder:
             cls_name = m_builder.group(1) or m_builder.group(2)
             template = template.replace('{class}', cls_name)
 
-        # 3. 提取通用的缺失符号 (方法名/变量名)
-        m_symbol = re.search(r'符号:\s+(?:方法|变量|类)\s+(\w+)|symbol:\s+(?:method|variable|class)\s+(\w+)', error_msg)
+        # 缺失符号名
+        m_symbol = re.search(
+            r'符号:\s+(?:方法|变量|类)\s+(\w+)|symbol:\s+(?:method|variable|class)\s+(\w+)',
+            error_msg)
         if m_symbol:
-            sym_name = m_symbol.group(1) or m_symbol.group(2)
-            template = template.replace('{symbol}', sym_name)
+            sym = m_symbol.group(1) or m_symbol.group(2)
+            template = template.replace('{symbol}', sym)
 
-        # 4. 提取 Final 类名 (支持双语)
+        # Final 类名
         m_final = re.search(r'最终(\w+)|final\s+(\w+)', error_msg)
         if m_final:
             cls_name = m_final.group(1) or m_final.group(2)
@@ -384,43 +461,48 @@ Reader reader = new StringReader("test content");
         exec_ok: bool,
     ) -> List[str]:
         """
-        生成可直接注入到 Refiner prompt 的修复指令列表。
-        
-        ★ 改进：优先级处理
-        - 编译错误总是首先处理（如果存在）
-        - 执行错误其次处理（如果存在且编译通过）
-        - 对于单个 test，优先级高的 issue 先出现，但不跳过低优先级
-        
-        Parameters
-        ----------
-        compile_errors : 编译错误列表
-        exec_errors    : 执行错误列表
-        compile_ok     : 是否编译成功
-        exec_ok        : 是否执行成功
-        
-        Returns
-        -------
-        instructions   : 修复指令列表（单个 test 内的多个 issues 都会包含）
+        生成可注入 Refiner prompt 的修复指令列表。
+        关键修复：按错误类型去重，同类型只生成一条指令，避免重复。
         """
         instructions = []
 
-        # ★ 高优先级：编译错误（总是优先处理）
         if not compile_ok and compile_errors:
             classified = self.classify_compile_errors(compile_errors)
-            # 按错误类型分组，避免重复
-            seen = set()
+
+            # ★ 关键修复：按错误类型去重，每种类型只生成一条指令
+            seen_types: dict = {}  # {error_type: ClassifiedError}
             for ce in classified:
-                if ce.error_type in seen:
-                    continue
-                seen.add(ce.error_type)
+                if ce.error_type not in seen_types:
+                    seen_types[ce.error_type] = ce
+                # CE-XX 类型收集所有原始错误，但只生成一条指令
 
-                instr = f"[{ce.error_type}] {ce.fix_hint}"
-                if ce.fix_code:
-                    instr += f"\nExample fix:\n{ce.fix_code}"
-                instructions.append(instr)
+            for err_type, ce in seen_types.items():
+                # 找出该类型的所有错误消息（用于更具体的描述）
+                same_type_errors = [
+                    c.original_message for c in classified
+                    if c.error_type == err_type
+                ]
 
-        # ★ 中优先级：执行错误（编译通过的情况下）
-        if not exec_ok and exec_errors:
+                if err_type == CompileErrorType.UNKNOWN:
+                    # CE-XX: 列出所有未识别错误，提示 LLM 自行判断
+                    for raw_msg in same_type_errors[:2]:
+                        instr = f"[CE-XX] Unrecognized compile error: {raw_msg[:150]}\nFix: Analyze the error message above and apply the appropriate fix."
+                        instructions.append(instr)
+                else:
+                    # 已识别类型：生成一条带有类型标签的指令
+                    # 如果有多条同类型错误，在指令中列举（最多2条）
+                    if len(same_type_errors) > 1:
+                        examples = "; ".join(
+                            e[:80] for e in same_type_errors[:2]
+                        )
+                        instr = f"[{err_type}] {ce.fix_hint}\nErrors of this type: {examples}"
+                    else:
+                        instr = f"[{err_type}] {ce.fix_hint}"
+                    if ce.fix_code:
+                        instr += f"\nExample fix:\n{ce.fix_code}"
+                    instructions.append(instr)
+
+        elif not exec_ok and exec_errors:
             classified = self.classify_exec_errors(exec_errors)
             for re_err in classified:
                 instr = f"[{re_err.error_type}] {re_err.fix_hint}"
@@ -428,24 +510,18 @@ Reader reader = new StringReader("test content");
                     instr += f"\nExample fix:\n{re_err.fix_code}"
                 instructions.append(instr)
 
-        return instructions[:4]  # 最多4条，避免prompt过长
+        return instructions[:4]
 
 
 # ════════════════════════════════════════════════════════════════════
-# 集成入口：增强 TestDiag 的指令生成
+# 集成入口
 # ════════════════════════════════════════════════════════════════════
 
 _analyzer = CompileErrorAnalyzer()
 
 
 def enrich_diag_with_fix_hints(diag) -> List[str]:
-    """
-    从 TestDiag 对象生成额外的修复提示，供 Refiner 使用。
-
-    用法（在 refine_agent.py 的 _build_refiner_messages 中调用）：
-        extra_hints = enrich_diag_with_fix_hints(diag)
-        # 将 extra_hints 追加到该 Test 的 instructions 中
-    """
+    """从 TestDiag 对象生成额外的修复提示，供 Refiner 使用。"""
     return _analyzer.generate_fix_instructions(
         compile_errors=getattr(diag, 'compile_errors', []),
         exec_errors=getattr(diag, 'exec_errors', []),
@@ -455,17 +531,19 @@ def enrich_diag_with_fix_hints(diag) -> List[str]:
 
 
 def get_error_summary(compile_errors: List[str], exec_errors: List[str]) -> str:
-    """
-    生成简洁的错误摘要文本，用于 suite_summary 生成。
-    """
+    """生成简洁的错误摘要文本。"""
     if not compile_errors and not exec_errors:
         return ""
 
     parts = []
     if compile_errors:
         classified = _analyzer.classify_compile_errors(compile_errors)
-        types = list(dict.fromkeys(ce.error_type for ce in classified))
-        parts.append(f"Compile errors: {', '.join(types)}")
+        # 去重后的类型列表
+        seen = []
+        for ce in classified:
+            if ce.error_type not in seen:
+                seen.append(ce.error_type)
+        parts.append(f"Compile errors: {', '.join(seen)}")
 
     if exec_errors:
         classified = _analyzer.classify_exec_errors(exec_errors)

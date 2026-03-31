@@ -268,7 +268,19 @@ def compute_suite_score_ablation(
         cfg = AblationConfig()
 
     if not test_scores:
-        return SuiteScore()
+        # 空输入时也要尊重消融配置，返回正确的 None 值
+        empty_suite = SuiteScore()
+        if not cfg.use_compile_exec:
+            empty_suite.compile_pass_rate = None
+            empty_suite.exec_pass_rate = None
+        if not cfg.use_coverage:
+            empty_suite.coverage_line_avg = None
+            empty_suite.coverage_line_max = None
+            empty_suite.coverage_line_min = None
+            empty_suite.coverage_branch_avg = None
+        if not cfg.use_bug_revealing:
+            empty_suite.bug_reveal_rate = None
+        return empty_suite
 
     scores = list(test_scores.values())
     n = len(scores)

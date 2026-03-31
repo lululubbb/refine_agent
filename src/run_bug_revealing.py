@@ -20,6 +20,10 @@
 
   # 传入根目录，自动展开所有子项目（自动检测每个子项目的模式）
   python3 run_bug_revealing.py /path/to/defect4j_projects
+
+  python3 run_bug_revealing.py /path/to/project_f --test_dir "/absolute/path/to/my_tests"
+  python3 run_bug_revealing.py /path/to/project_f --test_dir "tests%20260328155208"
+  python3 run_bug_revealing.py /path/to/project_f #自动找最新
 """
 
 import os
@@ -175,23 +179,27 @@ def resolve_buggy_fixed(proj_path):
     print(f"  tests_source_proj: {tests_source_proj}")
     return buggy_proj, fixed_proj, tests_source_proj
 
-
-def run_for_project(proj_path):
+def run_for_project(proj_path, specified_test_dir=None):
     """
-    对单个项目运行 bug_revealing.py。
-    proj_path 可以是 _f 或 _b 结尾的目录。
+    运行单个项目。如果 specified_test_dir 有值，则使用它而不是最新的目录。
     """
     project_name = os.path.basename(os.path.abspath(proj_path))
-
     result = resolve_buggy_fixed(proj_path)
-    if result is None:
-        return
+    if not result: return
     buggy_proj, fixed_proj, tests_source_proj = result
 
-    # 从 tests_source_proj 目录找测试文件
-    tests_dir = find_newest_tests(tests_source_proj)
-    if not tests_dir:
-        print(f"No tests%* directory found under {tests_source_proj}, skipping")
+    # --- 核心修改部分 ---
+    if specified_test_dir:
+        # 如果传入的是绝对路径，直接使用；否则在项目目录下拼接
+        if os.path.isabs(specified_test_dir):
+            tests_dir = specified_test_dir
+        else:
+            tests_dir = os.path.join(tests_source_proj, specified_test_dir)
+    else:
+        tests_dir = find_newest_tests(tests_source_proj)
+
+    if not tests_dir or not os.path.exists(tests_dir):
+        print(f"❌ Error: Test directory not found: {tests_dir}")
         return
 
     # 构造 bug_revealing.py 调用命令
@@ -218,30 +226,22 @@ def run_for_project(proj_path):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description='Run bug_revealing across projects (supports both _f and _b as project_dir)'
-    )
-    parser.add_argument(
-        'projects', nargs='*',
-        help=(
-            'Optional project paths. '
-            'Can be _f (fixed-first, new default) or _b (buggy-first, legacy). '
-            'If empty, uses config.project_dir discovery.'
-        )
-    )
+    parser = argparse.ArgumentParser(description='Batch run bug_revealing with specific test dir support.')
+    parser.add_argument('projects', nargs='*', help='Project paths (_f or _b).')
+    # 添加新参数
+    parser.add_argument('--test_dir', type=str, help='Manual specified test directory name (e.g., tests%20260328155208)')
+    
     args = parser.parse_args()
+    projects = find_projects(args.projects)
 
-    projects = find_projects(args.projects if args.projects else None)
     if not projects:
         print('No projects found to run')
         return
-    print(f"Found {len(projects)} projects to process.")
-    for p in projects:
-        print(f"\n{'='*60}")
-        print(f"Processing: {os.path.basename(p)}")
-        print(f"{'='*60}")
-        run_for_project(p)
 
+    print(f"Found {len(projects)} projects. Specific Test Dir: {args.test_dir or 'Auto-find newest'}")
+    for p in projects:
+        print(f"\n{'-'*40}\nTarget: {os.path.basename(p)}\n{'-'*40}")
+        run_for_project(p, specified_test_dir=args.test_dir)
 
 if __name__ == '__main__':
     main()

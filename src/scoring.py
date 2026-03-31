@@ -114,9 +114,9 @@ class SuiteScore:
         return {
             "n_tests":           self.n_tests,
             "compile_pass_count": self.compile_pass_count,
-            "compile_pass_rate":  round(self.compile_pass_rate, 4),
+            "compile_pass_rate":  _r(self.compile_pass_rate),
             "exec_pass_count":    self.exec_pass_count,
-            "exec_pass_rate":     round(self.exec_pass_rate, 4),
+            "exec_pass_rate":     _r(self.exec_pass_rate),
             "per_test_line_coverage":   self.per_test_line_coverage,
             "per_test_branch_coverage": self.per_test_branch_coverage,
             "coverage_line_avg":   _r(self.coverage_line_avg),
@@ -125,7 +125,7 @@ class SuiteScore:
             "coverage_branch_avg": _r(self.coverage_branch_avg),
             "bug_reveal_count":   self.bug_reveal_count,
             "bug_reveal_checked": self.bug_reveal_checked,
-            "bug_reveal_rate":    round(self.bug_reveal_rate, 4),
+            "bug_reveal_rate":    _r(self.bug_reveal_rate),
             "max_pairwise_similarity": _r(self.max_pairwise_similarity),
             "high_redundancy_pairs": [
                 {"test1": p[0], "test2": p[1], "similarity": round(p[2], 4)}

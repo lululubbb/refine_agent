@@ -5,9 +5,11 @@ import psutil
 import concurrent.futures
 import test_runner  # 导入模块
 from test_runner_patch import patch_test_runner_coverage
+from test_runner_coverage_patch import patch_all
 
 # 立即注入补丁
 patch_test_runner_coverage(test_runner)
+patch_all(test_runner)
 
 # 此时再从已经修补过的模块中获取 TestRunner
 from test_runner import TestRunner
