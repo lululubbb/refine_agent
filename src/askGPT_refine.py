@@ -443,6 +443,7 @@ def generate_one_test(
     gen_log_dir: str,
     progress_tag: str = "",
     version_text: str = "",
+    validation_issues_cache: dict = None, 
 ) -> Optional[tuple]:
     save_dir = os.path.join(gen_log_dir, str(seq))
     os.makedirs(save_dir, exist_ok=True)
@@ -508,7 +509,27 @@ def generate_one_test(
         f.write(final_code)
     with open(os.path.join(save_dir, "2_JAVA.java"), "w", encoding="utf-8") as f:
         f.write(final_code)
-
+    try:
+        from test_runner_patch import validate_before_write
+        _focal_ctx = ctx_d1.get("information", "") or ctx_d3.get("full_fm", "")
+        _has_errors, _val_text = validate_before_write(
+            final_code,
+            tc_name=tc_name,
+            focal_class_context=_focal_ctx,
+        )
+        if _val_text and validation_issues_cache is not None:
+            validation_issues_cache[tc_name] = {
+                "has_errors": _has_errors,
+                "prompt_text": _val_text,
+            }
+            if _has_errors:
+                print(
+                    f"    ⚠️  [Validator] {tc_name} 发现静态问题，"
+                    f"将在 fix 阶段注入修复提示", flush=True
+                )
+    except Exception as _ve:
+            pass   # 验证失败不影响主流程
+    # ── ★ 验证结束 ───────────────────────────────────────────────────
     print(f"    ✅ 生成成功{'⚠️(语法修复)' if has_err else ''} | "
           f"tokens={gen_result.prompt_tokens}+{gen_result.completion_tokens} | "
           f"llm_time={gen_result.elapsed_seconds:.1f}s | {tc_fname}", flush=True)
@@ -568,8 +589,9 @@ def build_fix_messages(
     test_name, current_code, instructions, focal_method,
     class_name, ctx_d1, ctx_d3, imports, suite_summary,
     prev_unchanged=False, diag=None, contract_text="",
-    version_text="",
+    version_text="", validation_issues: dict = None,  
 ):
+    from compile_error_analyzer import enrich_diag_with_fix_hints, get_error_summary
     compile_ok      = getattr(diag, 'compile_ok',      True)  if diag else True
     exec_ok         = getattr(diag, 'exec_ok',         True)  if diag else True
     compile_errors  = getattr(diag, 'compile_errors',  [])    if diag else []
@@ -660,6 +682,14 @@ def build_fix_messages(
             suffix += f"\n\n## Version Constraints Reminder\n{version_text[:500]}"
         if prev_unchanged:
             suffix += "\n\n⚠️ MUST CHANGE: Previous output was identical to input."
+        # ── ★ 修改点4：注入上一轮生成时的验证问题 ──
+        if validation_issues and test_name in validation_issues:
+            _vdata = validation_issues[test_name]
+            if _vdata.get("has_errors") and _vdata.get("prompt_text"):
+                suffix += (
+                    f"\n\n## Static Pre-validation Issues (fix these too):\n"
+                    f"{_vdata['prompt_text']}"
+                )
         msgs[-1]["content"] += suffix
 
     return msgs
@@ -775,7 +805,7 @@ def focal_method_pipeline(
     _divider("═", color=Fore.GREEN)
 
     current_codes: Dict[str, str] = {}
-
+    validation_issues_cache: dict = {}
     for seq in range(1, test_number + 1):
         tc_name = f"{class_name}_{method_id}_{seq}Test"
         result = generate_one_test(
@@ -786,7 +816,8 @@ def focal_method_pipeline(
             class_name=class_name, method_id=method_id,
             tc_dir=tc_dir, gen_log_dir=gen_log_dir,
             progress_tag=progress_tag,
-            version_text=version_text,  # ★ 传入版本信息
+            version_text=version_text,
+            validation_issues_cache=validation_issues_cache, 
         )
         if result is None:
             continue
@@ -914,7 +945,8 @@ def focal_method_pipeline(
                 imports=imports, suite_summary=refine_result.suite_summary,
                 prev_unchanged=prev_unchanged, diag=tc_diag,
                 contract_text=get_contract_text(contract),
-                version_text=version_text,  # ★ 传入版本信息
+                version_text=version_text,
+                validation_issues=validation_issues_cache, 
             )
 
             # ★ 新增：记录最终给 Generator 的 prompt（包括 system+user）
@@ -1052,13 +1084,14 @@ def _save_stats(base_dir: str, tracker: LLMStatsTracker,
 
     total_tok = token_stats["all_total"]["total_tokens"]
     llm_time  = token_stats["all_total"]["llm_elapsed_seconds"]
+    call_count = token_stats["all_total"]["call_count"]
     wall_time = time_stats["wall_clock"]["total_seconds"]
     print(flush=True)
     _divider("═", color=Fore.BLUE)
     print(Fore.BLUE +
           f"  🏁 全部完成\n"
           f"     Wall-clock: {wall_time}s  |  "
-          f"LLM time (纯API): {llm_time}s  |  "
+          f"LLM time (纯API): {llm_time}s ({call_count} calls)  |  "
           f"Generator: {token_stats['generator']['total_tokens']}  |  "
           f"Refiner: {token_stats['refiner']['total_tokens']}  |  "
           f"all_total: {total_tok}\n"
@@ -1081,10 +1114,12 @@ def _acc_global(g: dict, s: dict):
             g[role][k] += s.get(role, {}).get(k, 0)
         g[role].setdefault("llm_elapsed_seconds", 0.0)
         g[role]["llm_elapsed_seconds"] += s.get(role, {}).get("llm_elapsed_seconds", 0.0)
+        g[role].setdefault("call_count", 0)
+        g[role]["call_count"] += s.get(role, {}).get("call_count", 0)
 
     g.setdefault("all_total", {
         "prompt_tokens": 0, "completion_tokens": 0,
-        "total_tokens": 0, "llm_elapsed_seconds": 0.0,
+        "total_tokens": 0, "llm_elapsed_seconds": 0.0, "call_count": 0,
     })
     g["all_total"]["prompt_tokens"]       = (g["generator"].get("prompt_tokens", 0)
                                               + g["refiner"].get("prompt_tokens", 0))
@@ -1095,6 +1130,8 @@ def _acc_global(g: dict, s: dict):
     g["all_total"]["llm_elapsed_seconds"] = round(
         g["generator"].get("llm_elapsed_seconds", 0.0)
         + g["refiner"].get("llm_elapsed_seconds", 0.0), 3)
+    g["all_total"]["call_count"]          = (g["generator"].get("call_count", 0)
+                                              + g["refiner"].get("call_count", 0))
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -1182,7 +1219,7 @@ def start_whole_process(
     print(f"Refiner total     : {global_stats['refiner']['total_tokens']}")
     print(f"Refiner LLM time  : {global_stats['refiner']['llm_elapsed_seconds']:.1f}s")
     print(f"ALL total_tokens  : {gt['total_tokens']}")
-    print(f"ALL LLM time      : {gt['llm_elapsed_seconds']:.1f}s  (纯 API 调用，不含工具链)")
+    print(f"ALL LLM time      : {gt['llm_elapsed_seconds']:.1f}s   ({gt['call_count']} calls)")
     print(f"avg tokens/task   : {round(gt['total_tokens']/total, 1) if total else 0}")
     print(f"Generator per task: {round(global_stats['generator']['total_tokens']/total, 1) if total else 0}")
     print(f"Refiner per task  : {round(global_stats['refiner']['total_tokens']/total, 1) if total else 0}")

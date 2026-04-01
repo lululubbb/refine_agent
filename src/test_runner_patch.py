@@ -1,23 +1,16 @@
 """
-test_runner.py  — patched version
-主要修复：
-  Bug-Coverage-1: per_class_coverage 统计时只匹配外部类 (PolygonsSet)，
-                  忽略了内部类 (PolygonsSet$Edge 等)，导致行数远小于
-                  focal method 所在的实际类行数。
-                  修复：对所有 name.split('$')[0] == simple 的 <class> 元素求和。
+test_runner_patch.py  (v2 — 验证器真正集成版)
+=============================================
 
-  Bug-Coverage-2: 与 Bug-Coverage-1 同根因 —— _resolve_target_class 返回的
-                  简单类名与 JaCoCo XML 中的类名匹配逻辑不一致。
-                  统一改用 _jacoco_class_matches() 辅助函数做匹配。
+修复：
+  1. validate_before_write() 增加 focal_class_context 参数，
+     传入上下文以启用动态规则（R-05/R-08）
 
-新增：
-  - 在 generate_one_test / build_fix_messages 调用前加入 Rule-based Validator。
-  - validate_before_write() 在写入 test_cases/ 前做快速检查，记录到日志。
+  2. 修复主要集成问题：
+     旧版 validate_before_write 定义了但从未在 askGPT_refine.py 中被调用。
+     本版提供清晰的集成接口，并在 patch_test_runner_coverage 中
+     同时把验证工具函数注入到 askGPT_refine 模块。
 """
-# ── 本文件只包含差异补丁（patch），在 askGPT_refine.py 中通过 monkeypatch 注入 ──
-# 也可以直接替换 test_runner.py 中的对应方法。
-# 以下是独立可运行的补丁函数，直接 import 即可使用。
-
 from __future__ import annotations
 
 import csv
@@ -46,28 +39,9 @@ from scoring_ablation import global_ablation_config, compute_final_score_ablatio
 # ════════════════════════════════════════════════════════════════════
 
 def _jacoco_class_matches(jacoco_class_name: str, target_simple: str) -> bool:
-    """
-    判断 JaCoCo XML 中的 <class name="org/foo/Bar$Inner"> 是否属于
-    target_simple（如 "Bar"）。
-
-    规则：
-      1. 取 jacoco_class_name 的最后一段（去掉包名）
-      2. 再去掉 $ 及其后面的内部类名
-      3. 与 target_simple 做精确匹配
-    
-    例：
-      "org/apache/commons/math3/geometry/euclidean/twod/PolygonsSet$Edge"
-        → 外部类简单名 = "PolygonsSet" ✓
-      "org/apache/commons/math3/geometry/euclidean/twod/PolygonsSet"
-        → 外部类简单名 = "PolygonsSet" ✓
-      "org/apache/commons/csv/CSVRecord"
-        → 外部类简单名 = "CSVRecord" ✓
-    """
     if not jacoco_class_name or not target_simple:
         return False
-    # 取最后一段（去包名）
     last_segment = jacoco_class_name.split('/')[-1]
-    # 取外部类名（去掉 $ 及内部类部分）
     outer_class = last_segment.split('$')[0]
     return outer_class == target_simple
 
@@ -76,23 +50,11 @@ def _sum_class_coverage_from_xml(
     root_elem: ET.Element,
     target_simple: str,
 ) -> Dict[str, int]:
-    """
-    从 JaCoCo XML 的根元素中，汇总 target_simple 类（含所有内部类）
-    的 LINE 和 BRANCH 覆盖数据。
-
-    返回：
-      {
-        'line_cov': int, 'line_total': int,
-        'branch_cov': int, 'branch_total': int,
-      }
-    """
     totals = dict(line_cov=0, line_total=0, branch_cov=0, branch_total=0)
-
     for class_elem in root_elem.findall('.//class'):
         cname = class_elem.get('name', '')
         if not _jacoco_class_matches(cname, target_simple):
             continue
-        # 读取该 <class> 下的 <counter> 元素（class 级别）
         for counter in class_elem.findall('counter'):
             ctype   = counter.get('type', '')
             covered = int(counter.get('covered', 0))
@@ -103,7 +65,6 @@ def _sum_class_coverage_from_xml(
             elif ctype == 'BRANCH':
                 totals['branch_cov']   += covered
                 totals['branch_total'] += covered + missed
-
     return totals
 
 
@@ -111,18 +72,9 @@ def _compute_per_class_coverage_fixed(
     jacoco_xml_path: str,
     all_target_classes: List[str],
 ) -> Dict[str, dict]:
-    """
-    Bug-Coverage-1 修复版：正确汇总含内部类的覆盖率。
-
-    返回：
-      { simple_class_name: { line_cov, line_total, line_rate,
-                              branch_cov, branch_total, branch_rate } }
-    """
     result: Dict[str, dict] = {}
-
     if not jacoco_xml_path or not os.path.exists(jacoco_xml_path):
         return result
-
     try:
         with open(jacoco_xml_path, 'r', encoding='utf-8', errors='replace') as f:
             raw = f.read()
@@ -147,31 +99,40 @@ def _compute_per_class_coverage_fixed(
             'branch_total': bt,
             'branch_rate': round(100.0 * totals['branch_cov'] / bt, 2) if bt else 0.0,
         }
-
     return result
 
 
 # ════════════════════════════════════════════════════════════════════
-# Rule-based Validator 集成
+# Rule-based Validator 集成（v2 — 传入上下文的版本）
 # ════════════════════════════════════════════════════════════════════
 
 def validate_before_write(
     java_source: str,
     tc_name: str,
     log_path: Optional[str] = None,
+    focal_class_context: str = "",    # ★ 新增：传入上下文以启用动态规则
 ) -> Tuple[bool, str]:
     """
     在将 Java 代码写入 test_cases/ 之前调用 Rule-based Validator。
 
+    Parameters
+    ----------
+    java_source          : 待检查的 Java 源码
+    tc_name              : 测试类名（用于日志）
+    log_path             : 可选的日志文件路径
+    focal_class_context  : focal class 的信息字段（d1 information 或 d3 full_fm），
+                           传入后启用动态 R-05/R-08 规则
+
     Returns
     -------
     (has_critical_errors: bool, prompt_text: str)
-        has_critical_errors: True 表示存在会导致编译失败的错误
-        prompt_text: 可注入 LLM prompt 的问题描述（空字符串 = 无问题）
     """
     try:
         from java_syntax_validator import validate_java
-        result = validate_java(java_source)
+        result = validate_java(
+            java_source,
+            focal_class_context=focal_class_context
+        )
 
         if not result.is_valid or result.warning_count > 0:
             prompt_text = result.to_prompt_text(max_issues=5)
@@ -188,7 +149,7 @@ def validate_before_write(
 
             if result.error_count > 0:
                 print(
-                    f"  ⚠️  [Validator] {tc_name}: {result.error_count} error(s) detected before write",
+                    f"  ⚠️  [Validator] {tc_name}: {result.error_count} error(s) detected",
                     flush=True
                 )
                 for iss in result.issues:
@@ -200,7 +161,6 @@ def validate_before_write(
         return False, ""
 
     except ImportError:
-        # java_syntax_validator 未安装时静默跳过
         return False, ""
     except Exception as e:
         print(f"  [Validator] warning: validation failed for {tc_name}: {e}", flush=True)
@@ -208,46 +168,37 @@ def validate_before_write(
 
 
 # ════════════════════════════════════════════════════════════════════
-# 补丁注入函数：修复 run_all_tests 中 per_class_coverage 的计算
+# 补丁注入函数
 # ════════════════════════════════════════════════════════════════════
 
 def patch_test_runner_coverage(test_runner_module):
     """
     将 Bug-Coverage-1/2 修复注入到已导入的 test_runner 模块。
-
-    用法（在 run_tests.py 或 task.py 中）：
-        import test_runner as _tr_mod
-        from test_runner_patch import patch_test_runner_coverage
-        patch_test_runner_coverage(_tr_mod)
+    同时注入验证工具函数，供 askGPT_refine 调用。
     """
-    # 替换 TestRunner 中用于计算类级覆盖率的逻辑
-    # 由于 run_all_tests 是一个大方法，我们通过 monkeypatch 替换辅助函数
     original_run_all = test_runner_module.TestRunner.run_all_tests
 
     def patched_run_all_tests(self, tests_dir, compiled_test_dir,
                               compiler_output, test_output, report_dir, logs=None):
-        # 调用原始方法
         result = original_run_all(
             self, tests_dir, compiled_test_dir,
             compiler_output, test_output, report_dir, logs
         )
-        # 在原始方法完成后，重新计算 per_class_coverage 并更新 CSV
         _recompute_coverage_csv(self, tests_dir, logs)
         return result
 
     test_runner_module.TestRunner.run_all_tests = patched_run_all_tests
+
+    # ★ 注入验证函数到模块命名空间，供 askGPT_refine 等直接调用
+    test_runner_module._validate_before_write = validate_before_write
+
     print("[Patch] test_runner.TestRunner.run_all_tests patched for coverage fix.", flush=True)
 
 
 def _recompute_coverage_csv(runner_instance, tests_dir: str, logs=None):
-    """
-    在 run_all_tests 完成后，重新用修复版函数计算 per_class_coverage，
-    并将结果追加到 execution_stats.log。
-    """
     from test_runner_focal_fix import resolve_all_target_classes
 
     project_dir   = runner_instance.target_path
-    project_name  = os.path.basename(project_dir.rstrip('/'))
     all_tcs       = resolve_all_target_classes(project_dir)
     if not all_tcs:
         return

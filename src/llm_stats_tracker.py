@@ -174,6 +174,7 @@ class LLMStatsTracker:
                 "total_tokens":        gen_all["total_tokens"]        + ref_all["total_tokens"],
                 "llm_elapsed_seconds": round(
                     gen_all["llm_elapsed_seconds"] + ref_all["llm_elapsed_seconds"], 3),
+                "call_count":          gen_all["call_count"]          + ref_all["call_count"],
             },
             "rounds": rounds,
         }

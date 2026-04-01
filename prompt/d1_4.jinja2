@@ -1,7 +1,9 @@
 {# d1_4.jinja2 — Initial generation prompt (no external dependencies) #}
 {# context: class_name, focal_method, information, contract_text (optional) #}
 Please write a JUnit 5 test class for the Java method described below.
-
+{% if version_constraints %}
+{{ version_constraints }}
+{% endif %}
 ### Method Under Test
 Class: `{{ class_name }}`
 Method: `{{ focal_method }}`

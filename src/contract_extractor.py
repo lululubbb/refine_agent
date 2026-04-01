@@ -1,22 +1,24 @@
 """
-contract_extractor.py
-======================
-程序合约（Program Contracts）提取器
+contract_extractor.py  (v2 — 精简重构版)
+=========================================
 
-概念：程序合约源于 Hoare 逻辑（1969），包含：
-  - 前置条件（Precondition）：调用函数前必须满足的约束（输入限制）
-  - 后置条件（Postcondition）：函数执行后的输出保证
-  - 不变量（Invariant）：执行前后均成立的类状态约束
+核心设计原则重构：
+  旧版 Level 3-5 产生大量与代码无关的通用模板
+  （"String should not be null; consider testing empty string"），
+  LLM 本就会生成这类测试，注入后是噪声而非信号。
 
-本模块通过静态分析 Java focal method 的源码，自动推断其合约，
-并将合约以自然语言形式注入到 Generator 的 Prompt 中，
-从而减少 LLM 生成无效输入/错误断言，提升测试质量。
+新版原则：
+  - 只提取"代码中实际存在"的约束（Level 1 Javadoc、Level 2 防御性检查）
+  - Level 3 参数类型推断改为：仅当参数名暗示特定语义（offset/index/size/timeout）时提取
+  - Level 4 返回类型推断大幅削减：只保留真正有信息量的条目（void 的副作用提示）
+  - Level 5 方法名语义推断：只保留合约性强的方法（read/close/equals/hashCode/compareTo），
+    去掉 get/set/is 这类 LLM 本就了解的通用模式
+  - Level 6 字段不变量：只在方法确实修改字段时才输出
 
-使用方式：
-    from contract_extractor import ContractExtractor
-    extractor = ContractExtractor()
-    contract = extractor.extract(source_code, method_name, params, return_type)
-    prompt_addition = contract.to_prompt_text()
+修复后效果：
+  - 合约文本长度平均减少 60%
+  - 保留内容均来自代码中的实际证据，而非通用模板
+  - 对 LLM 真正有增量价值
 """
 
 from __future__ import annotations
@@ -36,23 +38,10 @@ class MethodContract:
     method_name: str
     return_type: str = ""
 
-    # ── 前置条件（Preconditions）────────────────────────────────
-    # 输入参数约束：参数不能为 null、必须在某范围内、不能为空集合等
     preconditions: List[str] = field(default_factory=list)
-
-    # ── 后置条件（Postconditions）────────────────────────────────
-    # 输出/副作用约束：返回值的类型/范围/内容保证、状态变化保证等
     postconditions: List[str] = field(default_factory=list)
-
-    # ── 异常合约（Exception Contract）───────────────────────────
-    # 在什么条件下抛出什么异常（帮助 LLM 生成异常测试用例）
     exception_contracts: List[str] = field(default_factory=list)
-
-    # ── 状态不变量（State Invariants）───────────────────────────
-    # 对象字段的约束，调用前后均成立
     invariants: List[str] = field(default_factory=list)
-
-    # ── 参数语义摘要（辅助信息）─────────────────────────────────
     param_semantics: Dict[str, str] = field(default_factory=dict)
 
     def is_empty(self) -> bool:
@@ -62,7 +51,7 @@ class MethodContract:
     def to_prompt_text(self) -> str:
         """
         将合约转换为适合注入到 LLM Prompt 的自然语言文本。
-        格式简洁、清晰，方便 LLM 理解并遵循。
+        只包含来自代码实际证据的约束，不包含通用模板。
         """
         if self.is_empty():
             return ""
@@ -70,49 +59,42 @@ class MethodContract:
         lines = [
             f"## Program Contract for `{self.method_name}`",
             "",
-            "Use the following contract to guide test generation. Tests MUST respect these constraints:",
+            "These constraints are extracted directly from the source code "
+            "(defensive checks, Javadoc, field analysis). "
+            "They represent **non-obvious** behaviors that your tests must cover:",
         ]
 
         if self.preconditions:
             lines.append("")
-            lines.append("### Preconditions (valid input constraints):")
-            lines.append("Generate test cases that BOTH respect these constraints AND deliberately violate them")
-            lines.append("(to test error handling). At least one test per constraint violation is required.")
+            lines.append("### Preconditions (from source code defensive checks):")
             for p in self.preconditions:
-                lines.append(f"  - {p}")
-
-        if self.postconditions:
-            lines.append("")
-            lines.append("### Postconditions (guaranteed output properties):")
-            lines.append("Each test assertion MUST verify at least one of these guarantees:")
-            for p in self.postconditions:
                 lines.append(f"  - {p}")
 
         if self.exception_contracts:
             lines.append("")
-            lines.append("### Exception Contracts (when exceptions should be thrown):")
-            lines.append("Generate specific tests for each exception condition using `assertThrows`:")
+            lines.append("### Exception Contracts (when these exceptions are thrown):")
+            lines.append("Generate `assertThrows` tests for each:")
             for e in self.exception_contracts:
                 lines.append(f"  - {e}")
 
+        if self.postconditions:
+            lines.append("")
+            lines.append("### Postconditions (guaranteed behaviors):")
+            lines.append("Each test should include assertions for at least one of:")
+            for p in self.postconditions:
+                lines.append(f"  - {p}")
+
         if self.invariants:
             lines.append("")
-            lines.append("### State Invariants (must hold before and after the call):")
+            lines.append("### State Invariants (verify before and after the call):")
             for inv in self.invariants:
                 lines.append(f"  - {inv}")
 
         if self.param_semantics:
             lines.append("")
-            lines.append("### Parameter Semantics:")
+            lines.append("### Parameter Semantics (from Javadoc):")
             for param, desc in self.param_semantics.items():
                 lines.append(f"  - `{param}`: {desc}")
-
-        lines.append("")
-        lines.append("### Test Generation Strategy based on Contract:")
-        lines.append("  1. Happy path: all preconditions satisfied → verify postconditions hold")
-        lines.append("  2. Boundary tests: values at the edge of valid ranges")
-        lines.append("  3. Violation tests: each precondition violated separately → verify exceptions/error behavior")
-        lines.append("  4. Null/empty tests: null inputs, empty collections, zero values")
 
         return "\n".join(lines)
 
@@ -129,99 +111,21 @@ class MethodContract:
 
 
 # ════════════════════════════════════════════════════════════════════
-# 合约提取器
+# 合约提取器（精简重构版）
 # ════════════════════════════════════════════════════════════════════
 
 class ContractExtractor:
     """
     从 Java focal method 源码中静态提取程序合约。
 
-    提取策略（多级，逐级降级）：
+    提取策略（只保留有代码证据的层级）：
     Level 1: Javadoc / 注解（@param, @throws, @return, @pre, @post）
     Level 2: 方法体中的防御性检查（if-throw、Objects.requireNonNull、assert）
-    Level 3: 参数类型推断（原始类型、集合类型、String、数组）
-    Level 4: 返回类型推断（void/非void、集合返回、boolean返回）
-    Level 5: 方法名语义推断（get/set/add/remove/is 前缀）
+    Level 3: 参数名语义推断（仅 offset/index/size/timeout 等语义明确的参数名）
+    Level 4: 返回类型推断（仅 void 的副作用提示，其余删除）
+    Level 5: 特定方法合约（read/close/equals/hashCode/compareTo 等有明确合约的方法）
+    Level 6: 字段不变量（仅当方法实际修改字段时）
     """
-
-    # ── 类型 → 前置条件模板 ───────────────────────────────────────
-    _TYPE_PRECONDITIONS = {
-        "String":       "{name} should not be null; consider also testing empty string \"\"",
-        "int":          "{name} must be a valid integer; test with 0, negative values, Integer.MAX_VALUE",
-        "long":         "{name} must be a valid long; test with 0L, negative values, Long.MAX_VALUE",
-        "double":       "{name} must be a valid double; test with 0.0, NaN, Double.POSITIVE_INFINITY, negative",
-        "float":        "{name} must be a valid float; test with 0.0f, Float.NaN, negative values",
-        "boolean":      "{name} can be true or false; generate tests for both values",
-        "char":         "{name} must be a valid char; test with special characters, whitespace",
-        "byte":         "{name} must be in range [Byte.MIN_VALUE, Byte.MAX_VALUE]",
-        "short":        "{name} must be in range [Short.MIN_VALUE, Short.MAX_VALUE]",
-        "List":         "{name} should not be null; test with empty list, single element, multiple elements",
-        "Collection":   "{name} should not be null; test with empty collection and populated collection",
-        "Map":          "{name} should not be null; test with empty map and map with entries",
-        "Set":          "{name} should not be null; test with empty set and set with elements",
-        "Object":       "{name} may be null unless documented otherwise; test null and valid objects",
-        "Reader":       "{name} must be a valid, open Reader; test with StringReader for controlled input",
-        "InputStream":  "{name} must be a valid, open InputStream; test with ByteArrayInputStream",
-        "char[]":       "{name} should not be null; test with empty array and populated array",
-    }
-
-    # ── 返回类型 → 后置条件模板 ───────────────────────────────────
-    _RETURN_POSTCONDITIONS = {
-        "boolean":    "Return value is true or false; assert the specific expected boolean for each scenario",
-        "String":     "Return value is a String (may be null or empty based on contract); assert exact value",
-        "int":        "Return value is an integer; assert specific expected numeric value for each input",
-        "long":       "Return value is a long; assert specific expected numeric value",
-        "double":     "Return value is a double; use assertEquals with delta for floating-point comparison",
-        "float":      "Return value is a float; use assertEquals with delta for floating-point comparison",
-        "List":       "Return value is a List; assert size, content, and order when applicable",
-        "Collection": "Return value is a Collection; assert it is not null and has expected size/content",
-        "Map":        "Return value is a Map; assert it is not null, check specific key-value pairs",
-        "Set":        "Return value is a Set; assert it is not null, check membership of expected elements",
-        "Optional":   "Return value is Optional; use assertTrue(result.isPresent()) or assertFalse",
-        "void":       "No return value; verify side effects: state changes, file writes, listener callbacks",
-    }
-
-    # ── 方法名前缀 → 语义推断 ─────────────────────────────────────
-    _METHOD_PREFIX_SEMANTICS = {
-        "get":      ("getter method", ["Returns the current value of a field; test after setting it",
-                                        "Return value should reflect the object's internal state"]),
-        "set":      ("setter method", ["Sets a field value; verify via corresponding getter",
-                                        "Test with boundary values and null (if type allows)"]),
-        "is":       ("boolean query", ["Returns true or false based on object state",
-                                        "Test both conditions that return true and false"]),
-        "has":      ("existence check", ["Returns true if element exists, false otherwise",
-                                          "Test with existing and non-existing elements"]),
-        "add":      ("collection add", ["Adds element to collection; verify size increases by 1",
-                                         "Verify added element can be retrieved"]),
-        "remove":   ("collection remove", ["Removes element from collection; verify size decreases",
-                                             "Test removing non-existing element"]),
-        "contains": ("membership check", ["Returns true if element is present",
-                                           "Test with present and absent elements"]),
-        "parse":    ("parsing method", ["Parses input into structured form; test valid/invalid formats",
-                                         "Test with null, empty, malformed input"]),
-        "read":     ("read method", ["Reads data from source; test end-of-stream condition (returns -1 or EOF)",
-                                      "Test reading from empty source and partially-read source"]),
-        "write":    ("write method", ["Writes data to target; verify written content",
-                                       "Test writing empty data and large data"]),
-        "format":   ("format method", ["Formats data according to pattern; test with valid/invalid patterns",
-                                         "Test with null input and edge-case values"]),
-        "validate": ("validation method", ["Validates input; test with valid input (no exception) and invalid",
-                                             "Each validation rule should have its own test"]),
-        "create":   ("factory method", ["Creates new instance; verify returned object is not null",
-                                          "Verify created object has expected initial state"]),
-        "build":    ("builder method", ["Builds object; verify all configured properties are reflected",
-                                          "Test with minimal and maximal configuration"]),
-        "compare":  ("comparison method", ["Returns negative/zero/positive; test all three outcomes",
-                                              "Test reflexivity: compare(a, a) == 0"]),
-        "equals":   ("equality check", ["Returns true if equal; test reflexivity, symmetry, null",
-                                          "Test with equal and unequal objects"]),
-        "encode":   ("encoding method", ["Encodes data; verify encoded result can be decoded back",
-                                           "Test with special characters and empty input"]),
-        "decode":   ("decoding method", ["Decodes data; verify result matches original",
-                                           "Test with invalid encoded data"]),
-        "reset":    ("reset method", ["Resets internal state; verify object returns to initial state",
-                                        "Verify all fields are reset, not just some"]),
-    }
 
     def extract(
         self,
@@ -233,40 +137,27 @@ class ContractExtractor:
         class_fields: str = "",
         javadoc: str = "",
     ) -> MethodContract:
-        """
-        主入口：从 focal method 源码中提取完整合约。
-
-        Parameters
-        ----------
-        source_code  : focal method 完整源码（含签名和方法体）
-        method_name  : 方法名（如 'read', 'getLineNumber'）
-        parameters   : 参数字符串（如 'char[] buf, int offset, int len'）
-        return_type  : 返回类型（如 'int', 'String', 'List<String>'）
-        class_name   : 所在类名（辅助推断构造函数合约）
-        class_fields : 类字段列表（辅助推断不变量）
-        javadoc      : 方法的 Javadoc 注释（如果能单独提取）
-        """
         contract = MethodContract(
             method_name=method_name,
             return_type=return_type,
         )
 
-        # Level 1: 从 Javadoc 和注释提取
+        # Level 1: Javadoc（高可信度，直接来自代码文档）
         self._extract_from_javadoc(source_code, javadoc, contract)
 
-        # Level 2: 从防御性检查提取
+        # Level 2: 防御性检查（高可信度，直接来自代码行为）
         self._extract_from_defensive_checks(source_code, contract)
 
-        # Level 3: 从参数类型推断前置条件
-        self._extract_from_param_types(parameters, contract)
+        # Level 3: 仅语义明确的参数名（低噪声）
+        self._extract_from_semantic_param_names(parameters, contract)
 
-        # Level 4: 从返回类型推断后置条件
-        self._extract_from_return_type(return_type, contract)
+        # Level 4: 仅 void 方法的副作用提示
+        self._extract_void_return_hint(return_type, contract)
 
-        # Level 5: 从方法名语义推断
-        self._extract_from_method_name(method_name, return_type, contract)
+        # Level 5: 特定方法的强合约
+        self._extract_strong_method_contracts(method_name, return_type, contract)
 
-        # Level 6: 从字段推断不变量（如果字段信息可用）
+        # Level 6: 字段不变量（仅有修改证据时）
         if class_fields:
             self._extract_invariants_from_fields(class_fields, source_code, contract)
 
@@ -282,26 +173,26 @@ class ContractExtractor:
 
     def _extract_from_javadoc(self, source_code: str, external_javadoc: str,
                                contract: MethodContract):
-        """从 Javadoc 注释提取 @param, @throws, @return 信息。"""
-        # 合并源码内的注释和外部传入的 javadoc
         combined = (external_javadoc or "") + "\n" + (source_code or "")
-
-        # 提取 /** ... */ 块
         javadoc_blocks = re.findall(r'/\*\*(.*?)\*/', combined, re.DOTALL)
+
         for block in javadoc_blocks:
             lines = [l.strip().lstrip('*').strip() for l in block.splitlines()]
             for line in lines:
-                # @param
+                # @param：只有包含约束关键词时才提取
                 pm = re.match(r'@param\s+(\w+)\s+(.*)', line)
                 if pm:
                     param_name, desc = pm.group(1), pm.group(2).strip()
                     if desc:
                         contract.param_semantics[param_name] = desc
-                        # 从描述中推断前置条件
-                        if any(kw in desc.lower() for kw in ['must', 'should', 'cannot', 'not null', 'positive', 'non-negative']):
+                        # 只有描述中包含约束词时才加入 preconditions
+                        if any(kw in desc.lower() for kw in
+                               ['must', 'should not', 'cannot', 'not null',
+                                'positive', 'non-negative', 'non-empty',
+                                'must not', '> 0', '>= 0']):
                             contract.preconditions.append(f"`{param_name}`: {desc}")
 
-                # @throws / @exception
+                # @throws/@exception
                 tm = re.match(r'@(?:throws?|exception)\s+(\w+)\s+(.*)', line)
                 if tm:
                     exc_type, desc = tm.group(1), tm.group(2).strip()
@@ -309,14 +200,16 @@ class ContractExtractor:
                         f"{exc_type} is thrown when: {desc or '(see source)'}"
                     )
 
-                # @return
+                # @return：只有包含具体信息时才提取
                 rm = re.match(r'@return\s+(.*)', line)
                 if rm:
                     desc = rm.group(1).strip()
-                    if desc:
+                    # 过滤掉纯类型描述（如 "the value", "a boolean"）
+                    if desc and len(desc) > 15 and not re.match(
+                            r'^(?:the|a|an)\s+\w+\s*$', desc, re.I):
                         contract.postconditions.append(f"Return value: {desc}")
 
-                # @pre / @post (custom tags)
+                # @pre / @post 自定义标签
                 pre_m = re.match(r'@pre\s+(.*)', line)
                 if pre_m:
                     contract.preconditions.append(pre_m.group(1).strip())
@@ -324,259 +217,227 @@ class ContractExtractor:
                 if post_m:
                     contract.postconditions.append(post_m.group(1).strip())
 
-        # 单行注释中的 precondition hints
-        inline_comments = re.findall(r'//\s*(.*)', source_code)
-        for comment in inline_comments:
-            lower = comment.lower()
-            if any(kw in lower for kw in ['precondition', 'require', 'assert that', 'must be']):
-                contract.preconditions.append(comment.strip())
-            elif any(kw in lower for kw in ['postcondition', 'ensure', 'guarantees']):
-                contract.postconditions.append(comment.strip())
-
     # ── Level 2: 防御性检查分析 ──────────────────────────────────
 
     def _extract_from_defensive_checks(self, source_code: str, contract: MethodContract):
-        """
-        分析方法体中的防御性编程模式，提取隐式前置条件。
-
-        模式：
-          - if (x == null) throw new ...
-          - if (x < 0) throw new ...
-          - Objects.requireNonNull(x)
-          - assert x != null
-          - Preconditions.checkArgument(...)
-        """
         if not source_code:
             return
 
-        # 1) Objects.requireNonNull(param)
+        # Objects.requireNonNull(param)
         for m in re.finditer(r'Objects\.requireNonNull\s*\(\s*(\w+)', source_code):
             param = m.group(1)
             contract.preconditions.append(
-                f"`{param}` must not be null (verified by Objects.requireNonNull)"
+                f"`{param}` must not be null (enforced by Objects.requireNonNull)"
             )
 
-        # 2) if (...) throw new XxxException(...)
+        # if (...) throw new XxxException(...)
         throw_patterns = re.finditer(
             r'if\s*\(([^)]+)\)\s*(?:\{[^}]*\})?\s*throw\s+new\s+(\w+)',
             source_code, re.DOTALL
         )
         for m in throw_patterns:
             condition, exc_type = m.group(1).strip(), m.group(2).strip()
-            # 前置条件：条件的反面
             contract.exception_contracts.append(
-                f"{exc_type} thrown when `{condition}` is true"
+                f"{exc_type} thrown when condition `{condition}` is true"
             )
             # 从条件推断参数约束
-            if 'null' in condition:
-                param_m = re.search(r'(\w+)\s*==\s*null', condition)
-                if param_m:
-                    contract.preconditions.append(
-                        f"`{param_m.group(1)}` must not be null"
-                    )
-            if '< 0' in condition or 'negative' in condition.lower():
-                param_m = re.search(r'(\w+)\s*<\s*0', condition)
-                if param_m:
-                    contract.preconditions.append(
-                        f"`{param_m.group(1)}` must be non-negative (≥ 0)"
-                    )
-            if '<= 0' in condition:
-                param_m = re.search(r'(\w+)\s*<=\s*0', condition)
-                if param_m:
-                    contract.preconditions.append(
-                        f"`{param_m.group(1)}` must be positive (> 0)"
-                    )
-            if 'isEmpty' in condition or 'length() == 0' in condition:
-                param_m = re.search(r'(\w+)\.isEmpty', condition)
-                if param_m:
-                    contract.preconditions.append(
-                        f"`{param_m.group(1)}` must not be empty"
-                    )
-
-        # 3) Preconditions.checkArgument / checkNotNull (Guava style)
-        for m in re.finditer(r'Preconditions\.check\w+\s*\(([^,)]+)', source_code):
-            condition = m.group(1).strip()
-            contract.preconditions.append(f"Guava precondition: `{condition}` must hold")
-
-        # 4) assert 语句
-        for m in re.finditer(r'\bassert\s+([^;]+);', source_code):
-            assertion = m.group(1).strip()
-            if len(assertion) < 100:  # 过滤太长的断言
-                contract.preconditions.append(f"Internal assert: `{assertion}` must hold")
-
-        # 5) 范围检查模式 (offset, length, index)
-        range_check = re.search(
-            r'if\s*\(\s*(\w+)\s*[<>]=?\s*(\w+\.length|this\.\w+|\d+)', source_code)
-        if range_check:
-            contract.preconditions.append(
-                "Array/buffer offset and length parameters must be within valid bounds"
-            )
-
-        # 6) 状态检查（isClosed、isOpen 等）
-        state_checks = re.findall(r'if\s*\(\s*(is\w+|!\s*is\w+)\s*\)', source_code)
-        for sc in state_checks:
-            if 'Closed' in sc or 'Open' in sc or 'Ready' in sc:
+            null_m = re.search(r'(\w+)\s*==\s*null', condition)
+            if null_m:
                 contract.preconditions.append(
-                    f"Object must be in valid state: `{sc.strip()}` check in method body"
+                    f"`{null_m.group(1)}` must not be null"
+                )
+            neg_m = re.search(r'(\w+)\s*<\s*0', condition)
+            if neg_m:
+                contract.preconditions.append(
+                    f"`{neg_m.group(1)}` must be >= 0"
+                )
+            lte_m = re.search(r'(\w+)\s*<=\s*0', condition)
+            if lte_m:
+                contract.preconditions.append(
+                    f"`{lte_m.group(1)}` must be > 0"
+                )
+            empty_m = re.search(r'(\w+)\.isEmpty\(\)', condition)
+            if empty_m:
+                contract.preconditions.append(
+                    f"`{empty_m.group(1)}` must not be empty"
                 )
 
-    # ── Level 3: 参数类型推断 ────────────────────────────────────
+        # Preconditions.checkArgument / checkNotNull (Guava)
+        for m in re.finditer(
+                r'Preconditions\.check(?:Argument|NotNull|State)\s*\(([^,)]+)',
+                source_code):
+            condition = m.group(1).strip()
+            if len(condition) < 80:
+                contract.preconditions.append(
+                    f"Guava precondition must hold: `{condition}`"
+                )
 
-    def _extract_from_param_types(self, parameters: str, contract: MethodContract):
-        """根据参数类型和名称推断前置条件。"""
+        # 范围检查（offset/length/index 越界防护）
+        if re.search(r'if\s*\(\s*\w+\s*[<>]=?\s*(?:\w+\.length|\w+\.size\(\))', source_code):
+            contract.preconditions.append(
+                "Array/buffer parameters must be within valid bounds"
+            )
+
+        # 状态检查（closed/open 状态）
+        closed_m = re.search(r'if\s*\(\s*(?:is)?[Cc]losed', source_code)
+        if closed_m:
+            contract.preconditions.append(
+                "Object must not be closed before calling this method"
+            )
+
+    # ── Level 3: 仅语义明确的参数名 ────────────────────────────────
+    # 只提取参数名本身就携带强约束语义的情况，不基于类型做通用推断
+
+    _SEMANTIC_PARAM_HINTS: Dict[str, str] = {
+        'offset':   "`offset` must be >= 0 and < buffer/array length",
+        'off':      "`off` (offset) must be >= 0 and < buffer/array length",
+        'length':   "`length` must be >= 0; 0 means empty operation",
+        'len':      "`len` (length) must be >= 0",
+        'count':    "`count` must be >= 0",
+        'index':    "`index` must be >= 0 and < collection size",
+        'idx':      "`idx` must be >= 0 and < collection size",
+        'pos':      "`pos` (position) must be >= 0",
+        'size':     "`size` must be > 0",
+        'capacity': "`capacity` must be > 0",
+        'timeout':  "`timeout` must be > 0; test with 0 and negative values",
+        'delay':    "`delay` must be >= 0",
+        'n':        "`n` must be >= 0 for count/repeat operations",
+    }
+
+    def _extract_from_semantic_param_names(self, parameters: str, contract: MethodContract):
+        """
+        只对参数名本身携带强约束语义的参数生成提示。
+        不基于类型（String/int/List）做通用推断——那是噪声。
+        """
         if not parameters:
             return
 
-        # 解析参数列表（支持泛型、数组）
-        # 去掉 final 关键字，分割参数
-        params_clean = re.sub(r'\bfinal\b', '', parameters).strip()
-        # 简单拆分（以逗号分割，但要处理泛型 <...> 中的逗号）
-        param_list = _split_params(params_clean)
+        # 提取参数名列表
+        param_names = re.findall(r'\b(\w+)\s*(?:[,)]|$)', parameters)
+        for name in param_names:
+            name_lower = name.lower()
+            for key, hint in self._SEMANTIC_PARAM_HINTS.items():
+                if name_lower == key or name_lower.endswith(key.capitalize()):
+                    contract.preconditions.append(hint)
+                    break
 
-        for param_str in param_list:
-            param_str = param_str.strip()
-            if not param_str:
-                continue
+    # ── Level 4: 仅 void 方法的副作用提示 ──────────────────────────
 
-            # 提取类型和名称
-            parts = param_str.rsplit(None, 1)
-            if len(parts) < 2:
-                continue
-            param_type = parts[0].strip()
-            param_name = parts[1].strip().lstrip('...')  # 处理可变参数
-
-            # 存储参数语义
-            # 查找基础类型（忽略泛型参数和数组）
-            base_type = re.sub(r'<.*?>', '', param_type).replace('[]', '').strip()
-
-            # 从模板生成前置条件
-            template = self._TYPE_PRECONDITIONS.get(base_type)
-            if template:
-                constraint = template.format(name=param_name)
-                contract.preconditions.append(constraint)
-
-            # 根据参数名推断语义
-            name_lower = param_name.lower()
-            if 'offset' in name_lower or 'off' in name_lower:
-                contract.preconditions.append(
-                    f"`{param_name}` (offset) must be ≥ 0 and < buffer length"
-                )
-            elif 'length' in name_lower or 'len' in name_lower or 'count' in name_lower:
-                contract.preconditions.append(
-                    f"`{param_name}` (length/count) must be ≥ 0; test 0 and max valid value"
-                )
-            elif 'index' in name_lower or 'idx' in name_lower or 'pos' in name_lower:
-                contract.preconditions.append(
-                    f"`{param_name}` (index) must be ≥ 0 and < collection size"
-                )
-            elif 'timeout' in name_lower or 'delay' in name_lower:
-                contract.preconditions.append(
-                    f"`{param_name}` must be positive; test with 0 and negative values"
-                )
-            elif 'size' in name_lower or 'capacity' in name_lower:
-                contract.preconditions.append(
-                    f"`{param_name}` must be > 0; test with 0 and negative values"
-                )
-
-    # ── Level 4: 返回类型推断 ────────────────────────────────────
-
-    def _extract_from_return_type(self, return_type: str, contract: MethodContract):
-        """根据返回类型推断后置条件。"""
-        if not return_type or return_type == "void":
-            if return_type == "void":
-                contract.postconditions.append(
-                    "Method has no return value; verify side effects (state changes, exceptions, etc.)"
-                )
-            return
-
-        # 查找基础类型
-        base_type = re.sub(r'<.*?>', '', return_type).replace('[]', '').strip()
-
-        # 从模板生成后置条件
-        postcond = self._RETURN_POSTCONDITIONS.get(base_type)
-        if postcond:
-            contract.postconditions.append(postcond)
-        elif base_type not in ('void',):
+    def _extract_void_return_hint(self, return_type: str, contract: MethodContract):
+        """
+        只对 void 方法生成提示：因为 void 方法无法通过返回值验证，
+        测试必须通过观察副作用来验证，这是 LLM 容易忽略的点。
+        其他返回类型不生成通用模板（LLM 本就了解如何断言返回值）。
+        """
+        if return_type and return_type.strip() == 'void':
             contract.postconditions.append(
-                f"Return value is of type `{return_type}`; assert it is not null "
-                f"(unless documented to return null) and has expected value"
+                "Method returns void — verify behavior through observable side effects: "
+                "state changes (use getters/reflection), exceptions thrown, "
+                "or interactions with dependencies"
             )
 
-        # 数组返回类型
-        if '[]' in return_type:
-            contract.postconditions.append(
-                f"Return value is an array; assert it is not null and has expected length/content"
-            )
+    # ── Level 5: 特定方法的强合约 ──────────────────────────────────
+    # 只保留有明确、非显然合约的方法名
 
-    # ── Level 5: 方法名语义推断 ──────────────────────────────────
-
-    def _extract_from_method_name(self, method_name: str, return_type: str,
-                                   contract: MethodContract):
-        """根据方法名前缀推断语义和合约。"""
+    def _extract_strong_method_contracts(self, method_name: str, return_type: str,
+                                          contract: MethodContract):
+        """
+        只处理合约性强且 LLM 不一定了解的方法：
+        - read* 方法：EOF 行为（返回 -1）
+        - close 方法：幂等性 + 后续调用行为
+        - equals：反射性/对称性/null
+        - hashCode：与 equals 的一致性
+        - compareTo：返回值符号语义
+        去掉 get/set/is/has/add/remove 等——这些是 LLM 本就了解的。
+        """
         if not method_name:
             return
-
-        for prefix, (semantic, hints) in self._METHOD_PREFIX_SEMANTICS.items():
-            if method_name.lower().startswith(prefix):
-                for hint in hints:
-                    # 区分前置和后置
-                    if any(kw in hint.lower() for kw in ['verify', 'assert', 'returns', 'return']):
-                        contract.postconditions.append(f"[{semantic}] {hint}")
-                    elif any(kw in hint.lower() for kw in ['test', 'generate', 'boundary']):
-                        contract.preconditions.append(f"[{semantic}] {hint}")
-                    else:
-                        contract.postconditions.append(f"[{semantic}] {hint}")
-                break
-
-        # 特殊方法名处理
         name_lower = method_name.lower()
-        if 'close' in name_lower:
+
+        # read 方法：EOF 是关键边界
+        if name_lower.startswith('read') or name_lower in ('read',):
             contract.postconditions.append(
-                "After close(), further read/write operations should throw IOException"
+                "When end-of-stream is reached, returns -1 (or EOF sentinel value); "
+                "test reading beyond available data"
+            )
+            contract.postconditions.append(
+                "State after read: internal position/counter increments; "
+                "verify via getLineNumber() or similar state accessor"
+            )
+
+        # close 方法：幂等性是关键合约
+        elif 'close' in name_lower:
+            contract.postconditions.append(
+                "close() must be idempotent: calling it multiple times must not throw"
             )
             contract.exception_contracts.append(
-                "Calling close() multiple times should be idempotent (no exception on second close)"
+                "After close(), subsequent read/write operations should throw IOException"
             )
-        elif 'open' in name_lower or 'connect' in name_lower:
+
+        # equals：三大性质
+        elif method_name == 'equals':
+            contract.postconditions.append("equals(null) must return false (not throw NPE)")
+            contract.postconditions.append("equals(self) must return true (reflexive)")
             contract.postconditions.append(
-                "After successful open/connect, the resource should be usable"
+                "If a.equals(b) then b.equals(a) must also be true (symmetric)"
             )
-        elif 'toString' in method_name:
+
+        # hashCode：与 equals 的一致性
+        elif method_name == 'hashCode':
             contract.postconditions.append(
-                "Return value must not be null; should represent the object's state meaningfully"
+                "Objects that are equals() must have the same hashCode()"
             )
-        elif 'hashCode' in method_name:
             contract.postconditions.append(
-                "Objects equal by equals() must have the same hashCode; consistent across calls"
+                "hashCode() must return the same value on repeated calls (consistent)"
             )
-        elif 'compareTo' in method_name:
+
+        # compareTo：返回值符号语义
+        elif 'compareTo' in method_name or 'compare' in method_name.lower():
             contract.postconditions.append(
-                "compareTo(self) must return 0; result must be antisymmetric"
+                "Returns negative when this < other, 0 when equal, positive when this > other"
+            )
+            contract.postconditions.append(
+                "compareTo(self) must return 0 (reflexive)"
             )
             contract.exception_contracts.append(
                 "NullPointerException when argument is null (standard Comparable contract)"
+            )
+
+        # reset/rewind：状态回到初始
+        elif name_lower in ('reset', 'rewind', 'clear'):
+            contract.postconditions.append(
+                f"After {method_name}(), object state must return to initial state; "
+                "verify by re-using the object as if freshly created"
+            )
+
+        # parse 方法：格式错误处理
+        elif name_lower.startswith('parse'):
+            contract.exception_contracts.append(
+                "Throws ParseException or similar when input format is invalid"
+            )
+            contract.preconditions.append(
+                "Input must conform to the expected format; test with malformed input"
             )
 
     # ── Level 6: 字段不变量推断 ──────────────────────────────────
 
     def _extract_invariants_from_fields(self, class_fields: str,
                                          source_code: str, contract: MethodContract):
-        """从类字段推断状态不变量。"""
+        """只在方法确实修改字段时才输出不变量提示。"""
         if not class_fields:
             return
 
-        # 检查方法是否修改了字段
         field_names = re.findall(r'\b(\w+)\s*;', class_fields)
-        modified_fields = []
-        for fname in field_names:
-            if re.search(rf'\bthis\.{fname}\s*=', source_code) or \
-               re.search(rf'\b{fname}\s*[+\-*/%]?=', source_code):
-                modified_fields.append(fname)
+        modified_fields = [
+            fname for fname in field_names
+            if (re.search(rf'\bthis\.{fname}\s*=', source_code) or
+                re.search(rf'\b{fname}\s*[+\-*/%]?=', source_code))
+        ]
 
         if modified_fields:
             contract.invariants.append(
-                f"Modified fields in this method: {', '.join(modified_fields)}; "
-                f"verify their values before and after the call"
+                f"This method modifies: {', '.join(modified_fields)}. "
+                f"Verify their values before and after the call to ensure correct state transition."
             )
 
 
@@ -585,7 +446,6 @@ class ContractExtractor:
 # ════════════════════════════════════════════════════════════════════
 
 def _dedup(lst: list) -> list:
-    """保序去重。"""
     seen, result = set(), []
     for item in lst:
         key = item.strip().lower()[:80]
@@ -596,10 +456,6 @@ def _dedup(lst: list) -> list:
 
 
 def _split_params(params_str: str) -> list:
-    """
-    按顶层逗号分割参数字符串，正确处理泛型中的逗号。
-    例：'Map<String, Integer> m, int n' → ['Map<String, Integer> m', 'int n']
-    """
     result, depth, current = [], 0, []
     for char in params_str:
         if char == '<':

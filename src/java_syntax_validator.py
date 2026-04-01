@@ -1,32 +1,32 @@
 """
-java_syntax_validator.py
-========================
-Rule-based Validator：在调用 LLM 生成/修复测试之前，
-用正则表达式快速检查 Java 源码中的常见语法问题。
+java_syntax_validator.py  (v2 — 动态规则版)
+============================================
 
-设计原则：
-  - 轻量、快速（无需 JVM 或 javalang）
-  - 只检测"高置信度"的错误，避免误报
-  - 返回结构化的诊断信息，便于注入 prompt 或日志记录
-  - 作为 javalang.parse.parse() 之前的廉价前置过滤器
+修复：
+  R-01（括号平衡）：
+    - 旧版：原始字符计数，与 javalang/编译器重叠，去掉
+    - 新版：只检测 assertThrows/assertAll 中常见的 lambda 括号失配
+      （这是 LLM 频繁犯的特定错误，比通用括号计数更有价值）
 
-检测规则（CE = Compile Error 类别）：
-  R-01  括号不匹配  { } ( ) [ ]
-  R-02  缺少 package 声明（当代码含 import 时）
-  R-03  缺少 class 声明
-  R-04  缺少必要 import（JUnit5 / Mockito 常见类未 import）
-  R-05  直接访问 private 成员（obj.privateField 模式）
-  R-06  使用了 CSVFormat.Builder（已知旧版不存在的 API）
-  R-07  assertThrows 使用了带参 lambda（e -> 而非 () ->）
-  R-08  继承 final 类（匿名子类模式）
-  R-09  缺少 throws Exception（含 checked exception 调用但方法未声明）
-  R-10  空测试体（@Test 方法体内无任何语句）
+  R-05（private 字段）：
+    - 旧版：硬编码 ['lastChar', 'lastRead', 'lineCounter', ...] 固定列表，只对特定类有效
+    - 新版：从 focal class 上下文动态提取 private 字段名，适用所有项目
+
+  R-08（继承 final 类）：
+    - 旧版：正则只匹配 CSV/Lexer/Token/Parser/Reader/Writer 等前缀
+    - 新版：从 focal class 上下文动态提取已知 final 类名，
+      同时保留通用的 `new XxxClass(...) {` 匿名子类检测
+
+  其他改进：
+    - 新增 R-11：反射方法名字符串硬编码检测（常见错误：字段名拼错）
+    - validate() 新增 focal_class_context 参数，支持动态规则
+    - 去掉与 javalang 重叠的 R-01，改为更有针对性的 lambda 检查
 """
 from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import List, Optional, Tuple
+from typing import List, Optional, Set
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -35,11 +35,11 @@ from typing import List, Optional, Tuple
 
 @dataclass
 class ValidationIssue:
-    rule_id: str          # e.g. "R-01"
+    rule_id: str
     severity: str         # "error" | "warning"
-    message: str          # 人类可读的描述
-    line_hint: int = -1   # 大致行号（-1 = 未知）
-    fix_hint: str = ""    # 给 LLM 的简短修复提示
+    message: str
+    line_hint: int = -1
+    fix_hint: str = ""
 
     def __str__(self) -> str:
         loc = f" (line ~{self.line_hint})" if self.line_hint > 0 else ""
@@ -78,18 +78,68 @@ class ValidationResult:
 
 
 # ════════════════════════════════════════════════════════════════════
+# 上下文提取工具
+# ════════════════════════════════════════════════════════════════════
+
+def extract_private_fields_from_context(focal_class_context: str) -> Set[str]:
+    """
+    从 focal class 上下文（d1/d3 的 information/full_fm 字段）中
+    动态提取 private 字段名，用于 R-05 规则。
+
+    匹配模式：
+      private [static] [final] Type fieldName;
+      private [static] [final] Type fieldName = ...;
+    """
+    field_names: Set[str] = set()
+    if not focal_class_context:
+        return field_names
+
+    pattern = re.compile(
+        r'\bprivate\b[^;{]*?\b(\w+)\s*(?:=\s*[^;]+)?;',
+        re.MULTILINE
+    )
+    for m in pattern.finditer(focal_class_context):
+        candidate = m.group(1).strip()
+        # 过滤掉关键字和类型名（大写开头的是类型，不是字段名）
+        if (candidate and
+                not candidate[0].isupper() and
+                candidate not in {'this', 'super', 'void', 'null', 'true', 'false',
+                                   'int', 'long', 'double', 'float', 'boolean',
+                                   'byte', 'char', 'short', 'final', 'static'}):
+            field_names.add(candidate)
+    return field_names
+
+
+def extract_final_classes_from_context(focal_class_context: str) -> Set[str]:
+    """
+    从 focal class 上下文中动态提取 final 类名，用于 R-08 规则。
+    匹配：public final class Xxx
+    """
+    final_classes: Set[str] = set()
+    if not focal_class_context:
+        return final_classes
+
+    for m in re.finditer(r'\bfinal\s+class\s+(\w+)', focal_class_context):
+        final_classes.add(m.group(1))
+    return final_classes
+
+
+def extract_class_name_from_context(focal_class_context: str) -> str:
+    """从上下文中提取被测类名（用于构造函数匹配）。"""
+    if not focal_class_context:
+        return ""
+    m = re.search(r'\bclass\s+(\w+)', focal_class_context)
+    return m.group(1) if m else ""
+
+
+# ════════════════════════════════════════════════════════════════════
 # 主验证器
 # ════════════════════════════════════════════════════════════════════
 
 class JavaSyntaxValidator:
     """
     对 Java 测试源码进行规则检查。
-
-    用法：
-        validator = JavaSyntaxValidator()
-        result = validator.validate(java_source)
-        if not result.is_valid:
-            print(result.to_prompt_text())
+    支持通过 focal_class_context 传入上下文，实现动态规则。
     """
 
     # ── 已知的 checked exception 方法调用模式 ────────────────────────
@@ -99,26 +149,10 @@ class JavaSyntaxValidator:
         re.compile(r'\bParseException\b'),
         re.compile(r'\bCloneNotSupportedException\b'),
         re.compile(r'throws\s+\w*Exception'),
-        # 常见会抛 IOException 的方法
         re.compile(r'\b(?:read|write|close|flush|parse|open|connect)\s*\('),
     ]
 
-    # ── 常见需要 import 的 JUnit5/Mockito 类 ─────────────────────────
-    _REQUIRED_IMPORTS = {
-        r'\bAssertions\.': 'org.junit.jupiter.api.Assertions',
-        r'\bassertEquals\b': 'org.junit.jupiter.api.Assertions (static import)',
-        r'\bassertTrue\b':   'org.junit.jupiter.api.Assertions (static import)',
-        r'\bassertFalse\b':  'org.junit.jupiter.api.Assertions (static import)',
-        r'\bassertThrows\b': 'org.junit.jupiter.api.Assertions (static import)',
-        r'\bassertNotNull\b':'org.junit.jupiter.api.Assertions (static import)',
-        r'\b@Test\b':        'org.junit.jupiter.api.Test',
-        r'\bmock\s*\(':      'org.mockito.Mockito (static import)',
-        r'\bwhen\s*\(':      'org.mockito.Mockito (static import)',
-        r'\bverify\s*\(':    'org.mockito.Mockito (static import)',
-        r'\bMockitoAnnotations\b': 'org.mockito.MockitoAnnotations',
-    }
-
-    # ── 已知旧版不存在的 API ──────────────────────────────────────────
+    # ── 已知旧版不存在的 API（保留静态部分，动态部分从上下文提取）───────
     _BANNED_APIS = [
         (re.compile(r'CSVFormat\.Builder'),
          "CSVFormat.Builder does not exist in Defects4J Csv versions. "
@@ -130,69 +164,103 @@ class JavaSyntaxValidator:
          "CSVFormat.DEFAULT"),
     ]
 
-    def validate(self, source: str, strict: bool = False) -> ValidationResult:
+    def validate(
+        self,
+        source: str,
+        strict: bool = False,
+        focal_class_context: str = "",    # ★ 新增：传入上下文以启用动态规则
+    ) -> ValidationResult:
         """
         对 Java 源码执行所有规则检查。
 
         Parameters
         ----------
-        source : str
-            Java 源码字符串
-        strict : bool
-            True 时将 warning 也计入 is_valid=False 的判定
-
-        Returns
-        -------
-        ValidationResult
+        source               : Java 源码字符串
+        strict               : True 时 warning 也影响 is_valid
+        focal_class_context  : focal class 的源码上下文（d1 information 或 d3 full_fm）
+                               传入后启用动态 R-05/R-08 规则
         """
         issues: List[ValidationIssue] = []
 
-        issues.extend(self._check_bracket_balance(source))
+        # ── 动态提取上下文信息 ────────────────────────────────────────
+        private_fields: Set[str] = set()
+        final_classes: Set[str] = set()
+        if focal_class_context:
+            private_fields = extract_private_fields_from_context(focal_class_context)
+            final_classes  = extract_final_classes_from_context(focal_class_context)
+
+        # ── 规则检查 ──────────────────────────────────────────────────
+        # R-01 已删除（与 javalang 重叠），改为 R-01b（lambda 括号检查）
+        issues.extend(self._check_lambda_bracket_mismatch(source))
         issues.extend(self._check_class_declaration(source))
-        issues.extend(self._check_missing_imports(source))
         issues.extend(self._check_banned_apis(source))
         issues.extend(self._check_assert_throws_lambda(source))
-        issues.extend(self._check_anonymous_final_subclass(source))
-        issues.extend(self._check_empty_test_bodies(source))
-        issues.extend(self._check_private_field_access(source))
-        # R-09 is heuristic-only, emit as warning
+        issues.extend(self._check_anonymous_subclass(source, final_classes))
         issues.extend(self._check_missing_throws(source))
+        issues.extend(self._check_empty_test_bodies(source))
+        issues.extend(self._check_private_field_access_dynamic(source, private_fields))
+        issues.extend(self._check_reflection_field_names(source, private_fields))
 
         errors   = [i for i in issues if i.severity == "error"]
         warnings = [i for i in issues if i.severity == "warning"]
 
         is_valid = (len(errors) == 0) and (not strict or len(warnings) == 0)
-
-        result = ValidationResult(
+        return ValidationResult(
             is_valid=is_valid,
             issues=issues,
             error_count=len(errors),
             warning_count=len(warnings),
         )
-        return result
 
     # ────────────────────────────────────────────────────────────────
-    # R-01: 括号平衡检查
+    # R-01b: Lambda 括号失配（assertThrows/assertAll 专项检查）
+    # 替代旧的通用括号计数（与编译器重叠）
     # ────────────────────────────────────────────────────────────────
 
-    def _check_bracket_balance(self, source: str) -> List[ValidationIssue]:
+    def _check_lambda_bracket_mismatch(self, source: str) -> List[ValidationIssue]:
+        """
+        检测 assertThrows/assertAll 中常见的 lambda 语法错误。
+        这是 LLM 频繁犯的错误：
+          assertThrows(Foo.class, () -> {
+              obj.method();
+          );  ← 少了一个 }
+        """
         issues = []
-        # 去掉字符串字面量和注释，避免误报
         cleaned = self._strip_strings_and_comments(source)
 
-        for open_b, close_b, name in [
-            ('{', '}', 'curly brace'),
-            ('(', ')', 'parenthesis'),
-            ('[', ']', 'square bracket'),
-        ]:
-            count = cleaned.count(open_b) - cleaned.count(close_b)
-            if count != 0:
-                direction = "unclosed" if count > 0 else "extra closing"
+        # 找所有 assertThrows/assertAll/assertDoesNotThrow 调用
+        pattern = re.compile(
+            r'\bassert(?:Throws|All|DoesNotThrow)\s*\(',
+            re.IGNORECASE
+        )
+        for m in pattern.finditer(cleaned):
+            # 找到 lambda 体的 { ... }，检查是否平衡
+            start = m.end()
+            depth_paren = 1
+            depth_brace = 0
+            in_lambda = False
+            i = start
+            while i < len(cleaned) and depth_paren > 0:
+                c = cleaned[i]
+                if c == '(':
+                    depth_paren += 1
+                elif c == ')':
+                    depth_paren -= 1
+                elif c == '{':
+                    depth_brace += 1
+                    in_lambda = True
+                elif c == '}':
+                    depth_brace -= 1
+                i += 1
+            if in_lambda and depth_brace != 0:
+                line_num = source[:m.start()].count('\n') + 1
                 issues.append(ValidationIssue(
-                    rule_id="R-01",
+                    rule_id="R-01b",
                     severity="error",
-                    message=f"Unbalanced {name}: {abs(count)} {direction} '{open_b if count > 0 else close_b}'",
-                    fix_hint=f"Check that every '{open_b}' has a matching '{close_b}'",
+                    message=f"Unbalanced braces inside {m.group().strip('(')} lambda body "
+                            f"(depth={depth_brace:+d})",
+                    line_hint=line_num,
+                    fix_hint="Check that lambda body `() -> { ... }` has matching braces",
                 ))
         return issues
 
@@ -207,43 +275,8 @@ class JavaSyntaxValidator:
                 rule_id="R-03",
                 severity="error",
                 message="No class declaration found in the source code.",
-                fix_hint="Ensure the output is a complete Java class starting with 'public class XxxTest {'",
+                fix_hint="Ensure the output is a complete Java class: `public class XxxTest {`",
             ))
-        return issues
-
-    # ────────────────────────────────────────────────────────────────
-    # R-04: 缺少 import
-    # ────────────────────────────────────────────────────────────────
-
-    def _check_missing_imports(self, source: str) -> List[ValidationIssue]:
-        issues = []
-        # 提取已有 import 行
-        existing_imports = set()
-        for line in source.splitlines():
-            stripped = line.strip()
-            if stripped.startswith("import "):
-                existing_imports.add(stripped)
-
-        cleaned_no_imports = re.sub(r'^\s*import\s+.*;\s*$', '', source, flags=re.MULTILINE)
-
-        for pattern_str, required_import in self._REQUIRED_IMPORTS.items():
-            if re.search(pattern_str, cleaned_no_imports):
-                # 检查 import 是否已存在（模糊匹配）
-                import_class = required_import.split(" ")[0]  # 取第一个词（去掉括号说明）
-                import_parts = import_class.split(".")
-                if import_parts:
-                    short_class = import_parts[-1]
-                    already_imported = any(
-                        short_class in imp or import_class.replace(".", "/") in imp.replace(".", "/")
-                        for imp in existing_imports
-                    )
-                    if not already_imported and import_class not in ("static import",):
-                        issues.append(ValidationIssue(
-                            rule_id="R-04",
-                            severity="warning",
-                            message=f"Possibly missing import for `{short_class}` (expected: `import {import_class};`)",
-                            fix_hint=f"Add: import {import_class};",
-                        ))
         return issues
 
     # ────────────────────────────────────────────────────────────────
@@ -290,29 +323,136 @@ class JavaSyntaxValidator:
         return issues
 
     # ────────────────────────────────────────────────────────────────
-    # R-08: 继承 final 类（匿名子类）
+    # R-08: 继承 final 类（动态版）
     # ────────────────────────────────────────────────────────────────
 
-    def _check_anonymous_final_subclass(self, source: str) -> List[ValidationIssue]:
+    def _check_anonymous_subclass(
+        self, source: str, final_classes: Set[str]
+    ) -> List[ValidationIssue]:
+        """
+        动态版：从上下文提取 final 类名，检测是否被匿名子类化。
+        同时保留静态的通用检测（任何 new XxxClass(...) { 匿名子类）。
+        """
         issues = []
-        # 检测 new SomeClass(...) { ... } 匿名子类模式，但排除 Runnable/Thread 等合理情况
-        # 这里只检测常见被测类的子类化（如果类名含 CSV/Record/Parser）
-        pattern = re.compile(
-            r'new\s+((?:CSV|Lexer|Token|Printer|Parser|Reader|Writer)\w*)\s*\([^)]*\)\s*\{',
-            re.IGNORECASE
-        )
         cleaned = self._strip_strings_and_comments(source)
-        for m in pattern.finditer(cleaned):
+
+        # ── 动态检查：上下文中已知的 final 类 ────────────────────────
+        for class_name in final_classes:
+            pattern = re.compile(
+                rf'new\s+{re.escape(class_name)}\s*\([^)]*\)\s*\{{',
+                re.DOTALL
+            )
+            m = pattern.search(cleaned)
+            if m:
+                line_num = cleaned[:m.start()].count('\n') + 1
+                issues.append(ValidationIssue(
+                    rule_id="R-08",
+                    severity="error",
+                    message=f"`{class_name}` is a final class and cannot be subclassed.",
+                    line_hint=line_num,
+                    fix_hint=f"Use Mockito.spy(new {class_name}(...)) instead of anonymous subclass",
+                ))
+
+        # ── 静态检查：通用匿名子类检测（warning 级别）─────────────────
+        # 检测所有 new XxxClass(...) { 模式（不只是已知 final 类）
+        general_pattern = re.compile(
+            r'new\s+([A-Z]\w+)\s*\([^)]*\)\s*\{',
+            re.DOTALL
+        )
+        known_anon_bases = {'Runnable', 'Callable', 'Thread', 'Comparator',
+                             'ActionListener', 'Serializable'}
+        for m in general_pattern.finditer(cleaned):
             class_name = m.group(1)
+            # 跳过已知合法的匿名子类基类 和 已在动态检查中报过的
+            if class_name in known_anon_bases or class_name in final_classes:
+                continue
             line_num = cleaned[:m.start()].count('\n') + 1
             issues.append(ValidationIssue(
                 rule_id="R-08",
                 severity="warning",
                 message=f"Anonymous subclass of `{class_name}` detected. "
-                        f"If this class is final, this will cause a compile error.",
+                        f"If `{class_name}` is final or mocked, this will fail.",
                 line_hint=line_num,
-                fix_hint=f"If `{class_name}` is final, use Mockito.spy(new {class_name}(...)) instead.",
+                fix_hint=f"If `{class_name}` is final: use Mockito.spy(new {class_name}(...))",
             ))
+
+        return issues
+
+    # ────────────────────────────────────────────────────────────────
+    # R-05: private 字段直接访问（动态版）
+    # ────────────────────────────────────────────────────────────────
+
+    def _check_private_field_access_dynamic(
+        self, source: str, private_fields: Set[str]
+    ) -> List[ValidationIssue]:
+        """
+        动态版：基于从上下文提取的 private 字段名，
+        检测是否有直接访问（obj.fieldName，不跟括号）。
+        """
+        issues = []
+        if not private_fields:
+            return issues
+
+        cleaned = self._strip_strings_and_comments(source)
+
+        for field_name in private_fields:
+            # 匹配 someVar.fieldName（不跟括号 → 不是方法调用）
+            pattern = re.compile(
+                rf'\b\w+\.{re.escape(field_name)}\s*(?![(\w])'
+            )
+            m = pattern.search(cleaned)
+            if m:
+                line_num = cleaned[:m.start()].count('\n') + 1
+                issues.append(ValidationIssue(
+                    rule_id="R-05",
+                    severity="warning",
+                    message=f"Possible direct access to private field `{field_name}` "
+                            f"via `{m.group().strip()}`.",
+                    line_hint=line_num,
+                    fix_hint=(
+                        f"Use reflection: "
+                        f"Field f = ClassName.class.getDeclaredField(\"{field_name}\"); "
+                        f"f.setAccessible(true); Object val = f.get(instance);"
+                    ),
+                ))
+
+        return issues
+
+    # ────────────────────────────────────────────────────────────────
+    # R-11: 反射字段名字符串可能拼错（新增）
+    # ────────────────────────────────────────────────────────────────
+
+    def _check_reflection_field_names(
+        self, source: str, private_fields: Set[str]
+    ) -> List[ValidationIssue]:
+        """
+        检测 getDeclaredField("xxx") 中的字段名是否在已知字段列表中。
+        如果传入了 private_fields，则检查字符串是否与已知字段名匹配。
+        """
+        issues = []
+        if not private_fields:
+            return issues
+
+        cleaned = self._strip_strings_and_comments(source)
+
+        # 找所有 getDeclaredField("xxx") 或 getDeclaredMethod("xxx") 调用
+        for m in re.finditer(r'getDeclaredField\s*\(\s*"(\w+)"\s*\)', source):
+            field_name = m.group(1)
+            if field_name not in private_fields:
+                # 尝试找最相似的字段名
+                similar = _find_similar(field_name, private_fields)
+                line_num = source[:m.start()].count('\n') + 1
+                hint = (f"Available private fields: {sorted(private_fields)[:8]}"
+                        + (f"; did you mean `{similar}`?" if similar else ""))
+                issues.append(ValidationIssue(
+                    rule_id="R-11",
+                    severity="warning",
+                    message=f"getDeclaredField(\"{field_name}\") — "
+                            f"field `{field_name}` not found in known private fields.",
+                    line_hint=line_num,
+                    fix_hint=hint,
+                ))
+
         return issues
 
     # ────────────────────────────────────────────────────────────────
@@ -320,12 +460,7 @@ class JavaSyntaxValidator:
     # ────────────────────────────────────────────────────────────────
 
     def _check_missing_throws(self, source: str) -> List[ValidationIssue]:
-        """
-        启发式检查：@Test 方法体内含有可能抛 checked exception 的调用，
-        但方法签名没有 throws 声明。
-        """
         issues = []
-        # 找所有 @Test 方法
         test_method_pattern = re.compile(
             r'@Test\s+(?:[\w@\s]*?\s+)?void\s+(\w+)\s*\(\s*\)\s*(?:throws\s+[\w,\s]+)?\{',
             re.MULTILINE
@@ -335,15 +470,10 @@ class JavaSyntaxValidator:
             has_throws = 'throws' in m.group(0)
             if has_throws:
                 continue
-            # 检查方法体（粗略截取到下一个 @Test 或类结束）
             body_start = m.end()
-            # 找到方法体的结束括号
             body_end = self._find_closing_brace(source, body_start - 1)
             method_body = source[body_start:body_end] if body_end > body_start else ""
-
-            has_checked = any(
-                p.search(method_body) for p in self._CHECKED_EXC_PATTERNS
-            )
+            has_checked = any(p.search(method_body) for p in self._CHECKED_EXC_PATTERNS)
             if has_checked:
                 line_num = source[:m.start()].count('\n') + 1
                 issues.append(ValidationIssue(
@@ -352,7 +482,7 @@ class JavaSyntaxValidator:
                     message=f"Test method `{method_name}()` may use checked exceptions "
                             f"but does not declare `throws Exception`.",
                     line_hint=line_num,
-                    fix_hint=f"Change signature to: `void {method_name}() throws Exception {{`",
+                    fix_hint=f"Change to: `void {method_name}() throws Exception {{`",
                 ))
         return issues
 
@@ -362,7 +492,6 @@ class JavaSyntaxValidator:
 
     def _check_empty_test_bodies(self, source: str) -> List[ValidationIssue]:
         issues = []
-        # 匹配 @Test ... void xxx() ... { } 或 { /* 只有注释 */ }
         pattern = re.compile(
             r'@Test\s+(?:[\w@\s]*?\s+)?void\s+(\w+)\s*\([^)]*\)\s*(?:throws\s+[\w,\s]+)?\{([^}]*)\}',
             re.MULTILINE | re.DOTALL
@@ -370,7 +499,6 @@ class JavaSyntaxValidator:
         for m in pattern.finditer(source):
             method_name = m.group(1)
             body = m.group(2)
-            # 去掉空白和注释后是否为空
             cleaned_body = re.sub(r'//[^\n]*', '', body)
             cleaned_body = re.sub(r'/\*.*?\*/', '', cleaned_body, flags=re.DOTALL)
             cleaned_body = cleaned_body.strip()
@@ -381,41 +509,7 @@ class JavaSyntaxValidator:
                     severity="warning",
                     message=f"Test method `{method_name}()` has an empty body — no assertions.",
                     line_hint=line_num,
-                    fix_hint="Add at least one assertion or method call to make this test meaningful.",
-                ))
-        return issues
-
-    # ────────────────────────────────────────────────────────────────
-    # R-05: 直接访问 private 字段（启发式）
-    # ────────────────────────────────────────────────────────────────
-
-    def _check_private_field_access(self, source: str) -> List[ValidationIssue]:
-        """
-        启发式：检测 obj.fieldName 的访问模式，
-        其中 fieldName 为典型的 private 字段名（小写开头、非公开方法）。
-        仅在字段名出现在文档中的常见 private 字段列表时警告。
-        """
-        issues = []
-        # 常见被私有字段直接访问的模式（不含括号 → 非方法调用）
-        # 例如 reader.lastChar, parser.lineNumber
-        known_private_fields = [
-            'lastChar', 'lastRead', 'lineCounter', 'lineNumber',
-            'charIndex', 'pos', 'buf', 'buffer', 'closed',
-        ]
-        cleaned = self._strip_strings_and_comments(source)
-        for field in known_private_fields:
-            # 匹配 someVar.fieldName（不跟括号）
-            pattern = re.compile(rf'\w+\.{re.escape(field)}(?!\s*\()')
-            m = pattern.search(cleaned)
-            if m:
-                line_num = cleaned[:m.start()].count('\n') + 1
-                issues.append(ValidationIssue(
-                    rule_id="R-05",
-                    severity="warning",
-                    message=f"Possible direct access to private field `{field}` via `{m.group()}`.",
-                    line_hint=line_num,
-                    fix_hint=f"Use reflection: Field f = ClassName.class.getDeclaredField(\"{field}\"); "
-                             f"f.setAccessible(true); Object val = f.get(instance);",
+                    fix_hint="Add at least one assertion to make this test meaningful.",
                 ))
         return issues
 
@@ -425,24 +519,17 @@ class JavaSyntaxValidator:
 
     @staticmethod
     def _strip_strings_and_comments(source: str) -> str:
-        """
-        去掉 Java 字符串字面量（"..."）、字符字面量（'.'）和注释（// ... 和 /* ... */），
-        以避免括号平衡、API 检测等规则误报。
-        """
         result = []
         i = 0
         n = len(source)
         while i < n:
-            # 块注释
             if source[i:i+2] == '/*':
                 end = source.find('*/', i + 2)
                 if end == -1:
-                    # 未闭合的块注释：用空格替换到末尾
                     result.append(' ' * (n - i))
                     break
                 result.append(' ' * (end + 2 - i))
                 i = end + 2
-            # 行注释
             elif source[i:i+2] == '//':
                 end = source.find('\n', i + 2)
                 if end == -1:
@@ -450,7 +537,6 @@ class JavaSyntaxValidator:
                     break
                 result.append(' ' * (end - i))
                 i = end
-            # 字符串字面量
             elif source[i] == '"':
                 j = i + 1
                 while j < n:
@@ -463,7 +549,6 @@ class JavaSyntaxValidator:
                     j += 1
                 result.append('"' + ' ' * (j - i - 2) + '"')
                 i = j
-            # 字符字面量
             elif source[i] == "'":
                 j = i + 1
                 while j < n:
@@ -483,7 +568,6 @@ class JavaSyntaxValidator:
 
     @staticmethod
     def _find_closing_brace(source: str, open_pos: int) -> int:
-        """从 open_pos（应为 '{' 的位置）找到对应的 '}'，返回其位置+1。"""
         depth = 0
         i = open_pos
         n = len(source)
@@ -495,7 +579,34 @@ class JavaSyntaxValidator:
                 if depth == 0:
                     return i + 1
             i += 1
-        return n  # 未找到匹配，返回末尾
+        return n
+
+
+# ════════════════════════════════════════════════════════════════════
+# 相似字符串查找（用于 R-11 的字段名建议）
+# ════════════════════════════════════════════════════════════════════
+
+def _find_similar(name: str, candidates: Set[str], threshold: int = 2) -> Optional[str]:
+    """找与 name 编辑距离最小的候选（简单 Levenshtein 近似）。"""
+    best, best_dist = None, float('inf')
+    for c in candidates:
+        dist = _edit_distance(name.lower(), c.lower())
+        if dist < best_dist:
+            best, best_dist = c, dist
+    return best if best_dist <= threshold else None
+
+
+def _edit_distance(s1: str, s2: str) -> int:
+    if len(s1) > len(s2):
+        s1, s2 = s2, s1
+    prev = list(range(len(s2) + 1))
+    for i, c1 in enumerate(s1):
+        curr = [i + 1]
+        for j, c2 in enumerate(s2):
+            curr.append(min(prev[j + 1] + 1, curr[j] + 1,
+                            prev[j] + (0 if c1 == c2 else 1)))
+        prev = curr
+    return prev[len(s2)]
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -505,23 +616,28 @@ class JavaSyntaxValidator:
 _default_validator = JavaSyntaxValidator()
 
 
-def validate_java(source: str, strict: bool = False) -> ValidationResult:
+def validate_java(
+    source: str,
+    strict: bool = False,
+    focal_class_context: str = "",
+) -> ValidationResult:
     """快速验证 Java 源码，返回 ValidationResult。"""
-    return _default_validator.validate(source, strict=strict)
+    return _default_validator.validate(
+        source, strict=strict, focal_class_context=focal_class_context
+    )
 
 
-def get_validation_prompt_text(source: str, max_issues: int = 4) -> str:
-    """
-    验证 Java 源码并返回可注入 LLM prompt 的问题文本。
-    若无问题则返回空字符串。
-    """
-    result = validate_java(source)
+def get_validation_prompt_text(
+    source: str,
+    max_issues: int = 4,
+    focal_class_context: str = "",
+) -> str:
+    result = validate_java(source, focal_class_context=focal_class_context)
     if result.is_valid:
         return ""
     return result.to_prompt_text(max_issues=max_issues)
 
 
-def has_critical_errors(source: str) -> bool:
-    """快速判断是否存在会导致编译失败的关键错误（仅检测 error 级别）。"""
-    result = validate_java(source)
+def has_critical_errors(source: str, focal_class_context: str = "") -> bool:
+    result = validate_java(source, focal_class_context=focal_class_context)
     return result.error_count > 0
