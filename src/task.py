@@ -4,12 +4,14 @@ import time
 import psutil
 import concurrent.futures
 import test_runner  # 导入模块
-from test_runner_patch import patch_test_runner_coverage
-from test_runner_coverage_patch import patch_all
+# from test_runner_patch import patch_test_runner_coverage
+# from test_runner_coverage_patch import patch_all
+# from test_runner_jacoco_fix import patch_jacoco_coverage   # ← 新增：jacococli 覆盖率修复
 
 # 立即注入补丁
-patch_test_runner_coverage(test_runner)
-patch_all(test_runner)
+# patch_test_runner_coverage(test_runner)
+# patch_all(test_runner)
+# patch_jacoco_coverage(test_runner)   # ← 新增：修复 report() + per_class_coverage 内部类匹配
 
 # 此时再从已经修补过的模块中获取 TestRunner
 from test_runner import TestRunner
@@ -259,29 +261,6 @@ class ParseTask:
         for root, dirs, files in os.walk(start_path):
             if filename in files:
                 return os.path.join(root, filename)
-
-
-    # def process_d4j_revisions(self, repo_path, focal_classes_json):
-    #     """
-    #     Analysis defects4j revisions focal method.
-    #     """
-    #     if '_f' not in os.path.basename(repo_path):
-    #         return
-    #     # Run analysis
-    #     print("Parsing focal class...")
-    #     project_name = os.path.split(repo_path)[1]
-    #     with open(focal_classes_json, 'r') as f:
-    #         content = json.load(f)
-    #     for repo in content:
-    #         if repo['project'] == project_name:
-    #             classes = repo['classes']
-    #     focals = []
-    #     for _class in classes:
-    #         class_path = self.get_class_path(repo_path, os.path.basename(_class.rstrip('\n').replace('.', '/') + '.java'))
-    #         focals.append(class_path)
-
-    #     output = os.path.join(self.output, project_name)
-    #     return self.parse_all_classes(focals, project_name, output), output
 
     def process_d4j_revisions(self, repo_path, focal_classes_json):
         """

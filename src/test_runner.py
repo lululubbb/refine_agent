@@ -1086,16 +1086,21 @@ class TestRunner:
                     per_test_report_dir = os.path.join(report_dir, "per_test_reports", test_basename)
                     self.report(compiled_test_dir, per_test_report_dir, jacoco_exec_override=per_test_exec)
 
-                    _global_xml = os.path.join(
-                        self.target_path, "target", "site", "jacoco", "jacoco.xml")
-                    if os.path.exists(_global_xml):
-                        os.makedirs(per_test_report_dir, exist_ok=True)
-                        _per_xml = os.path.join(per_test_report_dir, "jacoco.xml")
-                        try:
-                            shutil.copy2(_global_xml, _per_xml)
-                            per_test_jacoco_xml = _per_xml
-                        except Exception:
-                            per_test_jacoco_xml = _global_xml
+                    # FIX: jacococli-based report() writes jacoco.xml directly
+                    # into per_test_report_dir — check that path first
+                    _per_xml = os.path.join(per_test_report_dir, "jacoco.xml")
+                    if os.path.exists(_per_xml):
+                        per_test_jacoco_xml = _per_xml
+                    else:
+                        _global_xml = os.path.join(
+                            self.target_path, "target", "site", "jacoco", "jacoco.xml")
+                        if os.path.exists(_global_xml):
+                            os.makedirs(per_test_report_dir, exist_ok=True)
+                            try:
+                                shutil.copy2(_global_xml, _per_xml)
+                                per_test_jacoco_xml = _per_xml
+                            except Exception:
+                                per_test_jacoco_xml = _global_xml
 
                     # ── 提取 target_class 和 focal_method 的覆盖数据 ──────────
                     try:
@@ -1199,7 +1204,18 @@ class TestRunner:
 
         merged_exec = os.path.join(compiled_test_dir, "jacoco_merged.exec")
         exec_files = [r['exec_file'] for r in per_test_records
-                      if r.get('exec_file') and os.path.exists(r.get('exec_file'))]
+                      if r.get('exec_file')
+                      and os.path.exists(r.get('exec_file'))
+                      and os.path.getsize(r.get('exec_file')) > 0]  # FIX Bug-B: skip 0-byte exec files
+
+        # 参考 step_9_global_test_eval：merge 和统计 should include all local exec files
+        for ef in sorted(glob.glob(os.path.join(compiled_test_dir, "jacoco_*.exec")) +
+                         glob.glob(os.path.join(compiled_test_dir, "jacoco.exec"))):
+            if ef and os.path.exists(ef) and os.path.getsize(ef) > 0 and ef not in exec_files:
+                exec_files.append(ef)
+
+        exec_files = list(dict.fromkeys(exec_files))  # remove duplicates, keep order
+
         res = None
         if exec_files:
             if JACOCO_CLI and os.path.exists(JACOCO_CLI):
@@ -1230,6 +1246,11 @@ class TestRunner:
                 pass
 
         jacoco_xml_path = os.path.join(self.target_path, "target", "site", "jacoco", "jacoco.xml")
+        fallback_jacoco_xml = os.path.join(report_target, "jacoco.xml")
+        if not os.path.exists(jacoco_xml_path) and os.path.exists(fallback_jacoco_xml):
+            print(f"⚠️ 主要 jacoco.xml 未找到，回退到 {fallback_jacoco_xml}")
+            jacoco_xml_path = fallback_jacoco_xml
+
         # ★ Bug-Coverage-1 修复：使用修复后的函数计算 per_class_coverage（含内部类）
         per_class_coverage: dict = {}
         if os.path.exists(jacoco_xml_path):
@@ -1285,6 +1306,93 @@ class TestRunner:
                 m_branch_cov   = _pc.get('branch_cov')
                 m_branch_total = _pc.get('branch_total')
                 m_branch_rate  = _pc.get('branch_rate')
+
+            # 回退策略：如果 per_class_coverage 未能计算到目标类，尝试使用 per_test_records 的单测覆盖数据
+            if all_target_classes:
+                need_fallback = any(
+                    per_class_coverage.get(_tc.split('.')[-1].split('$')[0], {}).get('line_total', 0) == 0
+                    for _tc in all_target_classes
+                )
+            else:
+                need_fallback = (m_line_total is None or m_line_total == 0)
+
+            if need_fallback and per_test_records:
+                fallback_per_class = {}
+                for rec in per_test_records:
+                    rec_target = rec.get('per_test_target_class') or modified_class_name or ''
+                    rec_simple = rec_target.split('.')[-1].split('$')[0] if rec_target else None
+                    if not rec_simple:
+                        continue
+
+                    if all_target_classes and rec_simple not in [c.split('.')[-1].split('$')[0] for c in all_target_classes]:
+                        continue
+
+                    if rec.get('m_per_line_total') is None and rec.get('m_per_branch_total') is None:
+                        continue
+
+                    fc = fallback_per_class.setdefault(rec_simple, {
+                        'line_cov': 0, 'line_total': 0, 'line_rate': 0.0,
+                        'branch_cov': 0, 'branch_total': 0, 'branch_rate': 0.0,
+                    })
+
+                    # 采用 max 策略避免重复累加或覆盖错位（近似高度）
+                    fc['line_cov'] = max(fc['line_cov'], rec.get('m_per_line_cov') or 0)
+                    fc['line_total'] = max(fc['line_total'], rec.get('m_per_line_total') or 0)
+                    fc['branch_cov'] = max(fc['branch_cov'], rec.get('m_per_branch_cov') or 0)
+                    fc['branch_total'] = max(fc['branch_total'], rec.get('m_per_branch_total') or 0)
+
+                for k, v in fallback_per_class.items():
+                    if v['line_total'] > 0:
+                        v['line_rate'] = round(100.0 * v['line_cov'] / v['line_total'], 2)
+                    if v['branch_total'] > 0:
+                        v['branch_rate'] = round(100.0 * v['branch_cov'] / v['branch_total'], 2)
+
+                if fallback_per_class:
+                    # 仅当主路径完全没命中时，才采用回退逻辑
+                    if all_target_classes:
+                        missing_keys = [c.split('.')[-1].split('$')[0] for c in all_target_classes
+                                        if per_class_coverage.get(c.split('.')[-1].split('$')[0], {}).get('line_total', 0) == 0]
+                        for k in missing_keys:
+                            if k in fallback_per_class:
+                                per_class_coverage[k] = fallback_per_class[k]
+                    else:
+                        if modified_class_name:
+                            key = modified_class_name.split('.')[-1].split('$')[0]
+                            if key in fallback_per_class:
+                                per_class_coverage[key] = fallback_per_class[key]
+                                m_line_cov = fallback_per_class[key]['line_cov']
+                                m_line_total = fallback_per_class[key]['line_total']
+                                m_line_rate = fallback_per_class[key]['line_rate']
+                                m_branch_cov = fallback_per_class[key]['branch_cov']
+                                m_branch_total = fallback_per_class[key]['branch_total']
+                                m_branch_rate = fallback_per_class[key]['branch_rate']
+
+                    if m_line_total in (None, 0) and modified_class_name:
+                        key = modified_class_name.split('.')[-1].split('$')[0]
+                        _pc = per_class_coverage.get(key, {})
+                        if _pc.get('line_total'):
+                            m_line_cov = _pc.get('line_cov')
+                            m_line_total = _pc.get('line_total')
+                            m_line_rate = _pc.get('line_rate')
+                        if _pc.get('branch_total'):
+                            m_branch_cov = _pc.get('branch_cov')
+                            m_branch_total = _pc.get('branch_total')
+                            m_branch_rate = _pc.get('branch_rate')
+
+                    if line_rate is None or line_rate == 0:
+                        global_cov = sum(v.get('line_cov', 0) for v in per_class_coverage.values())
+                        global_tot = sum(v.get('line_total', 0) for v in per_class_coverage.values())
+                        if global_tot > 0:
+                            line_cov = global_cov
+                            line_total = global_tot
+                            line_rate = round(100.0 * global_cov / global_tot, 2)
+                    if branch_rate is None or branch_rate == 0:
+                        global_bcov = sum(v.get('branch_cov', 0) for v in per_class_coverage.values())
+                        global_btot = sum(v.get('branch_total', 0) for v in per_class_coverage.values())
+                        if global_btot > 0:
+                            branch_cov = global_bcov
+                            branch_total = global_btot
+                            branch_rate = round(100.0 * global_bcov / global_btot, 2)
 
         # ── coveragedetail.csv ────────────────────────────────────────
         try:
@@ -1801,18 +1909,36 @@ class TestRunner:
                 _tc_simple = _tc_name.split('.')[-1].split('$')[0]
                 _pc = per_class_coverage.get(_tc_simple, {})
                 print(f"  target_class: {_tc_simple}")
-                if _pc.get('line_total'):
-                    print(f"    行覆盖率: {_pc['line_rate']}% ({_pc['line_cov']}/{_pc['line_total']})")
-                if _pc.get('branch_total'):
-                    print(f"    分支覆盖率: {_pc['branch_rate']}% ({_pc['branch_cov']}/{_pc['branch_total']})")
+                # FIX Bug-A: use 'is not None' — int 0 is falsy, hid 0/0 results
+                if _pc.get('line_total') is not None:
+                    lt = _pc['line_total']
+                    if lt == 0:
+                        print(f"    行覆盖率: N/A (0行被JVM加载 — 测试未执行到被测类，或jacoco.xml陈旧)")
+                    else:
+                        print(f"    行覆盖率: {_pc['line_rate']}% ({_pc['line_cov']}/{lt})")
+                else:
+                    print(f"    行覆盖率: N/A (jacoco.xml中未找到该类)")
+                if _pc.get('branch_total') is not None:
+                    bt = _pc['branch_total']
+                    if bt > 0:
+                        print(f"    分支覆盖率: {_pc['branch_rate']}% ({_pc['branch_cov']}/{bt})")
+                    else:
+                        print(f"    分支覆盖率: N/A (无分支数据)")
         elif modified_class_name:
             print(f"  target_class: {modified_class_name}")
             if m_line_rate is not None:
                 print(f"    行覆盖率: {m_line_rate}% ({m_line_cov}/{m_line_total})")
             if m_branch_rate is not None:
                 print(f"    分支覆盖率: {m_branch_rate}% ({m_branch_cov}/{m_branch_total})")
-        if line_rate is None and branch_rate is None and not modified_class_name:
-            print("  未获取到有效覆盖率数据")
+        # FIX Bug-C: always show diagnostic when coverage is 0, even if all_target_classes is set
+        _has_any_coverage = any(
+            v.get('line_total', 0) > 0 for v in per_class_coverage.values()
+        ) if per_class_coverage else (m_line_total is not None and m_line_total > 0)
+        if not _has_any_coverage:
+            print("  ⚠ 未获取到有效覆盖率数据 — 可能原因:")
+            print("      1. 测试在执行被测类前抛出异常 (构造参数错误、Mock配置缺失等)")
+            print("      2. jacoco.xml不存在或为上次运行的陈旧文件 (检查target/site/jacoco/)")
+            print("      3. 所有测试超时被SIGTERM终止，jacoco agent shutdown hook未执行")
         print("-" * 50)
 
         return total_compile, total_test_run
@@ -2038,9 +2164,120 @@ class TestRunner:
                         "--datafile", f"{datafile_dir}/cobertura.ser",
                         target_classes], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+
+    def _collect_class_dirs(self) -> list:
+        """
+        Collect all target/classes directories in the project.
+        For single-module projects: [target_path/target/classes]
+        For multi-module projects:  each module's target/classes
+        
+        ★ 修复：如果 target/classes 为空或不存在 .class 文件，尝试编译或查找备选位置。
+        Used by the jacococli-based report() to set --classfiles.
+        """
+        class_dirs = []
+        
+        # 1. 尝试多模块项目
+        if self.has_submodule(self.target_path):
+            for module in self.get_submodule(self.target_path):
+                d = os.path.join(self.target_path, module, "target", "classes")
+                if os.path.isdir(d) and self._has_class_files(d):
+                    class_dirs.append(d)
+        
+        # 2. 尝试单模块项目
+        if not class_dirs:
+            d = os.path.join(self.target_path, "target", "classes")
+            if os.path.isdir(d):
+                if self._has_class_files(d):
+                    class_dirs.append(d)
+                else:
+                    # ★ 修复：如果 classes 目录为空，尝试编译
+                    print(f"  [WARN] target/classes 中没有 .class 文件，尝试编译...")
+                    self._try_compile_project()
+                    if self._has_class_files(d):
+                        class_dirs.append(d)
+            else:
+                # ★ 修复：目录不存在时尝试编译
+                print(f"  [WARN] target/classes 目录不存在，尝试编译项目...")
+                self._try_compile_project()
+                if os.path.isdir(d) and self._has_class_files(d):
+                    class_dirs.append(d)
+        
+        return class_dirs
+    
+    def _has_class_files(self, class_dir: str) -> bool:
+        """检查目录中是否包含 .class 文件"""
+        if not os.path.isdir(class_dir):
+            return False
+        for root, dirs, files in os.walk(class_dir):
+            for f in files:
+                if f.endswith('.class'):
+                    return True
+        return False
+    
+    def _xml_has_coverage_data(self, xml_path: str) -> bool:
+        """
+        ★ 新增方法：检查 jacoco.xml 是否包含实际的覆盖率数据。
+        返回 True 如果 XML 中有 <class> 元素，False 否则。
+        """
+        if not os.path.exists(xml_path):
+            return False
+        try:
+            tree = ET.parse(xml_path)
+            root = tree.getroot()
+            # 查找是否有任何 <class> 元素（表示有实际的覆盖率数据）
+            classes = root.findall('.//class')
+            return len(classes) > 0
+        except Exception as e:
+            print(f"  [WARN] 检查 XML 数据失败: {e}")
+            return False
+    
+    def _try_compile_project(self) -> bool:
+        """
+        ★ 新增方法：尝试编译项目以生成 .class 文件。
+        返回 True 如果编译成功，False 否则。
+        """
+        try:
+            pom_path = os.path.join(self.target_path, "pom.xml")
+            if not os.path.exists(pom_path):
+                print(f"    ❌ pom.xml 不存在于 {self.target_path}")
+                return False
+            
+            print(f"    运行 mvn clean compile ...")
+            result = subprocess.run(
+                ["mvn", "clean", "compile", "-q"],
+                cwd=self.target_path,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                timeout=300
+            )
+            if result.returncode == 0:
+                print(f"    ✅ 编译成功")
+                return True
+            else:
+                print(f"    ❌ 编译失败 (rc={result.returncode})")
+                if result.stderr:
+                    print(f"       错误信息: {result.stderr[:200]}")
+                return False
+        except Exception as e:
+            print(f"    ❌ 编译异常: {e}")
+            return False
+
     def report(self, datafile_dir, report_dir, jacoco_exec_override=None):
+        """
+        Generate a JaCoCo XML coverage report.
+
+        Uses jacococli report (CLI jar) instead of mvn jacoco:report because:
+          1. jacococli writes to an explicit --xml path (no shared-path collision).
+          2. jacococli reads --classfiles directly from target/classes, bypassing
+             Maven lifecycle — this fixes the 0/0 coverage bug on defects4j projects
+             like Math_32_f where mvn jacoco:report fails to locate classfiles.
+          3. Mirrors the approach used in HITS run_pipeline.py step_9.
+        
+        ★ 修复：添加检查以确保 XML 中有实际的覆盖率数据，而不是空文件。
+        """
         os.makedirs(report_dir, exist_ok=True)
         result = None
+
         if self.coverage_tool == "cobertura":
             result = subprocess.run(
                 ["bash", os.path.join(COBERTURA_DIR, "cobertura-report.sh"),
@@ -2048,24 +2285,87 @@ class TestRunner:
                  "--datafile", f"{datafile_dir}/cobertura.ser",
                  "--destination", report_dir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            return result
+
+        jacoco_exec_path = (jacoco_exec_override
+                            or os.path.join(datafile_dir, "jacoco.exec"))
+        if not os.path.exists(jacoco_exec_path) or os.path.getsize(jacoco_exec_path) == 0:
+            print(f"⚠️  jacoco.exec 无效或不存在：{jacoco_exec_path}")
+            return None
+
+        # XML output: per-run specific path inside report_dir (no collision between runs)
+        xml_out = os.path.join(report_dir, "jacoco.xml")
+
+        # ── Primary: jacococli report (mirrors HITS pipeline approach) ────────
+        if JACOCO_CLI and os.path.exists(JACOCO_CLI):
+            class_dirs = self._collect_class_dirs()
+            if class_dirs:
+                cmd = ["java", "-jar", JACOCO_CLI, "report", jacoco_exec_path]
+                for d in class_dirs:
+                    cmd += ["--classfiles", d]
+                cmd += ["--xml", xml_out, "--html", report_dir]
+                # Source dirs improve line-level reporting (optional)
+                for suffix in ["src/main/java", "src/main"]:
+                    sd = os.path.join(self.target_path, suffix)
+                    if os.path.isdir(sd):
+                        cmd += ["--sourcefiles", sd]
+                        break
+                if self.has_submodule(self.target_path):
+                    for module in self.get_submodule(self.target_path):
+                        for suffix in ["src/main/java", "src/main"]:
+                            sd = os.path.join(self.target_path, module, suffix)
+                            if os.path.isdir(sd):
+                                cmd += ["--sourcefiles", sd]
+                                break
+
+                result = subprocess.run(cmd, stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE, text=True)
+                if result.returncode == 0 and os.path.exists(xml_out):
+                    print(f"  [JaCoCo-Fix] ✅ Report generated: {xml_out}")
+                    
+                    # ★ 新增：检查生成的 XML 是否有实际数据
+                    if self._xml_has_coverage_data(xml_out):
+                        print(f"  [JaCoCo-Fix] ✅ XML 包含覆盖率数据")
+                    else:
+                        print(f"  [JaCoCo-Fix] ⚠️ XML 为空（没有覆盖率数据）")
+                        print(f"  [JaCoCo-Fix] 可能原因：")
+                        print(f"    1. .exec 文件中没有覆盖率记录")
+                        print(f"    2. 类文件与 .exec 中的记录不匹配")
+                        print(f"    3. JaCoCo agent 未正确注入到测试中")
+                    
+                    # Copy to legacy shared path for any code still reading it
+                    legacy_xml = os.path.join(
+                        self.target_path, "target", "site", "jacoco", "jacoco.xml")
+                    try:
+                        os.makedirs(os.path.dirname(legacy_xml), exist_ok=True)
+                        shutil.copy2(xml_out, legacy_xml)
+                    except Exception:
+                        pass
+                    return result
+                print(f"  [JaCoCo-Fix] ⚠️ jacococli rc={result.returncode}: "
+                      f"{(result.stderr or '')[:300]}")
+                # fall through to mvn fallback
+
+        # ── Fallback: mvn jacoco:report ────────────────────────────────────────
+        print(f"  [JaCoCo] Falling back to mvn jacoco:report ...")
+        mvn_cmd = [
+            "mvn", "jacoco:report",
+            f"-Djacoco.dataFile={jacoco_exec_path}",
+            "-Dmaven.bundle.skip=true",
+            "-f", os.path.join(self.target_path, "pom.xml"),
+        ]
+        result = subprocess.run(mvn_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                cwd=self.target_path, text=True)
+        jacoco_xml_mvn = os.path.join(
+            self.target_path, "target", "site", "jacoco", "jacoco.xml")
+        if os.path.exists(jacoco_xml_mvn):
+            print(f"✅ Jacoco 报告生成成功：{os.path.dirname(jacoco_xml)}")
+            try:
+                shutil.copy2(jacoco_xml_mvn, xml_out)
+            except Exception:
+                pass
         else:
-            jacoco_exec_path = jacoco_exec_override or os.path.join(datafile_dir, "jacoco.exec")
-            if os.path.exists(jacoco_exec_path) and os.path.getsize(jacoco_exec_path) > 0:
-                mvn_cmd = [
-                    "mvn", "jacoco:report",
-                    f"-Djacoco.dataFile={jacoco_exec_path}",
-                    "-Dmaven.bundle.skip=true",
-                    "-f", os.path.join(self.target_path, "pom.xml"),
-                ]
-                result = subprocess.run(mvn_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                        cwd=self.target_path, text=True)
-                jacoco_xml = os.path.join(self.target_path, "target", "site", "jacoco", "jacoco.xml")
-                if os.path.exists(jacoco_xml):
-                    print(f"✅ Jacoco 报告生成成功：{os.path.dirname(jacoco_xml)}")
-                else:
-                    print(f"⚠️  Jacoco 报告生成失败")
-            else:
-                print(f"⚠️  jacoco.exec 无效或不存在：{jacoco_exec_path}")
+            print(f"⚠️  Jacoco 报告生成失败")
         return result
 
     def make_dependency(self):
