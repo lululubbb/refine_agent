@@ -589,38 +589,61 @@ def build_fix_messages(
     test_name, current_code, instructions, focal_method,
     class_name, ctx_d1, ctx_d3, imports, suite_summary,
     prev_unchanged=False, diag=None, contract_text="",
-    version_text="", validation_issues: dict = None,  
+    version_text="", validation_issues: dict = None, cfg=None,
+    issues: List[str] = None,
 ):
     from compile_error_analyzer import enrich_diag_with_fix_hints, get_error_summary
-    compile_ok      = getattr(diag, 'compile_ok',      True)  if diag else True
-    exec_ok         = getattr(diag, 'exec_ok',         True)  if diag else True
-    compile_errors  = getattr(diag, 'compile_errors',  [])    if diag else []
-    exec_errors     = getattr(diag, 'exec_errors',     [])    if diag else []
-    missed_methods  = getattr(diag, 'missed_methods',  [])    if diag else []
-    partial_methods = getattr(diag, 'partial_methods', [])    if diag else []
-    issues          = getattr(diag, 'issues',          [])    if diag else []
-    auto_fix_hints  = enrich_diag_with_fix_hints(diag) if diag else []
-    error_summary   = get_error_summary(compile_errors, exec_errors) if diag else ""
+    from scoring_ablation import AblationConfig, global_ablation_config
+    if cfg is None:
+        cfg = global_ablation_config()
+    
+    if not cfg.use_compile_exec:
+        compile_ok = True
+        exec_ok = True
+        compile_errors = []
+        exec_errors = []
+        auto_fix_hints = []
+        error_summary = ""
+    else:
+        compile_ok = getattr(diag, 'compile_ok', True) if diag else True
+        exec_ok = getattr(diag, 'exec_ok', True) if diag else True
+        compile_errors = getattr(diag, 'compile_errors', []) if diag else []
+        exec_errors = getattr(diag, 'exec_errors', []) if diag else []
+        auto_fix_hints = enrich_diag_with_fix_hints(diag) if diag else []
+        error_summary = get_error_summary(compile_errors, exec_errors) if diag else ""
+    
+    if not cfg.use_coverage:
+        missed_methods = []
+        partial_methods = []
+    else:
+        missed_methods = getattr(diag, 'missed_methods', []) if diag else []
+        partial_methods = getattr(diag, 'partial_methods', []) if diag else []
 
     # ★ 使用 _get_fix_priority 过滤指令，避免在修复低优先级问题时传递高优先级指令
-    priority = _get_fix_priority(issues)
-    filtered_instructions = []
-    for instr in instructions:
-        if priority == "compile" and ("compile" in instr.lower() or "syntax" in instr.lower()):
-            filtered_instructions.append(instr)
-        elif priority == "exec" and ("exec" in instr.lower() or "runtime" in instr.lower() or "exception" in instr.lower()):
-            filtered_instructions.append(instr)
-        elif priority == "coverage" and ("coverage" in instr.lower() or "branch" in instr.lower() or "line" in instr.lower()):
-            filtered_instructions.append(instr)
-        elif priority == "bug_revealing" and ("bug" in instr.lower() or "revealing" in instr.lower()):
-            filtered_instructions.append(instr)
-        elif priority == "redundancy" and ("redundancy" in instr.lower() or "similar" in instr.lower()):
-            filtered_instructions.append(instr)
-        elif priority == "none":
-            filtered_instructions.append(instr)
-        # 如果不匹配关键词，保留所有（兼容旧指令）
-        else:
-            filtered_instructions.append(instr)
+    # 在消融实验 no_compile_exec 情况下，不进行优先级过滤，直接保留所有指令
+    if not cfg.use_compile_exec:
+        filtered_instructions = list(instructions)
+    else:
+        if issues is None:
+            issues = []
+        priority = _get_fix_priority(issues)
+        filtered_instructions = []
+        for instr in instructions:
+            if priority == "compile" and ("compile" in instr.lower() or "syntax" in instr.lower()):
+                filtered_instructions.append(instr)
+            elif priority == "exec" and ("exec" in instr.lower() or "runtime" in instr.lower() or "exception" in instr.lower()):
+                filtered_instructions.append(instr)
+            elif priority == "coverage" and ("coverage" in instr.lower() or "branch" in instr.lower() or "line" in instr.lower()):
+                filtered_instructions.append(instr)
+            elif priority == "bug_revealing" and ("bug" in instr.lower() or "revealing" in instr.lower()):
+                filtered_instructions.append(instr)
+            elif priority == "redundancy" and ("redundancy" in instr.lower() or "similar" in instr.lower()):
+                filtered_instructions.append(instr)
+            elif priority == "none":
+                filtered_instructions.append(instr)
+            # 如果不匹配关键词，保留所有（兼容旧指令）
+            else:
+                filtered_instructions.append(instr)
 
     merged_instructions = list(filtered_instructions)
     if not compile_ok and auto_fix_hints:
@@ -936,6 +959,7 @@ def focal_method_pipeline(
                   flush=True)
 
             tc_diag = refine_result.test_diags.get(tc_name)
+            tc_score = refine_result.test_scores.get(tc_name)
             original_code = current_codes[tc_name]
 
             fix_msgs = build_fix_messages(
@@ -946,7 +970,8 @@ def focal_method_pipeline(
                 prev_unchanged=prev_unchanged, diag=tc_diag,
                 contract_text=get_contract_text(contract),
                 version_text=version_text,
-                validation_issues=validation_issues_cache, 
+                validation_issues=validation_issues_cache,
+                issues=tc_score.issues if tc_score else [],
             )
 
             # ★ 新增：记录最终给 Generator 的 prompt（包括 system+user）
@@ -1082,10 +1107,10 @@ def _save_stats(base_dir: str, tracker: LLMStatsTracker,
     with open(os.path.join(base_dir, "time_stats.json"), "w", encoding="utf-8") as f:
         json.dump(time_stats, f, indent=2, ensure_ascii=False)
 
-    total_tok = token_stats["all_total"]["total_tokens"]
-    llm_time  = token_stats["all_total"]["llm_elapsed_seconds"]
-    call_count = token_stats["all_total"]["call_count"]
-    wall_time = time_stats["wall_clock"]["total_seconds"]
+    total_tok = token_stats["all_total"].get("total_tokens", 0)
+    llm_time  = token_stats["all_total"].get("llm_elapsed_seconds", 0.0)
+    call_count = token_stats["all_total"].get("call_count", 0)
+    wall_time = time_stats["wall_clock"].get("total_seconds", 0.0)
     print(flush=True)
     _divider("═", color=Fore.BLUE)
     print(Fore.BLUE +
@@ -1151,11 +1176,11 @@ def start_whole_process(
     global_start = time.time()
     global_stats: dict = {
         "generator": {"prompt_tokens": 0, "completion_tokens": 0,
-                      "total_tokens": 0, "llm_elapsed_seconds": 0.0},
+                      "total_tokens": 0, "llm_elapsed_seconds": 0.0, "call_count": 0},
         "refiner":   {"prompt_tokens": 0, "completion_tokens": 0,
-                      "total_tokens": 0, "llm_elapsed_seconds": 0.0},
+                      "total_tokens": 0, "llm_elapsed_seconds": 0.0, "call_count": 0},
         "all_total": {"prompt_tokens": 0, "completion_tokens": 0,
-                      "total_tokens": 0, "llm_elapsed_seconds": 0.0},
+                      "total_tokens": 0, "llm_elapsed_seconds": 0.0, "call_count": 0},
     }
 
     file_paths = []
@@ -1218,8 +1243,8 @@ def start_whole_process(
     print(f"Refiner compl.    : {global_stats['refiner']['completion_tokens']}")
     print(f"Refiner total     : {global_stats['refiner']['total_tokens']}")
     print(f"Refiner LLM time  : {global_stats['refiner']['llm_elapsed_seconds']:.1f}s")
-    print(f"ALL total_tokens  : {gt['total_tokens']}")
-    print(f"ALL LLM time      : {gt['llm_elapsed_seconds']:.1f}s   ({gt['call_count']} calls)")
+    print(f"ALL total_tokens  : {gt.get('total_tokens', 0)}")
+    print(f"ALL LLM time      : {gt.get('llm_elapsed_seconds', 0.0):.1f}s   ({gt.get('call_count', 0)} calls)")
     print(f"avg tokens/task   : {round(gt['total_tokens']/total, 1) if total else 0}")
     print(f"Generator per task: {round(global_stats['generator']['total_tokens']/total, 1) if total else 0}")
     print(f"Refiner per task  : {round(global_stats['refiner']['total_tokens']/total, 1) if total else 0}")

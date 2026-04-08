@@ -376,3 +376,140 @@ def export_method_test_case(temp_dir: str, class_name: str, method_id, seq: int,
     with open(path, "w", encoding="utf-8") as f:
         f.write(code)
     return path
+
+
+def collect_token_results_from_result_path(tests_dir_path):
+    """
+    tests_dir_path 参数传入的是 defect4j_projects/Csv_1_b/tests%xxx/ 路径，
+    但实际 time_stats.json 存储在 results_batch/Csv_1_b/scope_test%xxx/<method>/<num>/time_stats.json。
+    → 解决方案：遍历配置文件中 result_dir 目录下最新的 scope_test%* 目录
+    """
+    import re
+
+    # ── 查找 result_dir 目录下最新的 scope_test%* 目录 ──
+    scope_test_dirs = sorted(
+        glob.glob(os.path.join(result_dir, "scope_test%*")),
+        key=lambda p: int(re.search(r"(\d+)", os.path.basename(p)).group(1))
+                      if re.search(r"(\d+)", os.path.basename(p)) else 0
+    )
+    if not scope_test_dirs:
+        return []
+    search_root = scope_test_dirs[-1]   # 使用最新的 scope_test%* 目录
+
+    token_results = []
+    # 目录结构：scope_test%xxx / <method_id>%<proj>%<class>%<method> / <test_num> / time_stats.json
+    for method_dir in os.listdir(search_root):
+        method_path = os.path.join(search_root, method_dir)
+        if not os.path.isdir(method_path) or '%' not in method_dir:
+            continue
+        parts = method_dir.split('%')
+        if len(parts) < 4:
+            continue
+        method_id, project_name, class_name, method_name = parts[0], parts[1], parts[2], parts[3]
+
+        for test_num_str in os.listdir(method_path):
+            test_dir = os.path.join(method_path, test_num_str)
+            if not os.path.isdir(test_dir) or not test_num_str.isdigit():
+                continue
+            time_stats_file = os.path.join(test_dir, "time_stats.json")
+            if not os.path.exists(time_stats_file):
+                continue
+            try:
+                with open(time_stats_file, "r", encoding="utf-8") as f:
+                    ts = json.load(f)
+                # 累计 token 需从最新的 raw/imports 文件中读取
+                # 或累加 time_stats.json 同目录下 *_raw_*.json 文件的 token 数值
+                total_prompt = 0
+                total_completion = 0
+                total_tokens = 0
+                for fname in os.listdir(test_dir):
+                    if fname.endswith(".json") and "_raw_" in fname:
+                        try:
+                            with open(os.path.join(test_dir, fname), "r") as rf:
+                                raw = json.load(rf)
+                            total_prompt     += raw.get("prompt_tokens", 0)
+                            total_completion += raw.get("completion_tokens", 0)
+                            total_tokens     += raw.get("total_tokens", 0)
+                        except Exception:
+                            pass
+
+                token_results.append({
+                    "method_id":               method_id,
+                    "project_name":            project_name,
+                    "class_name":              class_name,
+                    "method_name":             method_name,
+                    "test_num":                int(test_num_str),
+                    "elapsed_seconds":         ts.get("total_elapsed_time_seconds", 0),
+                    "total_prompt_tokens":     total_prompt,
+                    "total_completion_tokens": total_completion,
+                    "total_tokens":            total_tokens,
+                })
+            except Exception as e:
+                print(f"[WARN] 读取 {time_stats_file} 失败: {e}")
+    return token_results
+
+
+def write_llm_summary(token_results, output_dir):
+    """
+    将 token_results 写成 test_summary.json 和 method_summary.json，
+    输出到 output_dir（应为 tests%xxx/ 目录，与 status/coverage 同级）。
+    
+    :param token_results: collect_token_results_from_result_path() 或
+                          start_whole_process() 返回的列表
+    :param output_dir: 目标目录（确保已存在）
+    """
+    from collections import defaultdict
+    import json, os
+
+    os.makedirs(output_dir, exist_ok=True)
+
+    # ── test_summary.json ────────────────────────────────────────────────
+    test_summary_rows = []
+    for ts in token_results:
+        test_summary_rows.append({
+            "method_id":               ts.get("method_id", ""),
+            "project_name":            ts.get("project_name", ""),
+            "class_name":              ts.get("class_name", ""),
+            "method_name":             ts.get("method_name", ""),
+            "test_num":                ts.get("test_num", ""),
+            "elapsed_seconds":         ts.get("elapsed_seconds", 0),
+            "total_prompt_tokens":     ts.get("total_prompt_tokens", 0),
+            "total_completion_tokens": ts.get("total_completion_tokens", 0),
+            "total_tokens":            ts.get("total_tokens", 0),
+        })
+
+    test_summary_path = os.path.join(output_dir, "test_summary.json")
+    with open(test_summary_path, "w", encoding="utf-8") as f:
+        json.dump(test_summary_rows, f, indent=2, ensure_ascii=False)
+    print(f"[Summary] test_summary 已写入: {test_summary_path}")
+
+    # ── method_summary.json ─────────────────────────────────────────────
+    method_groups = defaultdict(list)
+    for ts in token_results:
+        method_groups[ts.get("method_id", "unknown")].append(ts)
+
+    method_summary_rows = []
+    for mid, group in sorted(method_groups.items()):
+        test_count       = len(group)
+        total_elapsed    = round(sum(r.get("elapsed_seconds", 0) for r in group), 2)
+        total_prompt     = sum(r.get("total_prompt_tokens", 0) for r in group)
+        total_completion = sum(r.get("total_completion_tokens", 0) for r in group)
+        total_tok        = sum(r.get("total_tokens", 0) for r in group)
+        method_summary_rows.append({
+            "method_id":               mid,
+            "project_name":            group[0].get("project_name", ""),
+            "class_name":              group[0].get("class_name", ""),
+            "method_name":             group[0].get("method_name", ""),
+            "test_count":              test_count,
+            "total_elapsed_seconds":   total_elapsed,
+            "avg_elapsed_seconds":     round(total_elapsed / test_count, 2) if test_count else 0,
+            "total_prompt_tokens":     total_prompt,
+            "total_completion_tokens": total_completion,
+            "total_tokens":            total_tok,
+            "avg_tokens_per_test":     round(total_tok / test_count, 2) if test_count else 0,
+        })
+
+    method_summary_path = os.path.join(output_dir, "method_summary.json")
+    with open(method_summary_path, "w", encoding="utf-8") as f:
+        json.dump(method_summary_rows, f, indent=2, ensure_ascii=False)
+    print(f"[Summary] method_summary 已写入: {method_summary_path}")

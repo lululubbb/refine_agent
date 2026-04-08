@@ -3,12 +3,12 @@ import re
 import glob
 import argparse
 from task import Task
-from parse_xml import result_analysis
+# from parse_xml import result_analysis
 from config import *
 import subprocess
 import sys
 from tools import *
-# 使用示例：python3 run_tests.py /home/chenlu/ChatUniTest/defect4j_projects
+# 使用示例：python3 run_tests.py /home/chenlu/refine_test_gen_v5/defect4j_projects
 
 def run_tests(target_projects=None):
     """
@@ -43,7 +43,7 @@ def run_tests(target_projects=None):
                 projects.append(abs_proj)
                 continue
             # 情况2：传入的是 defects4j 根目录，展开包含多个 Csv*_*_b 子项目
-            children = sorted(glob.glob(os.path.join(abs_proj, 'Csv_5_f')))
+            children = sorted(glob.glob(os.path.join(abs_proj, 'Csv*_*_f')))
             if not children:
                 children = sorted(glob.glob(os.path.join(abs_proj, 'Csv*_*_b')))
             if children:
@@ -64,7 +64,7 @@ def run_tests(target_projects=None):
         # - 包含 Csv*_*_b 的目录（defects4j 风格）
         # - 或者直接包含 tests%* 的项目目录（单一项目）
         projects_set = set()
-        for p in glob.glob(os.path.join(project_dir, 'Csv_5_f')):
+        for p in glob.glob(os.path.join(project_dir, 'Csv*_*_f')):
             projects_set.add(os.path.abspath(p))
         if not projects_set:
             for p in glob.glob(os.path.join(project_dir, 'Csv*_*_b')):

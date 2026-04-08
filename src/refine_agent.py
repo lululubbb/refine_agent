@@ -11,7 +11,7 @@ refine_agent.py  (v3 — 问题修复版)
     LOW_LINE_COV:      exec_ok=True 且 focal_line_coverage < 0.7
     LOW_BRANCH_COV:    exec_ok=True 且 focal_branch_coverage < 0.7
     NOT_BUG_REVEALING: exec_ok=True 且 bug_revealing=False
-    HIGH_REDUNDANCY:   redundancy_score > 0.5
+    HIGH_REDUNDANCY:   redundancy > 0.7
   
 ─────────────────────────────────────────────────────────────────
 """
@@ -366,22 +366,48 @@ def tool_similarity(
 def _build_refiner_messages(
     focal_method, class_name, focal_method_code,
     test_file_codes, diags, test_scores, suite_score,
-    iteration, template_dir,
+    iteration, template_dir, cfg=None,  
 ):
+
+    from scoring_ablation import AblationConfig
+    if cfg is None:
+        cfg = AblationConfig()
+    
     problematic_data = []
     for tname in diags:
-        if not test_scores.get(tname, TestScore(tname)).issues:
+        score = test_scores.get(tname, TestScore(tname))
+        if not score.issues:
             continue
         entry = diags[tname].to_dict()
         entry["scores"]      = test_scores[tname].to_dict() if tname in test_scores else {}
         entry["source_code"] = test_file_codes.get(tname, "// [source not available]")
-        # ★ 新增：自动生成针对性的编译/运行时修复提示
-        entry["auto_fix_hints"] = enrich_diag_with_fix_hints(diags[tname])
-        entry["error_summary"]  = get_error_summary(
-            diags[tname].compile_errors, diags[tname].exec_errors
-        )
+        # ← 根据消融配置过滤诊断数据
+        if not cfg.use_compile_exec:
+            entry["compile_ok"] = True      # 屏蔽编译/执行状态
+            entry["exec_ok"] = True
+            entry["compile_errors"] = []
+            entry["exec_errors"] = []
+            entry["auto_fix_hints"] = []
+            entry["error_summary"] = ""
+        else:
+            entry["error_summary"] = get_error_summary(
+                diags[tname].compile_errors, diags[tname].exec_errors
+            )
+        
+        if not cfg.use_coverage:
+            entry["focal_line_rate"] = None
+            entry["focal_branch_rate"] = None
+            entry["missed_methods"] = []
+            entry["partial_methods"] = []
+        
+        if not cfg.use_bug_revealing:
+            entry["bug_revealing"] = None
+        
+        if not cfg.use_redundancy:
+            entry["redundancy_score"] = None
+            entry["most_similar_to"] = None
+        
         problematic_data.append(entry)
-
     try:
         from jinja2 import Environment, FileSystemLoader
         tenv = Environment(loader=FileSystemLoader(template_dir))
@@ -581,6 +607,7 @@ class RefineAgent:
             diags=filtered_diags, test_scores=filtered_scores,
             suite_score=suite_score,
             iteration=iteration, template_dir=self.template_dir,
+            cfg=_cfg, 
         )
         parsed, llm_result = self.client.chat_json(messages)
 
