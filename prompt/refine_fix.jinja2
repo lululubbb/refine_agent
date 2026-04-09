@@ -30,19 +30,28 @@ You MUST follow ALL compilation rules below or the test will STILL fail to compi
 {{ imports }}
 ```
 
+{# ══════════════════════════════════════════════════════════════ #}
+{# 编译/运行错误区块（仅在 use_compile_exec=True 时显示）        #}
+{# ══════════════════════════════════════════════════════════════ #}
+{% if use_compile_exec is not defined or use_compile_exec %}
+
 {% if not compile_ok %}
-## COMPILE ERRORS — MUST FIX ALL OF THESE FIRST (test will not run until resolved)
+## ❌ COMPILE ERRORS — MUST FIX ALL OF THESE FIRST (test will not run until resolved)
+
+The following errors were reported by the Java compiler. Read each error carefully and fix ALL of them:
+
 ```
 {% for err in compile_errors %}
 {{ err }}
 {% endfor %}
 ```
 
-**Error Type Classification:** {{ error_summary }}
-
 
 {% elif not exec_ok %}
-## RUNTIME ERRORS — MUST FIX (tests compile but fail at runtime)
+## ❌ RUNTIME ERRORS — MUST FIX (tests compile but fail at runtime)
+
+The following errors occurred when running the test. Read each error carefully:
+
 ```
 {% for err in exec_errors %}
 {{ err }}
@@ -50,45 +59,71 @@ You MUST follow ALL compilation rules below or the test will STILL fail to compi
 ```
 
 
-{% else %}
-## COVERAGE ISSUES (tests compile and run, but coverage is low)
+{% endif %}
+{% endif %}
+
+{# ══════════════════════════════════════════════════════════════ #}
+{# 覆盖率区块（仅在 use_coverage=True 且编译/执行通过时显示）    #}
+{# ══════════════════════════════════════════════════════════════ #}
+{% if (use_coverage is not defined or use_coverage) and (compile_ok and exec_ok) %}
+
+{% if missed_methods or partial_methods %}
+## 📊 COVERAGE ISSUES (tests compile and run, but focal method coverage is low)
+
 {% if missed_methods %}
-**Completely uncovered methods — add @Test methods for these:**
+**Completely uncovered methods — add `@Test` methods to cover these:**
 {% for m in missed_methods %}
 - {{ m }}
 {% endfor %}
 {% endif %}
+
 {% if partial_methods %}
-**Partially covered — add tests for missing branches:**
+**Partially covered methods — add tests for the missing branches:**
 {% for m in partial_methods %}
 - {{ m }}
 {% endfor %}
 {% endif %}
+
+
+{% endif %}
 {% endif %}
 
-## BUG REVEALING ISSUES
-Strengthen assertions to detect the specific bug:
-- Add assertions for exact return values (not just `assertNotNull`)
-- Test boundary values that exercise the fixed code path
-- Use multiple consecutive calls to check stateful behavior
+{# ══════════════════════════════════════════════════════════════ #}
+{# Bug Revealing 区块（仅在 use_bug_revealing=True 时显示）      #}
+{# ══════════════════════════════════════════════════════════════ #}
+{% if use_bug_revealing is not defined or use_bug_revealing %}
+
+{% if "NOT_BUG_REVEALING" in issues %}
+## 🐛 BUG REVEALING — Tests pass on both buggy and fixed versions (not revealing the bug)
+
+
 {% if contract_text %}
-- Verify postconditions from the Program Contract
+- **Verify postconditions from the Program Contract**: The contract lists specific behaviors that must hold
+{% endif %}
+{% endif %}
 {% endif %}
 
-## HIGH REDUNDANCY
-Replace with a completely different test scenario (different input, different code path).
+{# ══════════════════════════════════════════════════════════════ #}
+{# 冗余度区块（仅在 use_redundancy=True 时显示）                 #}
+{# ══════════════════════════════════════════════════════════════ #}
+{% if use_redundancy is not defined or use_redundancy %}
 
+{% if "HIGH_REDUNDANCY" in issues %}
+## 🔁 HIGH REDUNDANCY — This test is too similar to another test in the suite
+
+{% endif %}
+{% endif %}
 
 ## Rules
-1. Apply ALL repair instructions.
+1. Apply ALL repair instructions listed above.
 2. Keep the class name exactly: `{{ test_name }}`
-3. Do NOT change @Test methods that are NOT mentioned in instructions.
-4. Add missing imports.
-5. The output MUST be compilable Java.
-6. Only use APIs that appear in the Focal Method Context above.
+3. Do NOT change `@Test` methods that are NOT mentioned in the instructions (unless fixing compilation).
+4. Add any missing `import` statements.
+5. The output MUST be compilable Java — no syntax errors.
+6. Only use APIs that appear in the Focal Method Context above; do NOT invent APIs.
 {% if contract_text %}
 7. At least one test must verify each postcondition from the Program Contract.
 {% endif %}
-8. When using Mockito, do NOT mock final classes or final methods. Every mocked call must have a corresponding thenReturn, thenThrow, or thenAnswer.
-9. All test method signatures MUST include `throws Exception`.
-10. Output ONLY the complete Java class — no prose, no markdown fences.
+8. When using Mockito: do NOT mock final classes; every `when(...).thenXxx(...)` must have a matching stub.
+9. **ALL `@Test` method signatures MUST include `throws Exception`.**
+10. Output **ONLY** the complete Java class — no prose, no markdown fences, no explanations.

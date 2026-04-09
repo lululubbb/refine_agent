@@ -3,6 +3,11 @@ tool_runner_adapter.py
 ======================
 TestRunner 适配器：调用 TestRunner.start_all_test()，然后从已有输出文件
 提取所有 Tool 1+2 的诊断数据，序列化为统一的 suite_diagnosis.json。
+
+修改记录：
+  - 新增 _load_full_errors_from_files()：从 compiler_output/ 和 test_output/ 
+    目录读取完整的编译/运行错误文件内容，替换 diagnosis.log 中的截断错误信息。
+  - _parse_diag_block() 中将错误条目上限从10提高到30。
 ─────────────────────────────────────────────────────────────────
 """
 from __future__ import annotations
@@ -18,6 +23,13 @@ from typing import Dict, List, Optional
 logger = logging.getLogger(__name__)
 
 DIAG_JSON_NAME = "suite_diagnosis.json"
+
+# 单条错误消息最大字符数（防止超长日志撑爆 prompt）
+_MAX_SINGLE_ERROR_CHARS = 2000
+# 编译错误文件最大读取行数
+_MAX_COMPILE_ERROR_LINES = 80
+# 运行错误文件最大读取行数
+_MAX_RUNTIME_ERROR_LINES = 60
 
 # 状态优先级（数字越大，优先级越高）
 _STATUS_PRIORITY = {
@@ -64,6 +76,9 @@ def run_and_export(
     logger.info("[ToolRunner] tests_output_dir = %s", tests_output_dir)
 
     diag_map = _build_diag_map(tests_output_dir)
+
+    # ★ 新增：从 compiler_output/ 和 test_output/ 读取完整错误信息，补充/覆盖 diagnosis.log 的截断内容
+    _load_full_errors_from_files(tests_output_dir, diag_map)
 
     out_path = os.path.join(tests_output_dir, DIAG_JSON_NAME)
     try:
@@ -116,6 +131,254 @@ def _resolve_tests_output_dir(focal_method_result_dir: str,
         return latest
 
     return focal_method_result_dir
+
+
+# ════════════════════════════════════════════════════════════════════
+# ★ 新增：从磁盘文件读取完整错误信息
+# ════════════════════════════════════════════════════════════════════
+
+def _load_full_errors_from_files(tests_output_dir: str, diag: dict):
+    """
+    从 compiler_output/ 和 test_output/ 目录读取完整的错误文件内容，
+    用完整错误信息替换/补充 diagnosis.log 中可能被截断的错误条目。
+
+    文件命名约定（test_runner.py 生成）：
+      compiler_output/CompilerOutput-<ClassName>.java.txt  → 编译错误
+      test_output/TestOutput-<ClassName>.java.txt          → 运行错误
+    """
+    compile_dir = os.path.join(tests_output_dir, "compiler_output")
+    test_dir    = os.path.join(tests_output_dir, "test_output")
+
+    # ── 读取编译错误文件 ─────────────────────────────────────────────
+    if os.path.isdir(compile_dir):
+        for fname in os.listdir(compile_dir):
+            if not fname.endswith(".txt"):
+                continue
+            # 从文件名提取测试类名
+            # 格式：CompilerOutput-ClassName.java.txt 或 CompilerOutput-ClassName.txt
+            tc_name = _extract_tc_name_from_compile_file(fname)
+            if not tc_name:
+                continue
+
+            fpath = os.path.join(compile_dir, fname)
+            full_errors = _read_error_file(fpath, max_lines=_MAX_COMPILE_ERROR_LINES)
+            if not full_errors:
+                continue
+
+            # 找到对应的 diag 条目（短名匹配）
+            tc_key = _find_diag_key(diag, tc_name)
+            if tc_key is None:
+                continue
+
+            entry = diag[tc_key]
+            # 只有编译失败的才替换编译错误
+            if entry.get("compile_status") == "fail":
+                # 将完整错误内容解析为有意义的错误行列表
+                parsed_errors = _parse_compile_error_content(full_errors)
+                if parsed_errors:
+                    entry["compile_errors"] = parsed_errors[:30]
+                    logger.info("[FullError] compile errors loaded for %s: %d items",
+                                tc_key, len(parsed_errors))
+
+    # ── 读取运行错误文件 ─────────────────────────────────────────────
+    if os.path.isdir(test_dir):
+        for fname in os.listdir(test_dir):
+            if not fname.endswith(".txt"):
+                continue
+            tc_name = _extract_tc_name_from_test_file(fname)
+            if not tc_name:
+                continue
+
+            fpath = os.path.join(test_dir, fname)
+            full_errors = _read_error_file(fpath, max_lines=_MAX_RUNTIME_ERROR_LINES)
+            if not full_errors:
+                continue
+
+            tc_key = _find_diag_key(diag, tc_name)
+            if tc_key is None:
+                continue
+
+            entry = diag[tc_key]
+            if entry.get("exec_status") == "fail":
+                parsed_errors = _parse_runtime_error_content(full_errors)
+                if parsed_errors:
+                    entry["exec_errors"] = parsed_errors[:20]
+                    logger.info("[FullError] exec errors loaded for %s: %d items",
+                                tc_key, len(parsed_errors))
+
+
+def _extract_tc_name_from_compile_file(fname: str) -> str:
+    """
+    从编译错误文件名提取测试类名。
+    示例：
+      CompilerOutput-Lexer_4_2Test.java.txt → Lexer_4_2Test
+      compile_error.txt → (空，跳过)
+    """
+    # 去掉 .txt 后缀
+    base = fname
+    if base.endswith(".txt"):
+        base = base[:-4]
+    # 去掉 .java 后缀
+    if base.endswith(".java"):
+        base = base[:-5]
+    # 去掉前缀 CompilerOutput- 或 compile_error
+    for prefix in ("CompilerOutput-", "CompilerOutput_"):
+        if base.startswith(prefix):
+            return base[len(prefix):]
+    # 如果是 compile_error 这类全局文件，跳过
+    if base.lower() in ("compile_error", "compileroutput"):
+        return ""
+    return ""
+
+
+def _extract_tc_name_from_test_file(fname: str) -> str:
+    """
+    从运行错误文件名提取测试类名。
+    示例：
+      TestOutput-Lexer_4_2Test.java.txt → Lexer_4_2Test
+      runtime_error.txt → (空，跳过)
+    """
+    base = fname
+    if base.endswith(".txt"):
+        base = base[:-4]
+    if base.endswith(".java"):
+        base = base[:-5]
+    for prefix in ("TestOutput-", "TestOutput_", "runtime_error-"):
+        if base.startswith(prefix):
+            return base[len(prefix):]
+    if base.lower() in ("runtime_error", "testoutput"):
+        return ""
+    return ""
+
+
+def _read_error_file(fpath: str, max_lines: int = 80) -> str:
+    """读取错误文件内容，限制行数。"""
+    try:
+        with open(fpath, "r", encoding="utf-8", errors="replace") as f:
+            lines = f.readlines()
+        if len(lines) > max_lines:
+            content = "".join(lines[:max_lines])
+            content += f"\n... [{len(lines) - max_lines} more lines truncated] ..."
+        else:
+            content = "".join(lines)
+        return content.strip()
+    except Exception as e:
+        logger.debug("[FullError] read %s failed: %s", fpath, e)
+        return ""
+
+
+def _parse_compile_error_content(raw: str) -> List[str]:
+    """
+    将原始编译错误文本解析为有意义的错误行列表。
+    保留 error/warning 行及其上下文，去掉纯空行。
+    """
+    lines = raw.splitlines()
+    result = []
+    i = 0
+    while i < len(lines):
+        line = lines[i].rstrip()
+        # 保留包含 error: 或 warning: 的行及其前后1行上下文
+        if ": error:" in line or ": warning:" in line or "error:" in line.lower():
+            # 加入前一行（通常是文件位置行）
+            if i > 0 and lines[i-1].strip() and lines[i-1].strip() not in result:
+                result.append(lines[i-1].rstrip())
+            result.append(line)
+            # 加入后面的 ^ 指示行
+            if i + 1 < len(lines) and (lines[i+1].strip().startswith("^") or
+                                         "symbol" in lines[i+1].lower() or
+                                         "location" in lines[i+1].lower()):
+                result.append(lines[i+1].rstrip())
+                if i + 2 < len(lines) and ("symbol" in lines[i+2].lower() or
+                                             "location" in lines[i+2].lower()):
+                    result.append(lines[i+2].rstrip())
+        i += 1
+
+    # 如果没有提取到结构化错误，返回原始内容（截断到合理长度）
+    if not result:
+        # 按行返回，每行最多 _MAX_SINGLE_ERROR_CHARS 字符
+        for line in lines:
+            stripped = line.strip()
+            if stripped:
+                result.append(stripped[:_MAX_SINGLE_ERROR_CHARS])
+            if len(result) >= 30:
+                break
+
+    # 去重并限制总长度
+    seen = set()
+    deduped = []
+    for item in result:
+        key = item.strip()
+        if key and key not in seen:
+            seen.add(key)
+            deduped.append(item[:_MAX_SINGLE_ERROR_CHARS])
+
+    return deduped
+
+
+def _parse_runtime_error_content(raw: str) -> List[str]:
+    """
+    将原始运行错误文本解析为有意义的错误行列表。
+    重点提取：AssertionError、Exception、expected/but was、FAILED 等关键行。
+    """
+    lines = raw.splitlines()
+    result = []
+    key_patterns = [
+        "AssertionError", "AssertionFailedError",
+        "expected:", "but was:", "expected:<", "but was:<",
+        "Exception", "Error",
+        "FAILED", "FAILURE",
+        "org.opentest4j", "junit.framework",
+        "NullPointerException", "IllegalArgumentException",
+        "IllegalStateException", "IndexOutOfBoundsException",
+    ]
+    # 第一遍：提取关键行
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if not stripped:
+            continue
+        # 跳过纯 at 栈帧行（只保留前几行栈帧）
+        if stripped.startswith("at ") and len([r for r in result if r.startswith("at ")]) >= 3:
+            continue
+        if any(kw in line for kw in key_patterns):
+            result.append(stripped[:_MAX_SINGLE_ERROR_CHARS])
+        elif stripped.startswith("at ") and len([r for r in result if r.startswith("at ")]) < 3:
+            result.append(stripped[:200])
+
+    # 如果关键行太少，补充原始内容
+    if len(result) < 3:
+        for line in lines:
+            stripped = line.strip()
+            if stripped and stripped not in result:
+                result.append(stripped[:_MAX_SINGLE_ERROR_CHARS])
+            if len(result) >= 20:
+                break
+
+    # 去重
+    seen = set()
+    deduped = []
+    for item in result:
+        if item not in seen:
+            seen.add(item)
+            deduped.append(item)
+
+    return deduped[:20]
+
+
+def _find_diag_key(diag: dict, tc_name: str) -> Optional[str]:
+    """在 diag 字典中找到与 tc_name 匹配的键。"""
+    # 精确匹配
+    if tc_name in diag:
+        return tc_name
+    # 短名匹配（去掉包名前缀）
+    tc_short = tc_name.rsplit(".", 1)[-1]
+    if tc_short in diag:
+        return tc_short
+    # 模糊匹配：diag 中的键包含 tc_name
+    for key in diag:
+        key_short = key.rsplit(".", 1)[-1]
+        if key_short == tc_short or tc_short in key_short or key_short in tc_short:
+            return key
+    return None
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -306,12 +569,9 @@ def _parse_diag_block(block: str, diag: dict):
         return
 
     # ── 决定是否允许本块更新状态 ────────────────────────────────
-    # exec_ok（coverage_gap）块不应覆盖 compile_fail / exec_fail 状态
     new_prio     = _status_priority(block_status)
     current_prio = _status_priority(current_status)
 
-    # 如果 block_status == exec_ok 但当前已知更高优先级状态，
-    # 本块只更新覆盖率等辅助字段，不覆盖 compile/exec status
     can_update_status = (new_prio >= current_prio)
 
     if can_update_status:
@@ -324,7 +584,6 @@ def _parse_diag_block(block: str, diag: dict):
             entry["exec_status"] = "fail"
         elif block_status == "exec_timeout":
             entry["exec_status"] = "timeout"
-        # exec_ok → compile=pass, exec=pass（已在上面设置）
 
     # ── 第二遍：解析详细内容 ────────────────────────────────────
     in_core_errors     = False
@@ -337,12 +596,10 @@ def _parse_diag_block(block: str, diag: dict):
         if stripped == "---":
             break
 
-        # 跳过已解析的 status / error_type 行
         if re.match(r'status=', stripped) or re.match(r'error_type=', stripped):
             in_core_errors = in_missed_methods = in_partial_methods = in_full_stderr = False
             continue
 
-        # 进入各节
         if re.match(r'core_errors\s*\(?\d*\)?:', stripped):
             in_core_errors     = True
             in_missed_methods  = False
@@ -372,13 +629,10 @@ def _parse_diag_block(block: str, diag: dict):
         if item_m:
             val = item_m.group(1).strip()
             if in_core_errors and not in_full_stderr:
-                # 根据 block_status 决定放入 compile_errors 还是 exec_errors
                 if block_status == "compile_fail":
                     entry["compile_errors"].append(val)
                 elif block_status in ("exec_fail", "exec_timeout"):
-                    # ★ 修复：exec_fail 的 core_errors 应该放入 exec_errors
                     entry["exec_errors"].append(val)
-                # exec_ok 的 core_errors 忽略（不应该有）
             elif in_missed_methods:
                 entry["missed_methods"].append(val)
             elif in_partial_methods:
@@ -388,12 +642,11 @@ def _parse_diag_block(block: str, diag: dict):
         if in_full_stderr:
             continue
         if stripped and not stripped.startswith("-"):
-            # 遇到非列表行，重置节标志
             in_core_errors = in_missed_methods = in_partial_methods = False
 
-    # 去重并截断
-    entry["compile_errors"] = list(dict.fromkeys(entry["compile_errors"]))[:10]
-    entry["exec_errors"]    = list(dict.fromkeys(entry["exec_errors"]))[:10]
+    # 去重并截断（★ 提高上限到30条）
+    entry["compile_errors"] = list(dict.fromkeys(entry["compile_errors"]))[:30]
+    entry["exec_errors"]    = list(dict.fromkeys(entry["exec_errors"]))[:30]
     entry["missed_methods"] = list(dict.fromkeys(entry["missed_methods"]))
     entry["partial_methods"]= list(dict.fromkeys(entry["partial_methods"]))
 
@@ -430,7 +683,6 @@ def _parse_coverage_csv(csv_path: str, diag: dict):
                     continue
                 entry = _ensure(diag, tc)
 
-                # 覆盖率数据：compile_fail 的 test 跳过（值为空）
                 exec_note = row.get("exec_status", "").strip().lower()
                 if exec_note == "compile_fail":
                     continue

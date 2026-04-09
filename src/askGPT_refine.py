@@ -574,8 +574,24 @@ def _get_fix_priority(issues: List[str]) -> str:
 
 
 # ════════════════════════════════════════════════════════════════════
-# Fix 单个 Test（★ 删除版本信息注入，简化 compile_error_analyzer 输出）
+# Fix 单个 Test
 # ════════════════════════════════════════════════════════════════════
+def _select_key_compile_errors(compile_errors: List[str], max_items: int = 10) -> List[str]:
+    """
+    从完整编译错误列表中选取最有价值的错误行。
+    优先 ': error:' 行，其次上下文行，跳过 'Note:' 等噪声。
+    """
+    error_lines = []
+    context_lines = []
+    for line in compile_errors:
+        if ": error:" in line or line.strip().startswith("error:"):
+            error_lines.append(line)
+        elif line.strip() and not line.strip().startswith("Note:"):
+            context_lines.append(line)
+    selected = error_lines[:max_items]
+    if len(selected) < max_items:
+        selected += context_lines[:max_items - len(selected)]
+    return selected if selected else compile_errors[:max_items]
 
 def build_fix_messages(
     test_name, current_code, instructions, focal_method,
@@ -584,128 +600,199 @@ def build_fix_messages(
     validation_issues: dict = None, cfg=None,
     issues: List[str] = None,
 ):
+    """
+    构建 fix 阶段的 LLM 消息列表。
+ 
+    修改要点：
+    1. 消融模式开关（use_compile_exec / use_coverage / use_bug_revealing / use_redundancy）
+       作为 Jinja2 模板变量传入，由模板决定显示哪些区块（问题5）。
+    2. 完整的 compile_errors / exec_errors 从 diag 读取，
+       tool_runner_adapter 已从 compiler_output/*.txt 和 test_output/*.txt 填充（问题1）。
+    3. issues 列表传入模板，控制 BUG_REVEALING / HIGH_REDUNDANCY 区块（问题4/5）。
+    4. 删除 error_summary（问题3：冗余，错误本身已足够清晰）。
+    5. 修复指令不再按 priority 过度过滤，保留全部（问题2）。
+    """
     from scoring_ablation import AblationConfig, global_ablation_config
     if cfg is None:
         cfg = global_ablation_config()
-
-    if not cfg.use_compile_exec:
-        compile_ok = True
-        exec_ok = True
+    if issues is None:
+        issues = []
+ 
+    # ── 消融模式开关 ──────────────────────────────────────────────
+    use_compile_exec  = bool(cfg.use_compile_exec)
+    use_coverage      = bool(cfg.use_coverage)
+    use_bug_revealing = bool(cfg.use_bug_revealing)
+    use_redundancy    = bool(cfg.use_redundancy)
+ 
+    # ── 从 diag 读取完整错误信息 ──────────────────────────────────
+    if use_compile_exec and diag:
+        compile_ok     = getattr(diag, 'compile_ok', True)
+        exec_ok        = getattr(diag, 'exec_ok', True)
+        compile_errors = list(getattr(diag, 'compile_errors', []))
+        exec_errors    = list(getattr(diag, 'exec_errors', []))
+    else:
+        compile_ok     = True
+        exec_ok        = True
         compile_errors = []
-        exec_errors = []
-        # ★ 删除版本感知的 auto_fix_hints，只保留错误类型标签
-        auto_fix_hints = []
-        error_summary = ""
+        exec_errors    = []
+ 
+    if use_coverage and diag:
+        missed_methods  = list(getattr(diag, 'missed_methods', []))
+        partial_methods = list(getattr(diag, 'partial_methods', []))
     else:
-        compile_ok = getattr(diag, 'compile_ok', True) if diag else True
-        exec_ok = getattr(diag, 'exec_ok', True) if diag else True
-        compile_errors = getattr(diag, 'compile_errors', []) if diag else []
-        exec_errors = getattr(diag, 'exec_errors', []) if diag else []
-        # ★ 只保留错误类型标签（error_summary），不再传入 fix_code
-        auto_fix_hints = []  # 删除 auto_fix_hints，不再注入模板代码
-        error_summary = get_error_summary(compile_errors, exec_errors) if diag else ""
-
-    if not cfg.use_coverage:
-        missed_methods = []
+        missed_methods  = []
         partial_methods = []
-    else:
-        missed_methods = getattr(diag, 'missed_methods', []) if diag else []
-        partial_methods = getattr(diag, 'partial_methods', []) if diag else []
+ 
+    # ── 消融模式下过滤 issues ────────────────────────────────────
+    filtered_issues = []
+    for issue in issues:
+        if issue in ("COMPILE_FAIL", "EXEC_FAIL", "EXEC_TIMEOUT") and not use_compile_exec:
+            continue
+        if issue in ("LOW_LINE_COV", "LOW_BRANCH_COV") and not use_coverage:
+            continue
+        if issue == "NOT_BUG_REVEALING" and not use_bug_revealing:
+            continue
+        if issue == "HIGH_REDUNDANCY" and not use_redundancy:
+            continue
+        filtered_issues.append(issue)
+ 
+    priority = _get_fix_priority(filtered_issues) if filtered_issues else "none"
 
-    # 过滤指令
-    if not cfg.use_compile_exec:
+    # ── 新增：指令过滤逻辑 ────────────────────────────────────────────────────
+    filtered_instructions = []
+    for instr in instructions:
+        instr_lower = instr.lower()
+        
+        # 1. 如果优先级是编译，只保留编译/语法指令
+        if priority == "compile":
+            if "compile" in instr_lower or "syntax" in instr_lower:
+                filtered_instructions.append(instr)
+        
+        # 2. 如果优先级是执行，只保留执行/运行时/异常指令
+        elif priority == "exec":
+            if any(kw in instr_lower for kw in ["exec", "runtime", "exception", "timeout"]):
+                filtered_instructions.append(instr)
+        
+        # 3. 如果优先级是覆盖率，只保留覆盖率/分支/行指令
+        elif priority == "coverage":
+            if any(kw in instr_lower for kw in ["coverage", "branch", "line"]):
+                filtered_instructions.append(instr)
+        
+        # 4. 如果优先级是找 Bug，只保留 Bug 触发指令
+        elif priority == "bug_revealing":
+            if "bug" in instr_lower or "revealing" in instr_lower:
+                filtered_instructions.append(instr)
+        
+        # 5. 如果优先级是去冗余
+        elif priority == "redundancy":
+            if "redundancy" in instr_lower or "similar" in instr_lower:
+                filtered_instructions.append(instr)
+        
+        # 6. 无明确优先级或 none 时，保留所有指令（或根据需求自定义）
+        else:
+            filtered_instructions.append(instr)
+
+    # 如果过滤后一条指令都没剩下（极端情况），回退到原始指令，防止模型丢失上下文
+    if not filtered_instructions and instructions:
         filtered_instructions = list(instructions)
-    else:
-        if issues is None:
-            issues = []
-        priority = _get_fix_priority(issues)
-        filtered_instructions = []
-        for instr in instructions:
-            if priority == "compile" and ("compile" in instr.lower() or "syntax" in instr.lower()):
-                filtered_instructions.append(instr)
-            elif priority == "exec" and ("exec" in instr.lower() or "runtime" in instr.lower() or "exception" in instr.lower()):
-                filtered_instructions.append(instr)
-            elif priority == "coverage" and ("coverage" in instr.lower() or "branch" in instr.lower() or "line" in instr.lower()):
-                filtered_instructions.append(instr)
-            elif priority == "bug_revealing" and ("bug" in instr.lower() or "revealing" in instr.lower()):
-                filtered_instructions.append(instr)
-            elif priority == "redundancy" and ("redundancy" in instr.lower() or "similar" in instr.lower()):
-                filtered_instructions.append(instr)
-            elif priority == "none":
-                filtered_instructions.append(instr)
-            else:
-                filtered_instructions.append(instr)
 
-    merged_instructions = list(filtered_instructions)
-
+    merged_instructions = filtered_instructions
+ 
     unchanged_warning = (
-        "\n\n⚠️ CRITICAL: Your previous output was IDENTICAL to the input. "
-        "You MUST make substantial changes this time."
+        "\\n\\n⚠️ CRITICAL: Your previous output was IDENTICAL to the input. "
+        "You MUST make substantial changes this time. "
+        "Rewrite the failing test methods completely with different logic."
         if prev_unchanged else ""
     )
-
-    # ★ 注意：context 中不再包含 version_constraints
+ 
+    method_code = ctx_d1.get("information", ctx_d3.get("full_fm", ""))
+ 
     context = {
+        # 基础信息
         "class_name":           class_name,
         "focal_method":         focal_method,
         "test_name":            test_name,
         "current_suite":        current_code,
         "suite_summary":        suite_summary,
+        "method_code":          method_code,
+        "imports":              imports,
+        "contract_text":        contract_text,
+        "unchanged_warning":    unchanged_warning,
+        # 修复指令
         "instructions_json":    json.dumps(merged_instructions[:5], indent=2, ensure_ascii=False),
         "delete_tests_json":    "[]",
-        "method_code":          ctx_d1.get("information", ctx_d3.get("full_fm", "")),
-        "imports":              imports,
-        "instructions_summary": "\n".join(f"  {i+1}. {instr}" for i, instr in enumerate(merged_instructions[:5])),
-        "unchanged_warning":    unchanged_warning,
-        "compile_ok":           compile_ok,
-        "exec_ok":              exec_ok,
-        "compile_errors":       compile_errors[:10],
-        "exec_errors":          exec_errors[:10],
-        "missed_methods":       missed_methods[:20],
-        "partial_methods":      partial_methods[:10],
-        "contract_text":        contract_text,
-        "auto_fix_hints":       auto_fix_hints,   # 现在始终为空列表
-        "error_summary":        error_summary,
-        # ★ 不再包含 version_constraints
+        "instructions_summary": "\\n".join(
+            f"  {i+1}. {instr}" for i, instr in enumerate(merged_instructions[:5])
+        ),
+        # ★ 消融模式开关（传入模板）
+        "use_compile_exec":  use_compile_exec,
+        "use_coverage":      use_coverage,
+        "use_bug_revealing": use_bug_revealing,
+        "use_redundancy":    use_redundancy,
+        # 编译/运行状态和完整错误
+        "compile_ok":     compile_ok,
+        "exec_ok":        exec_ok,
+        "compile_errors": compile_errors[:30],
+        "exec_errors":    exec_errors[:30],
+        # 覆盖率信息
+        "missed_methods":  missed_methods[:20],
+        "partial_methods": partial_methods[:10],
+        # ★ issues 列表（控制 BUG_REVEALING / HIGH_REDUNDANCY 区块）
+        "issues": filtered_issues,
+        # 兼容性字段（保留但为空）
+        "auto_fix_hints": [],
+        "error_summary":  "",
     }
+ 
     msgs = generate_messages(TEMPLATE_FIX, context)
     if remain_prompt_tokens(msgs) < 0:
-        context["method_code"] = ctx_d3.get("full_fm", "")
+        context["method_code"] = ctx_d3.get("full_fm", "")[:2000]
         msgs = generate_messages(TEMPLATE_FIX, context)
-
+ 
+    # ── 末尾追加关键提示 ─────────────────────────────────────────
     if msgs and msgs[-1]["role"] == "user":
-        suffix = f"\n\n## Repair Instructions Summary\n{context['instructions_summary']}"
-
-        # ★ 编译错误：只给错误文本和类型标签，不给模板代码
-        if not compile_ok and compile_errors:
-            suffix += (f"\n\n## COMPILE ERRORS — FIX THESE FIRST:\n"
-                       + "\n".join(f"  {e}" for e in compile_errors[:5]))
-            if error_summary:
-                suffix += f"\n\n## Error Type Classification:\n  {error_summary}"
-            # ★ 删除 auto_fix_hints 注入（不再给出模板代码）
-
-        if not exec_ok and exec_errors:
-            suffix += (f"\n\n## EXECUTION ERRORS:\n"
-                       + "\n".join(f"  {e}" for e in exec_errors[:5]))
-
+        suffix_parts = []
+ 
+        # 修复指令摘要（始终追加）
+        suffix_parts.append(
+            f"\\n\\n## 📋 Repair Instructions Summary\\n{context['instructions_summary']}"
+        )
+ 
+        # 编译错误关键行强化
+        if use_compile_exec and not compile_ok and compile_errors:
+            key_errors = _select_key_compile_errors(compile_errors, max_items=10)
+            suffix_parts.append(
+                "\\n\\n## ⚠️ KEY COMPILE ERRORS TO FIX:\\n"
+                + "\\n".join(f"  {e}" for e in key_errors)
+            )
+ 
+        # 运行错误强化
+        if use_compile_exec and compile_ok and not exec_ok and exec_errors:
+            suffix_parts.append(
+                "\\n\\n## ⚠️ KEY RUNTIME ERRORS TO FIX:\\n"
+                + "\\n".join(f"  {e}" for e in exec_errors[:8])
+            )
+ 
+        # 未改变警告
         if prev_unchanged:
-            suffix += "\n\n⚠️ MUST CHANGE: Previous output was identical to input."
-
-        # ★ 语法验证问题注入（保留，这是有价值的静态分析）
+            suffix_parts.append(
+                "\\n\\nMUST MAKE SUBSTANTIAL CHANGES: "
+                "Previous output was identical to input. "
+                "Rewrite the problematic test methods completely."
+            )
+ 
+        # 语法验证问题注入
         if validation_issues and test_name in validation_issues:
             _vdata = validation_issues[test_name]
             if _vdata.get("has_errors") and _vdata.get("prompt_text"):
-                suffix += (
-                    f"\n\n## Static Pre-validation Issues (fix these too):\n"
+                suffix_parts.append(
+                    f"\\n\\n## Static Pre-validation Issues (fix these too):\\n"
                     f"{_vdata['prompt_text']}"
                 )
-
-        # ★ 不再注入版本约束 reminder
-
-        msgs[-1]["content"] += suffix
-
+ 
+        msgs[-1]["content"] += "".join(suffix_parts)
+ 
     return msgs
-
 
 # ════════════════════════════════════════════════════════════════════
 # 主流程 — focal_method_pipeline

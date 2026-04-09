@@ -75,23 +75,67 @@ Analyze the above data and produce repair instructions for **EVERY** Test file l
 3. **Coverage/Bug-Revealing**: Address these after compile and exec are fixed.
    BUT: If a Test only has coverage/bug-revealing issues, STILL generate instructions for them.
 
-**Fallback Rules** (if auto_fix_hints is insufficient):
-- For missing auto_fix_hints on compile errors: analyze `compile_errors[]` directly and suggest fixes
-- For missing auto_fix_hints on exec errors: analyze `exec_errors[]` directly and suggest fixes
+** COMPILE_FAIL Fix guidance (in priority order):**
+- `xxx has private access in Yyy` → Use reflection: `getDeclaredField("xxx").setAccessible(true).get(obj)` or `getDeclaredMethod("xxx").setAccessible(true).invoke(obj)`
+- `cannot inherit from final Xxx` → Use `Mockito.spy(new Xxx(...))` instead of anonymous subclass
+- `cannot find symbol: method/class Xxx` → This API does not exist in this version; check the provided class context for the correct API
+- `incompatible types: Yyy cannot be converted to Zzz` → Use the correct type that matches the constructor/method signature
+- `unreported exception IOException/SQLException` → Add `throws Exception` to the test method signature
+- `reference to Xxx is ambiguous` → Cast null explicitly: `method((ConcreteType) null)`
+- `constructor Xxx cannot be applied to given types` → Match the exact constructor signature shown in the class context
+- All `@Test` methods MUST declare `throws Exception`
+
 
 **For COMPILE_FAIL tests**, your instructions MUST:
 - Quote the exact error from `compile_errors[]`
 - Reference the specific CE-X type from `error_summary`
 - Give the EXACT code change (e.g., "Replace `reader.lastChar` with reflection: Field f = ...")
+- Refer to the specific rules in the COMPILE_FAIL Fix guidance above to formulate these instructions
+
+**EXEC_FAIL Fix guidance:**
+- `expected:<X> but was:<Y>` → Trace the focal method logic carefully; assert the actual return value, or use `assertNotNull`/`assertTrue` when the exact value is uncertain
+- `Expected XxxException to be thrown, but nothing was thrown` → Fix mock setup so the exception is actually triggered, or remove `assertThrows` if the exception path is unreachable
+- `Wrong exception type: expected Xxx but got Yyy` → Use the correct exception class (or a parent class) in `assertThrows`
+- `NoSuchFieldException: fieldName` → The field name in `getDeclaredField("fieldName")` is misspelled; check exact name in the class context
+- `NullPointerException` → Add null guards or initialize required objects before calling the focal method
 
 **For EXEC_FAIL tests**, your instructions MUST:
 - Quote the exact error from `exec_errors[]`
 - For wrong assertion values: trace the focal method and give the correct expected value
 - For wrong exception types: specify the correct parent exception class
+- Refer to the specific rules in the EXEC_FAIL Fix guidance above to formulate these instructions
+
+**Coverage Fix guidance:**
+- Add tests for boundary values (null, empty string, 0, negative numbers, max values)
+- Add tests for each `if`/`else` branch in the focal method
+- Add tests for exception-throwing paths (invalid input, closed state, etc.)
+- Each test should exercise a distinct code path
 
 **For Coverage/Bug-Revealing improvements**, suggest:
 - Additional test methods or edge cases to cover missed lines/branches
+- Refer to the specific rules in the Coverage Fix guidance above to formulate these instructions
+
+**Bug-revealing(pass on fixed, fail on buggy) Fix guidance:**
+- **Add precise assertions**: Use `assertEquals(exactExpectedValue, result)` instead of just `assertNotNull(result)`
+- **Test boundary conditions**: Focus on values near the boundary where the bug was introduced
+- **Test stateful behavior**: Call the method multiple times and verify the accumulated state
+- **Assert specific numeric/string values**: If the method returns a count, length, or computed value, assert the exact number
+- **Test the difference between buggy and fixed behavior**: Read the focal method source carefully to understand what the fix changes
+
+**For Bug-Revealing improvements**, suggest:
 - Stronger assertions that exercise the focal method more thoroughly
+- Refer to the specific rules in the Bug-revealing Fix guidance above to formulate these instructions
+
+**Redundancy Fix guidance:**
+- Use different input values (different data type, different range, different state)
+- Target a different code path in the focal method
+- If the current test covers the normal path, write one for an error/edge case instead
+- The new test should exercise logic NOT covered by other tests in the suite
+
+**For Redundancy Reduced**, suggest:
+- Replace this test with a **completely different scenario**:
+- Refer to the specific rules in the Redundancy Fix guidance above to formulate these instructions
+
 ````
 
 Output ONLY the JSON object as specified in your system prompt.
