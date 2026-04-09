@@ -1,5 +1,5 @@
 """
-askGPT_refine.py  (v4 — LLMStatsTracker 对齐 HITS baseline)
+askGPT_refine.py  (v5 — 删除版本信息注入，增强语法验证集成)
 ======================================
 
 正确的 Pipeline 流程（与用户需求完全对齐）：
@@ -87,7 +87,7 @@ import re
 import sys
 import time
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Set
 from contract_integration import (
     extract_contract_for_focal_method,
     save_contract,
@@ -107,7 +107,7 @@ from config import (
     dataset_dir, result_dir, project_dir,
 )
 from llm_client import LLMClient, LLMCallResult, make_generator_client, make_refiner_client
-from llm_stats_tracker import LLMStatsTracker          # ★ 新增
+from llm_stats_tracker import LLMStatsTracker
 from refine_agent import RefineAgent, RefineResult
 from suite_io import extract_test_methods, rebuild_suite
 from tools import (
@@ -121,27 +121,12 @@ from contract_integration import (
     extract_contract_for_focal_method, save_contract,
     enrich_ctx_with_contract, get_contract_text,
 )
-# ★ 新增：版本信息提取
-from project_version_extractor import get_version_prompt_text, get_version_info
 
 init()
 logger = logging.getLogger(__name__)
 
 _PROMPT_DIR = os.path.join(os.path.dirname(HERE), "prompt")
 env = Environment(loader=FileSystemLoader(_PROMPT_DIR))
-
-
-# ════════════════════════════════════════════════════════════════════
-# Import 保护工具
-# ════════════════════════════════════════════════════════════════════
-
-def _extract_imports(java_code: str) -> Set[str]:
-    """从 Java 代码中提取所有 import 语句（规范化为集合）。"""
-    return set(
-        line.strip()
-        for line in java_code.splitlines()
-        if line.strip().startswith("import ") and line.strip().endswith(";")
-    )
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -174,12 +159,9 @@ def _progress_bar(current: int, total: int, width: int = 20) -> str:
 def _code_changed(old: str, new: str) -> bool:
     """判断两段 Java 代码是否有实质区别（忽略空白和注释差异）。"""
     def normalize(s):
-        # 去掉注释
         s = re.sub(r'//[^\n]*', '', s)
         s = re.sub(r'/\*.*?\*/', '', s, flags=re.DOTALL)
-        # 压缩空白
         return re.sub(r'\s+', ' ', s).strip()
-    import re
     return normalize(old) != normalize(new)
 
 
@@ -230,14 +212,13 @@ def _print_suite_score(suite_score, tag=""):
         br_c = Fore.GREEN if br >= 0.5 else (Fore.YELLOW if br > 0 else Fore.RED)
         print(f"  {'Bug揭示率':<16}: {br_c}{ss.bug_reveal_count}/{ss.bug_reveal_checked} ({br*100:.0f}%){Style.RESET_ALL}", flush=True)
     else:
-        # ★ 修复问题3：区分不同的"未检测"原因
         skip_reason = getattr(ss, '_bug_reveal_skip_reason', None)
         if skip_reason == "fixed_dir not provided":
-            reason_str = f"未检测 {Fore.RED}(fixed project 目录不存在，请确认 _f 版本路径){Style.RESET_ALL}"
+            reason_str = f"未检测 {Fore.RED}(fixed project 目录不存在){Style.RESET_ALL}"
         elif skip_reason == "skip_bug_revealing=True":
             reason_str = f"未检测 {Fore.YELLOW}(skip_bug_revealing=True){Style.RESET_ALL}"
         elif ss.exec_pass_count == 0:
-            reason_str = f"未检测 {Fore.YELLOW}(所有测试编译/执行失败，无法检测){Style.RESET_ALL}"
+            reason_str = f"未检测 {Fore.YELLOW}(所有测试编译/执行失败){Style.RESET_ALL}"
         else:
             reason_str = f"{Fore.WHITE}未检测{Style.RESET_ALL}"
         print(f"  {'Bug揭示率':<16}: {reason_str}", flush=True)
@@ -247,21 +228,20 @@ def _print_suite_score(suite_score, tag=""):
         sim_c = Fore.RED if 1-sim > 0.9 else (Fore.YELLOW if 1-sim > 0.7 else Fore.GREEN)
         print(f"  {'最大用例相似度':<16}: {sim_c}{1-sim:.3f}{Style.RESET_ALL}", flush=True)
     else:
-        print(f"  {'最大用例相似度':<16}: {Fore.RED}N/A (相似度计算失败，检查 Tool 4 日志){Style.RESET_ALL}", flush=True)
+        print(f"  {'最大用例相似度':<16}: {Fore.RED}N/A{Style.RESET_ALL}", flush=True)
 
     if ss.problem_tests and ss.n_tests > 0:
         print(f"\n  ⚠️  问题分布：", flush=True)
         issue_order = ["COMPILE_FAIL", "UNEXPECTED_EXEC_FAIL", "EXEC_TIMEOUT",
                        "LOW_LINE_COV", "LOW_BRANCH_COV", "NOT_BUG_REVEALING", "HIGH_REDUNDANCY"]
         issue_colors = {
-            "COMPILE_FAIL":       Fore.RED,
-            "EXPECTED_EXEC_FAIL": Fore.GREEN,  # good fail
-            "UNEXPECTED_EXEC_FAIL": Fore.RED,  # bad fail
-            "EXEC_TIMEOUT":       Fore.RED,
-            "LOW_LINE_COV":       Fore.YELLOW,
-            "LOW_BRANCH_COV":     Fore.YELLOW,
-            "NOT_BUG_REVEALING":  Fore.MAGENTA,
-            "HIGH_REDUNDANCY":    Fore.CYAN,
+            "COMPILE_FAIL":         Fore.RED,
+            "UNEXPECTED_EXEC_FAIL": Fore.RED,
+            "EXEC_TIMEOUT":         Fore.RED,
+            "LOW_LINE_COV":         Fore.YELLOW,
+            "LOW_BRANCH_COV":       Fore.YELLOW,
+            "NOT_BUG_REVEALING":    Fore.MAGENTA,
+            "HIGH_REDUNDANCY":      Fore.CYAN,
         }
         for iss in issue_order:
             if iss in ss.problem_tests:
@@ -287,18 +267,16 @@ def _print_suite_score(suite_score, tag=""):
 
 
 def _print_test_diag(tc_name: str, diag, score):
-    """打印单个 Test 文件的详细诊断，用于 refine 前的问题定位。"""
     issues = score.issues if score else []
     if not issues:
         return
 
     issue_colors = {
-        "COMPILE_FAIL": Fore.RED, "EXPECTED_EXEC_FAIL": Fore.GREEN, "UNEXPECTED_EXEC_FAIL": Fore.RED, "EXEC_TIMEOUT": Fore.RED,
+        "COMPILE_FAIL": Fore.RED, "EXEC_FAIL": Fore.RED, "EXEC_TIMEOUT": Fore.RED,
         "LOW_LINE_COV": Fore.YELLOW, "LOW_BRANCH_COV": Fore.YELLOW,
         "NOT_BUG_REVEALING": Fore.MAGENTA, "HIGH_REDUNDANCY": Fore.CYAN,
     }
 
-    # ★ 提示诊断数据是否可信
     data_valid = getattr(diag, 'diag_data_valid', True)
     validity_hint = "" if data_valid else f" {Fore.RED}[⚠️ 诊断数据无效]{Style.RESET_ALL}"
 
@@ -307,8 +285,6 @@ def _print_test_diag(tc_name: str, diag, score):
           flush=True)
 
     if not data_valid:
-        print(f"    {Fore.RED}⚠️  工具链诊断数据缺失（suite_diagnosis.json 为空）。"
-              f"上报的 COMPILE_FAIL 可能是假阳性。{Style.RESET_ALL}", flush=True)
         return
 
     if "COMPILE_FAIL" in issues and diag.compile_errors:
@@ -316,13 +292,11 @@ def _print_test_diag(tc_name: str, diag, score):
         for e in diag.compile_errors[:5]:
             print(f"      • {e}", flush=True)
 
-    # 执行错误
-    if ("EXPECTED_EXEC_FAIL" in issues or "UNEXPECTED_EXEC_FAIL" in issues or "EXEC_TIMEOUT" in issues) and diag.exec_errors:
+    if "EXEC_FAIL" in issues and diag.exec_errors:
         print(f"    {Fore.RED}运行错误 (前5条):{Style.RESET_ALL}", flush=True)
         for e in diag.exec_errors[:5]:
             print(f"      • {e}", flush=True)
 
-    # 覆盖率
     if score.focal_line_coverage is not None:
         lc = score.focal_line_coverage
         lc_color = Fore.GREEN if lc >= 0.7 else (Fore.YELLOW if lc >= 0.4 else Fore.RED)
@@ -402,6 +376,7 @@ def generate_messages(template_name: str, context: dict) -> List[Dict]:
     messages.append({"role": "user", "content": generate_prompt(template_name, context)})
     return messages
 
+
 def remain_prompt_tokens(messages):
     return MAX_PROMPT_TOKENS - get_messages_tokens(messages)
 
@@ -412,7 +387,6 @@ def remain_prompt_tokens(messages):
 
 def call_generator(gen_client: LLMClient, messages: List[Dict],
                    save_path: str) -> tuple[bool, LLMCallResult]:
-    """调用 Generator LLM，保存原始响应，返回 (ok, LLMCallResult)。"""
     result = gen_client.chat(messages)
     with open(save_path, "w", encoding="utf-8") as f:
         json.dump({
@@ -427,7 +401,36 @@ def _strip_pkg(s: str, imports: str, package: str) -> str:
 
 
 # ════════════════════════════════════════════════════════════════════
-# 初始生成单个 Test 文件（★ 注入版本信息）
+# 语法验证工具（集中管理）
+# ════════════════════════════════════════════════════════════════════
+
+def _run_syntax_validation(
+    java_code: str,
+    tc_name: str,
+    focal_class_context: str = "",
+) -> tuple[bool, str]:
+    """
+    对 Java 代码执行语法验证。
+    返回 (has_errors: bool, prompt_text: str)
+    
+    ★ 这是语法验证的统一入口，在以下时机调用：
+      1. 初始生成后（generate_one_test）
+      2. 每轮 fix 后（focal_method_pipeline 的 fix 循环）
+    """
+    try:
+        from java_syntax_validator import validate_java
+        result = validate_java(java_code, focal_class_context=focal_class_context)
+        if result.is_valid:
+            return False, ""
+        prompt_text = result.to_prompt_text(max_issues=4)
+        return result.error_count > 0, prompt_text
+    except Exception as e:
+        logger.debug("syntax validation failed for %s: %s", tc_name, e)
+        return False, ""
+
+
+# ════════════════════════════════════════════════════════════════════
+# 初始生成单个 Test 文件
 # ════════════════════════════════════════════════════════════════════
 
 def generate_one_test(
@@ -442,8 +445,7 @@ def generate_one_test(
     tc_dir: str,
     gen_log_dir: str,
     progress_tag: str = "",
-    version_text: str = "",
-    validation_issues_cache: dict = None, 
+    validation_issues_cache: dict = None,
 ) -> Optional[tuple]:
     save_dir = os.path.join(gen_log_dir, str(seq))
     os.makedirs(save_dir, exist_ok=True)
@@ -454,21 +456,15 @@ def generate_one_test(
 
     def _s(s): return _strip_pkg(s, imports, package)
 
-    # ★ 注入版本约束到上下文
-    def _add_version(ctx):
-        c = copy.deepcopy(ctx)
-        if version_text:
-            c["version_constraints"] = version_text
-        return c
-
+    # 不再注入 version_constraints
     if not ctx_d3.get("c_deps") and not ctx_d3.get("m_deps"):
-        ctx  = _add_version(ctx_d1)
+        ctx  = copy.deepcopy(ctx_d1)
         msgs = generate_messages(TEMPLATE_NO_DEPS, ctx)
         if remain_prompt_tokens(msgs) < 0:
             ctx["information"] = _s(ctx["information"])
             msgs = generate_messages(TEMPLATE_NO_DEPS, ctx)
     else:
-        ctx  = _add_version(ctx_d3)
+        ctx  = copy.deepcopy(ctx_d3)
         msgs = generate_messages(TEMPLATE_WITH_DEPS, ctx)
         if remain_prompt_tokens(msgs) < 0:
             ctx["full_fm"] = _s(ctx.get("full_fm", ""))
@@ -509,27 +505,23 @@ def generate_one_test(
         f.write(final_code)
     with open(os.path.join(save_dir, "2_JAVA.java"), "w", encoding="utf-8") as f:
         f.write(final_code)
-    try:
-        from test_runner_patch import validate_before_write
-        _focal_ctx = ctx_d1.get("information", "") or ctx_d3.get("full_fm", "")
-        _has_errors, _val_text = validate_before_write(
-            final_code,
-            tc_name=tc_name,
-            focal_class_context=_focal_ctx,
-        )
-        if _val_text and validation_issues_cache is not None:
-            validation_issues_cache[tc_name] = {
-                "has_errors": _has_errors,
-                "prompt_text": _val_text,
-            }
-            if _has_errors:
-                print(
-                    f"    ⚠️  [Validator] {tc_name} 发现静态问题，"
-                    f"将在 fix 阶段注入修复提示", flush=True
-                )
-    except Exception as _ve:
-            pass   # 验证失败不影响主流程
-    # ── ★ 验证结束 ───────────────────────────────────────────────────
+
+    # ★ 语法验证：在生成后立即执行，将问题缓存供下一轮 fix 使用
+    _focal_ctx = ctx_d1.get("information", "") or ctx_d3.get("full_fm", "")
+    has_errors, val_text = _run_syntax_validation(
+        final_code, tc_name, focal_class_context=_focal_ctx
+    )
+    if val_text and validation_issues_cache is not None:
+        validation_issues_cache[tc_name] = {
+            "has_errors": has_errors,
+            "prompt_text": val_text,
+        }
+        if has_errors:
+            print(
+                f"    ⚠️  [Validator] {tc_name} 发现静态问题，"
+                f"将在 fix 阶段注入修复提示", flush=True
+            )
+
     print(f"    ✅ 生成成功{'⚠️(语法修复)' if has_err else ''} | "
           f"tokens={gen_result.prompt_tokens}+{gen_result.completion_tokens} | "
           f"llm_time={gen_result.elapsed_seconds:.1f}s | {tc_fname}", flush=True)
@@ -582,26 +574,26 @@ def _get_fix_priority(issues: List[str]) -> str:
 
 
 # ════════════════════════════════════════════════════════════════════
-# Fix 单个 Test（★ 注入版本信息 + Import保护）
+# Fix 单个 Test（★ 删除版本信息注入，简化 compile_error_analyzer 输出）
 # ════════════════════════════════════════════════════════════════════
 
 def build_fix_messages(
     test_name, current_code, instructions, focal_method,
     class_name, ctx_d1, ctx_d3, imports, suite_summary,
     prev_unchanged=False, diag=None, contract_text="",
-    version_text="", validation_issues: dict = None, cfg=None,
+    validation_issues: dict = None, cfg=None,
     issues: List[str] = None,
 ):
-    from compile_error_analyzer import enrich_diag_with_fix_hints, get_error_summary
     from scoring_ablation import AblationConfig, global_ablation_config
     if cfg is None:
         cfg = global_ablation_config()
-    
+
     if not cfg.use_compile_exec:
         compile_ok = True
         exec_ok = True
         compile_errors = []
         exec_errors = []
+        # ★ 删除版本感知的 auto_fix_hints，只保留错误类型标签
         auto_fix_hints = []
         error_summary = ""
     else:
@@ -609,9 +601,10 @@ def build_fix_messages(
         exec_ok = getattr(diag, 'exec_ok', True) if diag else True
         compile_errors = getattr(diag, 'compile_errors', []) if diag else []
         exec_errors = getattr(diag, 'exec_errors', []) if diag else []
-        auto_fix_hints = enrich_diag_with_fix_hints(diag) if diag else []
+        # ★ 只保留错误类型标签（error_summary），不再传入 fix_code
+        auto_fix_hints = []  # 删除 auto_fix_hints，不再注入模板代码
         error_summary = get_error_summary(compile_errors, exec_errors) if diag else ""
-    
+
     if not cfg.use_coverage:
         missed_methods = []
         partial_methods = []
@@ -619,8 +612,7 @@ def build_fix_messages(
         missed_methods = getattr(diag, 'missed_methods', []) if diag else []
         partial_methods = getattr(diag, 'partial_methods', []) if diag else []
 
-    # ★ 使用 _get_fix_priority 过滤指令，避免在修复低优先级问题时传递高优先级指令
-    # 在消融实验 no_compile_exec 情况下，不进行优先级过滤，直接保留所有指令
+    # 过滤指令
     if not cfg.use_compile_exec:
         filtered_instructions = list(instructions)
     else:
@@ -641,19 +633,10 @@ def build_fix_messages(
                 filtered_instructions.append(instr)
             elif priority == "none":
                 filtered_instructions.append(instr)
-            # 如果不匹配关键词，保留所有（兼容旧指令）
             else:
                 filtered_instructions.append(instr)
 
     merged_instructions = list(filtered_instructions)
-    if not compile_ok and auto_fix_hints:
-        merged_instructions = auto_fix_hints + [
-            i for i in instructions
-            if not any(hint[:30] in i for hint in auto_fix_hints)
-        ]
-    elif not exec_ok and auto_fix_hints:
-        merged_instructions = ([instructions[0]] + auto_fix_hints + instructions[1:]
-                               if instructions else auto_fix_hints)
 
     unchanged_warning = (
         "\n\n⚠️ CRITICAL: Your previous output was IDENTICAL to the input. "
@@ -661,6 +644,7 @@ def build_fix_messages(
         if prev_unchanged else ""
     )
 
+    # ★ 注意：context 中不再包含 version_constraints
     context = {
         "class_name":           class_name,
         "focal_method":         focal_method,
@@ -680,10 +664,9 @@ def build_fix_messages(
         "missed_methods":       missed_methods[:20],
         "partial_methods":      partial_methods[:10],
         "contract_text":        contract_text,
-        "auto_fix_hints":       auto_fix_hints,
+        "auto_fix_hints":       auto_fix_hints,   # 现在始终为空列表
         "error_summary":        error_summary,
-        # ★ 新增版本约束
-        "version_constraints":  version_text,
+        # ★ 不再包含 version_constraints
     }
     msgs = generate_messages(TEMPLATE_FIX, context)
     if remain_prompt_tokens(msgs) < 0:
@@ -692,20 +675,23 @@ def build_fix_messages(
 
     if msgs and msgs[-1]["role"] == "user":
         suffix = f"\n\n## Repair Instructions Summary\n{context['instructions_summary']}"
+
+        # ★ 编译错误：只给错误文本和类型标签，不给模板代码
         if not compile_ok and compile_errors:
             suffix += (f"\n\n## COMPILE ERRORS — FIX THESE FIRST:\n"
                        + "\n".join(f"  {e}" for e in compile_errors[:5]))
-            if auto_fix_hints:
-                suffix += f"\n\n## AUTO-ANALYZED FIXES:\n"
-                suffix += "\n".join(f"  {i+1}. {h[:200]}" for i, h in enumerate(auto_fix_hints))
+            if error_summary:
+                suffix += f"\n\n## Error Type Classification:\n  {error_summary}"
+            # ★ 删除 auto_fix_hints 注入（不再给出模板代码）
+
         if not exec_ok and exec_errors:
             suffix += (f"\n\n## EXECUTION ERRORS:\n"
                        + "\n".join(f"  {e}" for e in exec_errors[:5]))
-        if version_text:
-            suffix += f"\n\n## Version Constraints Reminder\n{version_text[:500]}"
+
         if prev_unchanged:
             suffix += "\n\n⚠️ MUST CHANGE: Previous output was identical to input."
-        # ── ★ 修改点4：注入上一轮生成时的验证问题 ──
+
+        # ★ 语法验证问题注入（保留，这是有价值的静态分析）
         if validation_issues and test_name in validation_issues:
             _vdata = validation_issues[test_name]
             if _vdata.get("has_errors") and _vdata.get("prompt_text"):
@@ -713,6 +699,9 @@ def build_fix_messages(
                     f"\n\n## Static Pre-validation Issues (fix these too):\n"
                     f"{_vdata['prompt_text']}"
                 )
+
+        # ★ 不再注入版本约束 reminder
+
         msgs[-1]["content"] += suffix
 
     return msgs
@@ -728,24 +717,17 @@ def focal_method_pipeline(
     submits: int,
     total: int,
 ) -> dict:
-    """
-    针对一个 focal method 的完整 pipeline：
-    1. 生成 test_number 个 Test 文件（Phase 1）
-    2. max_rounds 轮 Refine Agent + per-Test 精修（Phase 2）
-    """
     process_start = time.time()
     progress_tag  = f"[{submits}/{total}]"
 
     method_id, proj_name, class_name, method_name = parse_file_name(base_name)
 
-    # ── 目录 ─────────────────────────────────────────────────────
     tc_dir      = os.path.join(base_dir, "test_cases")
     gen_log_dir = os.path.join(base_dir, "gen_logs")
     ref_log_dir = os.path.join(base_dir, "refine_logs")
     for d in [tc_dir, gen_log_dir, ref_log_dir]:
         os.makedirs(d, exist_ok=True)
 
-    # ── 打印 focal method 处理头 ──────────────────────────────────
     print(flush=True)
     _section(f"{progress_tag} {proj_name}.{class_name}.{method_name}  (id={method_id})", Fore.CYAN)
     print(f"  {Fore.CYAN}目录: {base_dir}{Style.RESET_ALL}", flush=True)
@@ -774,16 +756,16 @@ def focal_method_pipeline(
     focal_method_code = raw_data.get("source_code", ctx_d1.get("information", ""))
     pkg_decl          = canonical_package_decl(package)
 
-    # ★ 提取项目版本信息
-    _proj_path = os.path.abspath(project_dir)
-    version_text = get_version_prompt_text(_proj_path)
-    if version_text:
-        print(f"  {Fore.BLUE}📋 Version constraints loaded for LLM{Style.RESET_ALL}", flush=True)
+    # ★ 删除版本信息提取
+    # version_text 完全移除
 
-    # 合约提取
+    # 合约提取（保留，对有防御性检查的方法有价值）
     contract = extract_contract_for_focal_method(raw_data, ctx_d1)
     if contract and not contract.is_empty():
         save_contract(contract, base_dir)
+        print(f"  {Fore.BLUE}📋 Program contract extracted: "
+              f"{len(contract.preconditions)} preconditions, "
+              f"{len(contract.exception_contracts)} exception contracts{Style.RESET_ALL}", flush=True)
     else:
         contract = None
 
@@ -810,7 +792,7 @@ def focal_method_pipeline(
         if os.path.isdir(cand):
             fixed_dir = cand
         test_project_dir = buggy_dir
- 
+
     agent = RefineAgent(
         refiner_client     = ref_client,
         template_dir       = _PROMPT_DIR,
@@ -829,6 +811,10 @@ def focal_method_pipeline(
 
     current_codes: Dict[str, str] = {}
     validation_issues_cache: dict = {}
+
+    # focal class 上下文（用于语法验证的动态规则）
+    focal_class_ctx = ctx_d1.get("information", "") or ctx_d3.get("full_fm", "")
+
     for seq in range(1, test_number + 1):
         tc_name = f"{class_name}_{method_id}_{seq}Test"
         result = generate_one_test(
@@ -839,8 +825,7 @@ def focal_method_pipeline(
             class_name=class_name, method_id=method_id,
             tc_dir=tc_dir, gen_log_dir=gen_log_dir,
             progress_tag=progress_tag,
-            version_text=version_text,
-            validation_issues_cache=validation_issues_cache, 
+            validation_issues_cache=validation_issues_cache,
         )
         if result is None:
             continue
@@ -904,7 +889,6 @@ def focal_method_pipeline(
         if refine_result.suite_score:
             _print_suite_score(refine_result.suite_score, tag=f"Round {r}")
 
-        # 打印诊断
         problematic = [n for n, s in refine_result.test_scores.items() if s.issues]
         if problematic:
             print(f"  📋 问题 Test 详细诊断 ({len(problematic)}/{len(current_codes)}):", flush=True)
@@ -958,7 +942,7 @@ def focal_method_pipeline(
                   + (f" {Fore.YELLOW}[上轮未改变，加强提示]{Style.RESET_ALL}" if prev_unchanged else ""),
                   flush=True)
 
-            tc_diag = refine_result.test_diags.get(tc_name)
+            tc_diag  = refine_result.test_diags.get(tc_name)
             tc_score = refine_result.test_scores.get(tc_name)
             original_code = current_codes[tc_name]
 
@@ -969,17 +953,15 @@ def focal_method_pipeline(
                 imports=imports, suite_summary=refine_result.suite_summary,
                 prev_unchanged=prev_unchanged, diag=tc_diag,
                 contract_text=get_contract_text(contract),
-                version_text=version_text,
+                # ★ 不再传入 version_text
                 validation_issues=validation_issues_cache,
                 issues=tc_score.issues if tc_score else [],
             )
 
-            # ★ 新增：记录最终给 Generator 的 prompt（包括 system+user）
             try:
                 prompt_json_path = os.path.join(fix_dir, "fix_prompt.json")
                 with open(prompt_json_path, "w", encoding="utf-8") as pf:
                     json.dump(fix_msgs, pf, ensure_ascii=False, indent=2)
-                print(f"    📄 保存 fix prompt 到: {prompt_json_path}", flush=True)
             except Exception as e:
                 print(f"    ⚠ 无法保存 fix prompt: {e}", flush=True)
 
@@ -988,9 +970,7 @@ def focal_method_pipeline(
             ok, fix_result = call_generator(gen_client, fix_msgs, fix_gen_path)
             t_fix = time.time() - t0_fix
 
-            # ★ 记录 fix 的 Generator token
             tracker.record("generator", round_key, fix_result)
-            print(f"  📊 [TokenLog] Recorded generator {round_key} fix: {fix_result.prompt_tokens}+{fix_result.completion_tokens} tokens", flush=True)
 
             new_java_path = os.path.join(fix_dir, "new.java")
 
@@ -1019,11 +999,27 @@ def focal_method_pipeline(
                         print(f"    ⚠️  {Fore.YELLOW}{tc_name} 输出与原始完全相同 "
                               f"(连续相同: {unchanged_counts[tc_name]} 次){Style.RESET_ALL}", flush=True)
                         with open(new_java_path, "w", encoding="utf-8") as f:
-                            f.write(f"// [UNCHANGED] Output identical to input "
-                                    f"(attempt {unchanged_counts[tc_name]})\n")
+                            f.write(f"// [UNCHANGED]\n")
                             f.write(new_code)
                     else:
                         unchanged_counts[tc_name] = 0
+
+                        # ★ fix 后立即进行语法验证，更新缓存供下一轮使用
+                        has_val_errors, val_text = _run_syntax_validation(
+                            new_code, tc_name, focal_class_context=focal_class_ctx
+                        )
+                        if val_text:
+                            validation_issues_cache[tc_name] = {
+                                "has_errors": has_val_errors,
+                                "prompt_text": val_text,
+                            }
+                            if has_val_errors:
+                                print(f"    ⚠️  [Validator] fix 后仍有静态问题，"
+                                      f"将在下轮注入提示", flush=True)
+                        else:
+                            # 修复成功，清除旧的验证缓存
+                            validation_issues_cache.pop(tc_name, None)
+
                         current_codes[tc_name] = new_code
                         tc_path = os.path.join(tc_dir, f"{tc_name}.java")
                         with open(tc_path, "w", encoding="utf-8") as f:
@@ -1062,32 +1058,22 @@ def focal_method_pipeline(
               f"无代码: {len(fix_results['no_code'])}  "
               f"失败: {len(fix_results['fail'])}" + Style.RESET_ALL, flush=True)
 
-        # 若当前轮所有 fix 都未改变，说明 Refiner/Generator 处于僵局，记录并继续
         if fix_results["unchanged"] and not fix_results["ok"]:
             print(Fore.YELLOW +
-                  f"  ⚠️  本轮所有精修输出均未发生变化，可能原因：\n"
-                  f"     1. 诊断数据缺失（suite_diagnosis.json 为空）→ 检查 TestRunner 路径\n"
-                  f"     2. Refiner 给出的指令过于模糊\n"
-                  f"     3. Generator 模型能力限制\n"
+                  f"  ⚠️  本轮所有精修输出均未发生变化\n"
                   f"  下一轮将加入 'prev_unchanged' 强化提示。" + Style.RESET_ALL, flush=True)
 
-    # ── 保存统计 ──────────────────────────────────────────────────
     _save_stats(base_dir, tracker, time_stats, process_start)
     return tracker.to_dict()
 
 
 def _save_stats(base_dir: str, tracker: LLMStatsTracker,
                 time_stats: dict, process_start: float):
-    """保存 token_stats.json 和 time_stats.json（与 HITS 字段对齐）。"""
     end_time = time.time()
     time_stats["wall_clock"]["end"]           = end_time
     time_stats["wall_clock"]["total_seconds"] = round(end_time - process_start, 2)
 
-    # ★ token_stats.json：由 LLMStatsTracker 生成，字段与 HITS 完全一致
     token_stats = tracker.to_dict()
-
-    # 额外追加一个 legacy-compatible 节点，方便旧脚本读取
-    # （prompt/completion 字段名与 v3 相同，避免下游分析脚本报错）
     token_stats["_legacy"] = {
         "generator": {
             "prompt":     token_stats["generator"]["prompt_tokens"],
@@ -1107,10 +1093,10 @@ def _save_stats(base_dir: str, tracker: LLMStatsTracker,
     with open(os.path.join(base_dir, "time_stats.json"), "w", encoding="utf-8") as f:
         json.dump(time_stats, f, indent=2, ensure_ascii=False)
 
-    total_tok = token_stats["all_total"].get("total_tokens", 0)
-    llm_time  = token_stats["all_total"].get("llm_elapsed_seconds", 0.0)
+    total_tok  = token_stats["all_total"].get("total_tokens", 0)
+    llm_time   = token_stats["all_total"].get("llm_elapsed_seconds", 0.0)
     call_count = token_stats["all_total"].get("call_count", 0)
-    wall_time = time_stats["wall_clock"].get("total_seconds", 0.0)
+    wall_time  = time_stats["wall_clock"].get("total_seconds", 0.0)
     print(flush=True)
     _divider("═", color=Fore.BLUE)
     print(Fore.BLUE +
@@ -1132,7 +1118,6 @@ def _save_stats(base_dir: str, tracker: LLMStatsTracker,
 # ════════════════════════════════════════════════════════════════════
 
 def _acc_global(g: dict, s: dict):
-    """将单个 focal method 的 token_stats 汇总到全局统计。"""
     for role in ("generator", "refiner"):
         for k in ("prompt_tokens", "completion_tokens", "total_tokens"):
             g.setdefault(role, {}).setdefault(k, 0)
@@ -1169,10 +1154,6 @@ def start_whole_process(
     method_ids: Optional[List[str]] = None,
     multiprocess: bool = False,
 ):
-    """
-    扫描 source_dir（direction_1/）下所有 .json，
-    对每个 focal method 调用 focal_method_pipeline。
-    """
     global_start = time.time()
     global_stats: dict = {
         "generator": {"prompt_tokens": 0, "completion_tokens": 0,
@@ -1229,7 +1210,6 @@ def start_whole_process(
     with open(os.path.join(result_path, "global_stats.json"), "w", encoding="utf-8") as f:
         json.dump(global_stats, f, indent=2, ensure_ascii=False)
 
-    # ── 打印全局摘要 ──────────────────────────────────────────────
     gt = global_stats["all_total"]
     print(Fore.MAGENTA + "\n===== 全局统计 =====" + Style.RESET_ALL)
     print(f"总任务数          : {total}")

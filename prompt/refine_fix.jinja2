@@ -2,10 +2,6 @@ You are an expert Java developer. Fix the following Test file based on the repai
 You MUST follow ALL compilation rules below or the test will STILL fail to compile.
 
 ## Test File: `{{ test_name }}.java`
-{% if version_constraints %}
-
-{{ version_constraints }}
-{% endif %}
 
 ## Focal Method Context
 ```java
@@ -24,78 +20,26 @@ You MUST follow ALL compilation rules below or the test will STILL fail to compi
 ## Suite Assessment (context)
 {{ suite_summary }}
 
+## Repair Instructions for THIS Test File
+```json
+{{ instructions_json }}
+```
+
+## Relevant Imports (add if missing)
+```java
+{{ imports }}
+```
+
 {% if not compile_ok %}
 ## COMPILE ERRORS — MUST FIX ALL OF THESE FIRST (test will not run until resolved)
-{% if auto_fix_hints %}
-### Auto-Analyzed Fix Hints (apply these FIRST):
-{% for hint in auto_fix_hints %}
-{{ loop.index }}. {{ hint }}
-{% endfor %}
-{% endif %}
 ```
 {% for err in compile_errors %}
 {{ err }}
 {% endfor %}
 ```
 
-### COMPILE ERROR FIX REFERENCE (apply the matching fix for each error above):
+**Error Type Classification:** {{ error_summary }}
 
-**"xxx 在 ClassName 中是 private 访问控制" (private field/method access)**
-→ NEVER access private fields/methods directly. Use reflection:
-```java
-Field f = ClassName.class.getDeclaredField("fieldName");
-f.setAccessible(true);
-Object val = f.get(instance);
-// For private method:
-Method m = ClassName.class.getDeclaredMethod("methodName", ArgType.class);
-m.setAccessible(true);
-m.invoke(instance, args);
-```
-
-**"无法从最终ClassName进行继承" (cannot extend final class)**
-→ Remove anonymous subclass. Use Mockito spy:
-```java
-ClassName spy = Mockito.spy(new ClassName(args));
-doThrow(new IOException()).when(spy).someMethod();
-```
-
-**"不兼容的类型: Closeable/Flushable无法转换为Appendable"**
-→ Replace Closeable/Flushable mock with a type that implements Appendable:
-```java
-StringWriter out = new StringWriter();  // implements Appendable
-// OR: Appendable out = mock(Appendable.class);
-new CSVPrinter(out, format);
-```
-
-**"未报告的异常错误IOException/SQLException" (unchecked exception)**
-→ Add `throws Exception` to the test method signature:
-```java
-@Test void testFoo() throws Exception { ... }
-```
-
-**"对xxx的引用不明确" (ambiguous method call with null)**
-→ Cast null to the specific overload type:
-```java
-printer.printRecords((Object[]) null);
-// or: printer.printRecords((ResultSet) null);
-```
-
-**"对于assertThrows(Class,...,(e)->...)" (wrong lambda parameter)**
-→ Use zero-argument lambda for assertThrows:
-```java
-assertThrows(IOException.class, () -> obj.method());  // NO parameter in lambda
-// NOT: assertThrows(IOException.class, e -> obj.method());
-```
-
-**"无法将类 XxxClass中的构造器应用到给定类型" (wrong constructor args)**
-→ Check the constructor signature in the focal method context above.
-Only pass exactly the arguments shown in the constructor signature.
-
-**"不兼容的类型: String无法转换为long"**
-→ Parse the string: `Long.parseLong(str)` or use the correct type directly.
-
-**"无法为最终变量xxx分配值"**
-→ Declare a NEW variable instead of reassigning the final one.
 
 {% elif not exec_ok %}
 ## RUNTIME ERRORS — MUST FIX (tests compile but fail at runtime)
@@ -103,34 +47,6 @@ Only pass exactly the arguments shown in the constructor signature.
 {% for err in exec_errors %}
 {{ err }}
 {% endfor %}
-```
-
-### RUNTIME ERROR FIX REFERENCE:
-
-**"expected: <X> but was: <Y>" (wrong assertion value)**
-→ The expected value is wrong. Trace the focal method carefully:
-→ If you cannot determine the exact value, use a WEAKER assertion:
-  `assertNotNull(result)` or `assertTrue(result >= 0)` instead of `assertEquals(X, result)`
-
-**"Unexpected exception type thrown, expected: <StringIndexOutOfBoundsException> but was: <IndexOutOfBoundsException>"**
-→ Use the PARENT class: `assertThrows(IndexOutOfBoundsException.class, ...)`
-→ Or use the common base: `assertThrows(RuntimeException.class, ...)`
-
-**"Expected XxxException to be thrown, but nothing was thrown"**
-→ The mock is wrong OR the code path doesn't throw in this version.
-→ Either fix the mock to actually trigger the exception, OR remove the assertThrows and
-  replace with a positive assertion about the actual return value.
-
-**"java.lang.NoSuchFieldException: fieldName"**
-→ The field name is wrong. The actual field in the source code has a different name.
-→ Look at the class source in the focal method context above for the correct field name.
-→ Common mistake: using `lineCounter` when the real field is `lineNumber` or vice versa.
-
-**"java.lang.IllegalArgumentException: Parameter 'xxx' must not be null"**
-→ Initialize the object before passing it:
-```java
-Reader r = new StringReader("test data");
-CSVParser.parse(r, StandardCharsets.UTF_8, CSVFormat.DEFAULT);
 ```
 
 
@@ -162,26 +78,6 @@ Strengthen assertions to detect the specific bug:
 ## HIGH REDUNDANCY
 Replace with a completely different test scenario (different input, different code path).
 
-## Repair Instructions for THIS Test File
-```json
-{{ instructions_json }}
-```
-
-## Relevant Imports (add if missing)
-```java
-{{ imports }}
-```
-
-## MANDATORY COMPILATION CHECKLIST (verify before outputting):
-Before writing the output, mentally check EACH of these:
-- [ ] No direct access to private fields (use getDeclaredField + setAccessible)
-- [ ] No anonymous subclasses of final classes (use Mockito.spy)
-- [ ] All Appendable constructor args actually implement Appendable
-- [ ] All @Test methods that use checked exceptions declare `throws Exception`
-- [ ] All null arguments to overloaded methods are explicitly cast
-- [ ] No CSVFormat.Builder usage (use withXxx() chaining instead)
-- [ ] All assertThrows lambdas use `() ->` not `e ->`
-- [ ] All assertion expected values verified against source code
 
 ## Rules
 1. Apply ALL repair instructions.
@@ -189,10 +85,10 @@ Before writing the output, mentally check EACH of these:
 3. Do NOT change @Test methods that are NOT mentioned in instructions.
 4. Add missing imports.
 5. The output MUST be compilable Java.
-6. Strictly Public API Only: Do NOT generate code that accesses private or protected methods/fields. Ensure all method calls and field accesses (e.g., Token.content) match the public API of the library version.
+6. Only use APIs that appear in the Focal Method Context above.
 {% if contract_text %}
 7. At least one test must verify each postcondition from the Program Contract.
 {% endif %}
-8.Mocking Guardrail: When using Mockito, do NOT mock final classes or final methods. Every mocked call must have a corresponding thenReturn, thenThrow, or thenAnswer to avoid NullPointerException during execution.
-9.Explicit Exception Declaration: All test method signatures MUST include throws Exception to handle IOException and other checked exceptions.
-11.Output ONLY the complete Java class — no prose, no markdown fences.
+8. When using Mockito, do NOT mock final classes or final methods. Every mocked call must have a corresponding thenReturn, thenThrow, or thenAnswer.
+9. All test method signatures MUST include `throws Exception`.
+10. Output ONLY the complete Java class — no prose, no markdown fences.

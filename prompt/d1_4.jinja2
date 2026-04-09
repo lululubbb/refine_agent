@@ -1,9 +1,7 @@
 {# d1_4.jinja2 — Initial generation prompt (no external dependencies) #}
 {# context: class_name, focal_method, information, contract_text (optional) #}
 Please write a JUnit 5 test class for the Java method described below.
-{% if version_constraints %}
-{{ version_constraints }}
-{% endif %}
+
 ### Method Under Test
 Class: `{{ class_name }}`
 Method: `{{ focal_method }}`
@@ -23,6 +21,7 @@ Method: `{{ focal_method }}`
 - Generate at least 5 diverse test methods covering: normal path, edge cases (null, empty, 0, negative), boundary values, and expected exceptions.
 - Each test name must be descriptive (e.g., `test{{ focal_method }}_nullInput`).
 - Include all necessary `import` statements.
+- All @Test methods must declare `throws Exception`.
 {% if contract_text %}
 - CRITICAL: Your tests MUST verify the postconditions listed in the contract above.
 - CRITICAL: Generate at least one test for each precondition violation (using `assertThrows`).
