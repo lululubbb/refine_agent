@@ -8,26 +8,13 @@ You MUST follow ALL compilation rules below or the test will STILL fail to compi
 {{ method_code }}
 ```
 {% if contract_text %}
-
 {{ contract_text }}
 {% endif %}
 
-## Current Test File Source
+## Unit Test to Fix
+Here's the unit test that needs fixing. To help you locate the error statements.
 ```java
 {{ current_suite }}
-```
-
-## Suite Assessment (context)
-{{ suite_summary }}
-
-## Repair Instructions for THIS Test File
-```json
-{{ instructions_json }}
-```
-
-## Relevant Imports (add if missing)
-```java
-{{ imports }}
 ```
 
 {# ══════════════════════════════════════════════════════════════ #}
@@ -36,8 +23,7 @@ You MUST follow ALL compilation rules below or the test will STILL fail to compi
 {% if use_compile_exec is not defined or use_compile_exec %}
 
 {% if not compile_ok %}
-## ❌ COMPILE ERRORS — MUST FIX ALL OF THESE FIRST (test will not run until resolved)
-
+## COMPILE ERRORS — MUST FIX ALL OF THESE FIRST (test will not run until resolved)
 The following errors were reported by the Java compiler. Read each error carefully and fix ALL of them:
 
 ```
@@ -48,8 +34,7 @@ The following errors were reported by the Java compiler. Read each error careful
 
 
 {% elif not exec_ok %}
-## ❌ RUNTIME ERRORS — MUST FIX (tests compile but fail at runtime)
-
+## RUNTIME ERRORS — MUST FIX (tests compile but fail at runtime)
 The following errors occurred when running the test. Read each error carefully:
 
 ```
@@ -68,8 +53,8 @@ The following errors occurred when running the test. Read each error carefully:
 {% if (use_coverage is not defined or use_coverage) and (compile_ok and exec_ok) %}
 
 {% if missed_methods or partial_methods %}
-## 📊 COVERAGE ISSUES (tests compile and run, but focal method coverage is low)
-
+## COVERAGE ISSUES (tests compile and run, but focal method coverage is low)
+The tests have coverage issues on the focal method. To improve coverage, you should add new test methods that cover the missing lines and branches in the focal method.
 {% if missed_methods %}
 **Completely uncovered methods — add `@Test` methods to cover these:**
 {% for m in missed_methods %}
@@ -89,12 +74,13 @@ The following errors occurred when running the test. Read each error carefully:
 {% endif %}
 
 {# ══════════════════════════════════════════════════════════════ #}
-{# Bug Revealing 区块（仅在 use_bug_revealing=True 时显示）      #}
+{# Bug Revealing 区块（仅在 use_bug_revealing=True 且编译/执行通过时显示时显示）      #}
 {# ══════════════════════════════════════════════════════════════ #}
-{% if use_bug_revealing is not defined or use_bug_revealing %}
+{% if (use_bug_revealing is not defined or use_bug_revealing) and (compile_ok and exec_ok)%}
 
 {% if "NOT_BUG_REVEALING" in issues %}
-## 🐛 BUG REVEALING — Tests pass on both buggy and fixed versions (not revealing the bug)
+The tests have issues with bug-revealing ability — you should strengthen the assertions.
+## BUG REVEALING — Tests pass/fail on both buggy and fixed versions (not revealing the bug)
 
 
 {% if contract_text %}
@@ -104,26 +90,58 @@ The following errors occurred when running the test. Read each error carefully:
 {% endif %}
 
 {# ══════════════════════════════════════════════════════════════ #}
-{# 冗余度区块（仅在 use_redundancy=True 时显示）                 #}
+{# 冗余度区块（仅在 use_redundancy=True 且编译/执行通过时显示时显示）                 #}
 {# ══════════════════════════════════════════════════════════════ #}
-{% if use_redundancy is not defined or use_redundancy %}
+{% if (use_redundancy is not defined or use_redundancy) and (compile_ok and exec_ok) %}
 
 {% if "HIGH_REDUNDANCY" in issues %}
-## 🔁 HIGH REDUNDANCY — This test is too similar to another test in the suite
+The tests have issues with high redundancy — you should minimize structural and behavioral similarity between test cases.
+## HIGH REDUNDANCY - AST-level combined similarity metrics
 
 {% endif %}
 {% endif %}
 
-## Rules
-1. Apply ALL repair instructions listed above.
-2. Keep the class name exactly: `{{ test_name }}`
-3. Do NOT change `@Test` methods that are NOT mentioned in the instructions (unless fixing compilation).
-4. Add any missing `import` statements.
-5. The output MUST be compilable Java — no syntax errors.
-6. Only use APIs that appear in the Focal Method Context above; do NOT invent APIs.
+## Suite Assessment 
+This is the quality assessment for the aforementioned unit test.
+{{ suite_summary }}
+
+## Repair Instructions for THIS Test File
+Here is the reference instruction for fixing the above unit test. You may modify the unit test by following the directions provided in this instruction.
+
+```json
+{{ instructions_json }}
+```
+
+## Relevant Imports (add if missing)
+```java
+{{ imports }}
+```
+
+# Procedures for Fixing the Unit Test:
+Let's proceed step by step:
+1. Pick out the statements that the errors occur
+2. Explain the causes of the errors
+3. Give solutions on how to fix the errors
+3. Provide the complete fixed unit test, utilizing JUnit 5.
+
+# Requirements and Considerations for the Unit Test Fix:
+- Apply ALL repair instructions listed above.
+- Keep the class name exactly: `{{ test_name }}`
+- Ensure the unit tests are executable without compile errors, runtime errors, or timeouts.
+- Aim for high coverage scores, covering as many instructions and branches of the method under test as possible.
+- Avoid modifying the method under test.
+- **ALL `@Test` method signatures MUST include `throws Exception`.**
+- Generate the entire unit test file, including package declaration and imports.
+- Only use APIs that appear in the Focal Method Context above; do NOT invent APIs.
 {% if contract_text %}
-7. At least one test must verify each postcondition from the Program Contract.
+- At least one test must verify each postcondition from the Program Contract.
 {% endif %}
-8. When using Mockito: do NOT mock final classes; every `when(...).thenXxx(...)` must have a matching stub.
-9. **ALL `@Test` method signatures MUST include `throws Exception`.**
-10. Output **ONLY** the complete Java class — no prose, no markdown fences, no explanations.
+- When using Mockito: do NOT mock final classes; every `when(...).thenXxx(...)` must have a matching stub.
+- Identify Abstraction: Before instantiating any class, check if it is marked as abstract in the provided context or common knowledge.
+- Strict Prohibition: NEVER use the new keyword to directly instantiate an abstract class (e.g., new AbstractClass(...) is FORBIDDEN).
+- NEVER use anonymous inner class syntax for final classes (e.g., new FinalClass(...) { ... } is a syntax error).
+- Output **ONLY** the complete Java class — no prose, no markdown fences, no explanations.
+
+Please proceed with generating the fixed unit test.
+Ensure all generations are provided in a single response.
+Ensure your generation contains NO line numbers!

@@ -154,8 +154,6 @@ def _load_full_errors_from_files(tests_output_dir: str, diag: dict):
         for fname in os.listdir(compile_dir):
             if not fname.endswith(".txt"):
                 continue
-            # 从文件名提取测试类名
-            # 格式：CompilerOutput-ClassName.java.txt 或 CompilerOutput-ClassName.txt
             tc_name = _extract_tc_name_from_compile_file(fname)
             if not tc_name:
                 continue
@@ -165,15 +163,12 @@ def _load_full_errors_from_files(tests_output_dir: str, diag: dict):
             if not full_errors:
                 continue
 
-            # 找到对应的 diag 条目（短名匹配）
             tc_key = _find_diag_key(diag, tc_name)
             if tc_key is None:
                 continue
 
             entry = diag[tc_key]
-            # 只有编译失败的才替换编译错误
             if entry.get("compile_status") == "fail":
-                # 将完整错误内容解析为有意义的错误行列表
                 parsed_errors = _parse_compile_error_content(full_errors)
                 if parsed_errors:
                     entry["compile_errors"] = parsed_errors[:30]
@@ -293,9 +288,7 @@ def _parse_compile_error_content(raw: str) -> List[str]:
                     result.append(lines[i+2].rstrip())
         i += 1
 
-    # 如果没有提取到结构化错误，返回原始内容（截断到合理长度）
     if not result:
-        # 按行返回，每行最多 _MAX_SINGLE_ERROR_CHARS 字符
         for line in lines:
             stripped = line.strip()
             if stripped:
@@ -303,7 +296,6 @@ def _parse_compile_error_content(raw: str) -> List[str]:
             if len(result) >= 30:
                 break
 
-    # 去重并限制总长度
     seen = set()
     deduped = []
     for item in result:
@@ -408,7 +400,6 @@ def _ensure(diag: dict, tc: str) -> dict:
             "focal_branch_rate": None,
             "missed_methods":    [],
             "partial_methods":   [],
-            # 内部跟踪当前已知的最高优先级状态
             "_current_status":   "unknown",
         }
     return diag[tc]
@@ -530,14 +521,20 @@ def _parse_diag_block(block: str, diag: dict):
     """
     解析单个 [DIAGNOSIS] 块并更新 diag 字典。
 
-    关键修复：
-    1. 正确处理缺少 error_type 的 exec_fail 块（test_runner.py 的 bug）
+    [BUG FIX] 关键修复：
+    diagnosis.log 中段头的格式为：
+        uncovered_methods (14):
+        partial_branch_methods (1):
+    原先的正则 r'(missed_methods|uncovered_methods):' 无法匹配，
+    因为 " (14)" 在关键词和冒号之间。
+    修复后使用 r'(missed_methods|uncovered_methods)(\s*\(\d+\))?:' 正确匹配。
+
+    其他修复：
+    1. 正确处理缺少 error_type 的 exec_fail 块
     2. 高优先级状态不被低优先级覆盖
-       （compile_fail > exec_timeout > exec_fail > exec_ok）
-    3. compile_errors 和 exec_errors 根据 status 正确分类，
-       而不是根据 error_type（因为 error_type 可能缺失）
-    4. exec_ok 块（coverage_gap）只更新覆盖率相关字段，
-       不覆盖已知的 compile_fail/exec_fail 状态
+    3. compile_errors 和 exec_errors 根据 status 正确分类
+    4. exec_ok 块只更新覆盖率相关字段，不覆盖已知的 compile_fail/exec_fail 状态
+    5. 修复 "line_rate=xxx" 等元数据行错误触发段落重置的问题
     """
     lines = block.splitlines()
     if not lines:
@@ -591,40 +588,56 @@ def _parse_diag_block(block: str, diag: dict):
     in_partial_methods = False
     in_full_stderr     = False
 
+    # 这些是元数据行的前缀，不应触发段落重置
+    _META_PREFIXES = (
+        "project=", "target_class=", "focal_method=",
+        "status=", "error_type=",
+        "line_rate=", "branch_rate=", "coverage_score=",
+        "uncovered_methods:", "partial_branch_methods:",
+        "missed_methods:", "partial_methods:",
+        "core_errors", "full_stderr",
+    )
+
     for line in lines[1:]:
         stripped = line.strip()
         if stripped == "---":
             break
 
-        if re.match(r'status=', stripped) or re.match(r'error_type=', stripped):
-            in_core_errors = in_missed_methods = in_partial_methods = in_full_stderr = False
-            continue
+        # ── 段头检测（必须在 item 检测之前）──────────────────────
 
-        if re.match(r'core_errors\s*\(?\d*\)?:', stripped):
+        # core_errors 段头
+        if re.match(r'core_errors\s*(\(\d+\))?:', stripped):
             in_core_errors     = True
             in_missed_methods  = False
             in_partial_methods = False
             in_full_stderr     = False
             continue
+
+        # full_stderr 段头
         if re.match(r'full_stderr\s*\(', stripped):
             in_core_errors     = False
             in_full_stderr     = True
             in_missed_methods  = False
             in_partial_methods = False
             continue
-        if re.match(r'(missed_methods|uncovered_methods):', stripped):
+
+        # [BUG FIX] 修复：支持 "uncovered_methods (14):" 格式
+        if re.match(r'(missed_methods|uncovered_methods)(\s*\(\d+\))?:', stripped):
             in_core_errors     = False
             in_full_stderr     = False
             in_missed_methods  = True
             in_partial_methods = False
             continue
-        if re.match(r'(partial_methods|partial_branch_methods):', stripped):
+
+        # [BUG FIX] 修复：支持 "partial_branch_methods (1):" 格式
+        if re.match(r'(partial_methods|partial_branch_methods)(\s*\(\d+\))?:', stripped):
             in_core_errors     = False
             in_full_stderr     = False
             in_missed_methods  = False
             in_partial_methods = True
             continue
 
+        # ── 处理列表项（以 "- " 开头）────────────────────────────
         item_m = re.match(r'-\s+(.+)', stripped)
         if item_m:
             val = item_m.group(1).strip()
@@ -639,16 +652,36 @@ def _parse_diag_block(block: str, diag: dict):
                 entry["partial_methods"].append(val)
             continue
 
+        # ── 非列表项：判断是否应重置段落状态 ─────────────────────
         if in_full_stderr:
+            # full_stderr 段内的任何内容都跳过
             continue
+
+        # 跳过元数据行（不重置当前段落状态）
+        is_meta = (
+            not stripped
+            or stripped.startswith("project=")
+            or stripped.startswith("target_class=")
+            or stripped.startswith("focal_method=")
+            or stripped.startswith("status=")
+            or stripped.startswith("error_type=")
+            or stripped.startswith("line_rate=")
+            or stripped.startswith("branch_rate=")
+            or stripped.startswith("coverage_score=")
+            or stripped.startswith("... [")  # 截断提示行
+        )
+        if is_meta:
+            continue
+
+        # 其他非空、非元数据行：重置段落状态（说明进入了新的逻辑块）
         if stripped and not stripped.startswith("-"):
             in_core_errors = in_missed_methods = in_partial_methods = False
 
-    # 去重并截断（★ 提高上限到30条）
-    entry["compile_errors"] = list(dict.fromkeys(entry["compile_errors"]))[:30]
-    entry["exec_errors"]    = list(dict.fromkeys(entry["exec_errors"]))[:30]
-    entry["missed_methods"] = list(dict.fromkeys(entry["missed_methods"]))
-    entry["partial_methods"]= list(dict.fromkeys(entry["partial_methods"]))
+    # 去重并截断
+    entry["compile_errors"]  = list(dict.fromkeys(entry["compile_errors"]))[:30]
+    entry["exec_errors"]     = list(dict.fromkeys(entry["exec_errors"]))[:30]
+    entry["missed_methods"]  = list(dict.fromkeys(entry["missed_methods"]))
+    entry["partial_methods"] = list(dict.fromkeys(entry["partial_methods"]))
 
 
 # ── *coveragedetail*.csv ─────────────────────────────────────────
@@ -711,7 +744,6 @@ def load_suite_diagnosis(tests_output_dir: str) -> Dict[str, dict]:
     try:
         with open(path, encoding="utf-8") as f:
             data = json.load(f)
-        # 清理内部字段
         for entry in data.values():
             entry.pop("_current_status", None)
         logger.info("[ToolRunner] loaded suite_diagnosis.json: %d entries from %s",

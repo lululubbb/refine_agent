@@ -109,9 +109,9 @@ Analyze the above data and produce repair instructions for **EVERY** Test file l
 - Add tests for boundary values (null, empty string, 0, negative numbers, max values)
 - Add tests for each `if`/`else` branch in the focal method
 - Add tests for exception-throwing paths (invalid input, closed state, etc.)
-- Each test should exercise a distinct code path
+- The new test should exercise logic NOT covered by other tests in the suite
 
-**For Coverage/Bug-Revealing improvements**, suggest:
+**For Coverage improvements**, suggest:
 - Additional test methods or edge cases to cover missed lines/branches
 - Refer to the specific rules in the Coverage Fix guidance above to formulate these instructions
 
@@ -120,20 +120,21 @@ Analyze the above data and produce repair instructions for **EVERY** Test file l
 - **Test boundary conditions**: Focus on values near the boundary where the bug was introduced
 - **Test stateful behavior**: Call the method multiple times and verify the accumulated state
 - **Assert specific numeric/string values**: If the method returns a count, length, or computed value, assert the exact number
-- **Test the difference between buggy and fixed behavior**: Read the focal method source carefully to understand what the fix changes
+- Target a different code path in the focal method
 
 **For Bug-Revealing improvements**, suggest:
 - Stronger assertions that exercise the focal method more thoroughly
 - Refer to the specific rules in the Bug-revealing Fix guidance above to formulate these instructions
 
 **Redundancy Fix guidance:**
-- Use different input values (different data type, different range, different state)
 - Target a different code path in the focal method
-- If the current test covers the normal path, write one for an error/edge case instead
-- The new test should exercise logic NOT covered by other tests in the suite
+- Reduce repeated logic, similar statement sequences, and near-duplicate code patterns.
+- Prioritize AST-level logic diversity over superficial changes like renaming variables or updating comments.
+- Use different input values (different data type, different range, different state)
+- Each generated or modified test must be structurally distinct at the AST level
 
 **For Redundancy Reduced**, suggest:
-- Replace this test with a **completely different scenario**:
+- Minimize structural and behavioral similarity between test cases.
 - Refer to the specific rules in the Redundancy Fix guidance above to formulate these instructions
 
 ````

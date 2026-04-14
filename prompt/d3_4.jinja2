@@ -1,18 +1,20 @@
-{# d3_4.jinja2 — Initial generation prompt (with dependencies) #}
 {# context: class_name, focal_method, full_fm, c_deps, m_deps #}
+Greetings! Thank you for assisting me in crafting the unit test. Your expertise is invaluable in generating test cases targeting specific segments of the method-under-test. Let's begin by introducing the method to be tested along with its dependencies. Then, detailed instructions will follow for generating the test case. Finally, examples will illustrate how to utilize the method-under-test and compose corresponding test cases.
 Please write a JUnit 5 test class for the Java method described below.
 
-### Method Under Test
-Class: `{{ class_name }}`
-Method: `{{ focal_method }}`
+### Method-to-test && Dependencies
+**Introduction of method-to-test (`{{ focal_method }}`) and Focal Class (`{{ class_name }}`)**
 
-### Full Focal Method and Class Context
+The method-to-test, `{{ focal_method }}`, resides in the focal class `{{ class_name }}`.
+
+Here is the source code of the focal class, including member methods and fields. The full implementation of the method-to-test will be provided, along with summarizations and signatures of other member methods.
 ```java
 {{ full_fm }}
 ```
 
 {% if m_deps %}
-### Method Dependencies
+**Introduction to Dependencies**
+Here, we provide information about the method-to-test's dependencies:
 {% for dep, sigs in m_deps.items() %}
 **{{ dep }}**:
 ```java
@@ -22,7 +24,7 @@ Method: `{{ focal_method }}`
 {% endif %}
 
 {% if c_deps %}
-### Constructor Dependencies
+**Introduction Constructor Dependencies**
 {% for dep, sigs in c_deps.items() %}
 **{{ dep }}**:
 ```java
@@ -31,17 +33,25 @@ Method: `{{ focal_method }}`
 {% endfor %}
 {% endif %}
 {% if contract_text %}
-
+Here, we provide information related to program contracts, which can offer core details such as input-output constraints of methods, parameter value ranges, exception-triggering conditions, and expected behavior specifications, so as to establish clear boundaries and verification criteria for test case generation.
 {{ contract_text }}
 {% endif %}
 
-### Requirements
+Now please generate a whole unit test file for the method-to-test.
+
+#### Requirements and Attention for the Unit Test to Generate:
 - Class name: `{{ class_name }}Test`
-- Use JUnit 5 (`@Test`, `Assertions.*`) and Mockito for mocking dependencies.
-- Generate at least 5 diverse test methods covering: normal path, edge cases, boundary values, and expected exceptions.
+- Ensure that the unit tests are executable: they should run without any compilation errors, runtime errors, or timeouts.
+- Aim for comprehensive coverage: the unit tests should encompass a significant portion of the codebase, including instructions and branches within the method under test.
+- Avoid altering the method under test.
+- Generate a complete unit test file, including the package declaration and all imports.
+- Import all dependent libraries used in the unit test file.
+- Use JUnit 5 (`@Test`, `Assertions.*`) and Mockito if needed.
 - Each test name must be descriptive (e.g., `test{{ focal_method }}_normalCase`).
-- Include all necessary `import` statements.
 - All @Test methods must declare `throws Exception`.
+- Identify Abstraction: Before instantiating any class, check if it is marked as abstract in the provided context or common knowledge.
+- Strict Prohibition: NEVER use the new keyword to directly instantiate an abstract class (e.g., new AbstractClass(...) is FORBIDDEN).
+- NEVER use anonymous inner class syntax for final classes (e.g., new FinalClass(...) { ... } is a syntax error).
 - Only use APIs that appear in the provided class context above.
 {% if contract_text %}
 - CRITICAL: Your tests MUST verify the postconditions listed in the contract above.
@@ -49,3 +59,18 @@ Method: `{{ focal_method }}`
 - CRITICAL: For each precondition, generate one test that satisfies it (happy path) and one that violates it (error path).
 {% endif %}
 - Output **ONLY** the complete Java class — no prose, no markdown fences.
+### Output Format:
+
+Here are my requirements for your output format:
+
+<generate>
+The whole unit test file is:
+```java
+...
+```
+</generate>
+
+Now, armed with this information, please proceed with the generation following my instructions.
+You MUST finish all generation in ONE RESPONSE!
+You MUST FULLY write ALL test methods!
+You shouldn't leave any spare work for the human! Finish everything!
