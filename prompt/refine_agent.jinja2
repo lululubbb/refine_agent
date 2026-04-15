@@ -1,7 +1,3 @@
-{# refine_agent.jinja2 (v3) #}
-{# Variables: focal_method, class_name, focal_method_code,
-              suite_score (dict), test_diagnostics (list), iteration #}
-
 ## Context
 - **Focal method**: `{{ focal_method }}` in class `{{ class_name }}`
 - **Iteration**: {{ iteration }}
@@ -49,8 +45,7 @@ Each entry below is one Test file with issues. It contains:
 - **Tool 4**: redundancy_score (0-1), most_similar_to
 - **scores.issues**: problem labels for this Test file
 - **source_code**: full Java source of this Test file
-- **auto_fix_hints**: Pre-analyzed fix suggestions (FOLLOW THESE FIRST for compile/runtime errors)
-- **error_summary**: Classified error type codes (CE-1..CE-10, RE-1..RE-6)
+- **error_summary**: Classified error type codes (CE-1..CE-13, RE-1..RE-6)
 
 ```json
 {{ test_diagnostics | tojson(indent=2) }}
@@ -67,10 +62,8 @@ Analyze the above data and produce repair instructions for **EVERY** Test file l
 
 **PRIORITY ORDER within a SINGLE Test file** (for which issues to address first):
 1. **COMPILE_FAIL**: If `compile_ok=false`, prioritize fixing compile errors.
-   Use the `auto_fix_hints` field — these are pre-analyzed fixes for the exact errors found.
    After fixing compile, address other issues.
 2. **EXEC_FAIL**: If `exec_ok=false`, prioritize fixing runtime errors using `exec_errors[]`.
-   Use `auto_fix_hints` for specific fix guidance.
    After fixing execution, address other issues.
 3. **Coverage/Bug-Revealing**: Address these after compile and exec are fixed.
    BUT: If a Test only has coverage/bug-revealing issues, STILL generate instructions for them.
@@ -89,7 +82,6 @@ Analyze the above data and produce repair instructions for **EVERY** Test file l
 **For COMPILE_FAIL tests**, your instructions MUST:
 - Quote the exact error from `compile_errors[]`
 - Reference the specific CE-X type from `error_summary`
-- Give the EXACT code change (e.g., "Replace `reader.lastChar` with reflection: Field f = ...")
 - Refer to the specific rules in the COMPILE_FAIL Fix guidance above to formulate these instructions
 
 **EXEC_FAIL Fix guidance:**
@@ -101,19 +93,14 @@ Analyze the above data and produce repair instructions for **EVERY** Test file l
 
 **For EXEC_FAIL tests**, your instructions MUST:
 - Quote the exact error from `exec_errors[]`
-- For wrong assertion values: trace the focal method and give the correct expected value
-- For wrong exception types: specify the correct parent exception class
 - Refer to the specific rules in the EXEC_FAIL Fix guidance above to formulate these instructions
 
 **Coverage Fix guidance:**
 - Add tests for boundary values (null, empty string, 0, negative numbers, max values)
 - Add tests for each `if`/`else` branch in the focal method
 - Add tests for exception-throwing paths (invalid input, closed state, etc.)
-- The new test should exercise logic NOT covered by other tests in the suite
-
-**For Coverage improvements**, suggest:
 - Additional test methods or edge cases to cover missed lines/branches
-- Refer to the specific rules in the Coverage Fix guidance above to formulate these instructions
+- The new test should exercise logic NOT covered by other tests in the suite
 
 **Bug-revealing(pass on fixed, fail on buggy) Fix guidance:**
 - **Add precise assertions**: Use `assertEquals(exactExpectedValue, result)` instead of just `assertNotNull(result)`
@@ -122,20 +109,12 @@ Analyze the above data and produce repair instructions for **EVERY** Test file l
 - **Assert specific numeric/string values**: If the method returns a count, length, or computed value, assert the exact number
 - Target a different code path in the focal method
 
-**For Bug-Revealing improvements**, suggest:
-- Stronger assertions that exercise the focal method more thoroughly
-- Refer to the specific rules in the Bug-revealing Fix guidance above to formulate these instructions
-
 **Redundancy Fix guidance:**
 - Target a different code path in the focal method
 - Reduce repeated logic, similar statement sequences, and near-duplicate code patterns.
 - Prioritize AST-level logic diversity over superficial changes like renaming variables or updating comments.
 - Use different input values (different data type, different range, different state)
 - Each generated or modified test must be structurally distinct at the AST level
-
-**For Redundancy Reduced**, suggest:
-- Minimize structural and behavioral similarity between test cases.
-- Refer to the specific rules in the Redundancy Fix guidance above to formulate these instructions
 
 ````
 

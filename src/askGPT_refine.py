@@ -758,20 +758,20 @@ def build_fix_messages(
             f"\\n\\n## 📋 Repair Instructions Summary\\n{context['instructions_summary']}"
         )
  
-        # 编译错误关键行强化
-        if use_compile_exec and not compile_ok and compile_errors:
-            key_errors = _select_key_compile_errors(compile_errors, max_items=10)
-            suffix_parts.append(
-                "\\n\\n## ⚠️ KEY COMPILE ERRORS TO FIX:\\n"
-                + "\\n".join(f"  {e}" for e in key_errors)
-            )
+        # # 编译错误关键行强化
+        # if use_compile_exec and not compile_ok and compile_errors:
+        #     key_errors = _select_key_compile_errors(compile_errors, max_items=10)
+        #     suffix_parts.append(
+        #         "\\n\\n## ⚠️ KEY COMPILE ERRORS TO FIX:\\n"
+        #         + "\\n".join(f"  {e}" for e in key_errors)
+        #     )
  
-        # 运行错误强化
-        if use_compile_exec and compile_ok and not exec_ok and exec_errors:
-            suffix_parts.append(
-                "\\n\\n## ⚠️ KEY RUNTIME ERRORS TO FIX:\\n"
-                + "\\n".join(f"  {e}" for e in exec_errors[:8])
-            )
+        # # 运行错误强化
+        # if use_compile_exec and compile_ok and not exec_ok and exec_errors:
+        #     suffix_parts.append(
+        #         "\\n\\n## ⚠️ KEY RUNTIME ERRORS TO FIX:\\n"
+        #         + "\\n".join(f"  {e}" for e in exec_errors[:8])
+        #     )
  
         # 未改变警告
         if prev_unchanged:
