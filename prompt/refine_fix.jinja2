@@ -1,18 +1,10 @@
 You are an expert Java developer. Fix the following Test file based on the repair instructions.
-You MUST follow ALL compilation rules below or the test will STILL fail to compile.
 
 ## Test File: `{{ test_name }}.java`
 
-## Focal Method Context
-```java
-{{ method_code }}
-```
-{% if contract_text %}
-{{ contract_text }}
-{% endif %}
 
 ## Unit Test to Fix
-Here's the unit test that needs fixing. To help you locate the error statements.
+Here's the unit test that needs fixing. .
 ```java
 {{ current_suite }}
 ```
@@ -23,9 +15,7 @@ Here's the unit test that needs fixing. To help you locate the error statements.
 {% if use_compile_exec is not defined or use_compile_exec %}
 
 {% if not compile_ok %}
-## COMPILE ERRORS — MUST FIX ALL OF THESE FIRST (test will not run until resolved)
-The following errors were reported by the Java compiler. Read each error carefully and fix ALL of them:
-
+## COMPILE ERRORS MESSAGE
 ```
 {% for err in compile_errors %}
 {{ err }}
@@ -34,9 +24,7 @@ The following errors were reported by the Java compiler. Read each error careful
 
 
 {% elif not exec_ok %}
-## RUNTIME ERRORS — MUST FIX (tests compile but fail at runtime)
-The following errors occurred when running the test. Read each error carefully:
-
+## RUNTIME ERRORS MESSAGE
 ```
 {% for err in exec_errors %}
 {{ err }}
@@ -54,7 +42,7 @@ The following errors occurred when running the test. Read each error carefully:
 
 {% if missed_methods or partial_methods %}
 ## COVERAGE ISSUES (tests compile and run, but focal method coverage is low)
-The tests have coverage issues on the focal method. To improve coverage, you should add new test methods that cover the missing lines and branches in the focal method.
+To improve coverage, you should add new test methods that cover the missing lines and branches in the focal method.
 {% if missed_methods %}
 **Completely uncovered methods — add `@Test` methods to cover these:**
 {% for m in missed_methods %}
@@ -79,13 +67,10 @@ The tests have coverage issues on the focal method. To improve coverage, you sho
 {% if (use_bug_revealing is not defined or use_bug_revealing) and (compile_ok and exec_ok)%}
 
 {% if "NOT_BUG_REVEALING" in issues %}
-The tests have issues with bug-revealing ability — you should strengthen the assertions.
 ## BUG REVEALING — Tests pass/fail on both buggy and fixed versions (not revealing the bug)
+you should strengthen the assertions to reveal the bug.
 
 
-{% if contract_text %}
-- **Verify postconditions from the Program Contract**: The contract lists specific behaviors that must hold
-{% endif %}
 {% endif %}
 {% endif %}
 
@@ -95,8 +80,9 @@ The tests have issues with bug-revealing ability — you should strengthen the a
 {% if (use_redundancy is not defined or use_redundancy) and (compile_ok and exec_ok) %}
 
 {% if "HIGH_REDUNDANCY" in issues %}
-The tests have issues with high redundancy — you should minimize structural and behavioral similarity between test cases.
+
 ## HIGH REDUNDANCY - AST-level combined similarity metrics
+you should minimize structural and behavioral similarity between test cases.
 
 {% endif %}
 {% endif %}
@@ -106,15 +92,14 @@ This is the quality assessment for the aforementioned unit test.
 {{ suite_summary }}
 
 ## Repair Instructions for THIS Test File
-Here is the reference instruction for fixing the above unit test. You may modify the unit test by following the directions provided in this instruction.
 
 ```json
 {{ instructions_json }}
 ```
 
-## Relevant Imports (add if missing)
+## the source code of the method under test and its classis:
 ```java
-{{ imports }}
+{{ method_code }}
 ```
 
 # Procedures for Fixing the Unit Test:
@@ -125,23 +110,13 @@ Let's proceed step by step:
 3. Provide the complete fixed unit test, utilizing JUnit 5.
 
 # Requirements and Considerations for the Unit Test Fix:
-- Apply ALL repair instructions listed above.
 - Keep the class name exactly: `{{ test_name }}`
 - Ensure the unit tests are executable without compile errors, runtime errors, or timeouts.
-- Aim for high coverage scores, covering as many instructions and branches of the method under test as possible.
 - Avoid modifying the method under test.
 - **ALL `@Test` method signatures MUST include `throws Exception`.**
 - Generate the entire unit test file, including package declaration and imports.
 - Only use APIs that appear in the Focal Method Context above; do NOT invent APIs.
-{% if contract_text %}
-- At least one test must verify each postcondition from the Program Contract.
-{% endif %}
-- When using Mockito: do NOT mock final classes; every `when(...).thenXxx(...)` must have a matching stub.
 - Identify Abstraction: Before instantiating any class, check if it is marked as abstract in the provided context or common knowledge.
-- Strict Prohibition: NEVER use the new keyword to directly instantiate an abstract class (e.g., new AbstractClass(...) is FORBIDDEN).
-- NEVER use anonymous inner class syntax for final classes (e.g., new FinalClass(...) { ... } is a syntax error).
-- Output **ONLY** the complete Java class — no prose, no markdown fences, no explanations.
 
-Please proceed with generating the fixed unit test.
-Ensure all generations are provided in a single response.
-Ensure your generation contains NO line numbers!
+
+Please fix the error and return the whole fixed unit test. You can use Junit 5, Mockito 3 and reflection. No explanation is needed.

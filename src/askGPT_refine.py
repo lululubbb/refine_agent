@@ -88,12 +88,12 @@ import sys
 import time
 from datetime import datetime
 from typing import Dict, List, Optional, Set
-from contract_integration import (
-    extract_contract_for_focal_method,
-    save_contract,
-    enrich_ctx_with_contract,
-    get_contract_text,
-)
+# from contract_integration import (
+#     extract_contract_for_focal_method,
+#     save_contract,
+#     enrich_ctx_with_contract,
+#     get_contract_text,
+# )
 from colorama import Fore, Style, init, Back
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -117,10 +117,10 @@ from tools import (
 )
 from jinja2 import Environment, FileSystemLoader
 from compile_error_analyzer import enrich_diag_with_fix_hints, get_error_summary
-from contract_integration import (
-    extract_contract_for_focal_method, save_contract,
-    enrich_ctx_with_contract, get_contract_text,
-)
+# from contract_integration import (
+#     extract_contract_for_focal_method, save_contract,
+#     enrich_ctx_with_contract, get_contract_text,
+# )
 
 init()
 logger = logging.getLogger(__name__)
@@ -847,14 +847,15 @@ def focal_method_pipeline(
     # version_text 完全移除
 
     # 合约提取（保留，对有防御性检查的方法有价值）
-    contract = extract_contract_for_focal_method(raw_data, ctx_d1)
-    if contract and not contract.is_empty():
-        save_contract(contract, base_dir)
-        print(f"  {Fore.BLUE}📋 Program contract extracted: "
-              f"{len(contract.preconditions)} preconditions, "
-              f"{len(contract.exception_contracts)} exception contracts{Style.RESET_ALL}", flush=True)
-    else:
-        contract = None
+    # contract = extract_contract_for_focal_method(raw_data, ctx_d1)
+    # if contract and not contract.is_empty():
+    #     save_contract(contract, base_dir)
+    #     print(f"  {Fore.BLUE}📋 Program contract extracted: "
+    #           f"{len(contract.preconditions)} preconditions, "
+    #           f"{len(contract.exception_contracts)} exception contracts{Style.RESET_ALL}", flush=True)
+    # else:
+    #     contract = None
+    contract = None
 
     gen_client = make_generator_client()
     ref_client = make_refiner_client()
@@ -906,8 +907,10 @@ def focal_method_pipeline(
         tc_name = f"{class_name}_{method_id}_{seq}Test"
         result = generate_one_test(
             seq=seq, gen_client=gen_client,
-            ctx_d1=enrich_ctx_with_contract(ctx_d1, contract),
-            ctx_d3=enrich_ctx_with_contract(ctx_d3, contract),
+            # ctx_d1=enrich_ctx_with_contract(ctx_d1, contract),
+            # ctx_d3=enrich_ctx_with_contract(ctx_d3, contract),
+            ctx_d1=ctx_d1,
+            ctx_d3=ctx_d3,
             imports=imports, package=package,
             class_name=class_name, method_id=method_id,
             tc_dir=tc_dir, gen_log_dir=gen_log_dir,
@@ -1039,7 +1042,8 @@ def focal_method_pipeline(
                 class_name=class_name, ctx_d1=ctx_d1, ctx_d3=ctx_d3,
                 imports=imports, suite_summary=refine_result.suite_summary,
                 prev_unchanged=prev_unchanged, diag=tc_diag,
-                contract_text=get_contract_text(contract),
+                # contract_text=get_contract_text(contract),
+                contract_text="",
                 # ★ 不再传入 version_text
                 validation_issues=validation_issues_cache,
                 issues=tc_score.issues if tc_score else [],

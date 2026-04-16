@@ -2,18 +2,11 @@
 - **Focal method**: `{{ focal_method }}` in class `{{ class_name }}`
 - **Iteration**: {{ iteration }}
 - **Suite size**: {{ suite_score.n_tests }} Test files
-
----
-
 ## Focal Method Source
 ```java
 {{ focal_method_code }}
 ```
-
----
-
 ## Suite-Level Scores (across all {{ suite_score.n_tests }} Test files)
-
 | Dimension | Value |
 |-----------|-------|
 | Compile pass | {{ suite_score.compile_pass_count }}/{{ suite_score.n_tests }} ({{ "%.0f"|format(suite_score.compile_pass_rate * 100) }}%) |
@@ -33,8 +26,6 @@ High-redundancy Test pairs (similarity > 0.7):
 - {{ pair.test1 }} ↔ {{ pair.test2 }}: {{ "%.3f"|format(pair.similarity) }}
 {% endfor %}
 {% endif %}
-
----
 
 ## Problematic Test Files — Detailed Diagnostics + Scores
 
@@ -57,8 +48,6 @@ Each entry below is one Test file with issues. It contains:
 Analyze the above data and produce repair instructions for **EVERY** Test file listed.
 
 **CRITICAL REQUIREMENT**: You MUST generate repair instructions for ALL problematic Test files, not just some.
-- Even if a Test has only low-priority issues (e.g., coverage), still generate instructions.
-- Do NOT skip any Test file.
 
 **PRIORITY ORDER within a SINGLE Test file** (for which issues to address first):
 1. **COMPILE_FAIL**: If `compile_ok=false`, prioritize fixing compile errors.
@@ -69,7 +58,7 @@ Analyze the above data and produce repair instructions for **EVERY** Test file l
    BUT: If a Test only has coverage/bug-revealing issues, STILL generate instructions for them.
 
 ** COMPILE_FAIL Fix guidance (in priority order):**
-- `xxx has private access in Yyy` → Use reflection: `getDeclaredField("xxx").setAccessible(true).get(obj)` or `getDeclaredMethod("xxx").setAccessible(true).invoke(obj)`
+- `xxx has private access in Yyy` → Use reflection
 - `cannot inherit from final Xxx` → Use `Mockito.spy(new Xxx(...))` instead of anonymous subclass
 - `cannot find symbol: method/class Xxx` → This API does not exist in this version; check the provided class context for the correct API
 - `incompatible types: Yyy cannot be converted to Zzz` → Use the correct type that matches the constructor/method signature

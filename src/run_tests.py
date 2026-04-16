@@ -114,28 +114,28 @@ def run_tests(target_projects=None):
                 Task.all_test(result_path, proj)
                 print(f"✅ 任务 Task.all_test 完成: {result_path}")
 
-                # 运行 bug_revealing
-                try:
-                    rb = [
-                        sys.executable, 
-                        os.path.join(os.path.dirname(__file__), 'run_bug_revealing.py'), 
-                        proj, 
-                        '--test_dir', result_path
-                    ]
-                    print(f"📌 运行 bug_revealing: {' '.join(rb)}")
-                    subprocess.run(rb, check=False)
-                except Exception as _e:
-                    print(f"⚠️ bug_revealing 失败: {_e}")
+                # # 运行 bug_revealing
+                # try:
+                #     rb = [
+                #         sys.executable, 
+                #         os.path.join(os.path.dirname(__file__), 'run_bug_revealing.py'), 
+                #         proj, 
+                #         '--test_dir', result_path
+                #     ]
+                #     print(f"📌 运行 bug_revealing: {' '.join(rb)}")
+                #     subprocess.run(rb, check=False)
+                # except Exception as _e:
+                #     print(f"⚠️ bug_revealing 失败: {_e}")
 
-                # 运行辅助分析脚本
-                try:
-                    scripts_dir = os.path.join(os.path.dirname(__file__), 'scripts')
-                    print(f"📌 运行 code_to_ast: {' '.join([sys.executable, os.path.join(scripts_dir, 'code_to_ast.py'), result_path])}")
-                    subprocess.run([sys.executable, os.path.join(scripts_dir, 'code_to_ast.py'), result_path], check=False)
-                    print(f"📌 运行 measure_similarity: {' '.join([sys.executable, os.path.join(scripts_dir, 'measure_similarity.py'), result_path])}")
-                    subprocess.run([sys.executable, os.path.join(scripts_dir, 'measure_similarity.py'), result_path], check=False)
-                except Exception as _e:
-                    print(f"⚠️ 相似度分析脚本运行失败: {_e}")
+                # # 运行辅助分析脚本
+                # try:
+                #     scripts_dir = os.path.join(os.path.dirname(__file__), 'scripts')
+                #     print(f"📌 运行 code_to_ast: {' '.join([sys.executable, os.path.join(scripts_dir, 'code_to_ast.py'), result_path])}")
+                #     subprocess.run([sys.executable, os.path.join(scripts_dir, 'code_to_ast.py'), result_path], check=False)
+                #     print(f"📌 运行 measure_similarity: {' '.join([sys.executable, os.path.join(scripts_dir, 'measure_similarity.py'), result_path])}")
+                #     subprocess.run([sys.executable, os.path.join(scripts_dir, 'measure_similarity.py'), result_path], check=False)
+                # except Exception as _e:
+                #     print(f"⚠️ 相似度分析脚本运行失败: {_e}")
 
                 # 写入 Summary (此时 result_path 就是当前的测试目录)
                 try:

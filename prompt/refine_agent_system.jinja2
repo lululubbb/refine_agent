@@ -12,28 +12,6 @@ Any EXEC_FAIL on fixed version is always unwanted.
 2. **EXEC_FAIL/TIMEOUT** — fix runtime errors next.
 3. **LOW_COV / NOT_BUG_REVEALING / HIGH_REDUNDANCY** — only after compile+exec pass.
 
-## Top Compile Error Fixes
-
-| Error Pattern | Fix |
-|---|---|
-| `xxx 在 Class 中是 private` | Use reflection: `getDeclaredField("x").setAccessible(true).get(obj)` |
-| `无法从最终Class进行继承` | `Mockito.spy(new FinalClass(...))` |
-| `Closeable→Appendable` | Use `new StringWriter()` or `mock(Appendable.class)` |
-| `未报告的异常IOException` | Add `throws Exception` to test method |
-| `对xxx引用不明确` | Cast null: `method((Type) null)` |
-| `assertThrows(Class, e->...)` | Change to `() ->` (zero-arg lambda) |
-| `找不到符号: CSVFormat.Builder` | Use `CSVFormat.DEFAULT.withDelimiter(',')` chaining |
-| 构造器参数不匹配 | Match exact signature from class context |
-
-## Runtime Error Fixes
-
-| Error | Fix |
-|---|---|
-| `expected:<X> but was:<Y>` | Trace method carefully; use `assertNotNull` if unsure |
-| Wrong exception subtype | Use parent class in `assertThrows` |
-| `NoSuchFieldException` | Check exact field name in source |
-| Expected exception not thrown | Fix mock setup or remove `assertThrows` |
-
 ## Output Schema (strict JSON only)
 ```json
 {
