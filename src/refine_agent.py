@@ -1,19 +1,11 @@
 """
-refine_agent.py  (v3 — 问题修复版)
-=====================================
+refine_agent.py  (v4 — focal-method coverage feedback + priority-based issue filtering)
 
-  质量检查标准（当前 scoring.py compute_test_score 里）：
-    COMPILE_FAIL:      compile_ok=False
-    EXEC_FAIL:         exec_ok=False（非超时）
-    EXPECTED_EXEC_FAIL:   exec_ok=False 且 bug_revealing=True（good fail）
-    UNEXPECTED_EXEC_FAIL: exec_ok=False 且 bug_revealing=False（bad fail）
-    EXEC_TIMEOUT:      exec_timeout=True
-    LOW_LINE_COV:      exec_ok=True 且 focal_line_coverage < 0.7
-    LOW_BRANCH_COV:    exec_ok=True 且 focal_branch_coverage < 0.7
-    NOT_BUG_REVEALING: exec_ok=True 且 bug_revealing=False
-    HIGH_REDUNDANCY:   redundancy > 0.7
-  
-─────────────────────────────────────────────────────────────────
+Key changes:
+  - TestDiag gains focal_line_covered / focal_line_total fields (Issue 3)
+  - tool_compile_run_and_coverage populates these from suite_diagnosis.json (Issue 3)
+  - Issues are filtered to highest-priority group before calling Refiner LLM (Issue 5)
+  - Priority order: COMPILE > EXEC > BUG_REVEALING > COVERAGE > REDUNDANCY (Issue 5)
 """
 from __future__ import annotations
 
@@ -31,7 +23,7 @@ from typing import Dict, List, Optional, Tuple
 from jinja2 import Environment, FileSystemLoader
 
 from llm_client import LLMClient, LLMCallResult
-from scoring import TestScore, SuiteScore
+from scoring import TestScore, SuiteScore, sort_issues_by_priority, issues_at_priority_level
 from compile_error_analyzer import enrich_diag_with_fix_hints, get_error_summary
 from scoring_ablation import (
     compute_test_score_ablation as compute_test_score,
@@ -61,11 +53,17 @@ class TestDiag:
 
     focal_line_rate:   Optional[float] = None
     focal_branch_rate: Optional[float] = None
+
+    # NEW (Issue 3): focal method line counts for richer coverage feedback
+    focal_line_covered: Optional[int] = None
+    focal_line_total:   Optional[int] = None
+
+    # Class-level missed/partial methods (kept for backward compat but
+    # NOT shown in fix prompt when focal coverage is the issue — see Issue 3)
     missed_methods:    List[str] = field(default_factory=list)
     partial_methods:   List[str] = field(default_factory=list)
 
     bug_revealing: Optional[bool] = None
-    # 整个其实是1-相似性，越大越好
     redundancy_score: Optional[float] = None
     most_similar_to:  Optional[str]   = None
 
@@ -77,9 +75,6 @@ class TestDiag:
 
 @dataclass
 class RefineResult:
-    """
-    Refine Agent 的完整输出，供 Generator 根据 per-Test 指令精修。
-    """
     focal_method: str
     class_name:   str
     iteration:    int
@@ -96,7 +91,6 @@ class RefineResult:
     refiner_completion_tokens: int   = 0
     refiner_elapsed_seconds:   float = 0.0
 
-    # 内部：agent.run() 写了几个文件（供 askGPT_refine 做 step 计数）
     _files_written: int = field(default=0, repr=False)
 
     def has_actionable_instructions(self) -> bool:
@@ -126,7 +120,7 @@ class RefineResult:
 
 
 # ════════════════════════════════════════════════════════════════════
-# 工具函数
+# Utility
 # ════════════════════════════════════════════════════════════════════
 
 def _run(cmd: List[str], timeout: int = 120) -> Tuple[int, str, str]:
@@ -144,7 +138,7 @@ def _short(full_name: str) -> str:
 
 
 # ════════════════════════════════════════════════════════════════════
-# Tool 1+2: 编译 + 执行 + 覆盖率
+# Tool 1+2: Compile + Run + Coverage  (Issue 3 fix)
 # ════════════════════════════════════════════════════════════════════
 
 def tool_compile_run_and_coverage(
@@ -171,7 +165,6 @@ def tool_compile_run_and_coverage(
     matched = 0
     for tc_name, raw in diag_map.items():
         if tc_name not in diags:
-            # 尝试短名匹配
             short = _short(tc_name)
             if short not in diags:
                 continue
@@ -186,20 +179,38 @@ def tool_compile_run_and_coverage(
         d.exec_errors    = raw.get("exec_errors",    [])
         d.missed_methods = raw.get("missed_methods", [])
         d.partial_methods= raw.get("partial_methods",[])
+
+        # Focal method line/branch rates
         lr = raw.get("focal_line_rate")
         br = raw.get("focal_branch_rate")
         d.focal_line_rate   = float(lr) if lr is not None else None
         d.focal_branch_rate = float(br) if br is not None else None
-        # ★ 标记数据有效
+
+        # ── Issue 3: populate focal line counts ──────────────────
+        flc = raw.get("focal_line_covered")
+        flt = raw.get("focal_line_total")
+        if flc is not None:
+            try:
+                d.focal_line_covered = int(flc)
+            except (TypeError, ValueError):
+                pass
+        if flt is not None:
+            try:
+                d.focal_line_total = int(flt)
+            except (TypeError, ValueError):
+                pass
+
+        # If not stored directly, derive from rate + total where possible
+        if d.focal_line_covered is None and d.focal_line_rate is not None and d.focal_line_total:
+            d.focal_line_covered = round(d.focal_line_rate / 100.0 * d.focal_line_total)
+
         d.diag_data_valid = True
         matched += 1
 
     logger.info("[Tool 1+2] matched %d/%d tests from suite_diagnosis.json", matched, len(diags))
-
     if matched == 0:
         logger.warning("[Tool 1+2] diag_map has %d entries but none matched test_names=%s",
                        len(diag_map), list(test_names)[:3])
-        logger.warning("[Tool 1+2] diag_map keys: %s", list(diag_map.keys())[:5])
 
     return diags, tests_output_dir
 
@@ -218,10 +229,9 @@ def tool_bug_revealing(
     fixed_dir: str,
     diags: Dict[str, TestDiag],
 ):
-    # ★ 修改：只有编译失败的测试才不检测bug_revealing，其他都检测
     compile_ok_tests = [name for name, d in diags.items() if d.compile_ok]
     if not compile_ok_tests:
-        logger.info("[Tool 3] skip: no compile_ok tests (all compile failed)")
+        logger.info("[Tool 3] skip: no compile_ok tests")
         return
 
     script = os.path.join(HERE, "scripts", "bug_revealing.py")
@@ -229,28 +239,22 @@ def tool_bug_revealing(
         logger.warning("[Tool 3] bug_revealing.py not found: %s", script)
         return
 
-    # 脚本会自动推断 --tests 和 --out，如果不提供 --tests，会找 buggy_dir 下的最新 tests* 目录
-    # --out 如果不提供，会自动生成文件名 {proj_prefix}_{_tgt_slug}_bugrevealing.csv
-    # 为了匹配，我们提供 --tests 和 --out，但让脚本处理文件名
     cmd = [sys.executable, script,
            "--buggy", buggy_dir,
            "--fixed", fixed_dir,
-           "--tests", focal_method_result_dir]  # 不指定 --out，让脚本自动生成
+           "--tests", focal_method_result_dir]
     rc, _, err = _run(cmd, timeout=300)
     if rc != 0:
         logger.warning("[Tool 3] bug_revealing rc=%d: %s", rc, err[:300])
         return
 
-    # 脚本生成的文件名模式：{proj_prefix}_{_tgt_slug}_bugrevealing.csv
-    # proj_prefix 从 buggy_dir 推断，_tgt_slug 从 target_class 推断
     proj_basename = os.path.basename(buggy_dir)
     if proj_basename.lower().endswith('_b') or proj_basename.lower().endswith('_f'):
         proj_prefix = proj_basename[:-2]
     else:
         proj_prefix = proj_basename
 
-    # 推断 _tgt_slug（target_class）
-    _tgt_slug = "unknown"  # 默认
+    _tgt_slug = "unknown"
     meta_file = os.path.join(buggy_dir, 'modified_classes.src')
     if os.path.exists(meta_file):
         try:
@@ -295,7 +299,7 @@ def tool_bug_revealing(
 
 
 # ════════════════════════════════════════════════════════════════════
-# Tool 4: 相似度
+# Tool 4: Similarity
 # ════════════════════════════════════════════════════════════════════
 
 def tool_similarity(
@@ -304,7 +308,6 @@ def tool_similarity(
 ) -> List[Tuple[str, str, float]]:
     scripts_dir = os.path.join(HERE, "scripts")
 
-    # ★ 修复：传 test_cases 子目录路径，让脚本走正确的分支
     tc_dir = os.path.join(focal_method_result_dir, "test_cases")
     if not os.path.isdir(tc_dir):
         logger.warning("[Tool 4] test_cases dir not found: %s", tc_dir)
@@ -321,7 +324,6 @@ def tool_similarity(
         else:
             logger.info("[Tool 4] %s OK", sname)
 
-    # Similarity CSV 写在 focal_method_result_dir/Similarity/ 下
     sim_dir    = os.path.join(focal_method_result_dir, "Similarity")
     bsim_files = sorted(glob.glob(os.path.join(sim_dir, "*_bigSims.csv")))
     if not bsim_files:
@@ -348,11 +350,10 @@ def tool_similarity(
 
         for tc, (score, partner) in best.items():
             if tc in diags:
-                diags[tc].redundancy_score = 1 - round(score, 4)  # 纠正：rs是冗余度（相似度），但之前用1-相似度；现在设为相似度
+                diags[tc].redundancy_score = 1 - round(score, 4)
                 diags[tc].most_similar_to  = partner
 
-        logger.info("[Tool 4] %d pairs loaded from %s", len(all_pairs), bsim_files[-1])
-
+        logger.info("[Tool 4] %d pairs loaded", len(all_pairs))
     except Exception as e:
         logger.warning("[Tool 4] bigSims parse: %s", e)
 
@@ -366,13 +367,12 @@ def tool_similarity(
 def _build_refiner_messages(
     focal_method, class_name, focal_method_code,
     test_file_codes, diags, test_scores, suite_score,
-    iteration, template_dir, cfg=None,  
+    iteration, template_dir, cfg=None,
 ):
-
     from scoring_ablation import AblationConfig
     if cfg is None:
         cfg = AblationConfig()
-    
+
     problematic_data = []
     for tname in diags:
         score = test_scores.get(tname, TestScore(tname))
@@ -381,9 +381,9 @@ def _build_refiner_messages(
         entry = diags[tname].to_dict()
         entry["scores"]      = test_scores[tname].to_dict() if tname in test_scores else {}
         entry["source_code"] = test_file_codes.get(tname, "// [source not available]")
-        # ← 根据消融配置过滤诊断数据
+
         if not cfg.use_compile_exec:
-            entry["compile_ok"] = True      # 屏蔽编译/执行状态
+            entry["compile_ok"] = True
             entry["exec_ok"] = True
             entry["compile_errors"] = []
             entry["exec_errors"] = []
@@ -393,21 +393,29 @@ def _build_refiner_messages(
             entry["error_summary"] = get_error_summary(
                 diags[tname].compile_errors, diags[tname].exec_errors
             )
-        
+
         if not cfg.use_coverage:
             entry["focal_line_rate"] = None
             entry["focal_branch_rate"] = None
+            entry["focal_line_covered"] = None
+            entry["focal_line_total"] = None
             entry["missed_methods"] = []
             entry["partial_methods"] = []
-        
+
         if not cfg.use_bug_revealing:
             entry["bug_revealing"] = None
-        
+
         if not cfg.use_redundancy:
             entry["redundancy_score"] = None
             entry["most_similar_to"] = None
-        
+
+        # ── Issue 5: show only top-priority issues to Refiner ────
+        top_issues = issues_at_priority_level(score.issues)
+        entry["top_priority_issues"] = top_issues
+        entry["all_issues"]          = score.issues
+
         problematic_data.append(entry)
+
     try:
         from jinja2 import Environment, FileSystemLoader
         tenv = Environment(loader=FileSystemLoader(template_dir))
@@ -446,11 +454,11 @@ def _fallback_prompt(focal_method, class_name, focal_method_code,
         suite_json=suite_json,
         tests_json=tests_json,
         iteration=iteration,
-        )
+    )
 
 
 # ════════════════════════════════════════════════════════════════════
-# RefineAgent 主类
+# RefineAgent
 # ════════════════════════════════════════════════════════════════════
 
 class RefineAgent:
@@ -519,7 +527,6 @@ class RefineAgent:
         )
 
         # ── Tool 3: Bug Revealing ─────────────────────────────────
-        # ★ 修复问题3：区分 fixed_dir 不存在 vs 编译失败无法检测
         if not self.skip_bug_revealing and self.buggy_dir and self.fixed_dir:
             t0 = time.time()
             tool_bug_revealing(
@@ -530,7 +537,7 @@ class RefineAgent:
             reason = "fixed_dir not provided" if not self.fixed_dir else "skip_bug_revealing=True"
             logger.info("[RefineAgent] [Tool 3] skipped: %s", reason)
 
-        # ── Tool 4: 相似度 ────────────────────────────────────────
+        # ── Tool 4: Similarity ────────────────────────────────────
         pairwise_sims: List[Tuple[str, str, float]] = []
         if not self.skip_similarity and len(test_names) > 1:
             t0 = time.time()
@@ -538,15 +545,10 @@ class RefineAgent:
             logger.info("[RefineAgent] [Tool 4] %.1fs  %d pairs",
                         time.time() - t0, len(pairwise_sims))
 
-        # ── 计算得分 ──────────────────────────────────────────────
-        # test_scores: Dict[str, TestScore] = {
-        #     name: compute_test_score(diag) for name, diag in diags.items()
-        # }
-        # suite_score: SuiteScore = compute_suite_score(test_scores, pairwise_sims)
+        # ── Compute scores ────────────────────────────────────────
         test_scores = {name: compute_test_score(diag, _cfg) for name, diag in diags.items()}
         suite_score = compute_suite_score(test_scores, pairwise_sims, _cfg)
 
-        # ★ 修复问题3：在 SuiteScore 里记录 bug_revealing 跳过原因
         if self.skip_bug_revealing or not self.fixed_dir:
             suite_score._bug_reveal_skip_reason = (
                 "fixed_dir not provided" if not self.fixed_dir else "skip_bug_revealing=True"
@@ -556,18 +558,17 @@ class RefineAgent:
 
         logger.info(
             "[RefineAgent] SuiteScore: tests=%d compile=%d/%d exec=%d/%d "
-            "line_cov_avg=%s bug_reveal=%d/%d max_pair_sim=%s",
+            "line_cov_avg=%s bug_reveal=%d/%d",
             suite_score.n_tests,
             suite_score.compile_pass_count, suite_score.n_tests,
             suite_score.exec_pass_count,    suite_score.n_tests,
             f"{suite_score.coverage_line_avg:.2f}" if suite_score.coverage_line_avg is not None else "N/A",
             suite_score.bug_reveal_count,   suite_score.bug_reveal_checked,
-            f"{suite_score.max_pairwise_similarity:.3f}" if suite_score.max_pairwise_similarity is not None else "N/A",
         )
         if suite_score.problem_tests:
             logger.info("[RefineAgent] Problems: %s", suite_score.problem_tests)
 
-        # ── 保存诊断 ──────────────────────────────────────────────
+        # ── Save diagnostics ──────────────────────────────────────
         diag_path = os.path.join(save_dir, f"{step}_tool_diag_{iteration}.json")
         with open(diag_path, "w", encoding="utf-8") as f:
             json.dump({
@@ -581,7 +582,7 @@ class RefineAgent:
             }, f, indent=2, ensure_ascii=False)
         step += 1; files_written += 1
 
-        # ── 检查是否有问题 ─────────────────────────────────────────
+        # ── Check for problems ────────────────────────────────────
         problematic = [n for n, s in test_scores.items() if s.issues]
         if not problematic:
             logger.info("[RefineAgent] all Tests OK, skipping Refiner LLM")
@@ -595,10 +596,27 @@ class RefineAgent:
         logger.info("[RefineAgent] %d/%d Tests have issues: %s",
                     len(problematic), len(test_names), problematic)
 
+        # ── Issue 5: filter to highest-priority problematic tests ─
+        # Find the global top priority across all problematic tests
+        all_issues_flat = []
+        for n in problematic:
+            all_issues_flat.extend(test_scores[n].issues)
+
+        top_priority_issues = issues_at_priority_level(all_issues_flat)
+
+        # Only send tests that have issues at the top priority level
+        top_priority_problematic = [
+            n for n in problematic
+            if any(i in top_priority_issues for i in test_scores[n].issues)
+        ]
+
+        logger.info("[RefineAgent] Top priority issues: %s, affected tests: %s",
+                    top_priority_issues, top_priority_problematic)
+
         # ── Refiner LLM ───────────────────────────────────────────
-        filtered_diags  = {n: diags[n]       for n in problematic}
-        filtered_scores = {n: test_scores[n] for n in problematic}
-        filtered_codes  = {n: test_file_codes.get(n, "") for n in problematic}
+        filtered_diags  = {n: diags[n]       for n in top_priority_problematic}
+        filtered_scores = {n: test_scores[n] for n in top_priority_problematic}
+        filtered_codes  = {n: test_file_codes.get(n, "") for n in top_priority_problematic}
 
         messages = _build_refiner_messages(
             focal_method=focal_method, class_name=class_name,
@@ -607,7 +625,7 @@ class RefineAgent:
             diags=filtered_diags, test_scores=filtered_scores,
             suite_score=suite_score,
             iteration=iteration, template_dir=self.template_dir,
-            cfg=_cfg, 
+            cfg=_cfg,
         )
         parsed, llm_result = self.client.chat_json(messages)
 
@@ -620,68 +638,27 @@ class RefineAgent:
             }, f, indent=2, ensure_ascii=False)
         files_written += 1
 
-        # ★ 改进：确保每个 problematic test 都有修复指令
-        # 1. 收集 LLM 生成的指令
+        # ── Collect instructions ──────────────────────────────────
         llm_instructions = {
             t: instr for t, instr in parsed.get("test_instructions", {}).items()
             if t in diags and isinstance(instr, list) and instr
         }
-        
-        # 2. 对于没有 LLM 指令的 problematic test，使用 rule-based 建议
-        # ★ 新增：Fallback 到 rule-based repair（确保每个 test 都有指令）
-        instructions = dict(llm_instructions)  # 从 LLM 指令开始
-        fallback_used_for = []  # 记录哪些 test 使用了 fallback
-        
-        for tname in problematic:
-            if tname not in instructions:  # 如果 LLM 没生成指令
+
+        instructions = dict(llm_instructions)
+        fallback_used_for = []
+
+        for tname in top_priority_problematic:
+            if tname not in instructions:
                 fallback_hints = enrich_diag_with_fix_hints(diags[tname])
                 if fallback_hints:
-                    # 用 rule-based 建议作为 fallback
                     instructions[tname] = fallback_hints
                     fallback_used_for.append(tname)
-                    logger.info(
-                        "[RefineAgent] Using rule-based repair for %s (no LLM instructions), "
-                        "%d hints provided",
-                        tname, len(fallback_hints)
-                    )
-        
+
         if fallback_used_for:
-            logger.info(
-                "[RefineAgent] Rule-based fallback used for %d/%d problematic tests: %s",
-                len(fallback_used_for), len(problematic), fallback_used_for
-            )
-        
-        # 3. 获取删除建议
+            logger.info("[RefineAgent] Rule-based fallback for %d tests: %s",
+                        len(fallback_used_for), fallback_used_for)
+
         delete_tests = [t for t in parsed.get("delete_tests", []) if t in diags]
-
-        # ★ 注释：取消自动删除高冗余用例操作，只进行提升
-        # auto_deleted = []
-        # for tname, ts in test_scores.items():
-        #     if tname in diags and "HIGH_REDUNDANCY" in ts.issues:
-        #         if ts.max_similarity is not None and ts.max_similarity >= 0.9:
-        #             if tname not in delete_tests:
-        #                 delete_tests.append(tname)
-        #                 auto_deleted.append(tname)
-        # if auto_deleted:
-        #     logger.info("[RefineAgent] auto delete HIGH_REDUNDANCY tests: %s", auto_deleted)
-
-        # ★ 新增：验证修复效果（编译检查）
-        if instructions:
-            logger.info("[Refine] Validating %d modified tests for compilation...", len(instructions))
-            validation_passed = 0
-            for test_name in instructions:
-                test_file = os.path.join(focal_method_result_dir, "test_cases", f"{test_name}.java")
-                if os.path.exists(test_file):
-                    # 简单语法检查
-                    try:
-                        import javalang
-                        with open(test_file, 'r', encoding='utf-8') as f:
-                            content = f.read()
-                        javalang.parse.parse(content)
-                        validation_passed += 1
-                    except Exception as e:
-                        logger.warning("[Refine] Validation failed for %s: %s", test_name, str(e)[:100])
-            logger.info("[Refine] Validation: %d/%d tests passed syntax check", validation_passed, len(instructions))
 
         return RefineResult(
             focal_method=focal_method, class_name=class_name, iteration=iteration,

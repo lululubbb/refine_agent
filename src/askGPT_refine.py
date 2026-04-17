@@ -88,12 +88,7 @@ import sys
 import time
 from datetime import datetime
 from typing import Dict, List, Optional, Set
-# from contract_integration import (
-#     extract_contract_for_focal_method,
-#     save_contract,
-#     enrich_ctx_with_contract,
-#     get_contract_text,
-# )
+
 from colorama import Fore, Style, init, Back
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -117,10 +112,7 @@ from tools import (
 )
 from jinja2 import Environment, FileSystemLoader
 from compile_error_analyzer import enrich_diag_with_fix_hints, get_error_summary
-# from contract_integration import (
-#     extract_contract_for_focal_method, save_contract,
-#     enrich_ctx_with_contract, get_contract_text,
-# )
+from scoring import sort_issues_by_priority, issues_at_priority_level
 
 init()
 logger = logging.getLogger(__name__)
@@ -128,9 +120,13 @@ logger = logging.getLogger(__name__)
 _PROMPT_DIR = os.path.join(os.path.dirname(HERE), "prompt")
 env = Environment(loader=FileSystemLoader(_PROMPT_DIR))
 
+# ── Issue 4: hard cap on @Test methods per file ──────────────────────
+_MAX_TEST_METHODS_DEFAULT = 8   # absolute ceiling
+_TEST_METHOD_HEADROOM     = 2   # allow at most current_count + headroom new tests
+
 
 # ════════════════════════════════════════════════════════════════════
-# 进度打印工具
+# Progress printing helpers  (unchanged)
 # ════════════════════════════════════════════════════════════════════
 
 def _ts() -> str:
@@ -157,12 +153,16 @@ def _progress_bar(current: int, total: int, width: int = 20) -> str:
 
 
 def _code_changed(old: str, new: str) -> bool:
-    """判断两段 Java 代码是否有实质区别（忽略空白和注释差异）。"""
     def normalize(s):
         s = re.sub(r'//[^\n]*', '', s)
         s = re.sub(r'/\*.*?\*/', '', s, flags=re.DOTALL)
         return re.sub(r'\s+', ' ', s).strip()
     return normalize(old) != normalize(new)
+
+
+def _count_test_methods(java_source: str) -> int:
+    """Count @Test annotated methods in a Java source string."""
+    return len(re.findall(r'@Test\b', java_source))
 
 
 def _print_suite_score(suite_score, tag=""):
@@ -227,21 +227,22 @@ def _print_suite_score(suite_score, tag=""):
         sim = ss.max_pairwise_similarity
         sim_c = Fore.RED if 1-sim > 0.9 else (Fore.YELLOW if 1-sim > 0.7 else Fore.GREEN)
         print(f"  {'最大用例相似度':<16}: {sim_c}{1-sim:.3f}{Style.RESET_ALL}", flush=True)
-    else:
-        print(f"  {'最大用例相似度':<16}: {Fore.RED}N/A{Style.RESET_ALL}", flush=True)
 
     if ss.problem_tests and ss.n_tests > 0:
-        print(f"\n  ⚠️  问题分布：", flush=True)
-        issue_order = ["COMPILE_FAIL", "UNEXPECTED_EXEC_FAIL", "EXEC_TIMEOUT",
-                       "LOW_LINE_COV", "LOW_BRANCH_COV", "NOT_BUG_REVEALING", "HIGH_REDUNDANCY"]
+        print(f"\n  ⚠️  问题分布（按优先级）：", flush=True)
+        # Issue 5: show issues in priority order
+        issue_order = ["COMPILE_FAIL", "EXEC_FAIL", "EXEC_TIMEOUT",
+                       "NOT_BUG_REVEALING",
+                       "LOW_LINE_COV", "LOW_BRANCH_COV",
+                       "HIGH_REDUNDANCY"]
         issue_colors = {
-            "COMPILE_FAIL":         Fore.RED,
-            "UNEXPECTED_EXEC_FAIL": Fore.RED,
-            "EXEC_TIMEOUT":         Fore.RED,
-            "LOW_LINE_COV":         Fore.YELLOW,
-            "LOW_BRANCH_COV":       Fore.YELLOW,
-            "NOT_BUG_REVEALING":    Fore.MAGENTA,
-            "HIGH_REDUNDANCY":      Fore.CYAN,
+            "COMPILE_FAIL":      Fore.RED,
+            "EXEC_FAIL":         Fore.RED,
+            "EXEC_TIMEOUT":      Fore.RED,
+            "NOT_BUG_REVEALING": Fore.MAGENTA,
+            "LOW_LINE_COV":      Fore.YELLOW,
+            "LOW_BRANCH_COV":    Fore.YELLOW,
+            "HIGH_REDUNDANCY":   Fore.CYAN,
         }
         for iss in issue_order:
             if iss in ss.problem_tests:
@@ -272,15 +273,19 @@ def _print_test_diag(tc_name: str, diag, score):
         return
 
     issue_colors = {
-        "COMPILE_FAIL": Fore.RED, "EXEC_FAIL": Fore.RED, "EXEC_TIMEOUT": Fore.RED,
-        "LOW_LINE_COV": Fore.YELLOW, "LOW_BRANCH_COV": Fore.YELLOW,
-        "NOT_BUG_REVEALING": Fore.MAGENTA, "HIGH_REDUNDANCY": Fore.CYAN,
+        "COMPILE_FAIL":      Fore.RED,
+        "EXEC_FAIL":         Fore.RED,
+        "EXEC_TIMEOUT":      Fore.RED,
+        "NOT_BUG_REVEALING": Fore.MAGENTA,
+        "LOW_LINE_COV":      Fore.YELLOW,
+        "LOW_BRANCH_COV":    Fore.YELLOW,
+        "HIGH_REDUNDANCY":   Fore.CYAN,
     }
 
     data_valid = getattr(diag, 'diag_data_valid', True)
     validity_hint = "" if data_valid else f" {Fore.RED}[⚠️ 诊断数据无效]{Style.RESET_ALL}"
 
-    print(f"\n  🔍 {Fore.WHITE}{tc_name}{Style.RESET_ALL}{validity_hint}  问题: "
+    print(f"\n  🔍 {Fore.WHITE}{tc_name}{Style.RESET_ALL}{validity_hint}  问题（优先级顺序）: "
           + "  ".join([f"{issue_colors.get(i, Fore.WHITE)}[{i}]{Style.RESET_ALL}" for i in issues]),
           flush=True)
 
@@ -292,12 +297,17 @@ def _print_test_diag(tc_name: str, diag, score):
         for e in diag.compile_errors[:5]:
             print(f"      • {e}", flush=True)
 
-    if "EXEC_FAIL" in issues and diag.exec_errors:
+    if ("EXEC_FAIL" in issues or "EXEC_TIMEOUT" in issues) and diag.exec_errors:
         print(f"    {Fore.RED}运行错误 (前5条):{Style.RESET_ALL}", flush=True)
         for e in diag.exec_errors[:5]:
             print(f"      • {e}", flush=True)
 
-    if score.focal_line_coverage is not None:
+    # Issue 3: show focal line counts
+    if score.focal_line_covered is not None and score.focal_line_total is not None and score.focal_line_total > 0:
+        lc_pct = score.focal_line_covered / score.focal_line_total * 100
+        lc_color = Fore.GREEN if lc_pct >= 70 else (Fore.YELLOW if lc_pct >= 40 else Fore.RED)
+        print(f"    focal method行覆盖: {lc_color}{score.focal_line_covered}/{score.focal_line_total} ({lc_pct:.1f}%){Style.RESET_ALL}", flush=True)
+    elif score.focal_line_coverage is not None:
         lc = score.focal_line_coverage
         lc_color = Fore.GREEN if lc >= 0.7 else (Fore.YELLOW if lc >= 0.4 else Fore.RED)
         print(f"    行覆盖率: {lc_color}{lc*100:.1f}%{Style.RESET_ALL}", flush=True)
@@ -314,7 +324,7 @@ def _print_test_diag(tc_name: str, diag, score):
 
     # Bug revealing
     if "NOT_BUG_REVEALING" in issues:
-        print(f"    {Fore.MAGENTA}未揭示 Bug：建议针对边界条件和异常路径增加断言{Style.RESET_ALL}", flush=True)
+        print(f"    {Fore.MAGENTA}未揭示 Bug：建议强化断言（使用精确 assertEquals）{Style.RESET_ALL}", flush=True)
 
     # 高冗余
     if "HIGH_REDUNDANCY" in issues and score.most_similar_to:
@@ -323,7 +333,6 @@ def _print_test_diag(tc_name: str, diag, score):
 
 
 def _print_refine_instructions(instructions: Dict[str, List[str]], delete_tests: List[str]):
-    """打印 Refiner LLM 输出的修复指令预览。"""
     if not instructions and not delete_tests:
         print(f"\n  ℹ️  {Fore.GREEN}Refiner 无修复指令（Suite 质量良好）{Style.RESET_ALL}", flush=True)
         return
@@ -361,7 +370,7 @@ def _log_refine_quality(save_dir: str, focal_method: str, round_num: int,
 
 
 # ════════════════════════════════════════════════════════════════════
-# Prompt 工具
+# Prompt helpers (unchanged)
 # ════════════════════════════════════════════════════════════════════
 
 def generate_prompt(template_name: str, context: dict) -> str:
@@ -382,7 +391,7 @@ def remain_prompt_tokens(messages):
 
 
 # ════════════════════════════════════════════════════════════════════
-# Generator LLM 调用
+# Generator LLM call (unchanged)
 # ════════════════════════════════════════════════════════════════════
 
 def call_generator(gen_client: LLMClient, messages: List[Dict],
@@ -401,7 +410,7 @@ def _strip_pkg(s: str, imports: str, package: str) -> str:
 
 
 # ════════════════════════════════════════════════════════════════════
-# 语法验证工具（集中管理）
+# Syntax validation (unchanged)
 # ════════════════════════════════════════════════════════════════════
 
 def _run_syntax_validation(
@@ -430,7 +439,7 @@ def _run_syntax_validation(
 
 
 # ════════════════════════════════════════════════════════════════════
-# 初始生成单个 Test 文件
+# Initial generation (unchanged)
 # ════════════════════════════════════════════════════════════════════
 
 def generate_one_test(
@@ -456,7 +465,6 @@ def generate_one_test(
 
     def _s(s): return _strip_pkg(s, imports, package)
 
-    # 不再注入 version_constraints
     if not ctx_d3.get("c_deps") and not ctx_d3.get("m_deps"):
         ctx  = copy.deepcopy(ctx_d1)
         msgs = generate_messages(TEMPLATE_NO_DEPS, ctx)
@@ -506,7 +514,6 @@ def generate_one_test(
     with open(os.path.join(save_dir, "2_JAVA.java"), "w", encoding="utf-8") as f:
         f.write(final_code)
 
-    # ★ 语法验证：在生成后立即执行，将问题缓存供下一轮 fix 使用
     _focal_ctx = ctx_d1.get("information", "") or ctx_d3.get("full_fm", "")
     has_errors, val_text = _run_syntax_validation(
         final_code, tc_name, focal_class_context=_focal_ctx
@@ -552,79 +559,69 @@ def _ensure_package_first(code: str, pkg_decl: str) -> str:
 
 
 # ════════════════════════════════════════════════════════════════════
-# ★ 渐进式修复策略：优先级判断
+# Issue 5: Fix priority ordering helper
 # ════════════════════════════════════════════════════════════════════
 
 def _get_fix_priority(issues: List[str]) -> str:
     """
-    返回当前 Test 最需要修复的问题类型。
-    优先级: COMPILE_FAIL > EXEC_FAIL/TIMEOUT > LOW_COV > BUG_REVEALING > REDUNDANCY
+    Return the primary category of the highest-priority issue present.
+    Priority: compile > exec > bug_revealing > coverage > redundancy
     """
     if "COMPILE_FAIL" in issues:
         return "compile"
     if "EXEC_FAIL" in issues or "EXEC_TIMEOUT" in issues:
         return "exec"
-    if "LOW_LINE_COV" in issues or "LOW_BRANCH_COV" in issues:
-        return "coverage"
     if "NOT_BUG_REVEALING" in issues:
         return "bug_revealing"
+    if "LOW_LINE_COV" in issues or "LOW_BRANCH_COV" in issues:
+        return "coverage"
     if "HIGH_REDUNDANCY" in issues:
         return "redundancy"
     return "none"
 
 
 # ════════════════════════════════════════════════════════════════════
-# Fix 单个 Test
+# build_fix_messages  — Issues 2, 3, 4, 5
 # ════════════════════════════════════════════════════════════════════
-def _select_key_compile_errors(compile_errors: List[str], max_items: int = 10) -> List[str]:
-    """
-    从完整编译错误列表中选取最有价值的错误行。
-    优先 ': error:' 行，其次上下文行，跳过 'Note:' 等噪声。
-    """
-    error_lines = []
-    context_lines = []
-    for line in compile_errors:
-        if ": error:" in line or line.strip().startswith("error:"):
-            error_lines.append(line)
-        elif line.strip() and not line.strip().startswith("Note:"):
-            context_lines.append(line)
-    selected = error_lines[:max_items]
-    if len(selected) < max_items:
-        selected += context_lines[:max_items - len(selected)]
-    return selected if selected else compile_errors[:max_items]
 
 def build_fix_messages(
-    test_name, current_code, instructions, focal_method,
-    class_name, ctx_d1, ctx_d3, imports, suite_summary,
-    prev_unchanged=False, diag=None, contract_text="",
-    validation_issues: dict = None, cfg=None,
+    test_name,
+    current_code,
+    instructions,
+    focal_method,
+    class_name,
+    ctx_d1,
+    ctx_d3,
+    imports,
+    suite_summary,
+    prev_unchanged=False,
+    diag=None,
+    contract_text="",
+    validation_issues: dict = None,
+    cfg=None,
     issues: List[str] = None,
 ):
     """
-    构建 fix 阶段的 LLM 消息列表。
- 
-    修改要点：
-    1. 消融模式开关（use_compile_exec / use_coverage / use_bug_revealing / use_redundancy）
-       作为 Jinja2 模板变量传入，由模板决定显示哪些区块（问题5）。
-    2. 完整的 compile_errors / exec_errors 从 diag 读取，
-       tool_runner_adapter 已从 compiler_output/*.txt 和 test_output/*.txt 填充（问题1）。
-    3. issues 列表传入模板，控制 BUG_REVEALING / HIGH_REDUNDANCY 区块（问题4/5）。
-    4. 删除 error_summary（问题3：冗余，错误本身已足够清晰）。
-    5. 修复指令不再按 priority 过度过滤，保留全部（问题2）。
+    Build fix-phase LLM messages.
+
+    Issue 2: coverage context only populated when LOW_COV issue is present.
+    Issue 3: focal_line_covered / focal_line_total passed from diag.
+    Issue 4: max_test_methods computed and passed to template.
+    Issue 5: instructions filtered to top-priority issue group.
     """
     from scoring_ablation import AblationConfig, global_ablation_config
     if cfg is None:
         cfg = global_ablation_config()
     if issues is None:
         issues = []
- 
-    # ── 消融模式开关 ──────────────────────────────────────────────
+
+    # ── Ablation switches ─────────────────────────────────────────
     use_compile_exec  = bool(cfg.use_compile_exec)
     use_coverage      = bool(cfg.use_coverage)
     use_bug_revealing = bool(cfg.use_bug_revealing)
     use_redundancy    = bool(cfg.use_redundancy)
- 
-    # ── 从 diag 读取完整错误信息 ──────────────────────────────────
+
+    # ── Error information from diag ───────────────────────────────
     if use_compile_exec and diag:
         compile_ok     = getattr(diag, 'compile_ok', True)
         exec_ok        = getattr(diag, 'exec_ok', True)
@@ -635,17 +632,14 @@ def build_fix_messages(
         exec_ok        = True
         compile_errors = []
         exec_errors    = []
- 
-    if use_coverage and diag:
-        missed_methods  = list(getattr(diag, 'missed_methods', []))
-        partial_methods = list(getattr(diag, 'partial_methods', []))
-    else:
-        missed_methods  = []
-        partial_methods = []
- 
-    # ── 消融模式下过滤 issues ────────────────────────────────────
+
+    # ── Issue 5: filter issues to top-priority group ──────────────
+    top_issues = issues_at_priority_level(issues) if issues else []
+    priority   = _get_fix_priority(top_issues)
+
+    # ── Ablation filter on top issues ─────────────────────────────
     filtered_issues = []
-    for issue in issues:
+    for issue in top_issues:
         if issue in ("COMPILE_FAIL", "EXEC_FAIL", "EXEC_TIMEOUT") and not use_compile_exec:
             continue
         if issue in ("LOW_LINE_COV", "LOW_BRANCH_COV") and not use_coverage:
@@ -655,60 +649,84 @@ def build_fix_messages(
         if issue == "HIGH_REDUNDANCY" and not use_redundancy:
             continue
         filtered_issues.append(issue)
- 
-    priority = _get_fix_priority(filtered_issues) if filtered_issues else "none"
 
-    # ── 新增：指令过滤逻辑 ────────────────────────────────────────────────────
+    # ── Issue 2: coverage context only when LOW_COV is the issue ──
+    has_coverage_issue = ("LOW_LINE_COV" in filtered_issues or
+                          "LOW_BRANCH_COV" in filtered_issues)
+
+    if use_coverage and has_coverage_issue and diag:
+        focal_line_rate    = getattr(diag, 'focal_line_rate',    None)
+        focal_branch_rate  = getattr(diag, 'focal_branch_rate',  None)
+        focal_line_covered = getattr(diag, 'focal_line_covered', None)
+        focal_line_total   = getattr(diag, 'focal_line_total',   None)
+    else:
+        # Issue 2: do NOT pass coverage context if not a coverage issue
+        focal_line_rate    = None
+        focal_branch_rate  = None
+        focal_line_covered = None
+        focal_line_total   = None
+
+    # ── Issue 4: compute @Test method cap ─────────────────────────
+    current_test_count = _count_test_methods(current_code)
+    # Allow at most current_count + headroom, but cap at absolute max
+    max_test_methods = min(
+        current_test_count + _TEST_METHOD_HEADROOM,
+        _MAX_TEST_METHODS_DEFAULT,
+    )
+    # Never go below current count (we don't want to force deletion)
+    max_test_methods = max(max_test_methods, current_test_count)
+
+    # ── Issue 5: filter instructions to top-priority ──────────────
     filtered_instructions = []
     for instr in instructions:
         instr_lower = instr.lower()
         
         # 1. 如果优先级是编译，只保留编译/语法指令
         if priority == "compile":
-            if "compile" in instr_lower or "syntax" in instr_lower:
+            # Only compile/syntax related instructions
+            if any(kw in instr_lower for kw in
+                   ["compile", "syntax", "error:", "cannot find", "private access",
+                    "incompatible", "unreported", "ambiguous", "constructor"]):
                 filtered_instructions.append(instr)
         
         # 2. 如果优先级是执行，只保留执行/运行时/异常指令
         elif priority == "exec":
-            if any(kw in instr_lower for kw in ["exec", "runtime", "exception", "timeout"]):
+            if any(kw in instr_lower for kw in
+                   ["exec", "runtime", "exception", "timeout", "assert", "expected",
+                    "but was", "thrown", "null"]):
                 filtered_instructions.append(instr)
-        
-        # 3. 如果优先级是覆盖率，只保留覆盖率/分支/行指令
-        elif priority == "coverage":
-            if any(kw in instr_lower for kw in ["coverage", "branch", "line"]):
-                filtered_instructions.append(instr)
-        
-        # 4. 如果优先级是找 Bug，只保留 Bug 触发指令
         elif priority == "bug_revealing":
-            if "bug" in instr_lower or "revealing" in instr_lower:
+            if any(kw in instr_lower for kw in
+                   ["bug", "revealing", "assert", "assertEquals", "boundary", "precise"]):
                 filtered_instructions.append(instr)
-        
-        # 5. 如果优先级是去冗余
+        elif priority == "coverage":
+            if any(kw in instr_lower for kw in
+                   ["coverage", "branch", "line", "path", "case", "boundary", "test"]):
+                filtered_instructions.append(instr)
         elif priority == "redundancy":
-            if "redundancy" in instr_lower or "similar" in instr_lower:
+            if any(kw in instr_lower for kw in
+                   ["redundan", "similar", "structur", "different"]):
                 filtered_instructions.append(instr)
         
         # 6. 无明确优先级或 none 时，保留所有指令（或根据需求自定义）
         else:
             filtered_instructions.append(instr)
 
-    # 如果过滤后一条指令都没剩下（极端情况），回退到原始指令，防止模型丢失上下文
+    # Fallback: if nothing matched the filter, keep all
     if not filtered_instructions and instructions:
         filtered_instructions = list(instructions)
 
-    merged_instructions = filtered_instructions
- 
     unchanged_warning = (
-        "\\n\\n⚠️ CRITICAL: Your previous output was IDENTICAL to the input. "
+        "\n\n⚠️ CRITICAL: Your previous output was IDENTICAL to the input. "
         "You MUST make substantial changes this time. "
         "Rewrite the failing test methods completely with different logic."
         if prev_unchanged else ""
     )
- 
+
     method_code = ctx_d1.get("information", ctx_d3.get("full_fm", ""))
- 
+
     context = {
-        # 基础信息
+        # Basic
         "class_name":           class_name,
         "focal_method":         focal_method,
         "test_name":            test_name,
@@ -718,84 +736,80 @@ def build_fix_messages(
         "imports":              imports,
         "contract_text":        contract_text,
         "unchanged_warning":    unchanged_warning,
-        # 修复指令
-        "instructions_json":    json.dumps(merged_instructions[:5], indent=2, ensure_ascii=False),
+        # Instructions
+        "instructions_json":    json.dumps(filtered_instructions[:5], indent=2, ensure_ascii=False),
         "delete_tests_json":    "[]",
-        "instructions_summary": "\\n".join(
-            f"  {i+1}. {instr}" for i, instr in enumerate(merged_instructions[:5])
+        "instructions_summary": "\n".join(
+            f"  {i+1}. {instr}" for i, instr in enumerate(filtered_instructions[:5])
         ),
-        # ★ 消融模式开关（传入模板）
+        # Ablation switches
         "use_compile_exec":  use_compile_exec,
         "use_coverage":      use_coverage,
         "use_bug_revealing": use_bug_revealing,
         "use_redundancy":    use_redundancy,
-        # 编译/运行状态和完整错误
+        # Compile/exec state
         "compile_ok":     compile_ok,
         "exec_ok":        exec_ok,
         "compile_errors": compile_errors[:30],
         "exec_errors":    exec_errors[:30],
-        # 覆盖率信息
-        "missed_methods":  missed_methods[:20],
-        "partial_methods": partial_methods[:10],
-        # ★ issues 列表（控制 BUG_REVEALING / HIGH_REDUNDANCY 区块）
+        # Issue 2+3: coverage vars (None when not a coverage issue)
+        "focal_line_rate":    focal_line_rate,
+        "focal_branch_rate":  focal_branch_rate,
+        "focal_line_covered": focal_line_covered,
+        "focal_line_total":   focal_line_total,
+        # Issue 5: top-priority issues (for template conditionals)
         "issues": filtered_issues,
-        # 兼容性字段（保留但为空）
-        "auto_fix_hints": [],
-        "error_summary":  "",
+        # Issue 4: @Test method cap
+        "max_test_methods": max_test_methods,
+        # Legacy / compat
+        "missed_methods":  [],   # Issue 3: no longer used in template
+        "partial_methods": [],   # Issue 3: no longer used in template
+        "auto_fix_hints":  [],
+        "error_summary":   "",
     }
- 
+
     msgs = generate_messages(TEMPLATE_FIX, context)
     if remain_prompt_tokens(msgs) < 0:
         context["method_code"] = ctx_d3.get("full_fm", "")[:2000]
         msgs = generate_messages(TEMPLATE_FIX, context)
- 
-    # ── 末尾追加关键提示 ─────────────────────────────────────────
+
+    # ── Append key reminders ──────────────────────────────────────
     if msgs and msgs[-1]["role"] == "user":
         suffix_parts = []
- 
-        # 修复指令摘要（始终追加）
+
         suffix_parts.append(
-            f"\\n\\n## 📋 Repair Instructions Summary\\n{context['instructions_summary']}"
+            f"\n\n## 📋 Repair Instructions Summary\n{context['instructions_summary']}"
         )
- 
-        # # 编译错误关键行强化
-        # if use_compile_exec and not compile_ok and compile_errors:
-        #     key_errors = _select_key_compile_errors(compile_errors, max_items=10)
-        #     suffix_parts.append(
-        #         "\\n\\n## ⚠️ KEY COMPILE ERRORS TO FIX:\\n"
-        #         + "\\n".join(f"  {e}" for e in key_errors)
-        #     )
- 
-        # # 运行错误强化
-        # if use_compile_exec and compile_ok and not exec_ok and exec_errors:
-        #     suffix_parts.append(
-        #         "\\n\\n## ⚠️ KEY RUNTIME ERRORS TO FIX:\\n"
-        #         + "\\n".join(f"  {e}" for e in exec_errors[:8])
-        #     )
- 
-        # 未改变警告
+
         if prev_unchanged:
             suffix_parts.append(
-                "\\n\\nMUST MAKE SUBSTANTIAL CHANGES: "
+                "\n\nMUST MAKE SUBSTANTIAL CHANGES: "
                 "Previous output was identical to input. "
                 "Rewrite the problematic test methods completely."
             )
- 
-        # 语法验证问题注入
+
         if validation_issues and test_name in validation_issues:
             _vdata = validation_issues[test_name]
             if _vdata.get("has_errors") and _vdata.get("prompt_text"):
                 suffix_parts.append(
-                    f"\\n\\n## Static Pre-validation Issues (fix these too):\\n"
+                    f"\n\n## Static Pre-validation Issues (fix these too):\n"
                     f"{_vdata['prompt_text']}"
                 )
- 
+
+        # Issue 4: reiterate @Test cap in suffix
+        suffix_parts.append(
+            f"\n\n⚠️ @Test METHOD LIMIT: Keep total `@Test` methods ≤ {max_test_methods}. "
+            f"Currently the file has {current_test_count} @Test methods. "
+            f"Improve existing tests rather than adding many new ones."
+        )
+
         msgs[-1]["content"] += "".join(suffix_parts)
- 
+
     return msgs
 
+
 # ════════════════════════════════════════════════════════════════════
-# 主流程 — focal_method_pipeline
+# focal_method_pipeline  (only build_fix_messages call updated)
 # ════════════════════════════════════════════════════════════════════
 
 def focal_method_pipeline(
@@ -843,18 +857,6 @@ def focal_method_pipeline(
     focal_method_code = raw_data.get("source_code", ctx_d1.get("information", ""))
     pkg_decl          = canonical_package_decl(package)
 
-    # ★ 删除版本信息提取
-    # version_text 完全移除
-
-    # 合约提取（保留，对有防御性检查的方法有价值）
-    # contract = extract_contract_for_focal_method(raw_data, ctx_d1)
-    # if contract and not contract.is_empty():
-    #     save_contract(contract, base_dir)
-    #     print(f"  {Fore.BLUE}📋 Program contract extracted: "
-    #           f"{len(contract.preconditions)} preconditions, "
-    #           f"{len(contract.exception_contracts)} exception contracts{Style.RESET_ALL}", flush=True)
-    # else:
-    #     contract = None
     contract = None
 
     gen_client = make_generator_client()
@@ -865,17 +867,17 @@ def focal_method_pipeline(
     current_name = os.path.basename(current_dir)
 
     if current_name.endswith("_f") or current_name.endswith("_F"):
-        fixed_dir = current_dir
+        fixed_dir  = current_dir
         buggy_name = re.sub(r'_f$', '_b', current_name, flags=re.IGNORECASE)
-        buggy_dir = None
+        buggy_dir  = None
         cand = os.path.join(proj_base, buggy_name)
         if os.path.isdir(cand):
             buggy_dir = cand
         test_project_dir = fixed_dir
     else:
-        buggy_dir = current_dir
+        buggy_dir  = current_dir
         fixed_name = re.sub(r'_b$', '_f', current_name, flags=re.IGNORECASE)
-        fixed_dir = None
+        fixed_dir  = None
         cand = os.path.join(proj_base, fixed_name)
         if os.path.isdir(cand):
             fixed_dir = cand
@@ -889,9 +891,7 @@ def focal_method_pipeline(
         skip_bug_revealing = (buggy_dir is None or fixed_dir is None),
     )
 
-    # ════════════════════════════════════════════════════════════════
-    # Phase 1: 初始生成
-    # ════════════════════════════════════════════════════════════════
+    # ── Phase 1: Initial generation ──────────────────────────────
     phase1_start = time.time()
     _divider("═", color=Fore.GREEN)
     print(Fore.GREEN + f"  ▶ Phase 1: 初始生成 {test_number} 个 Test 文件" + Style.RESET_ALL, flush=True)
@@ -907,10 +907,7 @@ def focal_method_pipeline(
         tc_name = f"{class_name}_{method_id}_{seq}Test"
         result = generate_one_test(
             seq=seq, gen_client=gen_client,
-            # ctx_d1=enrich_ctx_with_contract(ctx_d1, contract),
-            # ctx_d3=enrich_ctx_with_contract(ctx_d3, contract),
-            ctx_d1=ctx_d1,
-            ctx_d3=ctx_d3,
+            ctx_d1=ctx_d1, ctx_d3=ctx_d3,
             imports=imports, package=package,
             class_name=class_name, method_id=method_id,
             tc_dir=tc_dir, gen_log_dir=gen_log_dir,
@@ -933,9 +930,7 @@ def focal_method_pipeline(
         _save_stats(base_dir, tracker, time_stats, process_start)
         return tracker.to_dict()
 
-    # ════════════════════════════════════════════════════════════════
-    # Phase 2: 迭代 Refine
-    # ════════════════════════════════════════════════════════════════
+    # ── Phase 2: Iterative Refine ─────────────────────────────────
     unchanged_counts: Dict[str, int] = {tc: 0 for tc in current_codes}
 
     for r in range(1, max_rounds + 1):
@@ -1005,17 +1000,7 @@ def focal_method_pipeline(
 
         _print_refine_instructions(refine_result.instructions, refine_result.delete_tests)
 
-        # ★ 注释：取消删除高冗余 Test 操作，只进行提升
-        # # 删除高冗余 Test
-        # for del_tc in refine_result.delete_tests:
-        #     current_codes.pop(del_tc, None)
-        #     unchanged_counts.pop(del_tc, None)
-        #     tc_path = os.path.join(tc_dir, f"{del_tc}.java")
-        #     if os.path.exists(tc_path):
-        #         os.remove(tc_path)
-        #         print(f"  🗑  已删除冗余 Test: {del_tc}", flush=True)
-
-        # Fix 循环
+        # ── Fix loop ──────────────────────────────────────────────
         fix_results = {"ok": [], "unchanged": [], "no_code": [], "fail": []}
         print(f"\n  🔧 开始精修 {len(refine_result.instructions)} 个 Test ...", flush=True)
 
@@ -1042,9 +1027,7 @@ def focal_method_pipeline(
                 class_name=class_name, ctx_d1=ctx_d1, ctx_d3=ctx_d3,
                 imports=imports, suite_summary=refine_result.suite_summary,
                 prev_unchanged=prev_unchanged, diag=tc_diag,
-                # contract_text=get_contract_text(contract),
                 contract_text="",
-                # ★ 不再传入 version_text
                 validation_issues=validation_issues_cache,
                 issues=tc_score.issues if tc_score else [],
             )
@@ -1059,7 +1042,6 @@ def focal_method_pipeline(
             fix_gen_path = os.path.join(fix_dir, "fix_gen.json")
             t0_fix = time.time()
             ok, fix_result = call_generator(gen_client, fix_msgs, fix_gen_path)
-            t_fix = time.time() - t0_fix
 
             tracker.record("generator", round_key, fix_result)
 
@@ -1095,7 +1077,6 @@ def focal_method_pipeline(
                     else:
                         unchanged_counts[tc_name] = 0
 
-                        # ★ fix 后立即进行语法验证，更新缓存供下一轮使用
                         has_val_errors, val_text = _run_syntax_validation(
                             new_code, tc_name, focal_class_context=focal_class_ctx
                         )
@@ -1108,7 +1089,6 @@ def focal_method_pipeline(
                                 print(f"    ⚠️  [Validator] fix 后仍有静态问题，"
                                       f"将在下轮注入提示", flush=True)
                         else:
-                            # 修复成功，清除旧的验证缓存
                             validation_issues_cache.pop(tc_name, None)
 
                         current_codes[tc_name] = new_code
@@ -1205,7 +1185,7 @@ def _save_stats(base_dir: str, tracker: LLMStatsTracker,
 
 
 # ════════════════════════════════════════════════════════════════════
-# 全局汇总辅助
+# Global accumulator + batch entry (unchanged)
 # ════════════════════════════════════════════════════════════════════
 
 def _acc_global(g: dict, s: dict):
@@ -1234,10 +1214,6 @@ def _acc_global(g: dict, s: dict):
     g["all_total"]["call_count"]          = (g["generator"].get("call_count", 0)
                                               + g["refiner"].get("call_count", 0))
 
-
-# ════════════════════════════════════════════════════════════════════
-# 批量入口
-# ════════════════════════════════════════════════════════════════════
 
 def start_whole_process(
     source_dir: str,
@@ -1295,8 +1271,8 @@ def start_whole_process(
             _acc_global(global_stats, focal_method_pipeline(*t))
 
     elapsed = round(time.time() - global_start, 2)
-    global_stats["wall_clock_seconds"]    = elapsed
-    global_stats["total_focal_methods"]   = total
+    global_stats["wall_clock_seconds"]  = elapsed
+    global_stats["total_focal_methods"] = total
 
     with open(os.path.join(result_path, "global_stats.json"), "w", encoding="utf-8") as f:
         json.dump(global_stats, f, indent=2, ensure_ascii=False)

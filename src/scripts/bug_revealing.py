@@ -7,17 +7,10 @@ and PASSES on the fixed (f) version.
 Usage (examples):
   python3 bug_revealing.py --buggy /path/to/Csv_1_b --fixed /path/to/Csv_1_f --tests /path/to/tests_dir --out summary.csv
 
-Behavior summary:
-- Auto-detect tests if --tests omitted: looks for newest tests* dir under buggy project.
-- For each test .java: determine full class name from package+basename.
-- Optionally copy tests into both projects' src/test/java (use --copy). If not copied, script will compile and run tests from a temporary location.
-- Execution uses Maven to run a single test class per run:
-    mvn -Dtest=full.test.ClassName test
-  This ensures project classpath and surefire behavior.
-- A test is considered PASS if Maven returns 0 and surefire reports no failures; FAIL otherwise.
-- Output: CSV (default) with per-test b_result/f_result and boolean bug_revealing, and an aggregate summary printed.
-
-Note: This script favors correctness and simplicity using Maven runs per test. It is slower but robust across projects.
+Changes:
+  - Added @Test method-level statistics at the end of output:
+    * Fixed version: pass/fail/timeout counts per @Test method
+    * Buggy version: pass/fail counts per @Test method
 """
 
 import argparse
@@ -177,8 +170,6 @@ def copy_test_to_project(java_file, project_root, tests_subpath='src/test/java')
     return dest
 
 
-# ── 推断 target_class（modified class 简单类名）──────────────────────────
-# NOTE: Defined at module level so it can be called before any local scoping issues.
 def resolve_target_class(project_root, tests_top=None):
     """返回 target_class 简单类名，失败返回空字符串"""
     meta = os.path.join(project_root, 'modified_classes.src')
@@ -221,27 +212,25 @@ def resolve_target_class(project_root, tests_top=None):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--buggy', required=True, help='Path to buggy (b) project, e.g. /path/to/Csv_1_b')
-    parser.add_argument('--fixed', required=True, help='Path to fixed (f) project, e.g. /path/to/Csv_1_f')
-    parser.add_argument('--tests', required=False, help='Path to generated tests directory (folder containing Test.java files). If omitted tries to find newest tests* under buggy project.')
-    parser.add_argument('--copy', action='store_true', help='Copy tests into both projects under src/test/java before running')
-    parser.add_argument('--out', default=None, help='CSV output path (optional; auto-derived from tests dir if omitted)')
-    parser.add_argument('--timeout', type=int, default=120, help='Timeout seconds per test run')
-    parser.add_argument('--fail-if-no-tests', action='store_true', help='Exit non-zero if no tests found')
-    parser.add_argument('--force-clean', action='store_true', help='Force clean existing target directories or copied tests (optional)')
+    parser.add_argument('--buggy', required=True, help='Path to buggy (b) project')
+    parser.add_argument('--fixed', required=True, help='Path to fixed (f) project')
+    parser.add_argument('--tests', required=False, help='Path to generated tests directory')
+    parser.add_argument('--copy', action='store_true')
+    parser.add_argument('--out', default=None)
+    parser.add_argument('--timeout', type=int, default=120)
+    parser.add_argument('--fail-if-no-tests', action='store_true')
+    parser.add_argument('--force-clean', action='store_true')
     args = parser.parse_args()
 
     buggy = os.path.abspath(args.buggy)
     fixed = os.path.abspath(args.fixed)
 
-    # ── project prefix from buggy dir name (strip trailing _b / _f) ──────────
     proj_basename = os.path.basename(buggy)
     if proj_basename.lower().endswith('_b') or proj_basename.lower().endswith('_f'):
         proj_prefix = proj_basename[:-2]
     else:
         proj_prefix = proj_basename
 
-    # ── resolve tests_dir ─────────────────────────────────────────────────────
     tests_dir = args.tests
     if not tests_dir:
         tests_dir = find_newest_tests_dir(buggy)
@@ -264,11 +253,9 @@ def main():
                 tests_dir = os.path.abspath(raw)
                 print(f'Warning: provided --tests path not found as given or unquoted: {raw}')
 
-    # if tests dir contains a test_cases subdirectory, prefer that
     if tests_dir and os.path.isdir(os.path.join(tests_dir, 'test_cases')):
         tests_dir = os.path.join(tests_dir, 'test_cases')
 
-    # determine top-level tests directory (the tests* directory)
     top_tests_dir = None
     if tests_dir:
         if os.path.basename(tests_dir) == 'test_cases':
@@ -278,15 +265,11 @@ def main():
         else:
             top_tests_dir = os.path.dirname(tests_dir)
 
-    # ── resolve target class (now that top_tests_dir is set) ─────────────────
     _target_class = resolve_target_class(buggy, top_tests_dir)
     _tgt_slug = _target_class if _target_class else 'unknown'
 
-    # ── resolve output CSV path ───────────────────────────────────────────────
-    # Priority: explicit --out > auto-derived next to tests* dir
     if args.out:
         out_path = os.path.abspath(args.out)
-        # ensure the filename is prefixed correctly
         out_dir  = os.path.dirname(out_path)
         out_base = os.path.basename(out_path)
         expected_prefix = f'{proj_prefix}_{_tgt_slug}_'
@@ -294,14 +277,11 @@ def main():
             out_base = f'{proj_prefix}_{_tgt_slug}_{out_base}'
         out_path = os.path.join(out_dir, out_base)
     else:
-        # auto-derive: place in top_tests_dir (the tests* folder)
         base_dir = top_tests_dir if top_tests_dir else (os.path.dirname(buggy) if buggy else os.getcwd())
         out_path = os.path.join(base_dir, f'{proj_prefix}_{_tgt_slug}_bugrevealing.csv')
 
-    # make sure the output directory exists
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
 
-    # ── discover test files ───────────────────────────────────────────────────
     if tests_dir and os.path.isdir(tests_dir):
         test_files = discover_test_files(tests_dir)
     else:
@@ -319,7 +299,6 @@ def main():
         print(f'Wrote empty summary to {out_path}')
         return
 
-    # ── prepare detail log file ───────────────────────────────────────────────
     log_path = os.path.splitext(os.path.abspath(out_path))[0] + '.details.txt'
     try:
         logfh = open(log_path, 'w', encoding='utf-8')
@@ -385,17 +364,6 @@ def main():
             except Exception:
                 pass
 
-    if args.copy:
-        echo_and_log('Note: --copy requested but ignored. Using tests from tests*/test_cases and compiling into tests_ChatGPT.')
-
-    print('Note: TestRunner initialization skipped; using precompiled classes in tests_ChatGPT if available.')
-    if logfh:
-        try:
-            logfh.write('Note: TestRunner initialization skipped; using precompiled classes in tests_ChatGPT if available.\n')
-        except Exception:
-            pass
-
-    # ── build classpath ───────────────────────────────────────────────────────
     def build_classpath(project_root):
         m2 = os.path.expanduser('~/.m2/repository')
         def jar(*path):
@@ -420,7 +388,6 @@ def main():
             jar('org', 'junit', 'platform', 'junit-platform-console-standalone', '1.9.2',
                 'junit-platform-console-standalone-1.9.2.jar'),
         ]
-        # include compiled tests placed under the top-level tests dir (tests_ChatGPT)
         try:
             if top_tests_dir:
                 alt = os.path.join(top_tests_dir, 'tests_ChatGPT')
@@ -435,16 +402,26 @@ def main():
     buggy_cp = build_classpath(buggy)
     fixed_cp = build_classpath(fixed)
 
-    # ── main test loop ────────────────────────────────────────────────────────
     out_rows = []
     total_methods = 0
     bug_revealing_count = 0
+
+    # ── @Test method-level counters ────────────────────────────────────────────
+    # fixed version
+    fixed_pass_count    = 0
+    fixed_fail_count    = 0
+    fixed_timeout_count = 0
+    # buggy version
+    buggy_pass_count    = 0
+    buggy_fail_count    = 0
+    buggy_timeout_count = 0
+    # per-method records for detailed output
+    method_level_records = []
 
     for jf in test_files:
         full = get_full_class_name(jf)
         methods = discover_test_methods(jf)
         if not methods:
-            # fallback: run the whole class
             echo_and_log(f'Running test class {full} on buggy...')
             res_b = java_run_test(buggy, full, buggy_cp, timeout=args.timeout)
             echo_and_log(f'  -> {res_b["status"]}')
@@ -463,6 +440,28 @@ def main():
             if is_bug_revealing:
                 bug_revealing_count += 1
             total_methods += 1
+
+            # update @Test counters (class-level fallback)
+            if fstat == 'pass':
+                fixed_pass_count += 1
+            elif fstat == 'timeout':
+                fixed_timeout_count += 1
+            else:
+                fixed_fail_count += 1
+
+            if bstat == 'pass':
+                buggy_pass_count += 1
+            elif bstat == 'timeout':
+                buggy_timeout_count += 1
+            else:
+                buggy_fail_count += 1
+
+            method_level_records.append({
+                'test_class': full, 'test_method': '',
+                'fixed_status': fstat, 'buggy_status': bstat,
+                'bug_revealing': is_bug_revealing,
+            })
+
             out_rows.append([proj_prefix, _target_class, full, '', bstat, fstat,
                               'true' if is_bug_revealing else 'false',
                               str(b_rc), str(f_rc), notes])
@@ -499,6 +498,28 @@ def main():
                 if is_bug_revealing:
                     bug_revealing_count += 1
                 total_methods += 1
+
+                # update @Test method-level counters
+                if fstat == 'pass':
+                    fixed_pass_count += 1
+                elif fstat == 'timeout':
+                    fixed_timeout_count += 1
+                else:
+                    fixed_fail_count += 1
+
+                if bstat == 'pass':
+                    buggy_pass_count += 1
+                elif bstat == 'timeout':
+                    buggy_timeout_count += 1
+                else:
+                    buggy_fail_count += 1
+
+                method_level_records.append({
+                    'test_class': full, 'test_method': m,
+                    'fixed_status': fstat, 'buggy_status': bstat,
+                    'bug_revealing': is_bug_revealing,
+                })
+
                 out_rows.append([proj_prefix, _target_class, full, m, bstat, fstat,
                                   'true' if is_bug_revealing else 'false',
                                   str(b_rc), str(f_rc), notes])
@@ -516,10 +537,9 @@ def main():
                         write_log_entry(logfh, 'fixed', full, m, res_f)
                 out_rows[-1][9] = notes
 
-    # ── write per-method CSV ──────────────────────────────────────────────────
+    # ── write per-method CSV ────────────────────────────────────────────────
     with open(out_path, 'a', newline='') as csvfile:
         writer = csv.writer(csvfile)
-        # Only write header if file doesn't exist or is empty
         if not os.path.exists(out_path) or os.path.getsize(out_path) == 0:
             writer.writerow(['project_name', 'target_class', 'test_class', 'test_method',
                              'buggy_status', 'fixed_status', 'bug_revealing',
@@ -527,7 +547,7 @@ def main():
         for r in out_rows:
             writer.writerow(r)
 
-    # ── class-level summary CSV ───────────────────────────────────────────────
+    # ── class-level summary CSV ────────────────────────────────────────────
     try:
         class_level_out = os.path.splitext(out_path)[0] + '_class_level.csv'
         class_stats = {}
@@ -561,7 +581,27 @@ def main():
     except Exception as _cl_err:
         print(f'Warning: failed to write class-level CSV: {_cl_err}')
 
-    # ── shared per-project counts CSV ─────────────────────────────────────────
+    # ── @Test method-level summary CSV (NEW) ──────────────────────────────────
+    method_stats_out = os.path.splitext(out_path)[0] + '_method_stats.csv'
+    try:
+        with open(method_stats_out, 'w', newline='', encoding='utf-8') as msf:
+            ms_writer = csv.writer(msf)
+            ms_writer.writerow([
+                'project_name', 'target_class', 'test_class', 'test_method',
+                'fixed_status', 'buggy_status', 'bug_revealing'
+            ])
+            for rec in method_level_records:
+                ms_writer.writerow([
+                    proj_prefix, _target_class,
+                    rec['test_class'], rec['test_method'],
+                    rec['fixed_status'], rec['buggy_status'],
+                    'true' if rec['bug_revealing'] else 'false'
+                ])
+        echo_and_log(f'@Test method-level stats: {os.path.abspath(method_stats_out)}')
+    except Exception as e:
+        print(f'Warning: failed to write method_stats CSV: {e}')
+
+    # ── shared per-project counts CSV ────────────────────────────────────────
     counts_path = None
     try:
         shared_dir = os.path.dirname(buggy)
@@ -575,21 +615,43 @@ def main():
     except Exception:
         pass
 
-    # ── final summary ─────────────────────────────────────────────────────────
+    # ── final summary (including @Test method-level stats) ────────────────────
     echo_and_log('\n===== SUMMARY =====')
     echo_and_log(f'Total tests evaluated: {total_methods}')
     echo_and_log(f'Bug revealing tests: {bug_revealing_count}')
     echo_and_log(f'Summary CSV: {os.path.abspath(out_path)}')
 
+    echo_and_log('\n===== @Test METHOD-LEVEL STATISTICS =====')
+    echo_and_log(f'Total @Test methods run: {total_methods}')
+    echo_and_log(f'--- Fixed version ({os.path.basename(fixed)}) ---')
+    echo_and_log(f'  PASS   : {fixed_pass_count}')
+    echo_and_log(f'  FAIL   : {fixed_fail_count}')
+    echo_and_log(f'  TIMEOUT: {fixed_timeout_count}')
+    fixed_pass_rate = round(fixed_pass_count / total_methods * 100, 2) if total_methods > 0 else 0.0
+    echo_and_log(f'  Pass rate: {fixed_pass_rate}%')
+    echo_and_log(f'--- Buggy version ({os.path.basename(buggy)}) ---')
+    echo_and_log(f'  PASS   : {buggy_pass_count}')
+    echo_and_log(f'  FAIL   : {buggy_fail_count}')
+    echo_and_log(f'  TIMEOUT: {buggy_timeout_count}')
+    buggy_pass_rate = round(buggy_pass_count / total_methods * 100, 2) if total_methods > 0 else 0.0
+    echo_and_log(f'  Pass rate: {buggy_pass_rate}%')
+
     if logfh:
         try:
-            logfh.write('\n===== SUMMARY =====\n')
-            logfh.write(f'Total tests evaluated: {total_methods}\n')
-            logfh.write(f'Bug revealing tests: {bug_revealing_count}\n')
-            logfh.write(f'Summary CSV: {os.path.abspath(out_path)}\n')
-            if counts_path:
-                logfh.write(f'Per-project counts CSV: {os.path.abspath(counts_path)}\n')
-            logfh.write(f'\nlog finished: {datetime.now().isoformat()}\n')
+            logfh.write('\n===== @Test METHOD-LEVEL STATISTICS =====\n')
+            logfh.write(f'Total @Test methods run: {total_methods}\n')
+            logfh.write(f'--- Fixed version ({os.path.basename(fixed)}) ---\n')
+            logfh.write(f'  PASS   : {fixed_pass_count}\n')
+            logfh.write(f'  FAIL   : {fixed_fail_count}\n')
+            logfh.write(f'  TIMEOUT: {fixed_timeout_count}\n')
+            logfh.write(f'  Pass rate: {fixed_pass_rate}%\n')
+            logfh.write(f'--- Buggy version ({os.path.basename(buggy)}) ---\n')
+            logfh.write(f'  PASS   : {buggy_pass_count}\n')
+            logfh.write(f'  FAIL   : {buggy_fail_count}\n')
+            logfh.write(f'  TIMEOUT: {buggy_timeout_count}\n')
+            logfh.write(f'  Pass rate: {buggy_pass_rate}%\n')
+            logfh.write(f'\n===== END =====\n')
+            logfh.write(f'log finished: {datetime.now().isoformat()}\n')
             logfh.close()
             print(f'Detailed log: {os.path.abspath(log_path)}')
         except Exception:

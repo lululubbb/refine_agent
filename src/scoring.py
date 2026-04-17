@@ -1,57 +1,65 @@
 """
-scoring.py  (v4 — fixed-version workflow, single EXEC_FAIL type)
+scoring.py  (v5 — priority redesign + focal-method coverage fix)
 =================================================================
 
-Changes from v3:
-  - Removed EXPECTED_EXEC_FAIL / UNEXPECTED_EXEC_FAIL distinction.
-    When tests are generated on the fixed version, exec_fail is always
-    an unwanted failure (no "good fail" exists on fixed code).
-  - Bug revealing is checked separately on the buggy version by Tool 3.
-    A test that is bug-revealing will PASS on fixed AND FAIL on buggy —
-    there is no exec_fail on the fixed version for such a test.
-  - NOT_BUG_REVEALING is still tracked (test passes on both versions).
+Issue priority order (revised):
+  1. COMPILE_FAIL
+  2. EXEC_FAIL / EXEC_TIMEOUT
+  3. NOT_BUG_REVEALING   ← elevated above coverage
+  4. LOW_LINE_COV / LOW_BRANCH_COV
+  5. HIGH_REDUNDANCY
+
+Rationale: Bug-revealing is the key research contribution; coverage will
+naturally improve when bug-revealing tests are added, but not vice versa.
+Redundancy is a "nice to have" and should not distract from correctness.
+
+Coverage issue is ONLY raised when focal_line_coverage < threshold AND
+the test actually executes the focal method (focal_line_total > 0).
 """
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
+# Coverage thresholds
+_LINE_COV_THRESHOLD   = 0.70
+_BRANCH_COV_THRESHOLD = 0.70
+# Redundancy threshold
+_REDUNDANCY_THRESHOLD = 0.70
+
 
 # ════════════════════════════════════════════════════════════════════
-# Test 级评分（一个 Test 文件的各维度分数）
+# Test 级评分
 # ════════════════════════════════════════════════════════════════════
 
 @dataclass
 class TestScore:
     """
-    单个 Test 文件（Token_1_{seq}Test.java）的多维度分数。
-    无加权综合分，每个维度独立呈现给 Refiner。
+    Single Test file multi-dimensional score.
+    Issues are ordered by priority:
+      COMPILE_FAIL > EXEC_FAIL/EXEC_TIMEOUT > NOT_BUG_REVEALING > LOW_LINE/BRANCH_COV > HIGH_REDUNDANCY
     """
-    test_name: str              # e.g. "Token_1_1Test"
+    test_name: str
 
-    # ── 维度 1：编译 ─────────────────────────────────────────────
-    compile_score: float = 0.0  # 0=编译失败，1=编译通过
+    compile_score: float = 0.0
+    exec_score:    float = 0.0
 
-    # ── 维度 2：执行 ─────────────────────────────────────────────
-    exec_score: float = 0.0     # 0=运行失败/超时，1=运行通过
+    focal_line_coverage:   Optional[float] = None
+    focal_branch_coverage: Optional[float] = None
 
-    # ── 维度 3：覆盖率（focal method） ───────────────────────────
-    focal_line_coverage:   Optional[float] = None   # 0~1，行覆盖率
-    focal_branch_coverage: Optional[float] = None   # 0~1，分支覆盖率
-    # 注：coverage 保持原始值，不合并，让 Refiner 自行分析
+    # NEW: store focal method line counts for richer feedback
+    focal_line_covered: Optional[int] = None
+    focal_line_total:   Optional[int] = None
 
-    # ── 维度 4：Bug Revealing ────────────────────────────────────
-    bug_reveal_score: Optional[bool] = None  # True/False/None(未检测)
+    bug_reveal_score: Optional[bool] = None
 
-    # ── 维度 5：相似度（与 Suite 内其他 Test 的最高相似度）────────
-    max_similarity: Optional[float] = None   # 0~1，越高越冗余
-    most_similar_to: Optional[str]  = None   # 最相似的 Test 文件名
+    max_similarity: Optional[float] = None
+    most_similar_to: Optional[str]  = None
 
-    # ── 问题标签（脚本判定，供 Refiner 快速定位）─────────────────
     issues: List[str] = field(default_factory=list)
-    # Possible values:
+    # Priority-ordered possible values:
     #   COMPILE_FAIL | EXEC_FAIL | EXEC_TIMEOUT |
-    #   LOW_LINE_COV | LOW_BRANCH_COV | NOT_BUG_REVEALING | HIGH_REDUNDANCY
+    #   NOT_BUG_REVEALING | LOW_LINE_COV | LOW_BRANCH_COV | HIGH_REDUNDANCY
 
     def to_dict(self) -> dict:
         return {
@@ -60,6 +68,8 @@ class TestScore:
             "exec_score":           self.exec_score,
             "focal_line_coverage":  self.focal_line_coverage,
             "focal_branch_coverage":self.focal_branch_coverage,
+            "focal_line_covered":   self.focal_line_covered,
+            "focal_line_total":     self.focal_line_total,
             "bug_reveal_score":     self.bug_reveal_score,
             "max_similarity":       self.max_similarity,
             "most_similar_to":      self.most_similar_to,
@@ -140,14 +150,57 @@ def _r(v: Optional[float]) -> Optional[float]:
 
 
 # ════════════════════════════════════════════════════════════════════
-# 计算函数
+# Issue priority helper
+# ════════════════════════════════════════════════════════════════════
+
+# Lower number = higher priority
+_ISSUE_PRIORITY = {
+    "COMPILE_FAIL":       0,
+    "EXEC_FAIL":          1,
+    "EXEC_TIMEOUT":       1,
+    "NOT_BUG_REVEALING":  2,
+    "LOW_LINE_COV":       3,
+    "LOW_BRANCH_COV":     3,
+    "HIGH_REDUNDANCY":    4,
+}
+
+
+def sort_issues_by_priority(issues: List[str]) -> List[str]:
+    """Return issues sorted from highest priority (lowest number) to lowest."""
+    return sorted(issues, key=lambda x: _ISSUE_PRIORITY.get(x, 99))
+
+
+def highest_priority_issue(issues: List[str]) -> Optional[str]:
+    if not issues:
+        return None
+    return min(issues, key=lambda x: _ISSUE_PRIORITY.get(x, 99))
+
+
+def issues_at_priority_level(issues: List[str]) -> List[str]:
+    """
+    Return only the issues at the HIGHEST priority level present.
+    e.g. if COMPILE_FAIL and LOW_LINE_COV both present, return only [COMPILE_FAIL].
+    """
+    if not issues:
+        return []
+    best = min(_ISSUE_PRIORITY.get(i, 99) for i in issues)
+    return [i for i in issues if _ISSUE_PRIORITY.get(i, 99) == best]
+
+
+# ════════════════════════════════════════════════════════════════════
+# Compute functions
 # ════════════════════════════════════════════════════════════════════
 
 def compute_test_score(diag) -> TestScore:
     """
     Compute TestScore from TestDiag.
-    Tests are generated on the FIXED version, so exec_fail is always unwanted.
-    Bug revealing (fail on buggy, pass on fixed) is tracked separately via Tool 3.
+
+    Issue priority: COMPILE > EXEC > BUG_REVEALING > COVERAGE > REDUNDANCY
+
+    Coverage issues are ONLY raised when:
+      - exec passes
+      - focal_line_total > 0  (the focal method was actually reached)
+      - coverage is below threshold
     """
     compile_s = 1.0 if diag.compile_ok else 0.0
     exec_s    = 1.0 if diag.exec_ok    else 0.0
@@ -155,33 +208,48 @@ def compute_test_score(diag) -> TestScore:
     line_cov   = (diag.focal_line_rate   / 100.0) if diag.focal_line_rate   is not None else None
     branch_cov = (diag.focal_branch_rate / 100.0) if diag.focal_branch_rate is not None else None
 
+    # Focal method line counts (may be on diag if populated)
+    focal_line_covered = getattr(diag, 'focal_line_covered', None)
+    focal_line_total   = getattr(diag, 'focal_line_total',   None)
+
     issues: List[str] = []
 
-    # ── Compile failure ────────────────────────────────────────────
+    # ── Priority 0: Compile failure ──────────────────────────────
     if not diag.compile_ok:
         issues.append("COMPILE_FAIL")
+
     else:
-        # ── Execution failure (single type — no "good fail" on fixed version) ──
+        # ── Priority 1: Execution failure ────────────────────────
         if not diag.exec_ok:
             if diag.exec_timeout:
                 issues.append("EXEC_TIMEOUT")
             else:
                 issues.append("EXEC_FAIL")
 
-    # ── Coverage (only meaningful when exec passes) ────────────────
-    if diag.exec_ok:
-        if line_cov is not None and line_cov < 0.7:
-            issues.append("LOW_LINE_COV")
-        if diag.focal_branch_rate is not None:
-            if (diag.focal_branch_rate / 100.0) < 0.7:
-                issues.append("LOW_BRANCH_COV")
-        # ── Bug revealing: test passes on fixed but does NOT fail on buggy ──
-        if diag.bug_revealing is False:
-            issues.append("NOT_BUG_REVEALING")
+        else:
+            # Exec passed — check quality dimensions
 
-    # ── Redundancy ─────────────────────────────────────────────────
-    if diag.redundancy_score is not None and diag.redundancy_score > 0.7:
-        issues.append("HIGH_REDUNDANCY")
+            # ── Priority 2: Bug revealing ─────────────────────────
+            if diag.bug_revealing is False:
+                issues.append("NOT_BUG_REVEALING")
+
+            # ── Priority 3: Coverage ──────────────────────────────
+            # Only raise if focal method was actually reached (total > 0)
+            focal_reached = (focal_line_total is not None and focal_line_total > 0) or \
+                            (line_cov is not None)
+
+            if focal_reached:
+                if line_cov is not None and line_cov < _LINE_COV_THRESHOLD:
+                    issues.append("LOW_LINE_COV")
+                if branch_cov is not None and branch_cov < _BRANCH_COV_THRESHOLD:
+                    issues.append("LOW_BRANCH_COV")
+
+            # ── Priority 4: Redundancy ────────────────────────────
+            if diag.redundancy_score is not None and diag.redundancy_score > _REDUNDANCY_THRESHOLD:
+                issues.append("HIGH_REDUNDANCY")
+
+    # Sort by priority
+    issues = sort_issues_by_priority(issues)
 
     return TestScore(
         test_name             = diag.test_name,
@@ -189,6 +257,8 @@ def compute_test_score(diag) -> TestScore:
         exec_score            = exec_s,
         focal_line_coverage   = round(line_cov,   4) if line_cov   is not None else None,
         focal_branch_coverage = round(branch_cov, 4) if branch_cov is not None else None,
+        focal_line_covered    = focal_line_covered,
+        focal_line_total      = focal_line_total,
         bug_reveal_score      = diag.bug_revealing,
         max_similarity        = diag.redundancy_score,
         most_similar_to       = diag.most_similar_to,
@@ -230,7 +300,7 @@ def compute_suite_score(
     # ── 维度 4：Bug Revealing ────────────────────────────────────
     compile_ok_scores = [s for s in scores if s.compile_score > 0.5]
     br_checked = [s for s in compile_ok_scores if s.bug_reveal_score is not None]
-    br_yes     = [s for s in br_checked    if s.bug_reveal_score is True]
+    br_yes     = [s for s in br_checked        if s.bug_reveal_score is True]
 
     # ── 维度 5：相似度（Suite 内 pair 冗余）──────────────────────
     high_redund_pairs: List[Tuple[str, str, float]] = []
@@ -241,7 +311,7 @@ def compute_suite_score(
             max_pair_sim = all_sims[0][2]
         high_redund_pairs = [(t1, t2, sim) for t1, t2, sim in all_sims if sim > 0.7]
 
-    # ── 问题汇总 ─────────────────────────────────────────────────
+    # Problem tests map (issues already sorted by priority in each TestScore)
     problem_tests: Dict[str, List[str]] = {}
     for s in scores:
         for issue in s.issues:

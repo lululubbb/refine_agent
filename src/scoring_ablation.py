@@ -10,7 +10,6 @@ scoring_ablation.py
   - w/o Redundancy Score:     去掉冗余度维度，保留其余 3 个
   - w/o Compile/Exec Score:   去掉编译执行维度，保留其余 3 个
 
-    3. test_runner.py 的 final_scores2.csv 写入处同理
 """
 from __future__ import annotations
 
@@ -20,17 +19,19 @@ import configparser
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
-# ── sys.path 配置（在 src/ 目录下运行）──────────────────────────────
 HERE = os.path.dirname(os.path.abspath(__file__))
 if HERE not in sys.path:
     sys.path.insert(0, HERE)
 
-# ── 导入原始 scoring 模块的类型 ─────────────────────────────────────────────
-from scoring import TestScore, SuiteScore, compute_test_score, compute_suite_score
+from scoring import (
+    TestScore, SuiteScore,
+    compute_test_score, compute_suite_score,
+    sort_issues_by_priority,
+)
 
 
 # ════════════════════════════════════════════════════════════════════
-# 消融配置
+# AblationConfig (unchanged from original)
 # ════════════════════════════════════════════════════════════════════
 
 @dataclass
@@ -61,29 +62,22 @@ class AblationConfig:
     use_redundancy:    bool = True
     mode: str = "full"
 
-    # 各维度在 final_score 中的权重
-    # 消融时将被关闭维度的权重设为 0，其余维度权重等比例重新归一化
-    _WC: float = 0.15   # compile/exec
-    _WE: float = 0.15   # compile/exec (exec part)
-    _WV: float = 0.30   # coverage
-    _WB: float = 0.20   # bug revealing
-    _WR: float = 0.20   # redundancy
+    _WC: float = 0.15
+    _WE: float = 0.15
+    _WV: float = 0.30
+    _WB: float = 0.20
+    _WR: float = 0.20
 
     def effective_weights(self) -> Dict[str, float]:
-        """
-        返回消融后的有效权重（已归一化）。
-        关闭某维度时，该维度权重设为 0，其余维度等比例放大。
-        """
         raw = {
-            "compile": self._WC if self.use_compile_exec else 0.0,
-            "exec":    self._WE if self.use_compile_exec else 0.0,
-            "coverage": self._WV if self.use_coverage else 0.0,
-            "bug":      self._WB if self.use_bug_revealing else 0.0,
-            "redundancy": self._WR if self.use_redundancy else 0.0,
+            "compile":    self._WC if self.use_compile_exec else 0.0,
+            "exec":       self._WE if self.use_compile_exec else 0.0,
+            "coverage":   self._WV if self.use_coverage    else 0.0,
+            "bug":        self._WB if self.use_bug_revealing else 0.0,
+            "redundancy": self._WR if self.use_redundancy  else 0.0,
         }
         total = sum(raw.values())
         if total <= 0:
-            # 极端情况：所有维度都关闭，平均分
             return {k: 1.0 / len(raw) for k in raw}
         return {k: v / total for k, v in raw.items()}
 
@@ -112,10 +106,7 @@ class AblationConfig:
         elif mode == "no_compile_exec":
             return cls(use_compile_exec=False, mode=mode)
         else:
-            raise ValueError(
-                f"Unknown ablation mode: {mode!r}. "
-                "Valid modes: full, no_coverage, no_bug_revealing, no_redundancy, no_compile_exec"
-            )
+            raise ValueError(f"Unknown ablation mode: {mode!r}")
 
     def __str__(self) -> str:
         flags = []
@@ -128,7 +119,7 @@ class AblationConfig:
 
 
 # ════════════════════════════════════════════════════════════════════
-# 从 config.ini 读取消融配置
+# Read ablation config from config.ini
 # ════════════════════════════════════════════════════════════════════
 
 def get_ablation_config() -> AblationConfig:
@@ -157,13 +148,11 @@ def get_ablation_config() -> AblationConfig:
     sec = config["ablation"]
     mode = sec.get("mode", "full").strip()
 
-    # mode 优先；布尔开关作为覆盖
     try:
         cfg = AblationConfig.from_mode(mode)
     except ValueError:
         cfg = AblationConfig(mode=mode)
 
-    # 布尔开关可以覆盖 mode 的设置
     if sec.get("use_compile_exec") is not None:
         cfg.use_compile_exec = sec.getboolean("use_compile_exec", True)
     if sec.get("use_coverage") is not None:
@@ -177,7 +166,7 @@ def get_ablation_config() -> AblationConfig:
 
 
 # ════════════════════════════════════════════════════════════════════
-# 消融版 compute_test_score
+# Ablation-aware compute_test_score
 # ════════════════════════════════════════════════════════════════════
 
 def compute_test_score_ablation(diag, cfg: Optional[AblationConfig] = None) -> TestScore:
@@ -204,43 +193,43 @@ def compute_test_score_ablation(diag, cfg: Optional[AblationConfig] = None) -> T
     if cfg is None:
         cfg = AblationConfig()
 
-    # 先获取原始得分
     score = compute_test_score(diag)
 
-    # 根据消融配置过滤 issues
+    # Filter issues according to ablation config, preserving priority order
     filtered_issues = []
     for issue in score.issues:
         if issue in ("COMPILE_FAIL", "EXEC_FAIL", "EXEC_TIMEOUT") and not cfg.use_compile_exec:
-            continue  # 关闭编译/执行维度，过滤这些 issue
+            continue
         if issue in ("LOW_LINE_COV", "LOW_BRANCH_COV") and not cfg.use_coverage:
-            continue  # 关闭覆盖率维度
+            continue
         if issue == "NOT_BUG_REVEALING" and not cfg.use_bug_revealing:
-            continue  # 关闭 Bug Revealing 维度
+            continue
         if issue == "HIGH_REDUNDANCY" and not cfg.use_redundancy:
-            continue  # 关闭冗余度维度
+            continue
         filtered_issues.append(issue)
 
-    score.issues = filtered_issues
+    score.issues = sort_issues_by_priority(filtered_issues)
 
-    # ★ 改进：消融时将关闭维度的 score 字段置 None（而非满分）
-    # 这样在统计时会被正确地跳过，而不是计为通过
+    # Null out disabled dimension fields
     if not cfg.use_compile_exec:
         score.compile_score = None
         score.exec_score    = None
     if not cfg.use_coverage:
         score.focal_line_coverage   = None
         score.focal_branch_coverage = None
+        score.focal_line_covered    = None
+        score.focal_line_total      = None
     if not cfg.use_bug_revealing:
         score.bug_reveal_score = None
     if not cfg.use_redundancy:
-        score.max_similarity = None
+        score.max_similarity  = None
         score.most_similar_to = None
 
     return score
 
 
 # ════════════════════════════════════════════════════════════════════
-# 消融版 compute_suite_score
+# Ablation-aware compute_suite_score
 # ════════════════════════════════════════════════════════════════════
 
 def compute_suite_score_ablation(
@@ -268,11 +257,10 @@ def compute_suite_score_ablation(
         cfg = AblationConfig()
 
     if not test_scores:
-        # 空输入时也要尊重消融配置，返回正确的 None 值
         empty_suite = SuiteScore()
         if not cfg.use_compile_exec:
             empty_suite.compile_pass_rate = None
-            empty_suite.exec_pass_rate = None
+            empty_suite.exec_pass_rate    = None
         if not cfg.use_coverage:
             empty_suite.coverage_line_avg = None
             empty_suite.coverage_line_max = None
@@ -285,21 +273,20 @@ def compute_suite_score_ablation(
     scores = list(test_scores.values())
     n = len(scores)
 
-    # ── 维度 1：编译（可被消融关闭） ─────────────────────────────────────
     compile_pass_count  = 0
     compile_pass_rate   = None
     if cfg.use_compile_exec:
-        compile_pass_count = sum(1 for s in scores if s.compile_score is not None and s.compile_score > 0.5)
+        compile_pass_count = sum(
+            1 for s in scores if s.compile_score is not None and s.compile_score > 0.5)
         compile_pass_rate = round(compile_pass_count / n, 4)
 
-    # ── 维度 2：执行（可被消融关闭） ─────────────────────────────────────
     exec_pass_count = 0
     exec_pass_rate  = None
     if cfg.use_compile_exec:
-        exec_pass_count = sum(1 for s in scores if s.exec_score is not None and s.exec_score > 0.5)
+        exec_pass_count = sum(
+            1 for s in scores if s.exec_score is not None and s.exec_score > 0.5)
         exec_pass_rate = round(exec_pass_count / n, 4)
 
-    # ── 维度 3：覆盖率（可被消融关闭） ────────────────────────────────────
     per_line_coverage   = None
     per_branch_coverage = None
     coverage_line_avg   = None
@@ -311,26 +298,24 @@ def compute_suite_score_ablation(
         per_branch = [s.focal_branch_coverage for s in scores]
         line_vals  = [v for v in per_line   if v is not None]
         branch_vals= [v for v in per_branch if v is not None]
-        per_line_coverage = per_line
+        per_line_coverage   = per_line
         per_branch_coverage = per_branch
-        coverage_line_avg = round(sum(line_vals)   / len(line_vals),   4) if line_vals   else None
-        coverage_line_max = round(max(line_vals),  4) if line_vals   else None
-        coverage_line_min = round(min(line_vals),  4) if line_vals   else None
+        coverage_line_avg   = round(sum(line_vals)   / len(line_vals),   4) if line_vals   else None
+        coverage_line_max   = round(max(line_vals),  4) if line_vals   else None
+        coverage_line_min   = round(min(line_vals),  4) if line_vals   else None
         coverage_branch_avg = round(sum(branch_vals) / len(branch_vals), 4) if branch_vals else None
 
-    # ── 维度 4：Bug Revealing（可被消融关闭） ────────────────────────
     bug_reveal_count   = 0
     bug_reveal_checked = 0
     bug_reveal_rate    = 0.0
     if cfg.use_bug_revealing and cfg.use_compile_exec:
-        compile_ok_scores = [s for s in scores if s.compile_score > 0.5]
+        compile_ok_scores = [s for s in scores if s.compile_score is not None and s.compile_score > 0.5]
         br_checked = [s for s in compile_ok_scores if s.bug_reveal_score is not None]
-        br_yes     = [s for s in br_checked    if s.bug_reveal_score is True]
+        br_yes     = [s for s in br_checked        if s.bug_reveal_score is True]
         bug_reveal_count   = len(br_yes)
         bug_reveal_checked = len(br_checked)
         bug_reveal_rate    = round(len(br_yes) / len(br_checked), 4) if br_checked else 0.0
 
-    # ── 维度 5：相似度（可被消融关闭） ──────────────────────────────────
     high_redund_pairs: List[Tuple[str, str, float]] = []
     max_pair_sim: Optional[float] = None
     if cfg.use_redundancy and pairwise_sims:
@@ -339,11 +324,9 @@ def compute_suite_score_ablation(
             max_pair_sim = all_sims[0][2]
         high_redund_pairs = [(t1, t2, sim) for t1, t2, sim in all_sims if sim > 0.7]
 
-    # ── 问题汇总（按消融配置过滤） ──────────────────────────────────────
     problem_tests: Dict[str, List[str]] = {}
     for s in scores:
         for issue in s.issues:
-            # 跳过被消融关闭的维度的 issues
             if issue in ("COMPILE_FAIL", "EXEC_FAIL", "EXEC_TIMEOUT") and not cfg.use_compile_exec:
                 continue
             if issue in ("LOW_LINE_COV", "LOW_BRANCH_COV") and not cfg.use_coverage:
@@ -376,15 +359,15 @@ def compute_suite_score_ablation(
 
 
 # ════════════════════════════════════════════════════════════════════
-# 消融版 final_score 计算（用于 test_runner.py 的 CSV 输出）
+# Final score calculation (unchanged logic)
 # ════════════════════════════════════════════════════════════════════
 
 def compute_final_score_ablation(
     compile_score: float,
     exec_score: float,
-    coverage_score,          # float or None/''
-    bug_revealing_score,     # float or None/''
-    redundancy_score,        # float or None/''（这里是相似度，final=1-sim）
+    coverage_score,
+    bug_revealing_score,
+    redundancy_score,
     cfg: Optional[AblationConfig] = None,
 ) -> Tuple[float, float]:
     """
@@ -410,7 +393,6 @@ def compute_final_score_ablation(
     sw = []
     vw = 0.0
 
-    # 编译维度
     if cfg.use_compile_exec:
         if isinstance(compile_score, (int, float)):
             sw.append(compile_score * weights["compile"])
@@ -419,17 +401,14 @@ def compute_final_score_ablation(
             sw.append(exec_score * weights["exec"])
             vw += weights["exec"]
 
-    # 覆盖率维度
     if cfg.use_coverage and isinstance(coverage_score, (int, float)):
         sw.append(coverage_score * weights["coverage"])
         vw += weights["coverage"]
 
-    # Bug Revealing 维度
     if cfg.use_bug_revealing and isinstance(bug_revealing_score, (int, float)):
         sw.append(bug_revealing_score * weights["bug"])
         vw += weights["bug"]
 
-    # 冗余度维度（final = 1 - 相似度）
     if cfg.use_redundancy and isinstance(redundancy_score, (int, float)):
         rd = 1.0 - redundancy_score
         sw.append(rd * weights["redundancy"])
@@ -440,15 +419,13 @@ def compute_final_score_ablation(
 
 
 # ════════════════════════════════════════════════════════════════════
-# 全局单例（供其他模块 import）
+# Global singleton
 # ════════════════════════════════════════════════════════════════════
 
-# 在模块加载时读取配置（仅读一次，避免重复 I/O）
 _GLOBAL_ABLATION_CONFIG: Optional[AblationConfig] = None
 
 
 def global_ablation_config() -> AblationConfig:
-    """获取全局消融配置（懒加载单例）。"""
     global _GLOBAL_ABLATION_CONFIG
     if _GLOBAL_ABLATION_CONFIG is None:
         _GLOBAL_ABLATION_CONFIG = get_ablation_config()
@@ -457,6 +434,5 @@ def global_ablation_config() -> AblationConfig:
 
 
 def reset_global_ablation_config(cfg: Optional[AblationConfig] = None):
-    """重置全局配置（测试用）。"""
     global _GLOBAL_ABLATION_CONFIG
     _GLOBAL_ABLATION_CONFIG = cfg

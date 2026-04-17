@@ -1,14 +1,11 @@
 """
-tool_runner_adapter.py
-======================
-TestRunner 适配器：调用 TestRunner.start_all_test()，然后从已有输出文件
-提取所有 Tool 1+2 的诊断数据，序列化为统一的 suite_diagnosis.json。
+tool_runner_adapter.py  (with Issue-3 fix: focal line counts in diag)
 
-修改记录：
-  - 新增 _load_full_errors_from_files()：从 compiler_output/ 和 test_output/ 
-    目录读取完整的编译/运行错误文件内容，替换 diagnosis.log 中的截断错误信息。
-  - _parse_diag_block() 中将错误条目上限从10提高到30。
-─────────────────────────────────────────────────────────────────
+Changes:
+  - _parse_coverage_csv now also reads f_per_line_cov / f_per_line_total
+    and stores them as focal_line_covered / focal_line_total in the diag entry.
+  - _parse_diag_block retains existing logic unchanged.
+  - _load_full_errors_from_files retained unchanged.
 """
 from __future__ import annotations
 
@@ -46,7 +43,7 @@ def _status_priority(status_str: str) -> int:
 
 
 # ════════════════════════════════════════════════════════════════════
-# 主入口
+# Main entry
 # ════════════════════════════════════════════════════════════════════
 
 def run_and_export(
@@ -76,8 +73,6 @@ def run_and_export(
     logger.info("[ToolRunner] tests_output_dir = %s", tests_output_dir)
 
     diag_map = _build_diag_map(tests_output_dir)
-
-    # ★ 新增：从 compiler_output/ 和 test_output/ 读取完整错误信息，补充/覆盖 diagnosis.log 的截断内容
     _load_full_errors_from_files(tests_output_dir, diag_map)
 
     out_path = os.path.join(tests_output_dir, DIAG_JSON_NAME)
@@ -99,13 +94,10 @@ def run_and_export(
 
 
 def _clear_stale_diag(focal_method_result_dir: str, project_dir: str):
-    candidates = [
-        os.path.join(focal_method_result_dir, DIAG_JSON_NAME),
-    ]
+    candidates = [os.path.join(focal_method_result_dir, DIAG_JSON_NAME)]
     latest = _find_latest_tests_dir(project_dir)
     if latest:
         candidates.append(os.path.join(latest, DIAG_JSON_NAME))
-
     for path in candidates:
         if os.path.exists(path):
             try:
@@ -134,7 +126,7 @@ def _resolve_tests_output_dir(focal_method_result_dir: str,
 
 
 # ════════════════════════════════════════════════════════════════════
-# ★ 新增：从磁盘文件读取完整错误信息
+# Full error loading from disk files (unchanged)
 # ════════════════════════════════════════════════════════════════════
 
 def _load_full_errors_from_files(tests_output_dir: str, diag: dict):
@@ -157,23 +149,18 @@ def _load_full_errors_from_files(tests_output_dir: str, diag: dict):
             tc_name = _extract_tc_name_from_compile_file(fname)
             if not tc_name:
                 continue
-
             fpath = os.path.join(compile_dir, fname)
             full_errors = _read_error_file(fpath, max_lines=_MAX_COMPILE_ERROR_LINES)
             if not full_errors:
                 continue
-
             tc_key = _find_diag_key(diag, tc_name)
             if tc_key is None:
                 continue
-
             entry = diag[tc_key]
             if entry.get("compile_status") == "fail":
                 parsed_errors = _parse_compile_error_content(full_errors)
                 if parsed_errors:
                     entry["compile_errors"] = parsed_errors[:30]
-                    logger.info("[FullError] compile errors loaded for %s: %d items",
-                                tc_key, len(parsed_errors))
 
     # ── 读取运行错误文件 ─────────────────────────────────────────────
     if os.path.isdir(test_dir):
@@ -183,23 +170,18 @@ def _load_full_errors_from_files(tests_output_dir: str, diag: dict):
             tc_name = _extract_tc_name_from_test_file(fname)
             if not tc_name:
                 continue
-
             fpath = os.path.join(test_dir, fname)
             full_errors = _read_error_file(fpath, max_lines=_MAX_RUNTIME_ERROR_LINES)
             if not full_errors:
                 continue
-
             tc_key = _find_diag_key(diag, tc_name)
             if tc_key is None:
                 continue
-
             entry = diag[tc_key]
             if entry.get("exec_status") == "fail":
                 parsed_errors = _parse_runtime_error_content(full_errors)
                 if parsed_errors:
                     entry["exec_errors"] = parsed_errors[:20]
-                    logger.info("[FullError] exec errors loaded for %s: %d items",
-                                tc_key, len(parsed_errors))
 
 
 def _extract_tc_name_from_compile_file(fname: str) -> str:
@@ -213,14 +195,11 @@ def _extract_tc_name_from_compile_file(fname: str) -> str:
     base = fname
     if base.endswith(".txt"):
         base = base[:-4]
-    # 去掉 .java 后缀
     if base.endswith(".java"):
         base = base[:-5]
-    # 去掉前缀 CompilerOutput- 或 compile_error
     for prefix in ("CompilerOutput-", "CompilerOutput_"):
         if base.startswith(prefix):
             return base[len(prefix):]
-    # 如果是 compile_error 这类全局文件，跳过
     if base.lower() in ("compile_error", "compileroutput"):
         return ""
     return ""
@@ -247,7 +226,6 @@ def _extract_tc_name_from_test_file(fname: str) -> str:
 
 
 def _read_error_file(fpath: str, max_lines: int = 80) -> str:
-    """读取错误文件内容，限制行数。"""
     try:
         with open(fpath, "r", encoding="utf-8", errors="replace") as f:
             lines = f.readlines()
@@ -303,7 +281,6 @@ def _parse_compile_error_content(raw: str) -> List[str]:
         if key and key not in seen:
             seen.add(key)
             deduped.append(item[:_MAX_SINGLE_ERROR_CHARS])
-
     return deduped
 
 
@@ -352,7 +329,6 @@ def _parse_runtime_error_content(raw: str) -> List[str]:
         if item not in seen:
             seen.add(item)
             deduped.append(item)
-
     return deduped[:20]
 
 
@@ -361,11 +337,9 @@ def _find_diag_key(diag: dict, tc_name: str) -> Optional[str]:
     # 精确匹配
     if tc_name in diag:
         return tc_name
-    # 短名匹配（去掉包名前缀）
     tc_short = tc_name.rsplit(".", 1)[-1]
     if tc_short in diag:
         return tc_short
-    # 模糊匹配：diag 中的键包含 tc_name
     for key in diag:
         key_short = key.rsplit(".", 1)[-1]
         if key_short == tc_short or tc_short in key_short or key_short in tc_short:
@@ -374,7 +348,7 @@ def _find_diag_key(diag: dict, tc_name: str) -> Optional[str]:
 
 
 # ════════════════════════════════════════════════════════════════════
-# 数据提取
+# Data extraction
 # ════════════════════════════════════════════════════════════════════
 
 def _build_diag_map(tests_output_dir: str) -> Dict[str, dict]:
@@ -398,6 +372,9 @@ def _ensure(diag: dict, tc: str) -> dict:
             "exec_errors":       [],
             "focal_line_rate":   None,
             "focal_branch_rate": None,
+            # Issue 3: focal line counts
+            "focal_line_covered": None,
+            "focal_line_total":   None,
             "missed_methods":    [],
             "partial_methods":   [],
             "_current_status":   "unknown",
@@ -423,10 +400,7 @@ def _get_current_status(entry: dict) -> str:
 # ── *_status.csv ──────────────────────────────────────────────────
 
 def _load_status_csv(tests_output_dir: str, diag: dict):
-    search_dirs = [
-        tests_output_dir,
-        os.path.dirname(tests_output_dir),
-    ]
+    search_dirs = [tests_output_dir, os.path.dirname(tests_output_dir)]
     for d in search_dirs:
         if not os.path.isdir(d):
             continue
@@ -446,7 +420,6 @@ def _parse_status_csv(csv_path: str, diag: dict):
     采用高优先级状态优先原则（compile_fail > exec_timeout > exec_fail > exec_ok）。
     """
     try:
-        rows_read = 0
         with open(csv_path, newline="", encoding="utf-8") as f:
             for row in csv.DictReader(f):
                 tc = _short(row.get("test_class", "").strip())
@@ -460,7 +433,6 @@ def _parse_status_csv(csv_path: str, diag: dict):
                 if is_timeout and es == "fail":
                     es = "timeout"
 
-                # 推断本行的状态
                 if cs == "fail":
                     row_status = "compile_fail"
                 elif es == "timeout":
@@ -473,15 +445,11 @@ def _parse_status_csv(csv_path: str, diag: dict):
                     row_status = "unknown"
 
                 current_status = _get_current_status(entry)
-
-                # 只有新状态优先级 >= 当前状态才更新（高优先级不被低优先级覆盖）
                 if _status_priority(row_status) >= _status_priority(current_status):
                     if cs:
                         entry["compile_status"] = cs
                     if es and es != "pending":
                         entry["exec_status"] = es if es != "timeout" else "timeout"
-
-                rows_read += 1
     except Exception as e:
         logger.warning("status csv %s: %s", csv_path, e)
 
@@ -506,7 +474,7 @@ def _load_diagnosis_log(tests_output_dir: str, diag: dict):
     try:
         with open(log_path, encoding="utf-8", errors="ignore") as f:
             content = f.read()
-    except Exception as e:
+    except Exception:
         return
 
     raw_blocks = re.split(r'\[DIAGNOSIS\]', content)
@@ -518,24 +486,6 @@ def _load_diagnosis_log(tests_output_dir: str, diag: dict):
 
 
 def _parse_diag_block(block: str, diag: dict):
-    """
-    解析单个 [DIAGNOSIS] 块并更新 diag 字典。
-
-    [BUG FIX] 关键修复：
-    diagnosis.log 中段头的格式为：
-        uncovered_methods (14):
-        partial_branch_methods (1):
-    原先的正则 r'(missed_methods|uncovered_methods):' 无法匹配，
-    因为 " (14)" 在关键词和冒号之间。
-    修复后使用 r'(missed_methods|uncovered_methods)(\s*\(\d+\))?:' 正确匹配。
-
-    其他修复：
-    1. 正确处理缺少 error_type 的 exec_fail 块
-    2. 高优先级状态不被低优先级覆盖
-    3. compile_errors 和 exec_errors 根据 status 正确分类
-    4. exec_ok 块只更新覆盖率相关字段，不覆盖已知的 compile_fail/exec_fail 状态
-    5. 修复 "line_rate=xxx" 等元数据行错误触发段落重置的问题
-    """
     lines = block.splitlines()
     if not lines:
         return
@@ -544,12 +494,10 @@ def _parse_diag_block(block: str, diag: dict):
     if not tc_match:
         return
     tc = _short(tc_match.group(1).strip())
-
     entry = _ensure(diag, tc)
     current_status = _get_current_status(entry)
 
-    # ── 第一遍：解析 status 和 error_type ──────────────────────
-    block_status    = None
+    block_status     = None
     block_error_type = None
     for line in lines[1:]:
         stripped = line.strip()
@@ -565,10 +513,8 @@ def _parse_diag_block(block: str, diag: dict):
     if block_status is None:
         return
 
-    # ── 决定是否允许本块更新状态 ────────────────────────────────
     new_prio     = _status_priority(block_status)
     current_prio = _status_priority(current_status)
-
     can_update_status = (new_prio >= current_prio)
 
     if can_update_status:
@@ -582,30 +528,16 @@ def _parse_diag_block(block: str, diag: dict):
         elif block_status == "exec_timeout":
             entry["exec_status"] = "timeout"
 
-    # ── 第二遍：解析详细内容 ────────────────────────────────────
     in_core_errors     = False
     in_missed_methods  = False
     in_partial_methods = False
     in_full_stderr     = False
-
-    # 这些是元数据行的前缀，不应触发段落重置
-    _META_PREFIXES = (
-        "project=", "target_class=", "focal_method=",
-        "status=", "error_type=",
-        "line_rate=", "branch_rate=", "coverage_score=",
-        "uncovered_methods:", "partial_branch_methods:",
-        "missed_methods:", "partial_methods:",
-        "core_errors", "full_stderr",
-    )
 
     for line in lines[1:]:
         stripped = line.strip()
         if stripped == "---":
             break
 
-        # ── 段头检测（必须在 item 检测之前）──────────────────────
-
-        # core_errors 段头
         if re.match(r'core_errors\s*(\(\d+\))?:', stripped):
             in_core_errors     = True
             in_missed_methods  = False
@@ -613,7 +545,6 @@ def _parse_diag_block(block: str, diag: dict):
             in_full_stderr     = False
             continue
 
-        # full_stderr 段头
         if re.match(r'full_stderr\s*\(', stripped):
             in_core_errors     = False
             in_full_stderr     = True
@@ -621,7 +552,6 @@ def _parse_diag_block(block: str, diag: dict):
             in_partial_methods = False
             continue
 
-        # [BUG FIX] 修复：支持 "uncovered_methods (14):" 格式
         if re.match(r'(missed_methods|uncovered_methods)(\s*\(\d+\))?:', stripped):
             in_core_errors     = False
             in_full_stderr     = False
@@ -629,7 +559,6 @@ def _parse_diag_block(block: str, diag: dict):
             in_partial_methods = False
             continue
 
-        # [BUG FIX] 修复：支持 "partial_branch_methods (1):" 格式
         if re.match(r'(partial_methods|partial_branch_methods)(\s*\(\d+\))?:', stripped):
             in_core_errors     = False
             in_full_stderr     = False
@@ -637,7 +566,6 @@ def _parse_diag_block(block: str, diag: dict):
             in_partial_methods = True
             continue
 
-        # ── 处理列表项（以 "- " 开头）────────────────────────────
         item_m = re.match(r'-\s+(.+)', stripped)
         if item_m:
             val = item_m.group(1).strip()
@@ -652,12 +580,9 @@ def _parse_diag_block(block: str, diag: dict):
                 entry["partial_methods"].append(val)
             continue
 
-        # ── 非列表项：判断是否应重置段落状态 ─────────────────────
         if in_full_stderr:
-            # full_stderr 段内的任何内容都跳过
             continue
 
-        # 跳过元数据行（不重置当前段落状态）
         is_meta = (
             not stripped
             or stripped.startswith("project=")
@@ -668,29 +593,24 @@ def _parse_diag_block(block: str, diag: dict):
             or stripped.startswith("line_rate=")
             or stripped.startswith("branch_rate=")
             or stripped.startswith("coverage_score=")
-            or stripped.startswith("... [")  # 截断提示行
+            or stripped.startswith("... [")
         )
         if is_meta:
             continue
 
-        # 其他非空、非元数据行：重置段落状态（说明进入了新的逻辑块）
         if stripped and not stripped.startswith("-"):
             in_core_errors = in_missed_methods = in_partial_methods = False
 
-    # 去重并截断
     entry["compile_errors"]  = list(dict.fromkeys(entry["compile_errors"]))[:30]
     entry["exec_errors"]     = list(dict.fromkeys(entry["exec_errors"]))[:30]
     entry["missed_methods"]  = list(dict.fromkeys(entry["missed_methods"]))
     entry["partial_methods"] = list(dict.fromkeys(entry["partial_methods"]))
 
 
-# ── *coveragedetail*.csv ─────────────────────────────────────────
+# ── *coveragedetail*.csv  (Issue 3: also read focal line counts) ──
 
 def _load_coverage_csv(tests_output_dir: str, diag: dict):
-    search_dirs = [
-        tests_output_dir,
-        os.path.dirname(tests_output_dir),
-    ]
+    search_dirs = [tests_output_dir, os.path.dirname(tests_output_dir)]
     for d in search_dirs:
         if not os.path.isdir(d):
             continue
@@ -704,9 +624,11 @@ def _load_coverage_csv(tests_output_dir: str, diag: dict):
 
 def _parse_coverage_csv(csv_path: str, diag: dict):
     """
-    从 coveragedetail CSV 读取覆盖率数据。
-    追加模式下同一 test_class 可能出现多次，取最后一行的值
-    （最后一轮 refine 后的覆盖率）。
+    Read per-test focal method coverage from coveragedetail CSV.
+
+    Issue 3 fix: also populate focal_line_covered / focal_line_total
+    so the Refiner can give the LLM concrete line counts instead of
+    only showing class-level missed methods.
     """
     try:
         with open(csv_path, newline="", encoding="utf-8") as f:
@@ -720,7 +642,8 @@ def _parse_coverage_csv(csv_path: str, diag: dict):
                 if exec_note == "compile_fail":
                     continue
 
-                for field, key in [("f_per_line_rate", "focal_line_rate"),
+                # Focal method line/branch rates
+                for field, key in [("f_per_line_rate",   "focal_line_rate"),
                                     ("f_per_branch_rate", "focal_branch_rate")]:
                     val = row.get(field, "").strip()
                     if val:
@@ -728,12 +651,25 @@ def _parse_coverage_csv(csv_path: str, diag: dict):
                             entry[key] = round(float(val), 2)
                         except Exception:
                             pass
+
+                # ── Issue 3: focal line counts ──────────────────────
+                for csv_col, diag_key in [
+                    ("f_per_line_cov",   "focal_line_covered"),
+                    ("f_per_line_total", "focal_line_total"),
+                ]:
+                    val = row.get(csv_col, "").strip()
+                    if val:
+                        try:
+                            entry[diag_key] = int(float(val))
+                        except Exception:
+                            pass
+
     except Exception as e:
         logger.warning("coveragedetail csv %s: %s", csv_path, e)
 
 
 # ════════════════════════════════════════════════════════════════════
-# 读取 suite_diagnosis.json
+# Read suite_diagnosis.json
 # ════════════════════════════════════════════════════════════════════
 
 def load_suite_diagnosis(tests_output_dir: str) -> Dict[str, dict]:
@@ -755,7 +691,7 @@ def load_suite_diagnosis(tests_output_dir: str) -> Dict[str, dict]:
 
 
 # ════════════════════════════════════════════════════════════════════
-# 辅助
+# Helpers
 # ════════════════════════════════════════════════════════════════════
 
 def _find_latest_tests_dir(project_dir: str) -> Optional[str]:
