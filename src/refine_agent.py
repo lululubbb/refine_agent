@@ -1,11 +1,24 @@
 """
-refine_agent.py  (v4 — focal-method coverage feedback + priority-based issue filtering)
+refine_agent.py  (Issues 2 & 3 fixes)
 
-Key changes:
-  - TestDiag gains focal_line_covered / focal_line_total fields (Issue 3)
-  - tool_compile_run_and_coverage populates these from suite_diagnosis.json (Issue 3)
-  - Issues are filtered to highest-priority group before calling Refiner LLM (Issue 5)
-  - Priority order: COMPILE > EXEC > BUG_REVEALING > COVERAGE > REDUNDANCY (Issue 5)
+Issue 2 fix (redundancy score):
+  bigSims.csv 'redundancy_score' column = 1 - similarity (higher = more redundant).
+  The previous code did `diags[tc].redundancy_score = 1 - round(score, 4)`,
+  inverting it AGAIN back to similarity.  Fixed to store it directly.
+
+  scoring.py checks `if diag.redundancy_score > 0.7 → HIGH_REDUNDANCY`.
+  With the correct value (redundancy = 1 - similarity, higher = worse),
+  the threshold logic is correct: > 0.7 means highly redundant.
+
+Issue 3 fix (per-test priority, not suite-level):
+  Previously, issues_at_priority_level() was applied across ALL tests to find
+  the globally highest priority, then only tests with that priority were sent
+  to the Refiner.  This caused: if Test A has COMPILE_FAIL and Test B has
+  EXEC_FAIL, only Test A was repaired.
+
+  Fix: EVERY problematic test is sent to the Refiner.  The per-test top
+  priority is computed individually and stored in the diagnostic data so the
+  Refiner LLM knows which issue to tackle first for each test.
 """
 from __future__ import annotations
 
@@ -53,13 +66,9 @@ class TestDiag:
 
     focal_line_rate:   Optional[float] = None
     focal_branch_rate: Optional[float] = None
+    focal_line_covered: Optional[int]  = None
+    focal_line_total:   Optional[int]  = None
 
-    # NEW (Issue 3): focal method line counts for richer coverage feedback
-    focal_line_covered: Optional[int] = None
-    focal_line_total:   Optional[int] = None
-
-    # Class-level missed/partial methods (kept for backward compat but
-    # NOT shown in fix prompt when focal coverage is the issue — see Issue 3)
     missed_methods:    List[str] = field(default_factory=list)
     partial_methods:   List[str] = field(default_factory=list)
 
@@ -90,7 +99,6 @@ class RefineResult:
     refiner_prompt_tokens:     int   = 0
     refiner_completion_tokens: int   = 0
     refiner_elapsed_seconds:   float = 0.0
-
     _files_written: int = field(default=0, repr=False)
 
     def has_actionable_instructions(self) -> bool:
@@ -120,7 +128,7 @@ class RefineResult:
 
 
 # ════════════════════════════════════════════════════════════════════
-# Utility
+# Utilities
 # ════════════════════════════════════════════════════════════════════
 
 def _run(cmd: List[str], timeout: int = 120) -> Tuple[int, str, str]:
@@ -153,13 +161,11 @@ def tool_compile_run_and_coverage(
     # 调用 TestRunner + 导出 suite_diagnosis.json
     tests_output_dir = run_and_export(focal_method_result_dir, project_dir)
     if not tests_output_dir:
-        logger.warning("[Tool 1+2] TestRunner failed, all diags remain default")
         return diags, None
 
     # 读取统一 JSON（一次调用，包含 compile/exec/coverage 全部数据）
     diag_map = load_suite_diagnosis(tests_output_dir)
     if not diag_map:
-        logger.warning("[Tool 1+2] suite_diagnosis.json empty")
         return diags, tests_output_dir
 
     matched = 0
@@ -186,32 +192,19 @@ def tool_compile_run_and_coverage(
         d.focal_line_rate   = float(lr) if lr is not None else None
         d.focal_branch_rate = float(br) if br is not None else None
 
-        # ── Issue 3: populate focal line counts ──────────────────
         flc = raw.get("focal_line_covered")
         flt = raw.get("focal_line_total")
         if flc is not None:
-            try:
-                d.focal_line_covered = int(flc)
-            except (TypeError, ValueError):
-                pass
+            try: d.focal_line_covered = int(flc)
+            except Exception: pass
         if flt is not None:
-            try:
-                d.focal_line_total = int(flt)
-            except (TypeError, ValueError):
-                pass
-
-        # If not stored directly, derive from rate + total where possible
-        if d.focal_line_covered is None and d.focal_line_rate is not None and d.focal_line_total:
-            d.focal_line_covered = round(d.focal_line_rate / 100.0 * d.focal_line_total)
+            try: d.focal_line_total = int(flt)
+            except Exception: pass
 
         d.diag_data_valid = True
         matched += 1
 
-    logger.info("[Tool 1+2] matched %d/%d tests from suite_diagnosis.json", matched, len(diags))
-    if matched == 0:
-        logger.warning("[Tool 1+2] diag_map has %d entries but none matched test_names=%s",
-                       len(diag_map), list(test_names)[:3])
-
+    logger.info("[Tool 1+2] matched %d/%d", matched, len(diags))
     return diags, tests_output_dir
 
 
@@ -229,14 +222,13 @@ def tool_bug_revealing(
     fixed_dir: str,
     diags: Dict[str, TestDiag],
 ):
-    compile_ok_tests = [name for name, d in diags.items() if d.compile_ok]
+    compile_ok_tests = [n for n, d in diags.items() if d.compile_ok]
     if not compile_ok_tests:
-        logger.info("[Tool 3] skip: no compile_ok tests")
         return
 
     script = os.path.join(HERE, "scripts", "bug_revealing.py")
     if not os.path.exists(script):
-        logger.warning("[Tool 3] bug_revealing.py not found: %s", script)
+        logger.warning("[Tool 3] bug_revealing.py not found")
         return
 
     cmd = [sys.executable, script,
@@ -245,57 +237,45 @@ def tool_bug_revealing(
            "--tests", focal_method_result_dir]
     rc, _, err = _run(cmd, timeout=300)
     if rc != 0:
-        logger.warning("[Tool 3] bug_revealing rc=%d: %s", rc, err[:300])
+        logger.warning("[Tool 3] rc=%d: %s", rc, err[:300])
         return
 
     proj_basename = os.path.basename(buggy_dir)
-    if proj_basename.lower().endswith('_b') or proj_basename.lower().endswith('_f'):
-        proj_prefix = proj_basename[:-2]
-    else:
-        proj_prefix = proj_basename
+    proj_prefix = proj_basename[:-2] if proj_basename.lower().endswith(("_b","_f")) else proj_basename
 
     _tgt_slug = "unknown"
-    meta_file = os.path.join(buggy_dir, 'modified_classes.src')
-    if os.path.exists(meta_file):
-        try:
-            with open(meta_file) as f:
-                line = f.readline().strip()
-            if line:
-                _tgt_slug = line.split('.')[-1]
-        except Exception:
-            pass
-    else:
-        prop_file = os.path.join(buggy_dir, 'defects4j.build.properties')
-        if os.path.exists(prop_file):
+    for meta_path, extractor in [
+        (os.path.join(buggy_dir, "modified_classes.src"),
+         lambda lines: lines[0].strip().split(".")[-1] if lines else ""),
+        (os.path.join(buggy_dir, "defects4j.build.properties"),
+         lambda lines: next(
+             (l.split("=",1)[1].strip().split(",")[0].strip().split(".")[-1]
+              for l in lines if "d4j.classes.modified" in l and "=" in l), "")),
+    ]:
+        if os.path.exists(meta_path):
             try:
-                with open(prop_file) as f:
-                    for l in f:
-                        if 'd4j.classes.modified' in l and '=' in l:
-                            val = l.split('=', 1)[1].strip()
-                            first_class = val.split(',')[0].strip()
-                            if first_class:
-                                _tgt_slug = first_class.split('.')[-1]
-                            break
+                with open(meta_path) as f:
+                    val = extractor(f.readlines())
+                if val:
+                    _tgt_slug = val
+                    break
             except Exception:
                 pass
 
-    expected_filename = f"{proj_prefix}_{_tgt_slug}_bugrevealing.csv"
-    out_csv = os.path.join(focal_method_result_dir, expected_filename)
-
+    out_csv = os.path.join(focal_method_result_dir, f"{proj_prefix}_{_tgt_slug}_bugrevealing.csv")
     if not os.path.exists(out_csv):
-        logger.warning("[Tool 3] Expected output file not found: %s", out_csv)
+        logger.warning("[Tool 3] csv not found: %s", out_csv)
         return
 
     try:
         with open(out_csv, newline="", encoding="utf-8") as f:
             for row in csv.DictReader(f):
-                tc = _short(row.get("test_class", row.get("full_class_name", "")).strip())
+                tc = _short(row.get("test_class", "").strip())
                 if tc in diags:
                     diags[tc].bug_revealing = (
-                        str(row.get("bug_revealing", "false")).lower() == "true"
-                    )
+                        str(row.get("bug_revealing","false")).lower() == "true")
     except Exception as e:
-        logger.warning("[Tool 3] CSV parse: %s", e)
+        logger.warning("[Tool 3] csv parse: %s", e)
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -307,30 +287,25 @@ def tool_similarity(
     diags: Dict[str, TestDiag],
 ) -> List[Tuple[str, str, float]]:
     scripts_dir = os.path.join(HERE, "scripts")
-
     tc_dir = os.path.join(focal_method_result_dir, "test_cases")
     if not os.path.isdir(tc_dir):
-        logger.warning("[Tool 4] test_cases dir not found: %s", tc_dir)
         return []
 
     for sname, timeout in [("code_to_ast.py", 120), ("measure_similarity.py", 300)]:
         sc = os.path.join(scripts_dir, sname)
         if not os.path.exists(sc):
-            logger.warning("[Tool 4] %s not found", sname)
             return []
-        rc, stdout, stderr = _run([sys.executable, sc, tc_dir], timeout=timeout)
+        rc, _, stderr = _run([sys.executable, sc, tc_dir], timeout=timeout)
         if rc != 0:
-            logger.warning("[Tool 4] %s rc=%d stderr=%s", sname, rc, stderr[:300])
-        else:
-            logger.info("[Tool 4] %s OK", sname)
+            logger.warning("[Tool 4] %s rc=%d", sname, rc)
 
     sim_dir    = os.path.join(focal_method_result_dir, "Similarity")
     bsim_files = sorted(glob.glob(os.path.join(sim_dir, "*_bigSims.csv")))
     if not bsim_files:
-        logger.warning("[Tool 4] No bigSims.csv found in %s", sim_dir)
         return []
 
     all_pairs: List[Tuple[str, str, float]] = []
+    # best[tc] = (redundancy_score, partner) — highest redundancy_score = worst
     best: Dict[str, Tuple[float, str]] = {}
 
     try:
@@ -339,6 +314,8 @@ def tool_similarity(
                 tc1 = _short(row.get("test_case_1", "").strip())
                 tc2 = _short(row.get("test_case_2", "").strip())
                 try:
+                    # Issue 2 fix: 'redundancy_score' column = 1 - similarity
+                    # Store it directly — do NOT invert again.
                     rs = float(row.get("redundancy_score", 0))
                 except Exception:
                     rs = 0.0
@@ -350,18 +327,19 @@ def tool_similarity(
 
         for tc, (score, partner) in best.items():
             if tc in diags:
-                diags[tc].redundancy_score = 1 - round(score, 4)
+                # redundancy_score = 1 - similarity: high → redundant
+                diags[tc].redundancy_score = round(score, 4)
                 diags[tc].most_similar_to  = partner
 
-        logger.info("[Tool 4] %d pairs loaded", len(all_pairs))
+        logger.info("[Tool 4] %d pairs", len(all_pairs))
     except Exception as e:
-        logger.warning("[Tool 4] bigSims parse: %s", e)
+        logger.warning("[Tool 4] parse: %s", e)
 
     return all_pairs
 
 
 # ════════════════════════════════════════════════════════════════════
-# Refiner Prompt
+# Refiner prompt builder
 # ════════════════════════════════════════════════════════════════════
 
 def _build_refiner_messages(
@@ -380,55 +358,43 @@ def _build_refiner_messages(
             continue
         entry = diags[tname].to_dict()
         entry["scores"]      = test_scores[tname].to_dict() if tname in test_scores else {}
-        entry["source_code"] = test_file_codes.get(tname, "// [source not available]")
+        entry["source_code"] = test_file_codes.get(tname, "")
 
         if not cfg.use_compile_exec:
-            entry["compile_ok"] = True
-            entry["exec_ok"] = True
-            entry["compile_errors"] = []
-            entry["exec_errors"] = []
-            entry["auto_fix_hints"] = []
+            entry["compile_ok"] = True; entry["exec_ok"] = True
+            entry["compile_errors"] = []; entry["exec_errors"] = []
             entry["error_summary"] = ""
         else:
             entry["error_summary"] = get_error_summary(
-                diags[tname].compile_errors, diags[tname].exec_errors
-            )
+                diags[tname].compile_errors, diags[tname].exec_errors)
 
         if not cfg.use_coverage:
-            entry["focal_line_rate"] = None
-            entry["focal_branch_rate"] = None
-            entry["focal_line_covered"] = None
-            entry["focal_line_total"] = None
-            entry["missed_methods"] = []
-            entry["partial_methods"] = []
+            entry["focal_line_rate"] = None; entry["focal_branch_rate"] = None
+            entry["focal_line_covered"] = None; entry["focal_line_total"] = None
+            entry["missed_methods"] = []; entry["partial_methods"] = []
 
         if not cfg.use_bug_revealing:
             entry["bug_revealing"] = None
 
         if not cfg.use_redundancy:
-            entry["redundancy_score"] = None
-            entry["most_similar_to"] = None
+            entry["redundancy_score"] = None; entry["most_similar_to"] = None
 
-        # ── Issue 5: show only top-priority issues to Refiner ────
-        top_issues = issues_at_priority_level(score.issues)
-        entry["top_priority_issues"] = top_issues
+        # Issue 3: per-test top priority (not global suite priority)
+        entry["top_priority_issues"] = issues_at_priority_level(score.issues)
         entry["all_issues"]          = score.issues
-
         problematic_data.append(entry)
 
     try:
         from jinja2 import Environment, FileSystemLoader
         tenv = Environment(loader=FileSystemLoader(template_dir))
         user = tenv.get_template("refine_agent.jinja2").render(
-            focal_method      = focal_method,
-            class_name        = class_name,
-            focal_method_code = focal_method_code,
-            suite_score       = suite_score.to_dict(),
-            test_diagnostics  = problematic_data,
-            iteration         = iteration,
+            focal_method=focal_method, class_name=class_name,
+            focal_method_code=focal_method_code,
+            suite_score=suite_score.to_dict(),
+            test_diagnostics=problematic_data, iteration=iteration,
         )
     except Exception as e:
-        logger.warning("Template render failed (%s), using fallback", e)
+        logger.warning("Template render failed (%s), fallback", e)
         user = _fallback_prompt(focal_method, class_name, focal_method_code,
                                 problematic_data, suite_score, iteration, template_dir)
 
@@ -445,15 +411,11 @@ def _fallback_prompt(focal_method, class_name, focal_method_code,
                      problematic_data, suite_score, iteration, template_dir) -> str:
     suite_json = json.dumps(suite_score.to_dict(), indent=2, ensure_ascii=False)
     tests_json = json.dumps(problematic_data,      indent=2, ensure_ascii=False)
-
     tenv = Environment(loader=FileSystemLoader(template_dir))
     return tenv.get_template("fallback_refine_agent.jinja2").render(
-        focal_method=focal_method,
-        class_name=class_name,
+        focal_method=focal_method, class_name=class_name,
         focal_method_code=focal_method_code,
-        suite_json=suite_json,
-        tests_json=tests_json,
-        iteration=iteration,
+        suite_json=suite_json, tests_json=tests_json, iteration=iteration,
     )
 
 
@@ -510,43 +472,32 @@ class RefineAgent:
         files_written = 0
         step          = step_counter_start
 
-        logger.info("[RefineAgent] iter=%d  Suite=%d Tests: %s",
-                    iteration, len(test_names), test_names)
-
         # ── Tool 1+2 ──────────────────────────────────────────────
         t0 = time.time()
         diags, tests_output_dir = tool_compile_run_and_coverage(
-            focal_method_result_dir, project_dir, test_names
-        )
-        logger.info(
-            "[RefineAgent] [Tool 1+2] %.1fs  tests_dir=%s  "
-            "compile_ok=%d/%d  exec_ok=%d/%d",
-            time.time() - t0, tests_output_dir,
-            sum(1 for d in diags.values() if d.compile_ok), len(diags),
-            sum(1 for d in diags.values() if d.exec_ok),    len(diags),
-        )
+            focal_method_result_dir, project_dir, test_names)
+        logger.info("[RefineAgent] [Tool 1+2] %.1fs compile_ok=%d/%d exec_ok=%d/%d",
+                    time.time()-t0,
+                    sum(1 for d in diags.values() if d.compile_ok), len(diags),
+                    sum(1 for d in diags.values() if d.exec_ok),    len(diags))
 
-        # ── Tool 3: Bug Revealing ─────────────────────────────────
+        # ── Tool 3 ────────────────────────────────────────────────
         if not self.skip_bug_revealing and self.buggy_dir and self.fixed_dir:
             t0 = time.time()
-            tool_bug_revealing(
-                focal_method_result_dir, self.buggy_dir, self.fixed_dir, diags
-            )
-            logger.info("[RefineAgent] [Tool 3] %.1fs", time.time() - t0)
+            tool_bug_revealing(focal_method_result_dir, self.buggy_dir, self.fixed_dir, diags)
+            logger.info("[RefineAgent] [Tool 3] %.1fs", time.time()-t0)
         else:
-            reason = "fixed_dir not provided" if not self.fixed_dir else "skip_bug_revealing=True"
-            logger.info("[RefineAgent] [Tool 3] skipped: %s", reason)
+            logger.info("[RefineAgent] [Tool 3] skipped")
 
-        # ── Tool 4: Similarity ────────────────────────────────────
-        pairwise_sims: List[Tuple[str, str, float]] = []
+        # ── Tool 4 ────────────────────────────────────────────────
+        pairwise_sims = []
         if not self.skip_similarity and len(test_names) > 1:
             t0 = time.time()
             pairwise_sims = tool_similarity(focal_method_result_dir, diags)
-            logger.info("[RefineAgent] [Tool 4] %.1fs  %d pairs",
-                        time.time() - t0, len(pairwise_sims))
+            logger.info("[RefineAgent] [Tool 4] %.1fs %d pairs", time.time()-t0, len(pairwise_sims))
 
-        # ── Compute scores ────────────────────────────────────────
-        test_scores = {name: compute_test_score(diag, _cfg) for name, diag in diags.items()}
+        # ── Scores ────────────────────────────────────────────────
+        test_scores = {n: compute_test_score(d, _cfg) for n, d in diags.items()}
         suite_score = compute_suite_score(test_scores, pairwise_sims, _cfg)
 
         if self.skip_bug_revealing or not self.fixed_dir:
@@ -575,10 +526,8 @@ class RefineAgent:
                 "test_diags":    {k: v.to_dict() for k, v in diags.items()},
                 "test_scores":   {k: v.to_dict() for k, v in test_scores.items()},
                 "suite_score":   suite_score.to_dict(),
-                "pairwise_sims": [
-                    {"tc1": t1, "tc2": t2, "score": round(s, 4)}
-                    for t1, t2, s in pairwise_sims
-                ],
+                "pairwise_sims": [{"tc1":t1,"tc2":t2,"score":round(s,4)}
+                                   for t1,t2,s in pairwise_sims],
             }, f, indent=2, ensure_ascii=False)
         step += 1; files_written += 1
 
@@ -589,34 +538,17 @@ class RefineAgent:
             return RefineResult(
                 focal_method=focal_method, class_name=class_name, iteration=iteration,
                 test_diags=diags, test_scores=test_scores, suite_score=suite_score,
-                suite_summary="All Tests in this Suite pass all quality checks.",
-                _files_written=files_written,
-            )
+                suite_summary="All Tests pass all quality checks.", _files_written=files_written)
 
-        logger.info("[RefineAgent] %d/%d Tests have issues: %s",
-                    len(problematic), len(test_names), problematic)
+        logger.info("[RefineAgent] %d/%d problematic: %s", len(problematic), len(test_names), problematic)
 
-        # ── Issue 5: filter to highest-priority problematic tests ─
-        # Find the global top priority across all problematic tests
-        all_issues_flat = []
-        for n in problematic:
-            all_issues_flat.extend(test_scores[n].issues)
-
-        top_priority_issues = issues_at_priority_level(all_issues_flat)
-
-        # Only send tests that have issues at the top priority level
-        top_priority_problematic = [
-            n for n in problematic
-            if any(i in top_priority_issues for i in test_scores[n].issues)
-        ]
-
-        logger.info("[RefineAgent] Top priority issues: %s, affected tests: %s",
-                    top_priority_issues, top_priority_problematic)
-
-        # ── Refiner LLM ───────────────────────────────────────────
-        filtered_diags  = {n: diags[n]       for n in top_priority_problematic}
-        filtered_scores = {n: test_scores[n] for n in top_priority_problematic}
-        filtered_codes  = {n: test_file_codes.get(n, "") for n in top_priority_problematic}
+        # ── Issue 3 fix: send ALL problematic tests to Refiner ────
+        # Per-test priority is computed individually and embedded in each
+        # test's diagnostic data so the Refiner LLM knows what to focus on.
+        # We do NOT filter by suite-level top priority here.
+        filtered_diags  = {n: diags[n]       for n in problematic}
+        filtered_scores = {n: test_scores[n] for n in problematic}
+        filtered_codes  = {n: test_file_codes.get(n, "") for n in problematic}
 
         messages = _build_refiner_messages(
             focal_method=focal_method, class_name=class_name,
@@ -624,18 +556,14 @@ class RefineAgent:
             test_file_codes=filtered_codes,
             diags=filtered_diags, test_scores=filtered_scores,
             suite_score=suite_score,
-            iteration=iteration, template_dir=self.template_dir,
-            cfg=_cfg,
+            iteration=iteration, template_dir=self.template_dir, cfg=_cfg,
         )
         parsed, llm_result = self.client.chat_json(messages)
 
         ref_path = os.path.join(save_dir, f"{step}_REFINE_{iteration}.json")
         with open(ref_path, "w", encoding="utf-8") as f:
-            json.dump({
-                "raw":    llm_result.content,
-                "parsed": parsed,
-                "usage":  llm_result.to_usage_dict(),
-            }, f, indent=2, ensure_ascii=False)
+            json.dump({"raw": llm_result.content, "parsed": parsed,
+                       "usage": llm_result.to_usage_dict()}, f, indent=2, ensure_ascii=False)
         files_written += 1
 
         # ── Collect instructions ──────────────────────────────────
@@ -643,20 +571,14 @@ class RefineAgent:
             t: instr for t, instr in parsed.get("test_instructions", {}).items()
             if t in diags and isinstance(instr, list) and instr
         }
-
         instructions = dict(llm_instructions)
-        fallback_used_for = []
 
-        for tname in top_priority_problematic:
+        # Fallback: rule-based for any problematic test without LLM instructions
+        for tname in problematic:
             if tname not in instructions:
-                fallback_hints = enrich_diag_with_fix_hints(diags[tname])
-                if fallback_hints:
-                    instructions[tname] = fallback_hints
-                    fallback_used_for.append(tname)
-
-        if fallback_used_for:
-            logger.info("[RefineAgent] Rule-based fallback for %d tests: %s",
-                        len(fallback_used_for), fallback_used_for)
+                hints = enrich_diag_with_fix_hints(diags[tname])
+                if hints:
+                    instructions[tname] = hints
 
         delete_tests = [t for t in parsed.get("delete_tests", []) if t in diags]
 

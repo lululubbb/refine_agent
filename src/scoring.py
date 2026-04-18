@@ -1,44 +1,79 @@
 """
-scoring.py  (v5 — priority redesign + focal-method coverage fix)
-=================================================================
+scoring.py  (redundancy semantics clarification — Issue 2)
 
-Issue priority order (revised):
-  1. COMPILE_FAIL
-  2. EXEC_FAIL / EXEC_TIMEOUT
-  3. NOT_BUG_REVEALING   ← elevated above coverage
-  4. LOW_LINE_COV / LOW_BRANCH_COV
-  5. HIGH_REDUNDANCY
+Redundancy terminology used throughout the codebase:
+  - measure_similarity.py outputs:
+      combined_similarity  ∈ [0,1]  (higher = more similar = more redundant)
+      redundancy_score     = 1 - combined_similarity  (higher = more redundant)
+  - bigSims.csv column 'redundancy_score' = 1 - similarity (higher = worse)
+  - TestDiag.redundancy_score stores this value DIRECTLY (no re-inversion).
+  - HIGH_REDUNDANCY is raised when redundancy_score > _REDUNDANCY_THRESHOLD
+    (i.e. 1-similarity > 0.7, meaning similarity > 0.3 — rather similar).
 
-Rationale: Bug-revealing is the key research contribution; coverage will
-naturally improve when bug-revealing tests are added, but not vice versa.
-Redundancy is a "nice to have" and should not distract from correctness.
+    Wait — that threshold is inverted from what we want!
+    If redundancy_score = 1 - similarity, then:
+      redundancy_score > 0.7  ⟺  1-similarity > 0.7  ⟺  similarity < 0.3
+    That means we flag as redundant when tests are DISSIMILAR — wrong!
 
-Coverage issue is ONLY raised when focal_line_coverage < threshold AND
-the test actually executes the focal method (focal_line_total > 0).
+    The correct check should be similarity > threshold, or equivalently
+    redundancy_score < (1 - threshold).
+
+    BUT — looking at measure_similarity.py's output again:
+      w.writerow([..., f'{redundancy:.6f}'])
+      where redundancy = 1.0 - comb_sim
+
+    And bigSims.csv:
+      w.writerow([..., f'{rec[3]:.6f}', f'{1.0-rec[3]:.6f}'])
+      where rec[3] is comb_sim (similarity), so last col is 1-similarity = redundancy.
+
+    So bigSims.csv column 'redundancy_score' = 1 - similarity.
+    When this is stored in TestDiag.redundancy_score:
+      HIGH value = high redundancy (bad) = tests are very similar
+      LOW value  = low redundancy (good) = tests are diverse
+
+    Therefore the threshold check redundancy_score > 0.7 means:
+      1 - similarity > 0.7  ⟺  similarity < 0.3 → tests are DIVERSE → NOT redundant!
+
+    This is the real bug. The fix: use (1 - redundancy_score) > threshold,
+    i.e. similarity > threshold, i.e. redundancy_score < (1-threshold).
+
+    Equivalently: flag HIGH_REDUNDANCY when redundancy_score < _SIM_THRESHOLD
+    where _SIM_THRESHOLD is the similarity threshold (e.g. 0.7 → flag if sim > 0.7
+    → redundancy_score < 0.3).
+
+CORRECTED semantics:
+  redundancy_score ∈ [0,1]  from bigSims.csv, = 1 - similarity
+  similarity = 1 - redundancy_score
+  HIGH_REDUNDANCY iff similarity > _SIM_THRESHOLD
+               iff (1 - redundancy_score) > _SIM_THRESHOLD
+               iff redundancy_score < (1 - _SIM_THRESHOLD)
+
+Issue priority order:
+  COMPILE_FAIL (0) > EXEC_FAIL/TIMEOUT (1) > NOT_BUG_REVEALING (2) >
+  LOW_LINE/BRANCH_COV (3) > HIGH_REDUNDANCY (4)
 """
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
-# Coverage thresholds
+# Coverage thresholds (applied to focal method line/branch rate in 0..1)
 _LINE_COV_THRESHOLD   = 0.70
 _BRANCH_COV_THRESHOLD = 0.70
-# Redundancy threshold
-_REDUNDANCY_THRESHOLD = 0.70
+
+# Similarity threshold: flag as HIGH_REDUNDANCY when similarity > this value.
+# redundancy_score (from bigSims) = 1 - similarity, so the equivalent check is:
+#   redundancy_score < (1 - _SIM_THRESHOLD)
+_SIM_THRESHOLD        = 0.70
+_REDUNDANCY_FLAG_BELOW = 1.0 - _SIM_THRESHOLD   # = 0.30
 
 
 # ════════════════════════════════════════════════════════════════════
-# Test 级评分
+# TestScore
 # ════════════════════════════════════════════════════════════════════
 
 @dataclass
 class TestScore:
-    """
-    Single Test file multi-dimensional score.
-    Issues are ordered by priority:
-      COMPILE_FAIL > EXEC_FAIL/EXEC_TIMEOUT > NOT_BUG_REVEALING > LOW_LINE/BRANCH_COV > HIGH_REDUNDANCY
-    """
     test_name: str
 
     compile_score: float = 0.0
@@ -46,20 +81,17 @@ class TestScore:
 
     focal_line_coverage:   Optional[float] = None
     focal_branch_coverage: Optional[float] = None
-
-    # NEW: store focal method line counts for richer feedback
-    focal_line_covered: Optional[int] = None
-    focal_line_total:   Optional[int] = None
+    focal_line_covered:    Optional[int]   = None
+    focal_line_total:      Optional[int]   = None
 
     bug_reveal_score: Optional[bool] = None
 
-    max_similarity: Optional[float] = None
-    most_similar_to: Optional[str]  = None
+    # redundancy_score stored from bigSims = 1 - similarity
+    # (high value = more redundant = BAD)
+    max_similarity:  Optional[float] = None   # kept as field name for compat
+    most_similar_to: Optional[str]   = None
 
     issues: List[str] = field(default_factory=list)
-    # Priority-ordered possible values:
-    #   COMPILE_FAIL | EXEC_FAIL | EXEC_TIMEOUT |
-    #   NOT_BUG_REVEALING | LOW_LINE_COV | LOW_BRANCH_COV | HIGH_REDUNDANCY
 
     def to_dict(self) -> dict:
         return {
@@ -71,34 +103,28 @@ class TestScore:
             "focal_line_covered":   self.focal_line_covered,
             "focal_line_total":     self.focal_line_total,
             "bug_reveal_score":     self.bug_reveal_score,
-            "max_similarity":       self.max_similarity,
+            # expose both for clarity
+            "redundancy_score":     self.max_similarity,      # = 1-sim
+            "similarity":           round(1.0 - self.max_similarity, 4)
+                                    if self.max_similarity is not None else None,
             "most_similar_to":      self.most_similar_to,
             "issues":               self.issues,
         }
 
 
 # ════════════════════════════════════════════════════════════════════
-# Suite 级评分（N 个 Test 文件整体的多维度统计）
+# SuiteScore
 # ════════════════════════════════════════════════════════════════════
 
 @dataclass
 class SuiteScore:
-    """
-    Suite（针对同一 focal method 的 N 个 Test 文件集合）的多维度统计。
-    每个维度独立呈现，无加权综合分。
-    """
-    n_tests: int = 0            # Suite 中 Test 文件总数
+    n_tests: int = 0
 
-    # ── 维度 1：编译通过情况 ──────────────────────────────────────
     compile_pass_count: int   = 0
     compile_pass_rate:  float = 0.0
+    exec_pass_count:    int   = 0
+    exec_pass_rate:     float = 0.0
 
-    # ── 维度 2：执行通过情况 ──────────────────────────────────────
-    exec_pass_count: int   = 0
-    exec_pass_rate:  float = 0.0
-
-    # ── 维度 3：覆盖率统计（focal method） ───────────────────────
-    # 保留每个 Test 的原始行覆盖率列表（不丢失细节）
     per_test_line_coverage:   List[Optional[float]] = field(default_factory=list)
     per_test_branch_coverage: List[Optional[float]] = field(default_factory=list)
     coverage_line_avg:   Optional[float] = None
@@ -106,18 +132,14 @@ class SuiteScore:
     coverage_line_min:   Optional[float] = None
     coverage_branch_avg: Optional[float] = None
 
-    # ── 维度 4：Bug Revealing ────────────────────────────────────
-    bug_reveal_count:   int   = 0     # compile_ok 且 bug_revealing=True 的数量
-    bug_reveal_checked: int   = 0     # compile_ok 且检测过 bug_revealing 的数量
-    bug_reveal_rate:    float = 0.0   # bug_reveal_count / bug_reveal_checked
+    bug_reveal_count:   int   = 0
+    bug_reveal_checked: int   = 0
+    bug_reveal_rate:    float = 0.0
 
-    # ── 维度 5：Suite 内 Test 间相似度（冗余风险） ───────────────
-    max_pairwise_similarity: Optional[float] = None   # 最高 pair 相似度
-    # 高冗余 Test pair 列表（相似度 > 0.7）
+    # max pairwise SIMILARITY (1 - redundancy_score) — higher = more redundant
+    max_pairwise_similarity: Optional[float] = None
     high_redundancy_pairs: List[Tuple[str, str, float]] = field(default_factory=list)
 
-    # ── 问题汇总（按问题类型归类，指出哪些 Test 有问题）────────────
-    # e.g. {"COMPILE_FAIL": ["Token_1_2Test"], "LOW_LINE_COV": ["Token_1_1Test", ...]}
     problem_tests: Dict[str, List[str]] = field(default_factory=dict)
 
     def to_dict(self) -> dict:
@@ -145,15 +167,14 @@ class SuiteScore:
         }
 
 
-def _r(v: Optional[float]) -> Optional[float]:
+def _r(v):
     return round(v, 4) if v is not None else None
 
 
 # ════════════════════════════════════════════════════════════════════
-# Issue priority helper
+# Priority helpers
 # ════════════════════════════════════════════════════════════════════
 
-# Lower number = higher priority
 _ISSUE_PRIORITY = {
     "COMPILE_FAIL":       0,
     "EXEC_FAIL":          1,
@@ -166,7 +187,6 @@ _ISSUE_PRIORITY = {
 
 
 def sort_issues_by_priority(issues: List[str]) -> List[str]:
-    """Return issues sorted from highest priority (lowest number) to lowest."""
     return sorted(issues, key=lambda x: _ISSUE_PRIORITY.get(x, 99))
 
 
@@ -177,10 +197,7 @@ def highest_priority_issue(issues: List[str]) -> Optional[str]:
 
 
 def issues_at_priority_level(issues: List[str]) -> List[str]:
-    """
-    Return only the issues at the HIGHEST priority level present.
-    e.g. if COMPILE_FAIL and LOW_LINE_COV both present, return only [COMPILE_FAIL].
-    """
+    """Return only the issues at the highest priority level present."""
     if not issues:
         return []
     best = min(_ISSUE_PRIORITY.get(i, 99) for i in issues)
@@ -193,14 +210,11 @@ def issues_at_priority_level(issues: List[str]) -> List[str]:
 
 def compute_test_score(diag) -> TestScore:
     """
-    Compute TestScore from TestDiag.
-
-    Issue priority: COMPILE > EXEC > BUG_REVEALING > COVERAGE > REDUNDANCY
-
-    Coverage issues are ONLY raised when:
-      - exec passes
-      - focal_line_total > 0  (the focal method was actually reached)
-      - coverage is below threshold
+    Issue 2 fix: redundancy check uses CORRECTED threshold.
+      diag.redundancy_score = 1 - similarity  (from bigSims)
+      HIGH_REDUNDANCY iff similarity > _SIM_THRESHOLD
+                      iff (1 - redundancy_score) > _SIM_THRESHOLD
+                      iff redundancy_score < _REDUNDANCY_FLAG_BELOW
     """
     compile_s = 1.0 if diag.compile_ok else 0.0
     exec_s    = 1.0 if diag.exec_ok    else 0.0
@@ -208,47 +222,38 @@ def compute_test_score(diag) -> TestScore:
     line_cov   = (diag.focal_line_rate   / 100.0) if diag.focal_line_rate   is not None else None
     branch_cov = (diag.focal_branch_rate / 100.0) if diag.focal_branch_rate is not None else None
 
-    # Focal method line counts (may be on diag if populated)
     focal_line_covered = getattr(diag, 'focal_line_covered', None)
     focal_line_total   = getattr(diag, 'focal_line_total',   None)
 
     issues: List[str] = []
 
-    # ── Priority 0: Compile failure ──────────────────────────────
     if not diag.compile_ok:
         issues.append("COMPILE_FAIL")
-
     else:
-        # ── Priority 1: Execution failure ────────────────────────
         if not diag.exec_ok:
-            if diag.exec_timeout:
-                issues.append("EXEC_TIMEOUT")
-            else:
-                issues.append("EXEC_FAIL")
-
+            issues.append("EXEC_TIMEOUT" if diag.exec_timeout else "EXEC_FAIL")
         else:
-            # Exec passed — check quality dimensions
-
-            # ── Priority 2: Bug revealing ─────────────────────────
+            # Priority 2: Bug revealing
             if diag.bug_revealing is False:
                 issues.append("NOT_BUG_REVEALING")
 
-            # ── Priority 3: Coverage ──────────────────────────────
-            # Only raise if focal method was actually reached (total > 0)
-            focal_reached = (focal_line_total is not None and focal_line_total > 0) or \
-                            (line_cov is not None)
-
+            # Priority 3: Coverage (only when focal method was actually reached)
+            focal_reached = (
+                (focal_line_total is not None and focal_line_total > 0) or
+                line_cov is not None
+            )
             if focal_reached:
                 if line_cov is not None and line_cov < _LINE_COV_THRESHOLD:
                     issues.append("LOW_LINE_COV")
                 if branch_cov is not None and branch_cov < _BRANCH_COV_THRESHOLD:
                     issues.append("LOW_BRANCH_COV")
 
-            # ── Priority 4: Redundancy ────────────────────────────
-            if diag.redundancy_score is not None and diag.redundancy_score > _REDUNDANCY_THRESHOLD:
+            # Priority 4: Redundancy  — Issue 2 corrected check
+            rs = diag.redundancy_score  # = 1 - similarity
+            if rs is not None and rs < _REDUNDANCY_FLAG_BELOW:
+                # similarity = 1 - rs > _SIM_THRESHOLD → redundant
                 issues.append("HIGH_REDUNDANCY")
 
-    # Sort by priority
     issues = sort_issues_by_priority(issues)
 
     return TestScore(
@@ -260,7 +265,7 @@ def compute_test_score(diag) -> TestScore:
         focal_line_covered    = focal_line_covered,
         focal_line_total      = focal_line_total,
         bug_reveal_score      = diag.bug_revealing,
-        max_similarity        = diag.redundancy_score,
+        max_similarity        = diag.redundancy_score,  # stored as-is (1-sim)
         most_similar_to       = diag.most_similar_to,
         issues                = issues,
     )
@@ -270,48 +275,38 @@ def compute_suite_score(
     test_scores: Dict[str, "TestScore"],
     pairwise_sims: Optional[List[Tuple[str, str, float]]] = None,
 ) -> SuiteScore:
-    """
-    从所有 TestScore 计算 SuiteScore。
-
-    Parameters
-    ----------
-    test_scores   : {test_name → TestScore}，key = Test 文件名（如 Token_1_1Test）
-    pairwise_sims : 所有 pair 的相似度列表 [(tc1, tc2, score), ...]，
-                    由相似度工具计算，用于 Suite 级冗余分析
-    """
     if not test_scores:
         return SuiteScore()
 
     scores = list(test_scores.values())
     n = len(scores)
 
-    # ── 维度 1：编译 ─────────────────────────────────────────────
     compile_pass = sum(1 for s in scores if s.compile_score > 0.5)
+    exec_pass    = sum(1 for s in scores if s.exec_score    > 0.5)
 
-    # ── 维度 2：执行 ─────────────────────────────────────────────
-    exec_pass = sum(1 for s in scores if s.exec_score > 0.5)
-
-    # ── 维度 3：覆盖率 ────────────────────────────────────────────
     per_line   = [s.focal_line_coverage   for s in scores]
     per_branch = [s.focal_branch_coverage for s in scores]
     line_vals  = [v for v in per_line   if v is not None]
     branch_vals= [v for v in per_branch if v is not None]
 
-    # ── 维度 4：Bug Revealing ────────────────────────────────────
     compile_ok_scores = [s for s in scores if s.compile_score > 0.5]
     br_checked = [s for s in compile_ok_scores if s.bug_reveal_score is not None]
     br_yes     = [s for s in br_checked        if s.bug_reveal_score is True]
 
-    # ── 维度 5：相似度（Suite 内 pair 冗余）──────────────────────
+    # pairwise_sims carries (tc1, tc2, redundancy_score) where
+    # redundancy_score = 1 - similarity.  For suite-level display we want
+    # to report SIMILARITY (1 - redundancy_score).
     high_redund_pairs: List[Tuple[str, str, float]] = []
     max_pair_sim: Optional[float] = None
     if pairwise_sims:
-        all_sims = sorted(pairwise_sims, key=lambda x: x[2], reverse=True)
-        if all_sims:
-            max_pair_sim = all_sims[0][2]
-        high_redund_pairs = [(t1, t2, sim) for t1, t2, sim in all_sims if sim > 0.7]
+        # Convert redundancy_score → similarity for suite-level stats
+        sim_pairs = [(t1, t2, 1.0 - rs) for t1, t2, rs in pairwise_sims]
+        sim_pairs_sorted = sorted(sim_pairs, key=lambda x: x[2], reverse=True)
+        if sim_pairs_sorted:
+            max_pair_sim = sim_pairs_sorted[0][2]
+        high_redund_pairs = [(t1, t2, sim) for t1, t2, sim in sim_pairs_sorted
+                             if sim > _SIM_THRESHOLD]
 
-    # Problem tests map (issues already sorted by priority in each TestScore)
     problem_tests: Dict[str, List[str]] = {}
     for s in scores:
         for issue in s.issues:
@@ -325,9 +320,9 @@ def compute_suite_score(
         exec_pass_rate      = round(exec_pass / n, 4),
         per_test_line_coverage   = per_line,
         per_test_branch_coverage = per_branch,
-        coverage_line_avg   = round(sum(line_vals)   / len(line_vals),   4) if line_vals   else None,
-        coverage_line_max   = round(max(line_vals),  4) if line_vals   else None,
-        coverage_line_min   = round(min(line_vals),  4) if line_vals   else None,
+        coverage_line_avg   = round(sum(line_vals) / len(line_vals), 4)   if line_vals   else None,
+        coverage_line_max   = round(max(line_vals), 4)                     if line_vals   else None,
+        coverage_line_min   = round(min(line_vals), 4)                     if line_vals   else None,
         coverage_branch_avg = round(sum(branch_vals) / len(branch_vals), 4) if branch_vals else None,
         bug_reveal_count    = len(br_yes),
         bug_reveal_checked  = len(br_checked),

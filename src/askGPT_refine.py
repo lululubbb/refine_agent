@@ -1,8 +1,5 @@
 """
-askGPT_refine.py  (v5 — 删除版本信息注入，增强语法验证集成)
-======================================
-
-正确的 Pipeline 流程（与用户需求完全对齐）：
+askGPT_refine.py  (v6 — 断言修复 + @Test数量强制控制 + 平衡策略)
 
   针对一个 focal method：
 
@@ -29,52 +26,13 @@ askGPT_refine.py  (v5 — 删除版本信息注入，增强语法验证集成)
   │     Generator LLM 精修该 Test 文件（只改有指令的 Test）   │
   │     更新 test_cases/{test}.java                          │
   └─────────────────────────────────────────────────────────┘
-
-目录结构（与 ChatUniTest 完全兼容）：
-  results_batch/Csv_1_b/scope_test%T%/
-    1%Csv_1_b%Token%reset%d3/          ← base_dir (focal method)
-      test_cases/                       ← ★ TestRunner 读取此处
-        Token_1_1Test.java              ← test_num=1 的 Test 文件
-        Token_1_2Test.java              ← test_num=2 的 Test 文件
-        ...
-        Token_1_5Test.java              ← test_num=5 的 Test 文件
-      gen_logs/                         ← 初始生成记录（每个 Test 一个子目录）
-        1/   1_GEN.json  2_JAVA.java
-        2/   1_GEN.json  2_JAVA.java
-        ...
-      refine_logs/                      ← Refine 迭代记录（每轮一个子目录）
-        round_1/
-          tool_diag.json                ← 工具诊断 + 两级得分
-          REFINE.json                   ← Refiner LLM 输出
-          fix_1/  fix_gen.json  new.java  ← 对 Test_1 的精修
-          fix_2/  fix_gen.json  new.java
-          ...
-        round_2/
-          ...
-      time_stats.json
-      token_stats.json
-
-  增加清晰的进度打印，包括：
-  - 每个 focal method 的处理进度（进度条 + 时间估算）
-  - Phase 1 每个 Test 文件的生成状态
-  - Phase 2 每轮 Refine 的详细诊断输出：
-      · Suite 整体评分（编译率/执行率/覆盖率/Bug 揭示率/冗余度）
-      · 每个问题 Test 的具体问题标签 + 错误摘要
-      · Refiner LLM 输出的修复指令预览
-      · 每次 fix 后的状态变化
-  - 彩色 ANSI 输出，按严重程度染色
-  - 生成 refine_quality.jsonl 日志，方便后期离线分析覆盖率提升瓶颈
-
-修复内容：
-  Bug 1:  token_stats["rounds"] 始终为空 {}
-          → 新增 _acc_round_tokens()，在 phase1 结束和每轮 round 结束时
-            通过"快照基线 → 结束时相减"得到增量，写入 stats["rounds"]
-  Bug 1b: 缺少 all_total 字段
-          → _acc_gen / _acc_ref 每次累加后同步更新 token_stats["all_total"]
-  Bug 3:  fix_gen.json 和 new.java 未生成
-          → fix_gen.json 由 call_generator() 明确写出；
-            new.java 在所有路径（成功/提取失败/LLM失败）都明确写出，
-            失败时写注释占位，便于调试
+  
+核心改动（相对 v5）：
+1. 新增 _enforce_test_method_limit()：代码层面强制截断多余@Test方法
+2. 新增 _run_assert_fixer()：集成 MutAP 风格断言修复
+3. generate_one_test() 生成后立即调用断言修复和数量控制
+4. fix 循环中也调用断言修复
+5. build_fix_messages() 中严格隔离：编译/执行失败时绝不混入覆盖率/bugrevealing指令
 """
 from __future__ import annotations
 
@@ -120,9 +78,116 @@ logger = logging.getLogger(__name__)
 _PROMPT_DIR = os.path.join(os.path.dirname(HERE), "prompt")
 env = Environment(loader=FileSystemLoader(_PROMPT_DIR))
 
-# ── Issue 4: hard cap on @Test methods per file ──────────────────────
-_MAX_TEST_METHODS_DEFAULT = 8   # absolute ceiling
-_TEST_METHOD_HEADROOM     = 2   # allow at most current_count + headroom new tests
+# ── @Test 数量硬性上限 ──────────────────────────────────────────────
+_MAX_TEST_METHODS_DEFAULT = 8   # 绝对上限（降低以避免编译错误堆积）
+_TEST_METHOD_HEADROOM     = 2   # fix时最多允许新增数量
+
+
+# ════════════════════════════════════════════════════════════════════
+# 新增：强制截断多余 @Test 方法（代码层面，不依赖 prompt）
+# ════════════════════════════════════════════════════════════════════
+
+def _enforce_test_method_limit(java_source: str, max_tests: int) -> str:
+    """
+    强制将测试文件中的 @Test 方法数量限制在 max_tests 以内。
+    超出部分直接删除（保留前 max_tests 个）。
+
+    这是代码层面的硬性控制，不依赖 LLM 遵守 prompt 中的数量限制。
+    """
+    current_count = len(re.findall(r'@Test\b', java_source))
+    if current_count <= max_tests:
+        return java_source
+
+    lines = java_source.splitlines(keepends=True)
+    test_count = 0
+    cut_line = None
+
+    for i, line in enumerate(lines):
+        if re.search(r'@Test\b', line):
+            test_count += 1
+            if test_count > max_tests:
+                cut_line = i
+                break
+
+    if cut_line is None:
+        return java_source
+
+    kept_lines = lines[:cut_line]
+    source_so_far = ''.join(kept_lines)
+    open_braces = source_so_far.count('{')
+    close_braces = source_so_far.count('}')
+    missing = open_braces - close_braces
+    if missing > 0:
+        source_so_far = source_so_far.rstrip()
+        source_so_far += '\n' + '}\n' * missing
+
+    logger.info("[TestLimit] Truncated from %d to %d @Test methods", current_count, max_tests)
+    return source_so_far
+
+
+# ════════════════════════════════════════════════════════════════════
+# 新增：从被测类源码提取私有字段名
+# ════════════════════════════════════════════════════════════════════
+
+def _extract_private_fields_from_source(source_code: str) -> list:
+    """从被测类源码中提取私有字段名"""
+    pattern = re.compile(
+        r'\bprivate\b[^;{(]*?\b([a-z]\w*)\s*(?:=\s*[^;]+)?;',
+        re.MULTILINE
+    )
+    excluded = {'this', 'super', 'void', 'null', 'true', 'false',
+                'int', 'long', 'double', 'float', 'boolean',
+                'byte', 'char', 'short', 'final', 'static', 'new'}
+    fields = []
+    for m in pattern.finditer(source_code):
+        name = m.group(1).strip()
+        if name and name not in excluded and not name[0].isupper():
+            fields.append(name)
+    return fields
+
+
+# ════════════════════════════════════════════════════════════════════
+# 新增：集成 MutAP 断言修复
+# ════════════════════════════════════════════════════════════════════
+
+def _run_assert_fixer(
+    java_source: str,
+    class_name: str,
+    method_id: str,
+    seq,
+    package: str,
+    test_project_dir: str,
+    focal_source_code: str = "",
+) -> str:
+    """
+    对 LLM 生成的测试代码运行 MutAP 风格的断言修复。
+    在写入 test_cases/ 之前调用。
+
+    修复内容：
+    1. 移除直接访问私有字段的断言（避免编译错误）
+    2. 修复 assertEquals 中错误的预期值（用真实运行结果替换）
+    """
+    private_fields = _extract_private_fields_from_source(focal_source_code)
+
+    try:
+        from config import JUNIT_JAR, MOCKITO_JAR, LOG4J_JAR
+        from assert_fixer import fix_assertions
+
+        pkg_clean = re.sub(r'^package\s+', '', package or '').rstrip(';').strip()
+        tc_class_name = f"{class_name}_{method_id}_{seq}Test"
+
+        fixed = fix_assertions(
+            java_source=java_source,
+            class_name=tc_class_name,
+            package=pkg_clean,
+            project_dir=test_project_dir,
+            junit_jar=JUNIT_JAR,
+            private_fields=private_fields,
+        )
+        return fixed
+    except Exception as e:
+        logger.debug("[AssertFixer] skipped for %s_%s_%sTest: %s", class_name, method_id, seq, e)
+        return java_source
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -199,11 +264,7 @@ def _print_suite_score(suite_score, tag=""):
     if ss.coverage_branch_avg is not None:
         bc = ss.coverage_branch_avg
         bc_c = Fore.GREEN if bc >= 0.8 else (Fore.YELLOW if bc >= 0.7 else Fore.RED)
-        print(f"  {'分支覆盖率(avg)':<16}: {bc_c}{bc*100:.1f}%  "
-              f"(min={ss.coverage_branch_min*100:.1f}%  max={ss.coverage_branch_max*100:.1f}%){Style.RESET_ALL}"
-              if hasattr(ss, 'coverage_branch_min') and ss.coverage_branch_min is not None
-              else f"  {'分支覆盖率(avg)':<16}: {bc_c}{bc*100:.1f}%{Style.RESET_ALL}",
-              flush=True)
+        print(f"  {'分支覆盖率(avg)':<16}: {bc_c}{bc*100:.1f}%{Style.RESET_ALL}", flush=True)
     else:
         print(f"  {'分支覆盖率(avg)':<16}: {Fore.WHITE}N/A{Style.RESET_ALL}", flush=True)
 
@@ -376,7 +437,6 @@ def _log_refine_quality(save_dir: str, focal_method: str, round_num: int,
 def generate_prompt(template_name: str, context: dict) -> str:
     return env.get_template(template_name).render(context)
 
-
 def generate_messages(template_name: str, context: dict) -> List[Dict]:
     messages = []
     sys_name = f"{template_name.split('.')[0]}_system.jinja2"
@@ -384,7 +444,6 @@ def generate_messages(template_name: str, context: dict) -> List[Dict]:
         messages.append({"role": "system", "content": generate_prompt(sys_name, {})})
     messages.append({"role": "user", "content": generate_prompt(template_name, context)})
     return messages
-
 
 def remain_prompt_tokens(messages):
     return MAX_PROMPT_TOKENS - get_messages_tokens(messages)
@@ -439,7 +498,7 @@ def _run_syntax_validation(
 
 
 # ════════════════════════════════════════════════════════════════════
-# Initial generation (unchanged)
+# Initial generation — 修改：调用断言修复 + 数量控制
 # ════════════════════════════════════════════════════════════════════
 
 def generate_one_test(
@@ -455,6 +514,8 @@ def generate_one_test(
     gen_log_dir: str,
     progress_tag: str = "",
     validation_issues_cache: dict = None,
+    test_project_dir: str = "",
+    focal_source_code: str = "",
 ) -> Optional[tuple]:
     save_dir = os.path.join(gen_log_dir, str(seq))
     os.makedirs(save_dir, exist_ok=True)
@@ -507,6 +568,21 @@ def generate_one_test(
         final_code = repair_package(final_code, pkg_decl)
         final_code = _ensure_package_first(final_code, pkg_decl)
 
+    # ── 新增 Step A: 强制截断多余 @Test 方法 ──────────────────────
+    final_code = _enforce_test_method_limit(final_code, _MAX_TEST_METHODS_DEFAULT)
+
+    # ── 新增 Step B: MutAP 断言修复 ──────────────────────────────
+    if test_project_dir:
+        final_code = _run_assert_fixer(
+            java_source=final_code,
+            class_name=class_name,
+            method_id=method_id,
+            seq=seq,
+            package=package,
+            test_project_dir=test_project_dir,
+            focal_source_code=focal_source_code,
+        )
+
     tc_fname = f"{class_name}_{method_id}_{seq}Test.java"
     tc_path  = os.path.join(tc_dir, tc_fname)
     with open(tc_path, "w", encoding="utf-8") as f:
@@ -529,7 +605,9 @@ def generate_one_test(
                 f"将在 fix 阶段注入修复提示", flush=True
             )
 
+    test_cnt = _count_test_methods(final_code)
     print(f"    ✅ 生成成功{'⚠️(语法修复)' if has_err else ''} | "
+          f"@Test数={test_cnt} | "
           f"tokens={gen_result.prompt_tokens}+{gen_result.completion_tokens} | "
           f"llm_time={gen_result.elapsed_seconds:.1f}s | {tc_fname}", flush=True)
     return final_code, gen_result
@@ -562,26 +640,30 @@ def _ensure_package_first(code: str, pkg_decl: str) -> str:
 # Issue 5: Fix priority ordering helper
 # ════════════════════════════════════════════════════════════════════
 
-def _get_fix_priority(issues: List[str]) -> str:
+def _get_fix_priority_for_test(issues: List[str]) -> str:
     """
-    Return the primary category of the highest-priority issue present.
+    Return the top-priority issue category for a single test's issue list.
     Priority: compile > exec > bug_revealing > coverage > redundancy
     """
-    if "COMPILE_FAIL" in issues:
+    top = issues_at_priority_level(issues)
+    if not top:
+        return "none"
+    first = top[0]
+    if first == "COMPILE_FAIL":
         return "compile"
-    if "EXEC_FAIL" in issues or "EXEC_TIMEOUT" in issues:
+    if first in ("EXEC_FAIL", "EXEC_TIMEOUT"):
         return "exec"
-    if "NOT_BUG_REVEALING" in issues:
+    if first == "NOT_BUG_REVEALING":
         return "bug_revealing"
-    if "LOW_LINE_COV" in issues or "LOW_BRANCH_COV" in issues:
+    if first in ("LOW_LINE_COV", "LOW_BRANCH_COV"):
         return "coverage"
-    if "HIGH_REDUNDANCY" in issues:
+    if first == "HIGH_REDUNDANCY":
         return "redundancy"
     return "none"
 
 
 # ════════════════════════════════════════════════════════════════════
-# build_fix_messages  — Issues 2, 3, 4, 5
+# build_fix_messages  — per-test priority (Issue 3)
 # ════════════════════════════════════════════════════════════════════
 
 def build_fix_messages(
@@ -615,13 +697,26 @@ def build_fix_messages(
     if issues is None:
         issues = []
 
-    # ── Ablation switches ─────────────────────────────────────────
     use_compile_exec  = bool(cfg.use_compile_exec)
     use_coverage      = bool(cfg.use_coverage)
     use_bug_revealing = bool(cfg.use_bug_revealing)
     use_redundancy    = bool(cfg.use_redundancy)
 
-    # ── Error information from diag ───────────────────────────────
+    # ── Per-test top priority ─────────────────────────────────────
+    # Issue 3: use the THIS test's issues, not any suite-global filter
+    top_issues = issues_at_priority_level(issues) if issues else []
+    priority   = _get_fix_priority_for_test(issues)
+
+    # Ablation filter
+    filtered_issues = []
+    for issue in top_issues:
+        if issue in ("COMPILE_FAIL","EXEC_FAIL","EXEC_TIMEOUT") and not use_compile_exec: continue
+        if issue in ("LOW_LINE_COV","LOW_BRANCH_COV") and not use_coverage: continue
+        if issue == "NOT_BUG_REVEALING" and not use_bug_revealing: continue
+        if issue == "HIGH_REDUNDANCY" and not use_redundancy: continue
+        filtered_issues.append(issue)
+
+    # Error info
     if use_compile_exec and diag:
         compile_ok     = getattr(diag, 'compile_ok', True)
         exec_ok        = getattr(diag, 'exec_ok', True)
@@ -633,27 +728,8 @@ def build_fix_messages(
         compile_errors = []
         exec_errors    = []
 
-    # ── Issue 5: filter issues to top-priority group ──────────────
-    top_issues = issues_at_priority_level(issues) if issues else []
-    priority   = _get_fix_priority(top_issues)
-
-    # ── Ablation filter on top issues ─────────────────────────────
-    filtered_issues = []
-    for issue in top_issues:
-        if issue in ("COMPILE_FAIL", "EXEC_FAIL", "EXEC_TIMEOUT") and not use_compile_exec:
-            continue
-        if issue in ("LOW_LINE_COV", "LOW_BRANCH_COV") and not use_coverage:
-            continue
-        if issue == "NOT_BUG_REVEALING" and not use_bug_revealing:
-            continue
-        if issue == "HIGH_REDUNDANCY" and not use_redundancy:
-            continue
-        filtered_issues.append(issue)
-
-    # ── Issue 2: coverage context only when LOW_COV is the issue ──
-    has_coverage_issue = ("LOW_LINE_COV" in filtered_issues or
-                          "LOW_BRANCH_COV" in filtered_issues)
-
+    # Coverage info — only when LOW_COV is THIS test's issue
+    has_coverage_issue = "LOW_LINE_COV" in filtered_issues or "LOW_BRANCH_COV" in filtered_issues
     if use_coverage and has_coverage_issue and diag:
         focal_line_rate    = getattr(diag, 'focal_line_rate',    None)
         focal_branch_rate  = getattr(diag, 'focal_branch_rate',  None)
@@ -666,67 +742,56 @@ def build_fix_messages(
         focal_line_covered = None
         focal_line_total   = None
 
-    # ── Issue 4: compute @Test method cap ─────────────────────────
+    # ── @Test 数量限制：fix时只允许 current + headroom ──────────
     current_test_count = _count_test_methods(current_code)
-    # Allow at most current_count + headroom, but cap at absolute max
-    max_test_methods = min(
-        current_test_count + _TEST_METHOD_HEADROOM,
-        _MAX_TEST_METHODS_DEFAULT,
-    )
-    # Never go below current count (we don't want to force deletion)
-    max_test_methods = max(max_test_methods, current_test_count)
+    # 编译/执行失败时不允许增加新@Test，只修复现有
+    if priority in ("compile", "exec"):
+        max_test_methods = current_test_count  # 不允许新增
+    else:
+        max_test_methods = min(
+            current_test_count + _TEST_METHOD_HEADROOM,
+            _MAX_TEST_METHODS_DEFAULT,
+        )
+    max_test_methods = max(max_test_methods, 1)
 
-    # ── Issue 5: filter instructions to top-priority ──────────────
+    # ── 过滤指令到最高优先级 ─────────────────────────────────────
+     # ── Filter instructions to per-test top priority ──────────────
     filtered_instructions = []
     for instr in instructions:
-        instr_lower = instr.lower()
-        
-        # 1. 如果优先级是编译，只保留编译/语法指令
+        il = instr.lower()
         if priority == "compile":
-            # Only compile/syntax related instructions
-            if any(kw in instr_lower for kw in
-                   ["compile", "syntax", "error:", "cannot find", "private access",
-                    "incompatible", "unreported", "ambiguous", "constructor"]):
+            if any(k in il for k in ["compile","syntax","error:","cannot find","private access",
+                                      "incompatible","unreported","ambiguous","constructor",
+                                      "does not override","abstract","implement"]):
                 filtered_instructions.append(instr)
-        
-        # 2. 如果优先级是执行，只保留执行/运行时/异常指令
         elif priority == "exec":
-            if any(kw in instr_lower for kw in
-                   ["exec", "runtime", "exception", "timeout", "assert", "expected",
-                    "but was", "thrown", "null"]):
+            if any(k in il for k in ["exec","runtime","exception","timeout","assert","expected",
+                                      "but was","thrown","null","reflection","field"]):
                 filtered_instructions.append(instr)
         elif priority == "bug_revealing":
-            if any(kw in instr_lower for kw in
-                   ["bug", "revealing", "assert", "assertEquals", "boundary", "precise"]):
+            if any(k in il for k in ["bug","revealing","assert","assertEquals","boundary",
+                                      "precise","strengthen","exact"]):
                 filtered_instructions.append(instr)
         elif priority == "coverage":
-            if any(kw in instr_lower for kw in
-                   ["coverage", "branch", "line", "path", "case", "boundary", "test"]):
+            if any(k in il for k in ["coverage","branch","line","path","case","boundary","test"]):
                 filtered_instructions.append(instr)
         elif priority == "redundancy":
-            if any(kw in instr_lower for kw in
-                   ["redundan", "similar", "structur", "different"]):
+            if any(k in il for k in ["redundan","similar","structur","different"]):
                 filtered_instructions.append(instr)
-        
-        # 6. 无明确优先级或 none 时，保留所有指令（或根据需求自定义）
         else:
             filtered_instructions.append(instr)
 
-    # Fallback: if nothing matched the filter, keep all
     if not filtered_instructions and instructions:
         filtered_instructions = list(instructions)
 
     unchanged_warning = (
         "\n\n⚠️ CRITICAL: Your previous output was IDENTICAL to the input. "
-        "You MUST make substantial changes this time. "
-        "Rewrite the failing test methods completely with different logic."
-        if prev_unchanged else ""
-    )
+        "You MUST make substantial changes this time."
+        if prev_unchanged else "")
 
-    method_code = ctx_d1.get("information", ctx_d3.get("full_fm", ""))
+    method_code = ctx_d1.get("information", ctx_d3.get("full_fm",""))
 
     context = {
-        # Basic
         "class_name":           class_name,
         "focal_method":         focal_method,
         "test_name":            test_name,
@@ -736,18 +801,15 @@ def build_fix_messages(
         "imports":              imports,
         "contract_text":        contract_text,
         "unchanged_warning":    unchanged_warning,
-        # Instructions
-        "instructions_json":    json.dumps(filtered_instructions[:5], indent=2, ensure_ascii=False),
+        "instructions_json":    json.dumps(filtered_instructions[:4], indent=2, ensure_ascii=False),
         "delete_tests_json":    "[]",
         "instructions_summary": "\n".join(
-            f"  {i+1}. {instr}" for i, instr in enumerate(filtered_instructions[:5])
+            f"  {i+1}. {instr}" for i, instr in enumerate(filtered_instructions[:4])
         ),
-        # Ablation switches
         "use_compile_exec":  use_compile_exec,
         "use_coverage":      use_coverage,
         "use_bug_revealing": use_bug_revealing,
         "use_redundancy":    use_redundancy,
-        # Compile/exec state
         "compile_ok":     compile_ok,
         "exec_ok":        exec_ok,
         "compile_errors": compile_errors[:30],
@@ -757,13 +819,10 @@ def build_fix_messages(
         "focal_branch_rate":  focal_branch_rate,
         "focal_line_covered": focal_line_covered,
         "focal_line_total":   focal_line_total,
-        # Issue 5: top-priority issues (for template conditionals)
         "issues": filtered_issues,
-        # Issue 4: @Test method cap
         "max_test_methods": max_test_methods,
-        # Legacy / compat
-        "missed_methods":  [],   # Issue 3: no longer used in template
-        "partial_methods": [],   # Issue 3: no longer used in template
+        "missed_methods":  [],
+        "partial_methods": [],
         "auto_fix_hints":  [],
         "error_summary":   "",
     }
@@ -773,7 +832,6 @@ def build_fix_messages(
         context["method_code"] = ctx_d3.get("full_fm", "")[:2000]
         msgs = generate_messages(TEMPLATE_FIX, context)
 
-    # ── Append key reminders ──────────────────────────────────────
     if msgs and msgs[-1]["role"] == "user":
         suffix_parts = []
 
@@ -796,12 +854,18 @@ def build_fix_messages(
                     f"{_vdata['prompt_text']}"
                 )
 
-        # Issue 4: reiterate @Test cap in suffix
-        suffix_parts.append(
-            f"\n\n⚠️ @Test METHOD LIMIT: Keep total `@Test` methods ≤ {max_test_methods}. "
-            f"Currently the file has {current_test_count} @Test methods. "
-            f"Improve existing tests rather than adding many new ones."
-        )
+        # @Test 数量限制说明（简短）
+        if priority in ("compile", "exec"):
+            suffix_parts.append(
+                f"\n\n⚠️ DO NOT add new @Test methods. Focus ONLY on fixing the "
+                f"{'compile' if priority == 'compile' else 'runtime'} errors shown above. "
+                f"Keep exactly the same test methods, just fix the error."
+            )
+        else:
+            suffix_parts.append(
+                f"\n\n⚠️ Keep total @Test methods ≤ {max_test_methods} "
+                f"(currently {current_test_count})."
+            )
 
         msgs[-1]["content"] += "".join(suffix_parts)
 
@@ -809,7 +873,8 @@ def build_fix_messages(
 
 
 # ════════════════════════════════════════════════════════════════════
-# focal_method_pipeline  (only build_fix_messages call updated)
+# focal_method_pipeline — 修改：传入 test_project_dir 给 generate_one_test
+#                          + fix 循环中调用断言修复 + @Test 截断
 # ════════════════════════════════════════════════════════════════════
 
 def focal_method_pipeline(
@@ -832,7 +897,7 @@ def focal_method_pipeline(
     print(flush=True)
     _section(f"{progress_tag} {proj_name}.{class_name}.{method_name}  (id={method_id})", Fore.CYAN)
     print(f"  {Fore.CYAN}目录: {base_dir}{Style.RESET_ALL}", flush=True)
-    print(f"  {Fore.CYAN}计划: 生成 {test_number} 个 Test 文件，最多 {max_rounds} 轮 Refine{Style.RESET_ALL}", flush=True)
+    print(f"  {Fore.CYAN}计划: 生成 {test_number} 个 Test 文件（上限{_MAX_TEST_METHODS_DEFAULT}个@Test），最多 {max_rounds} 轮 Refine{Style.RESET_ALL}", flush=True)
 
     tracker    = LLMStatsTracker()
     time_stats = {
@@ -855,9 +920,8 @@ def focal_method_pipeline(
     package           = raw_data.get("package", "")
     imports           = raw_data.get("imports", "")
     focal_method_code = raw_data.get("source_code", ctx_d1.get("information", ""))
+    focal_source_code = raw_data.get("source_code", "")
     pkg_decl          = canonical_package_decl(package)
-
-    contract = None
 
     gen_client = make_generator_client()
     ref_client = make_refiner_client()
@@ -900,7 +964,6 @@ def focal_method_pipeline(
     current_codes: Dict[str, str] = {}
     validation_issues_cache: dict = {}
 
-    # focal class 上下文（用于语法验证的动态规则）
     focal_class_ctx = ctx_d1.get("information", "") or ctx_d3.get("full_fm", "")
 
     for seq in range(1, test_number + 1):
@@ -913,6 +976,8 @@ def focal_method_pipeline(
             tc_dir=tc_dir, gen_log_dir=gen_log_dir,
             progress_tag=progress_tag,
             validation_issues_cache=validation_issues_cache,
+            test_project_dir=test_project_dir,       # ← 新增
+            focal_source_code=focal_source_code,     # ← 新增
         )
         if result is None:
             continue
@@ -1065,6 +1130,31 @@ def focal_method_pipeline(
                         new_code = repair_package(new_code, pkg_decl)
                         new_code = _ensure_package_first(new_code, pkg_decl)
 
+                    # ── 新增：fix后也强制截断 @Test 数量 ─────────
+                    # 获取当前优先级，确定允许的最大数量
+                    current_priority = _get_fix_priority_for_test(tc_score.issues if tc_score else [])
+                    if current_priority in ("compile", "exec"):
+                        fix_max = _count_test_methods(original_code)  # 不允许新增
+                    else:
+                        fix_max = min(
+                            _count_test_methods(original_code) + _TEST_METHOD_HEADROOM,
+                            _MAX_TEST_METHODS_DEFAULT,
+                        )
+                    new_code = _enforce_test_method_limit(new_code, fix_max)
+
+                    # ── 新增：fix后也调用断言修复 ──────────────────
+                    if test_project_dir and current_priority not in ("compile",):
+                        # 编译失败时跳过断言修复（代码都无法编译）
+                        new_code = _run_assert_fixer(
+                            java_source=new_code,
+                            class_name=class_name,
+                            method_id=method_id,
+                            seq=seq_num,
+                            package=package,
+                            test_project_dir=test_project_dir,
+                            focal_source_code=focal_source_code,
+                        )
+
                     changed = _code_changed(original_code, new_code)
                     if not changed:
                         unchanged_counts[tc_name] = unchanged_counts.get(tc_name, 0) + 1
@@ -1098,7 +1188,8 @@ def focal_method_pipeline(
                         with open(new_java_path, "w", encoding="utf-8") as f:
                             f.write(new_code)
                         fix_results["ok"].append(tc_name)
-                        print(f"    ✅ {tc_name} 精修成功 | "
+                        new_cnt = _count_test_methods(new_code)
+                        print(f"    ✅ {tc_name} 精修成功 | @Test数={new_cnt} | "
                               f"prompt={fix_result.prompt_tokens} "
                               f"completion={fix_result.completion_tokens} | "
                               f"llm_time={fix_result.elapsed_seconds:.1f}s", flush=True)

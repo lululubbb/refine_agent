@@ -1,11 +1,22 @@
 """
-tool_runner_adapter.py  (with Issue-3 fix: focal line counts in diag)
+tool_runner_adapter.py  (bug-fix edition — Issues 1 & 2)
 
-Changes:
-  - _parse_coverage_csv now also reads f_per_line_cov / f_per_line_total
-    and stores them as focal_line_covered / focal_line_total in the diag entry.
-  - _parse_diag_block retains existing logic unchanged.
-  - _load_full_errors_from_files retained unchanged.
+Bug 1 fix: status/coveragedetail/diagnosis CSVs and diagnosis.log are all
+  opened in APPEND mode by test_runner.py, so the same test_class appears
+  multiple times across rounds.  The old "high priority wins" strategy kept
+  a compile_fail row from round N even after it was fixed in round N+1.
+  Fix: "last row wins" — the final occurrence always reflects the most
+  recent test run, which is exactly what the fix prompt must show.
+
+Bug 2 fix: compiler_output/ and test_output/ directories are never cleaned
+  between rounds, so _load_full_errors_from_files() was overwriting fresh
+  diagnosis data with stale error files from previous rounds.
+  Fix: only use a disk error file when its mtime >= the java source file's
+  mtime (i.e. it was written AFTER the current version of the test).
+
+Redundancy note (Issue 2 of original report): the score stored in
+  bigSims.csv column 'redundancy_score' is already (1 - similarity).
+  refine_agent.py was doing `1 - score` again → fixed there, not here.
 """
 from __future__ import annotations
 
@@ -27,19 +38,6 @@ _MAX_SINGLE_ERROR_CHARS = 2000
 _MAX_COMPILE_ERROR_LINES = 80
 # 运行错误文件最大读取行数
 _MAX_RUNTIME_ERROR_LINES = 60
-
-# 状态优先级（数字越大，优先级越高）
-_STATUS_PRIORITY = {
-    "compile_fail": 3,
-    "exec_timeout": 2,
-    "exec_fail":    1,
-    "exec_ok":      0,
-    "unknown":      -1,
-}
-
-
-def _status_priority(status_str: str) -> int:
-    return _STATUS_PRIORITY.get(status_str, -1)
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -64,10 +62,8 @@ def run_and_export(
         logger.warning("[ToolRunner] TestRunner failed: %s", e)
 
     tests_output_dir = _resolve_tests_output_dir(focal_method_result_dir, project_dir)
-
     if not tests_output_dir:
-        logger.warning("[ToolRunner] tests_output_dir not found (focal=%s, project=%s)",
-                       focal_method_result_dir, project_dir)
+        logger.warning("[ToolRunner] tests_output_dir not found")
         return None
 
     logger.info("[ToolRunner] tests_output_dir = %s", tests_output_dir)
@@ -79,13 +75,11 @@ def run_and_export(
     try:
         with open(out_path, "w", encoding="utf-8") as f:
             json.dump(diag_map, f, indent=2, ensure_ascii=False)
-        logger.info("[ToolRunner] suite_diagnosis.json → %d tests: %s", len(diag_map), out_path)
-
         compile_fail = sum(1 for v in diag_map.values() if v.get("compile_status") == "fail")
         compile_pass = sum(1 for v in diag_map.values() if v.get("compile_status") == "pass")
         exec_fail    = sum(1 for v in diag_map.values() if v.get("exec_status") == "fail")
         exec_pass    = sum(1 for v in diag_map.values() if v.get("exec_status") == "pass")
-        logger.info("[ToolRunner] diag summary: compile_pass=%d fail=%d | exec_pass=%d fail=%d",
+        logger.info("[ToolRunner] diag: compile_pass=%d fail=%d exec_pass=%d fail=%d",
                     compile_pass, compile_fail, exec_pass, exec_fail)
     except Exception as e:
         logger.warning("[ToolRunner] failed to write suite_diagnosis.json: %s", e)
@@ -102,32 +96,51 @@ def _clear_stale_diag(focal_method_result_dir: str, project_dir: str):
         if os.path.exists(path):
             try:
                 os.remove(path)
-            except Exception as e:
-                logger.debug("[ToolRunner] failed to clear %s: %s", path, e)
+            except Exception:
+                pass
 
 
 def _resolve_tests_output_dir(focal_method_result_dir: str,
                                project_dir: str) -> Optional[str]:
-    branch1_indicators = [
+    indicators = [
         os.path.join(focal_method_result_dir, "logs", "diagnosis.log"),
         os.path.join(focal_method_result_dir, "tests_ChatGPT"),
         os.path.join(focal_method_result_dir, "compiler_output"),
         os.path.join(focal_method_result_dir, "test_output"),
     ]
-    for indicator in branch1_indicators:
-        if os.path.exists(indicator):
+    for p in indicators:
+        if os.path.exists(p):
             return focal_method_result_dir
-
     latest = _find_latest_tests_dir(project_dir)
-    if latest:
-        return latest
-
-    return focal_method_result_dir
+    return latest or focal_method_result_dir
 
 
 # ════════════════════════════════════════════════════════════════════
-# Full error loading from disk files (unchanged)
+# Bug 2 fix: load disk errors only when file is fresh
 # ════════════════════════════════════════════════════════════════════
+
+def _java_mtime(tests_output_dir: str, tc_key: str) -> float:
+    """Return mtime of test_cases/<tc_key>.java, 0.0 if absent."""
+    tc_short = tc_key.rsplit(".", 1)[-1]
+    for name in (tc_key, tc_short):
+        p = os.path.join(tests_output_dir, "test_cases", f"{name}.java")
+        if os.path.exists(p):
+            try:
+                return os.path.getmtime(p)
+            except Exception:
+                return 0.0
+    return 0.0
+
+
+def _is_fresh(file_path: str, java_mtime: float) -> bool:
+    """True if file_path was written at or after the java source."""
+    if java_mtime == 0.0:
+        return True   # unknown source mtime → be permissive
+    try:
+        return os.path.getmtime(file_path) >= java_mtime - 1.0  # 1s tolerance
+    except Exception:
+        return False
+
 
 def _load_full_errors_from_files(tests_output_dir: str, diag: dict):
     """
@@ -149,20 +162,25 @@ def _load_full_errors_from_files(tests_output_dir: str, diag: dict):
             tc_name = _extract_tc_name_from_compile_file(fname)
             if not tc_name:
                 continue
-            fpath = os.path.join(compile_dir, fname)
-            full_errors = _read_error_file(fpath, max_lines=_MAX_COMPILE_ERROR_LINES)
-            if not full_errors:
-                continue
             tc_key = _find_diag_key(diag, tc_name)
             if tc_key is None:
                 continue
             entry = diag[tc_key]
-            if entry.get("compile_status") == "fail":
-                parsed_errors = _parse_compile_error_content(full_errors)
-                if parsed_errors:
-                    entry["compile_errors"] = parsed_errors[:30]
+            if entry.get("compile_status") != "fail":
+                continue  # current round compile passed → ignore old file
 
-    # ── 读取运行错误文件 ─────────────────────────────────────────────
+            fpath = os.path.join(compile_dir, fname)
+            jm = _java_mtime(tests_output_dir, tc_key)
+            if not _is_fresh(fpath, jm):
+                logger.debug("[FullError] skip stale compile file for %s", tc_key)
+                continue
+
+            raw = _read_error_file(fpath, _MAX_COMPILE_ERROR_LINES)
+            if raw:
+                parsed = _parse_compile_error_content(raw)
+                if parsed:
+                    entry["compile_errors"] = parsed[:30]
+
     if os.path.isdir(test_dir):
         for fname in os.listdir(test_dir):
             if not fname.endswith(".txt"):
@@ -170,58 +188,41 @@ def _load_full_errors_from_files(tests_output_dir: str, diag: dict):
             tc_name = _extract_tc_name_from_test_file(fname)
             if not tc_name:
                 continue
-            fpath = os.path.join(test_dir, fname)
-            full_errors = _read_error_file(fpath, max_lines=_MAX_RUNTIME_ERROR_LINES)
-            if not full_errors:
-                continue
             tc_key = _find_diag_key(diag, tc_name)
             if tc_key is None:
                 continue
             entry = diag[tc_key]
-            if entry.get("exec_status") == "fail":
-                parsed_errors = _parse_runtime_error_content(full_errors)
-                if parsed_errors:
-                    entry["exec_errors"] = parsed_errors[:20]
+            if entry.get("exec_status") != "fail":
+                continue
+
+            fpath = os.path.join(test_dir, fname)
+            jm = _java_mtime(tests_output_dir, tc_key)
+            if not _is_fresh(fpath, jm):
+                logger.debug("[FullError] skip stale exec file for %s", tc_key)
+                continue
+
+            raw = _read_error_file(fpath, _MAX_RUNTIME_ERROR_LINES)
+            if raw:
+                parsed = _parse_runtime_error_content(raw)
+                if parsed:
+                    entry["exec_errors"] = parsed[:20]
 
 
 def _extract_tc_name_from_compile_file(fname: str) -> str:
-    """
-    从编译错误文件名提取测试类名。
-    示例：
-      CompilerOutput-Lexer_4_2Test.java.txt → Lexer_4_2Test
-      compile_error.txt → (空，跳过)
-    """
-    # 去掉 .txt 后缀
-    base = fname
-    if base.endswith(".txt"):
-        base = base[:-4]
-    if base.endswith(".java"):
-        base = base[:-5]
+    base = fname[:-4] if fname.endswith(".txt") else fname
+    base = base[:-5] if base.endswith(".java") else base
     for prefix in ("CompilerOutput-", "CompilerOutput_"):
         if base.startswith(prefix):
             return base[len(prefix):]
-    if base.lower() in ("compile_error", "compileroutput"):
-        return ""
     return ""
 
 
 def _extract_tc_name_from_test_file(fname: str) -> str:
-    """
-    从运行错误文件名提取测试类名。
-    示例：
-      TestOutput-Lexer_4_2Test.java.txt → Lexer_4_2Test
-      runtime_error.txt → (空，跳过)
-    """
-    base = fname
-    if base.endswith(".txt"):
-        base = base[:-4]
-    if base.endswith(".java"):
-        base = base[:-5]
+    base = fname[:-4] if fname.endswith(".txt") else fname
+    base = base[:-5] if base.endswith(".java") else base
     for prefix in ("TestOutput-", "TestOutput_", "runtime_error-"):
         if base.startswith(prefix):
             return base[len(prefix):]
-    if base.lower() in ("runtime_error", "testoutput"):
-        return ""
     return ""
 
 
@@ -230,13 +231,9 @@ def _read_error_file(fpath: str, max_lines: int = 80) -> str:
         with open(fpath, "r", encoding="utf-8", errors="replace") as f:
             lines = f.readlines()
         if len(lines) > max_lines:
-            content = "".join(lines[:max_lines])
-            content += f"\n... [{len(lines) - max_lines} more lines truncated] ..."
-        else:
-            content = "".join(lines)
-        return content.strip()
-    except Exception as e:
-        logger.debug("[FullError] read %s failed: %s", fpath, e)
+            return "".join(lines[:max_lines]) + f"\n... [{len(lines)-max_lines} more lines] ..."
+        return "".join(lines).strip()
+    except Exception:
         return ""
 
 
@@ -247,39 +244,27 @@ def _parse_compile_error_content(raw: str) -> List[str]:
     """
     lines = raw.splitlines()
     result = []
-    i = 0
-    while i < len(lines):
-        line = lines[i].rstrip()
-        # 保留包含 error: 或 warning: 的行及其前后1行上下文
-        if ": error:" in line or ": warning:" in line or "error:" in line.lower():
-            # 加入前一行（通常是文件位置行）
-            if i > 0 and lines[i-1].strip() and lines[i-1].strip() not in result:
+    for i, line in enumerate(lines):
+        if ": error:" in line or "error:" in line.lower():
+            if i > 0 and lines[i-1].strip() and lines[i-1].rstrip() not in result:
                 result.append(lines[i-1].rstrip())
-            result.append(line)
-            # 加入后面的 ^ 指示行
-            if i + 1 < len(lines) and (lines[i+1].strip().startswith("^") or
-                                         "symbol" in lines[i+1].lower() or
-                                         "location" in lines[i+1].lower()):
-                result.append(lines[i+1].rstrip())
-                if i + 2 < len(lines) and ("symbol" in lines[i+2].lower() or
-                                             "location" in lines[i+2].lower()):
-                    result.append(lines[i+2].rstrip())
-        i += 1
-
+            result.append(line.rstrip())
+            for j in (i+1, i+2):
+                if j < len(lines) and (lines[j].strip().startswith("^") or
+                        "symbol" in lines[j].lower() or "location" in lines[j].lower()):
+                    result.append(lines[j].rstrip())
     if not result:
         for line in lines:
-            stripped = line.strip()
-            if stripped:
-                result.append(stripped[:_MAX_SINGLE_ERROR_CHARS])
+            s = line.strip()
+            if s:
+                result.append(s[:_MAX_SINGLE_ERROR_CHARS])
             if len(result) >= 30:
                 break
-
-    seen = set()
-    deduped = []
+    seen, deduped = set(), []
     for item in result:
-        key = item.strip()
-        if key and key not in seen:
-            seen.add(key)
+        k = item.strip()
+        if k and k not in seen:
+            seen.add(k)
             deduped.append(item[:_MAX_SINGLE_ERROR_CHARS])
     return deduped
 
@@ -290,41 +275,29 @@ def _parse_runtime_error_content(raw: str) -> List[str]:
     重点提取：AssertionError、Exception、expected/but was、FAILED 等关键行。
     """
     lines = raw.splitlines()
+    key_kw = ["AssertionError","AssertionFailedError","expected:","but was:",
+               "Exception","Error","FAILED","FAILURE","NullPointerException",
+               "IllegalArgumentException","IllegalStateException",
+               "IndexOutOfBoundsException","org.opentest4j","junit.framework"]
     result = []
-    key_patterns = [
-        "AssertionError", "AssertionFailedError",
-        "expected:", "but was:", "expected:<", "but was:<",
-        "Exception", "Error",
-        "FAILED", "FAILURE",
-        "org.opentest4j", "junit.framework",
-        "NullPointerException", "IllegalArgumentException",
-        "IllegalStateException", "IndexOutOfBoundsException",
-    ]
-    # 第一遍：提取关键行
-    for i, line in enumerate(lines):
-        stripped = line.strip()
-        if not stripped:
+    for line in lines:
+        s = line.strip()
+        if not s:
             continue
-        # 跳过纯 at 栈帧行（只保留前几行栈帧）
-        if stripped.startswith("at ") and len([r for r in result if r.startswith("at ")]) >= 3:
+        if s.startswith("at ") and len([r for r in result if r.startswith("at ")]) >= 3:
             continue
-        if any(kw in line for kw in key_patterns):
-            result.append(stripped[:_MAX_SINGLE_ERROR_CHARS])
-        elif stripped.startswith("at ") and len([r for r in result if r.startswith("at ")]) < 3:
-            result.append(stripped[:200])
-
-    # 如果关键行太少，补充原始内容
+        if any(k in line for k in key_kw):
+            result.append(s[:_MAX_SINGLE_ERROR_CHARS])
+        elif s.startswith("at ") and len([r for r in result if r.startswith("at ")]) < 3:
+            result.append(s[:200])
     if len(result) < 3:
         for line in lines:
-            stripped = line.strip()
-            if stripped and stripped not in result:
-                result.append(stripped[:_MAX_SINGLE_ERROR_CHARS])
+            s = line.strip()
+            if s and s not in result:
+                result.append(s[:_MAX_SINGLE_ERROR_CHARS])
             if len(result) >= 20:
                 break
-
-    # 去重
-    seen = set()
-    deduped = []
+    seen, deduped = set(), []
     for item in result:
         if item not in seen:
             seen.add(item)
@@ -341,14 +314,13 @@ def _find_diag_key(diag: dict, tc_name: str) -> Optional[str]:
     if tc_short in diag:
         return tc_short
     for key in diag:
-        key_short = key.rsplit(".", 1)[-1]
-        if key_short == tc_short or tc_short in key_short or key_short in tc_short:
+        if key.rsplit(".", 1)[-1] == tc_short:
             return key
     return None
 
 
 # ════════════════════════════════════════════════════════════════════
-# Data extraction
+# Diag map construction
 # ════════════════════════════════════════════════════════════════════
 
 def _build_diag_map(tests_output_dir: str) -> Dict[str, dict]:
@@ -366,38 +338,22 @@ def _short(full_name: str) -> str:
 def _ensure(diag: dict, tc: str) -> dict:
     if tc not in diag:
         diag[tc] = {
-            "compile_status":    "unknown",
-            "exec_status":       "unknown",
-            "compile_errors":    [],
-            "exec_errors":       [],
-            "focal_line_rate":   None,
-            "focal_branch_rate": None,
-            # Issue 3: focal line counts
+            "compile_status":     "unknown",
+            "exec_status":        "unknown",
+            "compile_errors":     [],
+            "exec_errors":        [],
+            "focal_line_rate":    None,
+            "focal_branch_rate":  None,
             "focal_line_covered": None,
             "focal_line_total":   None,
-            "missed_methods":    [],
-            "partial_methods":   [],
-            "_current_status":   "unknown",
+            "missed_methods":     [],
+            "partial_methods":    [],
         }
     return diag[tc]
 
 
-def _get_current_status(entry: dict) -> str:
-    """从 entry 推断当前已知的最高优先级状态字符串。"""
-    cs = entry.get("compile_status", "unknown")
-    es = entry.get("exec_status",    "unknown")
-    if cs == "fail":
-        return "compile_fail"
-    if es == "timeout":
-        return "exec_timeout"
-    if es == "fail":
-        return "exec_fail"
-    if es == "pass":
-        return "exec_ok"
-    return "unknown"
-
-
-# ── *_status.csv ──────────────────────────────────────────────────
+# ── *_status.csv ─────────────────────────────────────────────────
+# Bug 1 fix: last row wins (append mode → last = most recent round)
 
 def _load_status_csv(tests_output_dir: str, diag: dict):
     search_dirs = [tests_output_dir, os.path.dirname(tests_output_dir)]
@@ -407,54 +363,38 @@ def _load_status_csv(tests_output_dir: str, diag: dict):
         csv_files = glob.glob(os.path.join(d, "*_status*.csv"))
         if csv_files:
             for csv_path in sorted(csv_files):
-                logger.info("[ToolRunner] loading status csv: %s", csv_path)
                 _parse_status_csv(csv_path, diag)
             return
     logger.warning("[ToolRunner] no *_status*.csv found under %s", tests_output_dir)
 
 
 def _parse_status_csv(csv_path: str, diag: dict):
-    """
-    从 status CSV 读取 compile/exec 状态。
-    对于同一个 test_class 出现多次（追加模式的多轮），
-    采用高优先级状态优先原则（compile_fail > exec_timeout > exec_fail > exec_ok）。
-    """
+    """Last row wins: final occurrence of each test_class = most recent result."""
     try:
+        latest: Dict[str, dict] = {}
         with open(csv_path, newline="", encoding="utf-8") as f:
             for row in csv.DictReader(f):
                 tc = _short(row.get("test_class", "").strip())
-                if not tc:
-                    continue
-                entry = _ensure(diag, tc)
+                if tc:
+                    latest[tc] = row   # overwrite → last row wins
 
-                cs = row.get("compile_status", "").lower().strip()
-                es = row.get("exec_status",    "").lower().strip()
-                is_timeout = str(row.get("exec_timeout", "false")).lower() in ("true", "1")
-                if is_timeout and es == "fail":
-                    es = "timeout"
-
-                if cs == "fail":
-                    row_status = "compile_fail"
-                elif es == "timeout":
-                    row_status = "exec_timeout"
-                elif es == "fail":
-                    row_status = "exec_fail"
-                elif es in ("pass", "ok"):
-                    row_status = "exec_ok"
-                else:
-                    row_status = "unknown"
-
-                current_status = _get_current_status(entry)
-                if _status_priority(row_status) >= _status_priority(current_status):
-                    if cs:
-                        entry["compile_status"] = cs
-                    if es and es != "pending":
-                        entry["exec_status"] = es if es != "timeout" else "timeout"
+        for tc, row in latest.items():
+            entry = _ensure(diag, tc)
+            cs = row.get("compile_status", "").lower().strip()
+            es = row.get("exec_status",    "").lower().strip()
+            is_timeout = str(row.get("exec_timeout", "false")).lower() in ("true", "1")
+            if is_timeout and es == "fail":
+                es = "timeout"
+            if cs:
+                entry["compile_status"] = cs
+            if es and es not in ("pending",):
+                entry["exec_status"] = es
     except Exception as e:
         logger.warning("status csv %s: %s", csv_path, e)
 
 
 # ── diagnosis.log ─────────────────────────────────────────────────
+# Bug 1 fix: last [DIAGNOSIS] block for each test_class wins
 
 def _load_diagnosis_log(tests_output_dir: str, diag: dict):
     candidates = [
@@ -462,15 +402,9 @@ def _load_diagnosis_log(tests_output_dir: str, diag: dict):
         os.path.join(tests_output_dir, "diagnosis.log"),
         os.path.join(os.path.dirname(tests_output_dir), "logs", "diagnosis.log"),
     ]
-    log_path = None
-    for c in candidates:
-        if os.path.exists(c) and os.path.getsize(c) > 0:
-            log_path = c
-            break
-
+    log_path = next((c for c in candidates if os.path.exists(c) and os.path.getsize(c) > 0), None)
     if not log_path:
         return
-
     try:
         with open(log_path, encoding="utf-8", errors="ignore") as f:
             content = f.read()
@@ -478,136 +412,124 @@ def _load_diagnosis_log(tests_output_dir: str, diag: dict):
         return
 
     raw_blocks = re.split(r'\[DIAGNOSIS\]', content)
-    parsed = 0
+
+    # Collect all parsed blocks, keep only the last one per tc
+    per_tc: Dict[str, dict] = {}
     for block in raw_blocks[1:]:
-        _parse_diag_block(block, diag)
-        parsed += 1
-    logger.info("[ToolRunner] parsed %d [DIAGNOSIS] blocks from %s", parsed, log_path)
+        parsed = _parse_diag_block_to_dict(block)
+        if parsed:
+            tc = parsed["tc"]
+            per_tc[tc] = parsed   # last block wins
+
+    for tc, parsed in per_tc.items():
+        entry = _ensure(diag, tc)
+        _apply_diag_block(entry, parsed)
+
+    logger.info("[ToolRunner] applied %d diagnosis blocks from %s", len(per_tc), log_path)
 
 
-def _parse_diag_block(block: str, diag: dict):
+def _parse_diag_block_to_dict(block: str) -> Optional[dict]:
+    """Parse a [DIAGNOSIS] block into a dict; return None if unparseable."""
     lines = block.splitlines()
     if not lines:
-        return
-
+        return None
     tc_match = re.match(r'\s*test_class=(.+)', lines[0])
     if not tc_match:
-        return
+        return None
     tc = _short(tc_match.group(1).strip())
-    entry = _ensure(diag, tc)
-    current_status = _get_current_status(entry)
 
-    block_status     = None
-    block_error_type = None
+    block_status = None
     for line in lines[1:]:
-        stripped = line.strip()
-        if stripped == "---":
+        s = line.strip()
+        if s == "---":
             break
-        sm = re.match(r'status=(\S+)', stripped)
-        if sm:
-            block_status = sm.group(1)
-        etm = re.match(r'error_type=(\S+)', stripped)
-        if etm:
-            block_error_type = etm.group(1)
+        m = re.match(r'status=(\S+)', s)
+        if m:
+            block_status = m.group(1)
 
     if block_status is None:
-        return
+        return None
 
-    new_prio     = _status_priority(block_status)
-    current_prio = _status_priority(current_status)
-    can_update_status = (new_prio >= current_prio)
+    compile_errors: List[str] = []
+    exec_errors:    List[str] = []
+    missed:         List[str] = []
+    partial:        List[str] = []
 
-    if can_update_status:
-        entry["compile_status"] = "pass"
-        entry["exec_status"]    = "pass"
-        if block_status == "compile_fail":
-            entry["compile_status"] = "fail"
-            entry["exec_status"]    = "skip"
-        elif block_status == "exec_fail":
-            entry["exec_status"] = "fail"
-        elif block_status == "exec_timeout":
-            entry["exec_status"] = "timeout"
-
-    in_core_errors     = False
-    in_missed_methods  = False
-    in_partial_methods = False
-    in_full_stderr     = False
+    in_core = in_missed = in_partial = in_full_stderr = False
 
     for line in lines[1:]:
-        stripped = line.strip()
-        if stripped == "---":
+        s = line.strip()
+        if s == "---":
             break
+        if re.match(r'core_errors\s*(\(\d+\))?:', s):
+            in_core = True; in_missed = in_partial = in_full_stderr = False; continue
+        if re.match(r'full_stderr\s*\(', s):
+            in_full_stderr = True; in_core = in_missed = in_partial = False; continue
+        if re.match(r'(missed_methods|uncovered_methods)(\s*\(\d+\))?:', s):
+            in_missed = True; in_core = in_partial = in_full_stderr = False; continue
+        if re.match(r'(partial_methods|partial_branch_methods)(\s*\(\d+\))?:', s):
+            in_partial = True; in_core = in_missed = in_full_stderr = False; continue
 
-        if re.match(r'core_errors\s*(\(\d+\))?:', stripped):
-            in_core_errors     = True
-            in_missed_methods  = False
-            in_partial_methods = False
-            in_full_stderr     = False
-            continue
-
-        if re.match(r'full_stderr\s*\(', stripped):
-            in_core_errors     = False
-            in_full_stderr     = True
-            in_missed_methods  = False
-            in_partial_methods = False
-            continue
-
-        if re.match(r'(missed_methods|uncovered_methods)(\s*\(\d+\))?:', stripped):
-            in_core_errors     = False
-            in_full_stderr     = False
-            in_missed_methods  = True
-            in_partial_methods = False
-            continue
-
-        if re.match(r'(partial_methods|partial_branch_methods)(\s*\(\d+\))?:', stripped):
-            in_core_errors     = False
-            in_full_stderr     = False
-            in_missed_methods  = False
-            in_partial_methods = True
-            continue
-
-        item_m = re.match(r'-\s+(.+)', stripped)
+        item_m = re.match(r'-\s+(.+)', s)
         if item_m:
             val = item_m.group(1).strip()
-            if in_core_errors and not in_full_stderr:
+            if in_core and not in_full_stderr:
                 if block_status == "compile_fail":
-                    entry["compile_errors"].append(val)
+                    compile_errors.append(val)
                 elif block_status in ("exec_fail", "exec_timeout"):
-                    entry["exec_errors"].append(val)
-            elif in_missed_methods:
-                entry["missed_methods"].append(val)
-            elif in_partial_methods:
-                entry["partial_methods"].append(val)
+                    exec_errors.append(val)
+            elif in_missed:
+                missed.append(val)
+            elif in_partial:
+                partial.append(val)
             continue
 
         if in_full_stderr:
             continue
-
-        is_meta = (
-            not stripped
-            or stripped.startswith("project=")
-            or stripped.startswith("target_class=")
-            or stripped.startswith("focal_method=")
-            or stripped.startswith("status=")
-            or stripped.startswith("error_type=")
-            or stripped.startswith("line_rate=")
-            or stripped.startswith("branch_rate=")
-            or stripped.startswith("coverage_score=")
-            or stripped.startswith("... [")
-        )
+        is_meta = (not s or any(s.startswith(p) for p in
+                   ("project=","target_class=","focal_method=","status=","error_type=",
+                    "line_rate=","branch_rate=","coverage_score=","... [")))
         if is_meta:
             continue
+        if s and not s.startswith("-"):
+            in_core = in_missed = in_partial = False
 
-        if stripped and not stripped.startswith("-"):
-            in_core_errors = in_missed_methods = in_partial_methods = False
+    return {
+        "tc": tc,
+        "block_status": block_status,
+        "compile_errors": list(dict.fromkeys(compile_errors))[:30],
+        "exec_errors":    list(dict.fromkeys(exec_errors))[:30],
+        "missed_methods": list(dict.fromkeys(missed)),
+        "partial_methods":list(dict.fromkeys(partial)),
+    }
 
-    entry["compile_errors"]  = list(dict.fromkeys(entry["compile_errors"]))[:30]
-    entry["exec_errors"]     = list(dict.fromkeys(entry["exec_errors"]))[:30]
-    entry["missed_methods"]  = list(dict.fromkeys(entry["missed_methods"]))
-    entry["partial_methods"] = list(dict.fromkeys(entry["partial_methods"]))
+
+def _apply_diag_block(entry: dict, parsed: dict):
+    """Apply a parsed diagnosis block to an entry dict."""
+    block_status = parsed["block_status"]
+    # Always reset and re-apply from the latest block
+    entry["compile_status"] = "pass"
+    entry["exec_status"]    = "pass"
+    entry["compile_errors"] = []
+    entry["exec_errors"]    = []
+    entry["missed_methods"] = []
+    entry["partial_methods"]= []
+
+    if block_status == "compile_fail":
+        entry["compile_status"] = "fail"
+        entry["exec_status"]    = "skip"
+    elif block_status == "exec_fail":
+        entry["exec_status"] = "fail"
+    elif block_status == "exec_timeout":
+        entry["exec_status"] = "timeout"
+
+    entry["compile_errors"]  = parsed["compile_errors"]
+    entry["exec_errors"]     = parsed["exec_errors"]
+    entry["missed_methods"]  = parsed["missed_methods"]
+    entry["partial_methods"] = parsed["partial_methods"]
 
 
-# ── *coveragedetail*.csv  (Issue 3: also read focal line counts) ──
+# ── coveragedetail CSV ─────────────────────────────────────────────
 
 def _load_coverage_csv(tests_output_dir: str, diag: dict):
     search_dirs = [tests_output_dir, os.path.dirname(tests_output_dir)]
@@ -616,60 +538,42 @@ def _load_coverage_csv(tests_output_dir: str, diag: dict):
             continue
         cov_files = sorted(glob.glob(os.path.join(d, "*coveragedetail*.csv")))
         if cov_files:
-            logger.info("[ToolRunner] loading coveragedetail: %s", cov_files[-1])
             _parse_coverage_csv(cov_files[-1], diag)
             return
-    logger.debug("[ToolRunner] no *coveragedetail*.csv found under %s", tests_output_dir)
 
 
 def _parse_coverage_csv(csv_path: str, diag: dict):
-    """
-    Read per-test focal method coverage from coveragedetail CSV.
-
-    Issue 3 fix: also populate focal_line_covered / focal_line_total
-    so the Refiner can give the LLM concrete line counts instead of
-    only showing class-level missed methods.
-    """
+    """Last row wins (append mode)."""
     try:
+        latest: Dict[str, dict] = {}
         with open(csv_path, newline="", encoding="utf-8") as f:
             for row in csv.DictReader(f):
                 tc = _short(row.get("test_class", "").strip())
-                if not tc:
-                    continue
-                entry = _ensure(diag, tc)
+                if tc:
+                    latest[tc] = row
 
-                exec_note = row.get("exec_status", "").strip().lower()
-                if exec_note == "compile_fail":
-                    continue
-
-                # Focal method line/branch rates
-                for field, key in [("f_per_line_rate",   "focal_line_rate"),
-                                    ("f_per_branch_rate", "focal_branch_rate")]:
-                    val = row.get(field, "").strip()
-                    if val:
-                        try:
-                            entry[key] = round(float(val), 2)
-                        except Exception:
-                            pass
-
-                # ── Issue 3: focal line counts ──────────────────────
-                for csv_col, diag_key in [
-                    ("f_per_line_cov",   "focal_line_covered"),
-                    ("f_per_line_total", "focal_line_total"),
-                ]:
-                    val = row.get(csv_col, "").strip()
-                    if val:
-                        try:
-                            entry[diag_key] = int(float(val))
-                        except Exception:
-                            pass
-
+        for tc, row in latest.items():
+            entry = _ensure(diag, tc)
+            if row.get("exec_status", "").strip().lower() == "compile_fail":
+                continue
+            for field, key in [("f_per_line_rate","focal_line_rate"),
+                                ("f_per_branch_rate","focal_branch_rate")]:
+                v = row.get(field, "").strip()
+                if v:
+                    try: entry[key] = round(float(v), 2)
+                    except Exception: pass
+            for fc, dk in [("f_per_line_cov","focal_line_covered"),
+                           ("f_per_line_total","focal_line_total")]:
+                v = row.get(fc, "").strip()
+                if v:
+                    try: entry[dk] = int(float(v))
+                    except Exception: pass
     except Exception as e:
         logger.warning("coveragedetail csv %s: %s", csv_path, e)
 
 
 # ════════════════════════════════════════════════════════════════════
-# Read suite_diagnosis.json
+# Public loader
 # ════════════════════════════════════════════════════════════════════
 
 def load_suite_diagnosis(tests_output_dir: str) -> Dict[str, dict]:
@@ -680,19 +584,12 @@ def load_suite_diagnosis(tests_output_dir: str) -> Dict[str, dict]:
     try:
         with open(path, encoding="utf-8") as f:
             data = json.load(f)
-        for entry in data.values():
-            entry.pop("_current_status", None)
-        logger.info("[ToolRunner] loaded suite_diagnosis.json: %d entries from %s",
-                    len(data), path)
+        logger.info("[ToolRunner] loaded suite_diagnosis.json: %d entries", len(data))
         return data
     except Exception as e:
         logger.warning("failed to load suite_diagnosis.json: %s", e)
         return {}
 
-
-# ════════════════════════════════════════════════════════════════════
-# Helpers
-# ════════════════════════════════════════════════════════════════════
 
 def _find_latest_tests_dir(project_dir: str) -> Optional[str]:
     try:

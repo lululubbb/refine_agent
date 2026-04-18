@@ -26,12 +26,13 @@ if HERE not in sys.path:
 from scoring import (
     TestScore, SuiteScore,
     compute_test_score, compute_suite_score,
-    sort_issues_by_priority,
+    sort_issues_by_priority, issues_at_priority_level,
+    _SIM_THRESHOLD, _REDUNDANCY_FLAG_BELOW,
 )
 
 
 # ════════════════════════════════════════════════════════════════════
-# AblationConfig (unchanged from original)
+# AblationConfig
 # ════════════════════════════════════════════════════════════════════
 
 @dataclass
@@ -83,30 +84,16 @@ class AblationConfig:
 
     @classmethod
     def from_mode(cls, mode: str) -> "AblationConfig":
-        """
-        从预设模式名称创建配置。
-
-        Parameters
-        ----------
-        mode : str
-            "full"                完整模型（所有维度开启）
-            "no_coverage"         w/o Coverage Score
-            "no_bug_revealing"    w/o Bug-Revealing Score
-            "no_redundancy"       w/o Redundancy Score
-            "no_compile_exec"     w/o Compile/Exec Score
-        """
-        if mode == "full":
-            return cls(mode=mode)
-        elif mode == "no_coverage":
-            return cls(use_coverage=False, mode=mode)
-        elif mode == "no_bug_revealing":
-            return cls(use_bug_revealing=False, mode=mode)
-        elif mode == "no_redundancy":
-            return cls(use_redundancy=False, mode=mode)
-        elif mode == "no_compile_exec":
-            return cls(use_compile_exec=False, mode=mode)
-        else:
+        modes = {
+            "full":             cls,
+            "no_coverage":      lambda: cls(use_coverage=False, mode=mode),
+            "no_bug_revealing": lambda: cls(use_bug_revealing=False, mode=mode),
+            "no_redundancy":    lambda: cls(use_redundancy=False, mode=mode),
+            "no_compile_exec":  lambda: cls(use_compile_exec=False, mode=mode),
+        }
+        if mode not in modes:
             raise ValueError(f"Unknown ablation mode: {mode!r}")
+        return modes[mode]() if mode != "full" else cls(mode=mode)
 
     def __str__(self) -> str:
         flags = []
@@ -137,80 +124,47 @@ def get_ablation_config() -> AblationConfig:
         # use_redundancy = true
     """
     config = configparser.ConfigParser()
-    ini_path = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "..", "config", "config.ini"
-    )
+    ini_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                            "..", "config", "config.ini")
     config.read(ini_path)
-
     if not config.has_section("ablation"):
         return AblationConfig(mode="full")
-
     sec = config["ablation"]
     mode = sec.get("mode", "full").strip()
-
     try:
         cfg = AblationConfig.from_mode(mode)
     except ValueError:
         cfg = AblationConfig(mode=mode)
-
-    if sec.get("use_compile_exec") is not None:
-        cfg.use_compile_exec = sec.getboolean("use_compile_exec", True)
-    if sec.get("use_coverage") is not None:
-        cfg.use_coverage = sec.getboolean("use_coverage", True)
-    if sec.get("use_bug_revealing") is not None:
-        cfg.use_bug_revealing = sec.getboolean("use_bug_revealing", True)
-    if sec.get("use_redundancy") is not None:
-        cfg.use_redundancy = sec.getboolean("use_redundancy", True)
-
+    for attr in ("use_compile_exec", "use_coverage", "use_bug_revealing", "use_redundancy"):
+        if sec.get(attr) is not None:
+            setattr(cfg, attr, sec.getboolean(attr, True))
     return cfg
 
 
 # ════════════════════════════════════════════════════════════════════
-# Ablation-aware compute_test_score
+# Ablation-aware scoring
 # ════════════════════════════════════════════════════════════════════
 
 def compute_test_score_ablation(diag, cfg: Optional[AblationConfig] = None) -> TestScore:
-    """
-    消融版 compute_test_score：根据 AblationConfig 过滤 issues。
-
-    先调用原始 compute_test_score 获取完整的 TestScore，
-    再根据消融配置过滤掉不需要的 issues，同时将对应的 score 字段置为 None（而非满分）。
-    
-    这样做的好处：
-    1. 完全不考虑被关闭维度的数据
-    2. 避免在统计时混淆（None 值会被合理跳过）
-    3. 使消融更加彻底
-
-    Parameters
-    ----------
-    diag    : TestDiag 对象
-    cfg     : AblationConfig（None 时使用 Full Model）
-
-    Returns
-    -------
-    TestScore（消融后）
-    """
     if cfg is None:
         cfg = AblationConfig()
 
     score = compute_test_score(diag)
 
-    # Filter issues according to ablation config, preserving priority order
-    filtered_issues = []
+    filtered = []
     for issue in score.issues:
-        if issue in ("COMPILE_FAIL", "EXEC_FAIL", "EXEC_TIMEOUT") and not cfg.use_compile_exec:
+        if issue in ("COMPILE_FAIL","EXEC_FAIL","EXEC_TIMEOUT") and not cfg.use_compile_exec:
             continue
-        if issue in ("LOW_LINE_COV", "LOW_BRANCH_COV") and not cfg.use_coverage:
+        if issue in ("LOW_LINE_COV","LOW_BRANCH_COV") and not cfg.use_coverage:
             continue
         if issue == "NOT_BUG_REVEALING" and not cfg.use_bug_revealing:
             continue
         if issue == "HIGH_REDUNDANCY" and not cfg.use_redundancy:
             continue
-        filtered_issues.append(issue)
+        filtered.append(issue)
 
-    score.issues = sort_issues_by_priority(filtered_issues)
+    score.issues = sort_issues_by_priority(filtered)
 
-    # Null out disabled dimension fields
     if not cfg.use_compile_exec:
         score.compile_score = None
         score.exec_score    = None
@@ -237,22 +191,6 @@ def compute_suite_score_ablation(
     pairwise_sims: Optional[List[Tuple[str, str, float]]] = None,
     cfg: Optional[AblationConfig] = None,
 ) -> SuiteScore:
-    """
-    消融版 compute_suite_score：根据 AblationConfig 调整统计维度。
-    
-    关键改进：当关闭某维度时，不仅过滤 issues，还要在统计中完全忽略该维度。
-    例如在 no_compile_exec 模式下，不呈现编译/执行通过率，而是显示 N/A。
-
-    Parameters
-    ----------
-    test_scores   : {test_name → TestScore}（已经是消融后的 TestScore）
-    pairwise_sims : 所有 pair 的相似度列表
-    cfg           : AblationConfig
-
-    Returns
-    -------
-    SuiteScore（消融后）
-    """
     if cfg is None:
         cfg = AblationConfig()
 
@@ -296,33 +234,32 @@ def compute_suite_score_ablation(
     if cfg.use_coverage:
         per_line   = [s.focal_line_coverage   for s in scores]
         per_branch = [s.focal_branch_coverage for s in scores]
-        line_vals  = [v for v in per_line   if v is not None]
-        branch_vals= [v for v in per_branch if v is not None]
-        per_line_coverage   = per_line
-        per_branch_coverage = per_branch
-        coverage_line_avg   = round(sum(line_vals)   / len(line_vals),   4) if line_vals   else None
-        coverage_line_max   = round(max(line_vals),  4) if line_vals   else None
-        coverage_line_min   = round(min(line_vals),  4) if line_vals   else None
-        coverage_branch_avg = round(sum(branch_vals) / len(branch_vals), 4) if branch_vals else None
+        lv = [v for v in per_line   if v is not None]
+        bv = [v for v in per_branch if v is not None]
+        cov_line_avg   = round(sum(lv)/len(lv), 4) if lv else None
+        cov_line_max   = round(max(lv), 4)         if lv else None
+        cov_line_min   = round(min(lv), 4)         if lv else None
+        cov_branch_avg = round(sum(bv)/len(bv), 4) if bv else None
 
-    bug_reveal_count   = 0
-    bug_reveal_checked = 0
-    bug_reveal_rate    = 0.0
+    br_count = br_checked = 0
+    br_rate = 0.0
     if cfg.use_bug_revealing and cfg.use_compile_exec:
-        compile_ok_scores = [s for s in scores if s.compile_score is not None and s.compile_score > 0.5]
-        br_checked = [s for s in compile_ok_scores if s.bug_reveal_score is not None]
-        br_yes     = [s for s in br_checked        if s.bug_reveal_score is True]
-        bug_reveal_count   = len(br_yes)
-        bug_reveal_checked = len(br_checked)
-        bug_reveal_rate    = round(len(br_yes) / len(br_checked), 4) if br_checked else 0.0
+        ok_scores  = [s for s in scores if s.compile_score is not None and s.compile_score > 0.5]
+        checked    = [s for s in ok_scores if s.bug_reveal_score is not None]
+        yes        = [s for s in checked   if s.bug_reveal_score is True]
+        br_count   = len(yes); br_checked = len(checked)
+        br_rate    = round(len(yes)/len(checked), 4) if checked else 0.0
 
-    high_redund_pairs: List[Tuple[str, str, float]] = []
-    max_pair_sim: Optional[float] = None
+    high_redund_pairs = []
+    max_pair_sim = None
     if cfg.use_redundancy and pairwise_sims:
-        all_sims = sorted(pairwise_sims, key=lambda x: x[2], reverse=True)
-        if all_sims:
-            max_pair_sim = all_sims[0][2]
-        high_redund_pairs = [(t1, t2, sim) for t1, t2, sim in all_sims if sim > 0.7]
+        # pairwise_sims = (tc1, tc2, redundancy_score=1-sim)
+        sim_pairs = [(t1, t2, 1.0-rs) for t1, t2, rs in pairwise_sims]
+        sim_pairs_s = sorted(sim_pairs, key=lambda x: x[2], reverse=True)
+        if sim_pairs_s:
+            max_pair_sim = sim_pairs_s[0][2]
+        high_redund_pairs = [(t1, t2, sim) for t1, t2, sim in sim_pairs_s
+                             if sim > _SIM_THRESHOLD]
 
     problem_tests: Dict[str, List[str]] = {}
     for s in scores:
@@ -339,19 +276,19 @@ def compute_suite_score_ablation(
 
     return SuiteScore(
         n_tests             = n,
-        compile_pass_count  = compile_pass_count,
+        compile_pass_count  = compile_pass_count or 0,
         compile_pass_rate   = compile_pass_rate,
-        exec_pass_count     = exec_pass_count,
+        exec_pass_count     = exec_pass_count or 0,
         exec_pass_rate      = exec_pass_rate,
-        per_test_line_coverage   = per_line_coverage,
-        per_test_branch_coverage = per_branch_coverage,
-        coverage_line_avg   = coverage_line_avg,
-        coverage_line_max   = coverage_line_max,
-        coverage_line_min   = coverage_line_min,
-        coverage_branch_avg = coverage_branch_avg,
-        bug_reveal_count    = bug_reveal_count,
-        bug_reveal_checked  = bug_reveal_checked,
-        bug_reveal_rate     = bug_reveal_rate,
+        per_test_line_coverage   = per_line,
+        per_test_branch_coverage = per_branch,
+        coverage_line_avg   = cov_line_avg,
+        coverage_line_max   = cov_line_max,
+        coverage_line_min   = cov_line_min,
+        coverage_branch_avg = cov_branch_avg,
+        bug_reveal_count    = br_count,
+        bug_reveal_checked  = br_checked,
+        bug_reveal_rate     = br_rate,
         max_pairwise_similarity = round(max_pair_sim, 4) if max_pair_sim is not None else None,
         high_redundancy_pairs   = high_redund_pairs,
         problem_tests       = problem_tests,
@@ -370,29 +307,10 @@ def compute_final_score_ablation(
     redundancy_score,
     cfg: Optional[AblationConfig] = None,
 ) -> Tuple[float, float]:
-    """
-    计算消融后的 final_score。
-
-    Parameters
-    ----------
-    compile_score, exec_score : float
-    coverage_score            : float (0~1) or '' (not available)
-    bug_revealing_score       : float (0 or 1) or '' (not available)
-    redundancy_score          : float (0~1, 相似度) or '' (not available)
-    cfg                       : AblationConfig
-
-    Returns
-    -------
-    (final_score: float, valid_weight_pct: float)
-        valid_weight_pct 表示有效维度的权重占比
-    """
     if cfg is None:
         cfg = AblationConfig()
-
     weights = cfg.effective_weights()
-    sw = []
-    vw = 0.0
-
+    sw, vw = [], 0.0
     if cfg.use_compile_exec:
         if isinstance(compile_score, (int, float)):
             sw.append(compile_score * weights["compile"])
