@@ -71,6 +71,8 @@ from tools import (
 from jinja2 import Environment, FileSystemLoader
 from compile_error_analyzer import enrich_diag_with_fix_hints, get_error_summary
 from scoring import sort_issues_by_priority, issues_at_priority_level
+from stable_test_guard import StableTestGuard
+import assert_fixer as _af_module
 
 init()
 logger = logging.getLogger(__name__)
@@ -79,8 +81,8 @@ _PROMPT_DIR = os.path.join(os.path.dirname(HERE), "prompt")
 env = Environment(loader=FileSystemLoader(_PROMPT_DIR))
 
 # ── @Test 数量硬性上限 ──────────────────────────────────────────────
-_MAX_TEST_METHODS_DEFAULT = 8   # 绝对上限（降低以避免编译错误堆积）
-_TEST_METHOD_HEADROOM     = 2   # fix时最多允许新增数量
+_MAX_TEST_METHODS_DEFAULT = 15   # 绝对上限（降低以避免编译错误堆积）
+_TEST_METHOD_HEADROOM     = 3   # fix时最多允许新增数量
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -963,6 +965,15 @@ def focal_method_pipeline(
 
     current_codes: Dict[str, str] = {}
     validation_issues_cache: dict = {}
+    guard = StableTestGuard()
+    # 设置 assert_fixer 日志到 base_dir
+    _af_log = os.path.join(base_dir, "assert_fixer.log")
+    try:
+        import assert_fixer as _af_module
+        if hasattr(_af_module, 'set_log_file'):
+            _af_module.set_log_file(_af_log)
+    except Exception:
+        pass
 
     focal_class_ctx = ctx_d1.get("information", "") or ctx_d3.get("full_fm", "")
 
@@ -1023,6 +1034,17 @@ def focal_method_pipeline(
             save_dir=round_log_dir,
             step_counter_start=1,
         )
+        # 更新稳定性追踪
+        guard.update_after_round(r, refine_result.test_diags, current_codes)
+        logger.info("[StableGuard] Round %d: %s", r, guard.summary())
+        
+        stable_tests = guard.get_stable_tests()
+        unstable_tests = guard.get_unstable_tests()
+        if stable_tests:
+            print(f"  🛡 Stable (protected): {sorted(stable_tests)}", flush=True)
+        if unstable_tests:
+            print(f"  🔧 Unstable (needs fix): {sorted(unstable_tests)}", flush=True)
+
         agent_elapsed = time.time() - t0_agent
         tool_elapsed  = agent_elapsed - refine_result.refiner_elapsed_seconds
         time_stats["tool_chain"]["total_seconds"] += max(0.0, tool_elapsed)
@@ -1065,152 +1087,416 @@ def focal_method_pipeline(
 
         _print_refine_instructions(refine_result.instructions, refine_result.delete_tests)
 
-        # ── Fix loop ──────────────────────────────────────────────
-        fix_results = {"ok": [], "unchanged": [], "no_code": [], "fail": []}
-        print(f"\n  🔧 开始精修 {len(refine_result.instructions)} 个 Test ...", flush=True)
-
+    # ── Fix loop ──────────────────────────────────────────────
+    def _build_fix_messages_for_unstable(
+        tc_name: str,
+        current_code: str,
+        instructions: List[str],
+        focal_method: str,
+        class_name: str,
+        ctx_d1: dict,
+        ctx_d3: dict,
+        imports: str,
+        diag,
+        issues: List[str],
+        prev_unchanged: bool,
+        validation_issues: dict,
+    ) -> List[Dict]:
+        """
+        为"不稳定"的test（有compile/exec错误）构建fix消息。
+        原则：极简，只给错误信息，绝对禁止新增@Test。
+        """
+        compile_ok     = getattr(diag, 'compile_ok', True) if diag else True
+        exec_ok        = getattr(diag, 'exec_ok', True) if diag else True
+        compile_errors = list(getattr(diag, 'compile_errors', []))[:5] if diag else []
+        exec_errors    = list(getattr(diag, 'exec_errors', []))[:3] if diag else []
+    
+        current_test_count = _count_test_methods(current_code)
+        method_code = ctx_d1.get("information", ctx_d3.get("full_fm", ""))[:3000]
+    
+        # 只提取与当前错误类型直接相关的指令
+        has_compile_fail = "COMPILE_FAIL" in issues
+        has_exec_fail    = "EXEC_FAIL" in issues or "EXEC_TIMEOUT" in issues
+    
+        if has_compile_fail:
+            relevant = [i for i in instructions if any(
+                kw in i.lower() for kw in [
+                    'compile', 'error', 'cannot find', 'private', 'abstract',
+                    'incompatible', 'unreported', 'ambiguous', 'constructor',
+                ]
+            )] or instructions[:2]
+        elif has_exec_fail:
+            relevant = [i for i in instructions if any(
+                kw in i.lower() for kw in [
+                    'runtime', 'exception', 'assert', 'expected', 'but was',
+                    'null', 'timeout', 'thrown',
+                ]
+            )] or instructions[:2]
+        else:
+            relevant = instructions[:2]
+    
+        relevant = relevant[:2]  # 最多2条，减少干扰
+    
+        context = {
+            "class_name":        class_name,
+            "focal_method":      focal_method,
+            "test_name":         tc_name,
+            "current_suite":     current_code,
+            "suite_summary":     "",
+            "method_code":       method_code,
+            "imports":           imports,
+            "contract_text":     "",
+            "unchanged_warning": "",
+            "instructions_json": json.dumps(relevant, indent=2, ensure_ascii=False),
+            "delete_tests_json": "[]",
+            "instructions_summary": "\n".join(f"  {i+1}. {inst}" for i, inst in enumerate(relevant)),
+            "use_compile_exec":  True,
+            "use_coverage":      False,
+            "use_bug_revealing": False,
+            "use_redundancy":    False,
+            "compile_ok":        compile_ok,
+            "exec_ok":           exec_ok,
+            "compile_errors":    compile_errors,
+            "exec_errors":       exec_errors,
+            "focal_line_rate":   None,
+            "focal_branch_rate": None,
+            "focal_line_covered":None,
+            "focal_line_total":  None,
+            "issues":            issues,
+            "max_test_methods":  current_test_count,  # 不允许新增
+            "missed_methods":    [],
+            "partial_methods":   [],
+            "auto_fix_hints":    [],
+            "error_summary":     "",
+        }
+    
+        msgs = generate_messages(TEMPLATE_FIX, context)
+        if remain_prompt_tokens(msgs) < 0:
+            context["method_code"] = method_code[:1000]
+            msgs = generate_messages(TEMPLATE_FIX, context)
+    
+        # 追加简洁约束（不堆叠）
+        if msgs and msgs[-1]["role"] == "user":
+            suffix = f"\n\nCRITICAL: Keep exactly {current_test_count} @Test methods. Fix ONLY the error above."
+            if prev_unchanged:
+                suffix += "\nPrevious output was identical. Make concrete changes to fix the error."
+            # 只在compile失败时追加静态验证问题
+            if has_compile_fail and validation_issues and tc_name in validation_issues:
+                vdata = validation_issues[tc_name]
+                if vdata.get("has_errors"):
+                    suffix += f"\n\n{vdata.get('prompt_text', '')}"
+            msgs[-1]["content"] += suffix
+    
+        return msgs
+    
+    
+    def _build_fix_messages_for_stable(
+        tc_name: str,
+        current_code: str,
+        instructions: List[str],
+        focal_method: str,
+        class_name: str,
+        ctx_d1: dict,
+        ctx_d3: dict,
+        imports: str,
+        diag,
+        issues: List[str],
+        prev_unchanged: bool,
+    ) -> List[Dict]:
+        """
+        为"稳定"的test（compile+exec pass，但有覆盖率/bugrevealing问题）构建fix消息。
+        原则：只允许修改方法体内的断言，不重写方法签名，不新增@Test（除非EXPAND）。
+        """
+        current_test_count = _count_test_methods(current_code)
+        method_code = ctx_d1.get("information", ctx_d3.get("full_fm", ""))[:3000]
+    
+        has_bug_issue = "NOT_BUG_REVEALING" in issues
+        has_cov_issue = "LOW_LINE_COV" in issues or "LOW_BRANCH_COV" in issues
+    
+        # 覆盖率问题：允许新增最多1个@Test
+        if has_cov_issue and not has_bug_issue:
+            max_tests = current_test_count + 3
+        elif has_bug_issue:
+            max_tests = current_test_count + 1
+        else:
+            max_tests = current_test_count 
+            
+        focal_line_rate    = getattr(diag, 'focal_line_rate',    None) if diag and has_cov_issue else None
+        focal_branch_rate  = getattr(diag, 'focal_branch_rate',  None) if diag and has_cov_issue else None
+        focal_line_covered = getattr(diag, 'focal_line_covered', None) if diag and has_cov_issue else None
+        focal_line_total   = getattr(diag, 'focal_line_total',   None) if diag and has_cov_issue else None
+    
+        relevant = instructions[:3]
+    
+        context = {
+            "class_name":        class_name,
+            "focal_method":      focal_method,
+            "test_name":         tc_name,
+            "current_suite":     current_code,
+            "suite_summary":     "",
+            "method_code":       method_code,
+            "imports":           imports,
+            "contract_text":     "",
+            "unchanged_warning": "",
+            "instructions_json": json.dumps(relevant, indent=2, ensure_ascii=False),
+            "delete_tests_json": "[]",
+            "instructions_summary": "\n".join(f"  {i+1}. {inst}" for i, inst in enumerate(relevant)),
+            "use_compile_exec":  False,
+            "use_coverage":      has_cov_issue,
+            "use_bug_revealing": has_bug_issue,
+            "use_redundancy":    False,
+            "compile_ok":        True,
+            "exec_ok":           True,
+            "compile_errors":    [],
+            "exec_errors":       [],
+            "focal_line_rate":   focal_line_rate,
+            "focal_branch_rate": focal_branch_rate,
+            "focal_line_covered":focal_line_covered,
+            "focal_line_total":  focal_line_total,
+            "issues":            issues,
+            "max_test_methods":  max_tests,
+            "missed_methods":    getattr(diag, 'missed_methods', [])[:5] if diag else [],
+            "partial_methods":   getattr(diag, 'partial_methods', [])[:5] if diag else [],
+            "auto_fix_hints":    [],
+            "error_summary":     "",
+        }
+    
+        msgs = generate_messages(TEMPLATE_FIX, context)
+        if remain_prompt_tokens(msgs) < 0:
+            context["method_code"] = method_code[:1000]
+            msgs = generate_messages(TEMPLATE_FIX, context)
+    
+        if msgs and msgs[-1]["role"] == "user":
+            if has_bug_issue:
+                suffix = (
+                    f"\n\nThis test compiles and runs. Strengthen existing assertions first."
+                    f"You may add at most 1 new @Test method only if it can reveal the bug "
+                    f"When possible, use assertEquals(expected, actual) for exact checks; "
+                    f"without removing or weakening any existing @Test methods."
+                )
+            else:
+                suffix = (
+                    f"\n\nThis test compiles and runs. "
+                    f"You may add at most 3 new @Test method for an uncovered branch. "
+                    f"Do NOT modify existing @Test methods that already pass."
+                )
+            if prev_unchanged:
+                suffix += " Previous output was identical—make a concrete change."
+            msgs[-1]["content"] += suffix
+    
+        return msgs
+    
+    
+    def _tiered_fix_loop(
+        refine_result,
+        guard,  # StableTestGuard instance
+        current_codes: dict,
+        tc_dir: str,
+        round_log_dir: str,
+        round_key: str,
+        gen_client,
+        tracker,
+        ctx_d1: dict,
+        ctx_d3: dict,
+        imports: str,
+        package: str,
+        pkg_decl: str,
+        class_name: str,
+        method_id: str,
+        method_name: str,
+        focal_class_ctx: str,
+        test_project_dir: str,
+        focal_source_code: str,
+        unchanged_counts: dict,
+        validation_issues_cache: dict,
+    ) -> dict:
+        """
+        核心fix循环：物理分离稳定测试和不稳定测试的修复策略。
+    
+        关键设计：
+        1. 不稳定test（compile/exec fail）→ _build_fix_messages_for_unstable
+        - 极简prompt，只看错误信息
+        - 严格禁止新增@Test
+        - fix后检查方法数量，如果变少则回滚（guard.guard_after_fix）
+    
+        2. 稳定test（pass但需增强）→ _build_fix_messages_for_stable
+        - 不给编译/执行错误信息（避免LLM乱改）
+        - 只给覆盖率/bugrevealing诊断
+        - 仅允许方法体内修改或最多新增1个@Test
+        - fix后如果原有@Test方法消失则回滚
+    
+        3. 既稳定又没问题的test → 根本不传给LLM（不在instructions里）
+        """
+        fix_results = {
+            "ok": [], "unchanged": [], "no_code": [],
+            "fail": [], "rollback": []
+        }
+    
+        print(f"\n  🔧 Tiered fix loop: {len(refine_result.instructions)} tests", flush=True)
+    
         for tc_name, instructions in refine_result.instructions.items():
             if tc_name not in current_codes:
                 continue
-
+    
+            tc_score = refine_result.test_scores.get(tc_name)
+            tc_diag  = refine_result.test_diags.get(tc_name)
+            issues   = tc_score.issues if tc_score else []
+            if not issues:
+                continue  # 没问题，跳过
+    
+            stability = guard.get_stability(tc_name)
+            is_stable = stability and stability.is_stable
+    
+            original_code = current_codes[tc_name]
+            prev_unchanged = unchanged_counts.get(tc_name, 0) > 0
+    
             fix_dir = os.path.join(round_log_dir, f"fix_{tc_name}")
             os.makedirs(fix_dir, exist_ok=True)
-
-            prev_unchanged = unchanged_counts.get(tc_name, 0) > 0
-            print(f"\n    [{_ts()}] 精修 {Fore.WHITE}{tc_name}{Style.RESET_ALL} "
-                  f"({len(instructions)} 条指令)"
-                  + (f" {Fore.YELLOW}[上轮未改变，加强提示]{Style.RESET_ALL}" if prev_unchanged else ""),
-                  flush=True)
-
-            tc_diag  = refine_result.test_diags.get(tc_name)
-            tc_score = refine_result.test_scores.get(tc_name)
-            original_code = current_codes[tc_name]
-
-            fix_msgs = build_fix_messages(
-                test_name=tc_name, current_code=original_code,
-                instructions=instructions, focal_method=method_name,
-                class_name=class_name, ctx_d1=ctx_d1, ctx_d3=ctx_d3,
-                imports=imports, suite_summary=refine_result.suite_summary,
-                prev_unchanged=prev_unchanged, diag=tc_diag,
-                contract_text="",
-                validation_issues=validation_issues_cache,
-                issues=tc_score.issues if tc_score else [],
-            )
-
-            try:
-                prompt_json_path = os.path.join(fix_dir, "fix_prompt.json")
-                with open(prompt_json_path, "w", encoding="utf-8") as pf:
-                    json.dump(fix_msgs, pf, ensure_ascii=False, indent=2)
-            except Exception as e:
-                print(f"    ⚠ 无法保存 fix prompt: {e}", flush=True)
-
-            fix_gen_path = os.path.join(fix_dir, "fix_gen.json")
-            t0_fix = time.time()
-            ok, fix_result = call_generator(gen_client, fix_msgs, fix_gen_path)
-
-            tracker.record("generator", round_key, fix_result)
-
-            new_java_path = os.path.join(fix_dir, "new.java")
-
-            if ok:
-                has_code, new_code, _ = extract_code(fix_result.content)
-                if has_code and new_code.strip():
-                    if pkg_decl:
-                        new_code = repair_package(new_code, pkg_decl)
-                    new_code = repair_imports(new_code, imports)
-                    if pkg_decl:
-                        new_code = _ensure_package_first(new_code, pkg_decl)
-
-                    try:
-                        seq_num = int(tc_name.split("_")[-1].replace("Test", ""))
-                    except ValueError:
-                        seq_num = 1
-                    new_code = change_class_name(new_code, class_name, method_id, seq_num)
-                    if pkg_decl:
-                        new_code = repair_package(new_code, pkg_decl)
-                        new_code = _ensure_package_first(new_code, pkg_decl)
-
-                    # ── 新增：fix后也强制截断 @Test 数量 ─────────
-                    # 获取当前优先级，确定允许的最大数量
-                    current_priority = _get_fix_priority_for_test(tc_score.issues if tc_score else [])
-                    if current_priority in ("compile", "exec"):
-                        fix_max = _count_test_methods(original_code)  # 不允许新增
-                    else:
-                        fix_max = min(
-                            _count_test_methods(original_code) + _TEST_METHOD_HEADROOM,
-                            _MAX_TEST_METHODS_DEFAULT,
-                        )
-                    new_code = _enforce_test_method_limit(new_code, fix_max)
-
-                    # ── 新增：fix后也调用断言修复 ──────────────────
-                    if test_project_dir and current_priority not in ("compile",):
-                        # 编译失败时跳过断言修复（代码都无法编译）
-                        new_code = _run_assert_fixer(
-                            java_source=new_code,
-                            class_name=class_name,
-                            method_id=method_id,
-                            seq=seq_num,
-                            package=package,
-                            test_project_dir=test_project_dir,
-                            focal_source_code=focal_source_code,
-                        )
-
-                    changed = _code_changed(original_code, new_code)
-                    if not changed:
-                        unchanged_counts[tc_name] = unchanged_counts.get(tc_name, 0) + 1
-                        fix_results["unchanged"].append(tc_name)
-                        print(f"    ⚠️  {Fore.YELLOW}{tc_name} 输出与原始完全相同 "
-                              f"(连续相同: {unchanged_counts[tc_name]} 次){Style.RESET_ALL}", flush=True)
-                        with open(new_java_path, "w", encoding="utf-8") as f:
-                            f.write(f"// [UNCHANGED]\n")
-                            f.write(new_code)
-                    else:
-                        unchanged_counts[tc_name] = 0
-
-                        has_val_errors, val_text = _run_syntax_validation(
-                            new_code, tc_name, focal_class_context=focal_class_ctx
-                        )
-                        if val_text:
-                            validation_issues_cache[tc_name] = {
-                                "has_errors": has_val_errors,
-                                "prompt_text": val_text,
-                            }
-                            if has_val_errors:
-                                print(f"    ⚠️  [Validator] fix 后仍有静态问题，"
-                                      f"将在下轮注入提示", flush=True)
-                        else:
-                            validation_issues_cache.pop(tc_name, None)
-
-                        current_codes[tc_name] = new_code
-                        tc_path = os.path.join(tc_dir, f"{tc_name}.java")
-                        with open(tc_path, "w", encoding="utf-8") as f:
-                            f.write(new_code)
-                        with open(new_java_path, "w", encoding="utf-8") as f:
-                            f.write(new_code)
-                        fix_results["ok"].append(tc_name)
-                        new_cnt = _count_test_methods(new_code)
-                        print(f"    ✅ {tc_name} 精修成功 | @Test数={new_cnt} | "
-                              f"prompt={fix_result.prompt_tokens} "
-                              f"completion={fix_result.completion_tokens} | "
-                              f"llm_time={fix_result.elapsed_seconds:.1f}s", flush=True)
-                else:
-                    fix_results["no_code"].append(tc_name)
-                    with open(new_java_path, "w", encoding="utf-8") as f:
-                        f.write("// [EXTRACT_FAILED]\n")
+    
+            # 选择对应的message构建策略
+            if is_stable:
+                tier_label = "🟡STABLE-ENHANCE"
+                fix_msgs = _build_fix_messages_for_stable(
+                    tc_name=tc_name,
+                    current_code=original_code,
+                    instructions=instructions,
+                    focal_method=method_name,
+                    class_name=class_name,
+                    ctx_d1=ctx_d1,
+                    ctx_d3=ctx_d3,
+                    imports=imports,
+                    diag=tc_diag,
+                    issues=issues,
+                    prev_unchanged=prev_unchanged,
+                )
             else:
+                tier_label = "🔴UNSTABLE-FIX"
+                fix_msgs = _build_fix_messages_for_unstable(
+                    tc_name=tc_name,
+                    current_code=original_code,
+                    instructions=instructions,
+                    focal_method=method_name,
+                    class_name=class_name,
+                    ctx_d1=ctx_d1,
+                    ctx_d3=ctx_d3,
+                    imports=imports,
+                    diag=tc_diag,
+                    issues=issues,
+                    prev_unchanged=prev_unchanged,
+                    validation_issues=validation_issues_cache,
+                )
+    
+            print(
+                f"\n    [{_ts()}] {tier_label} {tc_name} | issues={issues}",
+                flush=True
+            )
+    
+            # 调用LLM
+            fix_gen_path = os.path.join(fix_dir, "fix_gen.json")
+            ok, fix_result = call_generator(gen_client, fix_msgs, fix_gen_path)
+            tracker.record("generator", round_key, fix_result)
+    
+            if not ok:
                 fix_results["fail"].append(tc_name)
-                with open(new_java_path, "w", encoding="utf-8") as f:
-                    f.write(f"// [LLM_ERROR]\n")
-
-        round_elapsed = time.time() - round_start
-        time_stats["rounds"][round_key] = round(round_elapsed, 2)
-
-        _log_refine_quality(
-            round_log_dir, f"{class_name}.{method_name}", r,
-            refine_result.suite_score, refine_result.test_scores,
-            refine_result.instructions, refine_result.suite_summary,
-            fix_results=fix_results,
-        )
+                continue
+    
+            has_code, new_code, _ = extract_code(fix_result.content)
+            if not has_code or not new_code.strip():
+                fix_results["no_code"].append(tc_name)
+                continue
+    
+            # 代码后处理（package/import修复）
+            if pkg_decl:
+                new_code = repair_package(new_code, pkg_decl)
+            new_code = repair_imports(new_code, imports)
+            if pkg_decl:
+                new_code = _ensure_package_first(new_code, pkg_decl)
+    
+            try:
+                seq_num = int(tc_name.split("_")[-1].replace("Test", ""))
+            except ValueError:
+                seq_num = 1
+            new_code = change_class_name(new_code, class_name, method_id, seq_num)
+            if pkg_decl:
+                new_code = repair_package(new_code, pkg_decl)
+                new_code = _ensure_package_first(new_code, pkg_decl)
+    
+            # @Test数量强制截断
+            if is_stable:
+                # 稳定test：最多允许+1
+                max_allowed = _count_test_methods(original_code) + 1
+            else:
+                # 不稳定test：严格禁止新增
+                max_allowed = _count_test_methods(original_code)
+            new_code = _enforce_test_method_limit(new_code, max_allowed)
+    
+            # assert_fixer（只做安全清理，不替换值）
+            if test_project_dir and focal_source_code:
+                from assert_fixer import fix_assertions
+                pf = _extract_private_fields_from_source(focal_source_code)
+                pkg_clean = re.sub(r'^package\s+', '', package or '').rstrip(';').strip()
+                new_code = fix_assertions(
+                    java_source=new_code,
+                    class_name=f"{class_name}_{method_id}_{seq_num}Test",
+                    package=pkg_clean,
+                    project_dir=test_project_dir,
+                    private_fields=pf,
+                )
+    
+            # 检查是否改变
+            changed = _code_changed(original_code, new_code)
+    
+            if not changed:
+                unchanged_counts[tc_name] = unchanged_counts.get(tc_name, 0) + 1
+                fix_results["unchanged"].append(tc_name)
+                print(
+                    f"    ⚠️  {tc_name} UNCHANGED (streak={unchanged_counts[tc_name]})",
+                    flush=True
+                )
+                continue
+    
+            # 稳定测试：代码层面保护（guard回滚）
+            new_code, rolled_back = guard.guard_after_fix(tc_name, new_code, tc_dir)
+            if rolled_back:
+                fix_results["rollback"].append(tc_name)
+                print(
+                    f"    🔄 {tc_name} ROLLED BACK (stable test lost @Test methods)",
+                    flush=True
+                )
+                continue
+    
+            # 语法验证（快速）
+            unchanged_counts[tc_name] = 0
+            has_val_errors, val_text = _run_syntax_validation(
+                new_code, tc_name, focal_class_context=focal_class_ctx
+            )
+            if val_text:
+                validation_issues_cache[tc_name] = {
+                    "has_errors": has_val_errors,
+                    "prompt_text": val_text,
+                }
+            else:
+                validation_issues_cache.pop(tc_name, None)
+    
+            # 写入文件
+            current_codes[tc_name] = new_code
+            tc_path = os.path.join(tc_dir, f"{tc_name}.java")
+            with open(tc_path, "w", encoding="utf-8") as f:
+                f.write(new_code)
+            with open(os.path.join(fix_dir, "new.java"), "w", encoding="utf-8") as f:
+                f.write(new_code)
+    
+            fix_results["ok"].append(tc_name)
+            orig_cnt = _count_test_methods(original_code)
+            new_cnt  = _count_test_methods(new_code)
+            print(
+                f"    ✅ {tc_name} FIXED | {tier_label} | "
+                f"@Test: {orig_cnt}→{new_cnt} | "
+                f"tokens={fix_result.prompt_tokens}+{fix_result.completion_tokens}",
+                flush=True
+            )
+    
+        return fix_results
 
         print(flush=True)
         print(Fore.MAGENTA +

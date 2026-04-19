@@ -76,7 +76,7 @@ Here's the unit test that needs fixing.
 To reveal the bug you should **strengthen existing assertions** in the current test methods:
 - Replace `assertNotNull(result)` with `assertEquals(exactExpectedValue, result)`.
 - Assert specific numeric values, string contents, or state changes.
-- Test boundary conditions: values near the edge of correct/incorrect behavior.
+- Focus on boundary conditions, exception behavior, or invalid input handling.
 - **Do NOT add many new `@Test` methods** — instead make existing tests more precise.
 
 {% endif %}
@@ -122,8 +122,5 @@ Let's proceed step by step:
 - Generate the entire unit test file, including package declaration and imports.
 - Only use APIs that appear in the Focal Method Context above; do NOT invent APIs.
 - Identify Abstraction: Before instantiating any class, check if it is marked as abstract.
-- **IMPORTANT — @Test count limit (Issue 4):**
-  Keep the total number of `@Test` methods to **at most {{ max_test_methods | default(8) }}**.
-  Adding more than {{ max_test_methods | default(8) }} `@Test` methods will likely cause compile errors.
 
 Please fix the error and return the whole fixed unit test. You can use JUnit 5, Mockito 3 and reflection. No explanation is needed.

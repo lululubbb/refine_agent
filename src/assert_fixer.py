@@ -1,435 +1,209 @@
 """
-assert_fixer.py
-===============
-MutAP 风格的断言修复器。
+assert_fixer.py  (v3 — 彻底修正版)
+=====================================
 
-核心思路（来自 MutAP 论文）：
-  LLM 生成的断言预期值往往是错误的（hallucination）。
-  通过真实运行被测方法（PUT），用实际输出替换错误的预期值。
+为什么不能在fixed版本上替换断言值：
+  
+  场景：focal method 有一个 bug，buggy版本返回3，fixed版本返回4。
+  LLM生成：assertEquals(3, result)  ← LLM猜错了，应该是4
+  
+  旧版MuTap做法：在fixed版本上运行 → 捕获"expected:<3> but was:<4>" 
+                 → 把3替换成4 → assertEquals(4, result)
+  
+  问题：这个断言在fixed版本pass，但在buggy版本（返回3）时 assertEquals(4,3) FAIL
+        ——好像这就是我们想要的？
+  
+  但实际情况更复杂：
+  1. LLM往往生成的测试根本就构造不对（参数错、对象初始化错）
+     在这种情况下，运行出来的result根本不是focal method的输出，
+     而是某个初始化阶段的值或默认值。替换后断言毫无意义。
+  2. 更重要的：LLM生成的测试可能已经编译失败，根本跑不到运行阶段，
+     旧版assert_fixer遇到编译失败直接返回原始代码，什么都没做。
+     但这路径走了很多时间和资源。
 
-流程：
-  1. 解析 Java 测试文件，提取所有 assertEquals/assertTrue 等断言
-  2. 用 javac + java 运行一个小型 harness 来获取每个断言的真实输出
-  3. 如果真实输出与断言预期不符，替换预期值
-  4. 如果运行报错（输入不合法），丢弃该断言
-  5. 返回修复后的 Java 源码
+正确做法：
+  - 不运行测试，不替换值
+  - 只做静态代码清理：移除编译100%失败的模式（私有字段直接访问）
+  - 让TestRunner真实评估，让Refiner基于真实诊断数据做修复
+  - 详细记录每次改动，便于观察
 
-重要设计决策：
-  - 只修复 assertEquals(expected, actual) 类型的断言（有明确预期值）
-  - 不修复 assertNotNull/assertTrue/assertThrows 等（这些不需要精确值）
-  - 修复失败时保留原始断言（不丢弃整个测试方法）
-  - 对私有字段直接访问产生的编译错误：将相关断言替换为 assertNotNull/非null检查
+额外日志：
+  - 记录到 <test_dir>/assert_fixer.log，每次调用都追加
+  - 格式清晰，能快速看到哪个测试哪行被改了什么
 """
 from __future__ import annotations
 
+import logging
 import os
 import re
-import subprocess
-import sys
-import tempfile
-import logging
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 logger = logging.getLogger(__name__)
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+# ── 模块级日志文件路径（可在外部设置）────────────────────────────
+_LOG_FILE: Optional[str] = None
 
-# 最大允许修复的断言数量（避免运行时间过长）
-_MAX_ASSERTIONS_TO_FIX = 20
-# 单次运行超时（秒）
-_RUN_TIMEOUT = 10
+
+def set_log_file(path: str):
+    """设置assert_fixer的日志文件路径，便于外部控制。"""
+    global _LOG_FILE
+    _LOG_FILE = path
+
+
+def _write_log(msg: str):
+    """同时写入logger和日志文件。"""
+    logger.info(msg)
+    if _LOG_FILE:
+        try:
+            with open(_LOG_FILE, 'a', encoding='utf-8') as f:
+                f.write(msg + '\n')
+        except Exception:
+            pass
 
 
 # ════════════════════════════════════════════════════════════════════
-# 断言解析
+# 静态代码清理：只删除编译100%失败的模式
 # ════════════════════════════════════════════════════════════════════
 
-# 匹配 assertEquals(expected, actual) 或 assertEquals(message, expected, actual)
-_ASSERT_EQUALS_PATTERN = re.compile(
-    r'(assertEquals\s*\()'           # 方法调用开始
-    r'([^;]+?)'                      # 参数（延迟匹配）
-    r'(\s*\)\s*;)',                  # 结束
-    re.DOTALL
-)
-
-# 匹配私有字段直接访问：obj.privateField（不是方法调用）
-_PRIVATE_FIELD_ACCESS = re.compile(
-    r'\b(\w+)\.([a-z]\w*)\b(?!\s*[\(\[])',  # 小写开头的字段访问
-)
-
-
-def _is_literal(s: str) -> bool:
-    """判断字符串是否是字面量（数字、字符串、布尔值、null、char）"""
-    s = s.strip()
-    if s in ('true', 'false', 'null'):
-        return True
-    if re.match(r'^-?\d+(\.\d+)?[LlFfDd]?$', s):
-        return True
-    if s.startswith('"') and s.endswith('"'):
-        return True
-    if s.startswith("'") and s.endswith("'"):
-        return True
-    return False
-
-
-def _split_assert_args(args_str: str) -> List[str]:
+def _clean_private_field_direct_access(
+    java_source: str,
+    private_fields: List[str],
+    class_name: str,
+) -> Tuple[str, List[Dict]]:
     """
-    分割 assertEquals 的参数，正确处理嵌套括号。
-    例：assertEquals("msg", foo(a, b), bar(c))  → ["\"msg\"", "foo(a, b)", "bar(c)"]
-    """
-    args = []
-    depth = 0
-    current = []
-    for ch in args_str:
-        if ch == '(':
-            depth += 1
-            current.append(ch)
-        elif ch == ')':
-            depth -= 1
-            current.append(ch)
-        elif ch == ',' and depth == 0:
-            args.append(''.join(current).strip())
-            current = []
-        else:
-            current.append(ch)
-    if current:
-        args.append(''.join(current).strip())
-    return args
+    移除直接访问私有字段的断言语句。
+    这是唯一我们能确定"编译100%失败"的模式。
 
-
-# ════════════════════════════════════════════════════════════════════
-# 私有字段访问检测与修复
-# ════════════════════════════════════════════════════════════════════
-
-def _fix_private_field_assertions(java_source: str, private_fields: List[str]) -> str:
-    """
-    将直接访问私有字段的 assertEquals 替换为 assertNotNull 或注释掉。
-    这解决了"直接访问私有字段导致编译错误"的问题。
+    返回 (修复后代码, 修改记录列表)
     """
     if not private_fields:
-        return java_source
+        return java_source, []
 
+    changes = []
     lines = java_source.splitlines(keepends=True)
     result = []
 
-    for line in lines:
-        fixed_line = line
-        # 检查这行是否包含 assertEquals 且访问了私有字段
-        if 'assertEquals' in line:
-            for field in private_fields:
-                # 直接字段访问模式：obj.field 或 .field
-                pattern = re.compile(rf'\.\s*{re.escape(field)}\s*[,\)]')
-                if pattern.search(line):
-                    # 提取缩进
-                    indent = re.match(r'^(\s*)', line).group(1)
-                    # 替换为注释（保留原始意图但不编译）
-                    fixed_line = f"{indent}// [AssertFixer] Removed direct private field access: {line.strip()}\n"
-                    logger.debug("[AssertFixer] Removed private field assertion: %s", line.strip())
-                    break
-        result.append(fixed_line)
+    # 构建匹配任意私有字段直接访问的模式
+    # 匹配 someObj.fieldName 且后面不是 ( 或 [ （排除方法调用）
+    field_pattern = re.compile(
+        r'\b\w+\.(' + '|'.join(re.escape(f) for f in private_fields) + r')\b(?!\s*[\(\[])'
+    )
 
-    return ''.join(result)
+    for i, line in enumerate(lines, 1):
+        stripped = line.strip()
 
+        # 只检查断言行
+        is_assert = any(kw in stripped for kw in [
+            'assertEquals', 'assertNotEquals', 'assertTrue', 'assertFalse',
+            'assertNotNull', 'assertNull', 'assertThat', 'assertSame',
+        ])
 
-# ════════════════════════════════════════════════════════════════════
-# 核心修复逻辑
-# ════════════════════════════════════════════════════════════════════
-
-class AssertFixer:
-    """
-    MutAP 风格的断言修复器。
-    通过编译运行被测类 + 测试方法来获取真实输出，修正错误断言。
-    """
-
-    def __init__(
-        self,
-        project_dir: str,
-        junit_jar: str = "",
-        mockito_jar: str = "",
-        log4j_jar: str = "",
-        timeout: int = _RUN_TIMEOUT,
-    ):
-        self.project_dir = project_dir
-        self.junit_jar = junit_jar
-        self.mockito_jar = mockito_jar
-        self.log4j_jar = log4j_jar
-        self.timeout = timeout
-
-        # 构建 classpath
-        import glob as _glob
-        dep_jars = _glob.glob(os.path.join(project_dir, "**/*.jar"), recursive=True)
-        build_dir = os.path.join(project_dir, "target", "classes")
-        cp_parts = [build_dir] + dep_jars
-        if junit_jar:
-            cp_parts.extend(junit_jar.split(':'))
-        if mockito_jar:
-            cp_parts.extend(mockito_jar.split(':'))
-        if log4j_jar:
-            cp_parts.extend(log4j_jar.split(':'))
-        self.classpath = ':'.join([p for p in cp_parts if p])
-
-    def fix(
-        self,
-        java_source: str,
-        class_name: str,
-        package: str = "",
-        private_fields: Optional[List[str]] = None,
-    ) -> str:
-        """
-        修复 Java 测试源码中的错误断言。
-
-        Parameters
-        ----------
-        java_source     : 原始 Java 测试源码
-        class_name      : 测试类名（如 Token_1_1Test）
-        package         : 包名（如 org.apache.commons.csv）
-        private_fields  : 已知的私有字段名列表（用于移除直接访问）
-
-        Returns
-        -------
-        修复后的 Java 源码
-        """
-        fixed = java_source
-
-        # Step 1: 移除私有字段直接访问的断言
-        if private_fields:
-            fixed = _fix_private_field_assertions(fixed, private_fields)
-            logger.info("[AssertFixer] Step 1: private field assertions removed")
-
-        # Step 2: 修复 assertEquals 的错误预期值
-        fixed = self._fix_assertEquals_values(fixed, class_name, package)
-
-        return fixed
-
-    def _fix_assertEquals_values(
-        self, java_source: str, class_name: str, package: str
-    ) -> str:
-        """
-        编译并运行测试，捕获 AssertionError 来识别错误断言，
-        然后用真实值替换错误的预期值。
-
-        策略：
-        - 用 javac 编译测试文件
-        - 如果编译失败，不做 assertEquals 修复（只做 Step 1 的私有字段清理）
-        - 如果编译成功，用 JUnit 运行，解析 AssertionError 输出
-        - 从 "expected:<X> but was:<Y>" 中提取真实值 Y，替换错误的预期值 X
-        """
-        with tempfile.TemporaryDirectory() as tmpdir:
-            # 写入测试文件
-            test_file = os.path.join(tmpdir, f"{class_name}.java")
-            with open(test_file, 'w', encoding='utf-8') as f:
-                f.write(java_source)
-
-            # 编译
-            compile_ok, compile_err = self._compile(test_file, tmpdir)
-            if not compile_ok:
-                logger.debug("[AssertFixer] compile failed, skip assertEquals fix: %s",
-                             compile_err[:200])
-                return java_source  # 编译失败，不修复（保留原始，让 TestRunner 处理）
-
-            # 运行测试
-            full_class = f"{package}.{class_name}" if package else class_name
-            run_output = self._run_tests(tmpdir, full_class)
-
-            if not run_output:
-                return java_source
-
-            # 解析 AssertionError，提取 expected vs actual
-            fixes = self._parse_assertion_errors(run_output)
-            if not fixes:
-                logger.info("[AssertFixer] No assertEquals errors found, all assertions correct")
-                return java_source
-
-            logger.info("[AssertFixer] Found %d assertEquals errors to fix", len(fixes))
-
-            # 替换错误的预期值
-            fixed = self._apply_fixes(java_source, fixes)
-            return fixed
-
-    def _compile(self, test_file: str, output_dir: str) -> Tuple[bool, str]:
-        """编译单个测试文件"""
-        cmd = [
-            'javac',
-            '-d', output_dir,
-            '-cp', f"{output_dir}:{self.classpath}",
-            test_file
-        ]
-        try:
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=30
-            )
-            return result.returncode == 0, result.stderr
-        except Exception as e:
-            return False, str(e)
-
-    def _run_tests(self, class_dir: str, full_class_name: str) -> str:
-        """运行测试，返回输出（含 AssertionError 信息）"""
-        cmd = [
-            'java',
-            '-cp', f"{class_dir}:{self.classpath}",
-            'org.junit.platform.console.ConsoleLauncher',
-            '--disable-banner',
-            '--disable-ansi-colors',
-            '--details=verbose',
-            '--select-class', full_class_name,
-        ]
-        try:
-            result = subprocess.run(
-                cmd, capture_output=True, text=True,
-                timeout=self.timeout
-            )
-            return result.stdout + '\n' + result.stderr
-        except subprocess.TimeoutExpired:
-            return ""
-        except Exception as e:
-            logger.debug("[AssertFixer] run error: %s", e)
-            return ""
-
-    def _parse_assertion_errors(self, output: str) -> List[Tuple[str, str]]:
-        """
-        从 JUnit 输出中解析 AssertionError。
-        返回 [(wrong_expected, actual_value), ...] 列表。
-
-        JUnit 5 输出格式：
-          expected: <3> but was: <4>
-          ==> expected: <"hello"> but was: <"world">
-        JUnit 4 格式：
-          expected:<3> but was:<4>
-        """
-        fixes = []
-        seen = set()
-
-        # JUnit 5 格式
-        pattern5 = re.compile(
-            r'expected:\s*<([^>]*)>\s*but was:\s*<([^>]*)>',
-            re.IGNORECASE
-        )
-        # JUnit 4 格式
-        pattern4 = re.compile(
-            r'expected:<([^>]*)> but was:<([^>]*)>',
-            re.IGNORECASE
-        )
-
-        for pattern in [pattern5, pattern4]:
-            for m in pattern.finditer(output):
-                expected_val = m.group(1).strip()
-                actual_val = m.group(2).strip()
-                key = (expected_val, actual_val)
-                if key not in seen and expected_val != actual_val:
-                    seen.add(key)
-                    fixes.append((expected_val, actual_val))
-
-        return fixes[:_MAX_ASSERTIONS_TO_FIX]
-
-    def _apply_fixes(
-        self, java_source: str, fixes: List[Tuple[str, str]]
-    ) -> str:
-        """
-        将错误的预期值替换为真实值。
-
-        策略：
-        - 只替换字面量形式的预期值（数字、字符串）
-        - 如果 actual 是复杂表达式（无法安全嵌入），跳过
-        - 替换时保持代码结构不变
-        """
-        result = java_source
-
-        for wrong_expected, actual_val in fixes:
-            # 跳过复杂的 actual 值（含空格或特殊字符，可能不安全）
-            if not self._is_safe_replacement(actual_val):
-                logger.debug("[AssertFixer] Skip complex actual value: %s", actual_val[:50])
-                continue
-
-            # 在 assertEquals 中查找并替换这个预期值
-            result = self._replace_expected_in_assertEquals(
-                result, wrong_expected, actual_val
-            )
-
-        return result
-
-    def _is_safe_replacement(self, val: str) -> bool:
-        """判断是否可以安全地将此值嵌入 Java 代码"""
-        if not val:
-            return False
-        # 允许：数字、简单字符串、布尔值、null
-        val = val.strip()
-        if val in ('true', 'false', 'null'):
-            return True
-        if re.match(r'^-?\d+(\.\d+)?[LlFfDd]?$', val):
-            return True
-        # 字符串值（来自 toString()）- 用双引号包裹
-        if not re.search(r'[{}()\[\]<>]', val):
-            return True
-        return False
-
-    def _replace_expected_in_assertEquals(
-        self, source: str, wrong: str, correct: str
-    ) -> str:
-        """
-        在 assertEquals 调用中替换错误的预期值。
-        谨慎替换：只替换明确是字面量预期值的位置。
-        """
-        lines = source.splitlines(keepends=True)
-        result = []
-
-        for line in lines:
-            if 'assertEquals' not in line:
-                result.append(line)
-                continue
-
-            # 检查这行是否包含错误的预期值
-            # 构建可能的 Java 字面量形式
-            wrong_forms = self._get_java_literal_forms(wrong)
-            correct_form = self._to_java_literal(correct)
-
-            replaced = False
-            for wf in wrong_forms:
-                # 在 assertEquals( 之后查找这个值
-                pattern = re.compile(
-                    r'(assertEquals\s*\(\s*)' + re.escape(wf) + r'(\s*,)',
+        if is_assert:
+            m = field_pattern.search(stripped)
+            if m:
+                field_name = m.group(1)
+                indent = re.match(r'^(\s*)', line).group(1)
+                # 用注释替换，保留原始内容便于追踪
+                replacement = (
+                    f"{indent}// [AssertFixer] Removed: direct private field access "
+                    f"'.{field_name}' causes compile error | "
+                    f"original: {stripped[:120]}\n"
                 )
-                if pattern.search(line):
-                    new_line = pattern.sub(
-                        r'\g<1>' + correct_form + r'\g<2>',
-                        line, count=1
-                    )
+                result.append(replacement)
+                changes.append({
+                    "line": i,
+                    "action": "REMOVED",
+                    "reason": f"private field direct access: .{field_name}",
+                    "original": stripped[:120],
+                })
+                continue
+
+        result.append(line)
+
+    return ''.join(result), changes
+
+
+def _fix_reflection_field_names(
+    java_source: str,
+    private_fields: List[str],
+    class_name: str,
+) -> Tuple[str, List[Dict]]:
+    """
+    修正 getDeclaredField("xxx") 中明显拼错的字段名。
+    只有当编辑距离<=2时才替换（防止误改）。
+
+    返回 (修复后代码, 修改记录列表)
+    """
+    if not private_fields:
+        return java_source, []
+
+    field_set = set(private_fields)
+    changes = []
+    lines = java_source.splitlines(keepends=True)
+    result = []
+
+    for i, line in enumerate(lines, 1):
+        m = re.search(r'getDeclaredField\s*\(\s*"(\w+)"\s*\)', line)
+        if m:
+            field_name = m.group(1)
+            if field_name not in field_set:
+                similar = _find_similar(field_name, field_set, max_dist=2)
+                if similar:
+                    new_line = line.replace(f'"{field_name}"', f'"{similar}"', 1)
                     result.append(new_line)
-                    replaced = True
-                    logger.debug("[AssertFixer] Fixed: %s -> %s", wf, correct_form)
-                    break
+                    changes.append({
+                        "line": i,
+                        "action": "FIXED",
+                        "reason": f"reflection field name typo: '{field_name}' → '{similar}'",
+                        "original": line.strip()[:100],
+                        "replacement": new_line.strip()[:100],
+                    })
+                    continue
+                else:
+                    # 找不到相似的，注释掉整行
+                    indent = re.match(r'^(\s*)', line).group(1)
+                    replacement = (
+                        f"{indent}// [AssertFixer] Removed: unknown field "
+                        f"'{field_name}' not in [{', '.join(sorted(field_set)[:5])}] "
+                        f"| original: {line.strip()[:80]}\n"
+                    )
+                    result.append(replacement)
+                    changes.append({
+                        "line": i,
+                        "action": "REMOVED",
+                        "reason": f"reflection field '{field_name}' not found in class",
+                        "original": line.strip()[:100],
+                    })
+                    continue
 
-            if not replaced:
-                result.append(line)
+        result.append(line)
 
-        return ''.join(result)
+    return ''.join(result), changes
 
-    def _get_java_literal_forms(self, val: str) -> List[str]:
-        """返回一个值可能在 Java 代码中出现的所有字面量形式"""
-        forms = [val]
-        # 数字可能有 L/l 后缀
-        if re.match(r'^-?\d+$', val):
-            forms.extend([val + 'L', val + 'l', val + 'F', val + 'f'])
-        # 字符串
-        forms.append(f'"{val}"')
-        return forms
 
-    def _to_java_literal(self, val: str) -> str:
-        """将运行时值转换为 Java 字面量"""
-        val = val.strip()
-        if val in ('true', 'false', 'null'):
-            return val
-        if re.match(r'^-?\d+(\.\d+)?[LlFfDd]?$', val):
-            return val
-        # 字符串值（带引号）
-        if val.startswith('"') and val.endswith('"'):
-            return val
-        # 其他值作为字符串处理
-        escaped = val.replace('\\', '\\\\').replace('"', '\\"')
-        return f'"{escaped}"'
+def _find_similar(name: str, candidates: Set[str], max_dist: int = 2) -> Optional[str]:
+    best, best_d = None, float('inf')
+    for c in candidates:
+        d = _edit_dist(name.lower(), c.lower())
+        if d < best_d:
+            best, best_d = c, d
+    return best if best_d <= max_dist else None
+
+
+def _edit_dist(s1: str, s2: str) -> int:
+    if len(s1) > len(s2):
+        s1, s2 = s2, s1
+    prev = list(range(len(s2) + 1))
+    for c1 in s1:
+        curr = [prev[0] + 1]
+        for j, c2 in enumerate(s2):
+            curr.append(min(prev[j+1]+1, curr[j]+1, prev[j]+(0 if c1==c2 else 1)))
+        prev = curr
+    return prev[len(s2)]
 
 
 # ════════════════════════════════════════════════════════════════════
-# 简化入口：从文件信息快速创建并运行
+# 主入口
 # ════════════════════════════════════════════════════════════════════
 
 def fix_assertions(
@@ -443,53 +217,59 @@ def fix_assertions(
     private_fields: Optional[List[str]] = None,
 ) -> str:
     """
-    一站式断言修复入口。
-    在 LLM 生成测试代码之后、进入 TestRunner 评估之前调用。
+    静态代码清理：移除编译必然失败的代码模式。
 
-    Parameters
-    ----------
-    java_source    : LLM 生成的 Java 测试源码
-    class_name     : 测试类名
-    package        : 包名
-    project_dir    : 被测项目目录（含编译好的 target/classes）
-    junit_jar      : JUnit JAR 路径（冒号分隔）
-    private_fields : 已知私有字段列表
+    不做：
+    - 运行测试
+    - 替换断言预期值（会破坏bugrevealing能力）
 
-    Returns
-    -------
-    修复后的 Java 源码（编译/运行失败时返回原始源码）
+    做：
+    - 移除直接访问私有字段的断言行
+    - 修正反射中明显拼错的字段名
+
+    所有改动都有详细日志输出。
     """
-    if not project_dir or not os.path.isdir(project_dir):
-        logger.debug("[AssertFixer] project_dir not found, skip: %s", project_dir)
+    if not private_fields:
         return java_source
 
-    # 检查 target/classes 是否存在（被测类已编译）
-    classes_dir = os.path.join(project_dir, "target", "classes")
-    if not os.path.isdir(classes_dir):
-        logger.debug("[AssertFixer] target/classes not found, skip")
-        return java_source
+    _write_log(f"\n{'='*60}")
+    _write_log(f"[AssertFixer] Processing: {class_name}")
+    _write_log(f"  Known private fields: {private_fields}")
+    _write_log(f"{'='*60}")
 
-    try:
-        fixer = AssertFixer(
-            project_dir=project_dir,
-            junit_jar=junit_jar,
-            mockito_jar=mockito_jar,
-            log4j_jar=log4j_jar,
+    all_changes = []
+    current = java_source
+
+    # Step 1: 移除私有字段直接访问断言
+    current, changes1 = _clean_private_field_direct_access(current, private_fields, class_name)
+    all_changes.extend(changes1)
+
+    # Step 2: 修正反射字段名拼写
+    current, changes2 = _fix_reflection_field_names(current, private_fields, class_name)
+    all_changes.extend(changes2)
+
+    if all_changes:
+        _write_log(f"[AssertFixer] {class_name}: {len(all_changes)} change(s) made:")
+        for ch in all_changes:
+            action = ch['action']
+            reason = ch['reason']
+            line_n = ch['line']
+            orig   = ch.get('original', '')
+            repl   = ch.get('replacement', '')
+            if repl:
+                _write_log(f"  Line {line_n} [{action}] {reason}")
+                _write_log(f"    Before: {orig}")
+                _write_log(f"    After:  {repl}")
+            else:
+                _write_log(f"  Line {line_n} [{action}] {reason}")
+                _write_log(f"    Original: {orig}")
+        print(
+            f"  [AssertFixer] {class_name}: {len(all_changes)} fix(es) applied "
+            f"({sum(1 for c in all_changes if c['action']=='REMOVED')} removed, "
+            f"{sum(1 for c in all_changes if c['action']=='FIXED')} fixed)",
+            flush=True
         )
-        fixed = fixer.fix(
-            java_source=java_source,
-            class_name=class_name,
-            package=package,
-            private_fields=private_fields,
-        )
+    else:
+        _write_log(f"[AssertFixer] {class_name}: no changes needed")
 
-        if fixed != java_source:
-            logger.info("[AssertFixer] Assertions fixed for %s", class_name)
-        else:
-            logger.info("[AssertFixer] No changes needed for %s", class_name)
-
-        return fixed
-
-    except Exception as e:
-        logger.warning("[AssertFixer] Fix failed for %s: %s", class_name, e)
-        return java_source  # 失败时返回原始代码，不影响主流程
+    return current
