@@ -28,6 +28,8 @@ from scoring import (
     compute_test_score, compute_suite_score,
     sort_issues_by_priority, issues_at_priority_level,
     _SIM_THRESHOLD, _REDUNDANCY_FLAG_BELOW,
+    _has_coverage_issue,
+    _LINE_COV_THRESHOLD, _BRANCH_COV_THRESHOLD,
 )
 
 
@@ -155,7 +157,8 @@ def compute_test_score_ablation(diag, cfg: Optional[AblationConfig] = None) -> T
     for issue in score.issues:
         if issue in ("COMPILE_FAIL","EXEC_FAIL","EXEC_TIMEOUT") and not cfg.use_compile_exec:
             continue
-        if issue in ("LOW_LINE_COV","LOW_BRANCH_COV") and not cfg.use_coverage:
+        # Handle both old names and new unified name
+        if issue in ("LOW_COVERAGE","LOW_LINE_COV","LOW_BRANCH_COV") and not cfg.use_coverage:
             continue
         if issue == "NOT_BUG_REVEALING" and not cfg.use_bug_revealing:
             continue
@@ -195,18 +198,7 @@ def compute_suite_score_ablation(
         cfg = AblationConfig()
 
     if not test_scores:
-        empty_suite = SuiteScore()
-        if not cfg.use_compile_exec:
-            empty_suite.compile_pass_rate = None
-            empty_suite.exec_pass_rate    = None
-        if not cfg.use_coverage:
-            empty_suite.coverage_line_avg = None
-            empty_suite.coverage_line_max = None
-            empty_suite.coverage_line_min = None
-            empty_suite.coverage_branch_avg = None
-        if not cfg.use_bug_revealing:
-            empty_suite.bug_reveal_rate = None
-        return empty_suite
+        return SuiteScore()
 
     scores = list(test_scores.values())
     n = len(scores)
@@ -218,6 +210,8 @@ def compute_suite_score_ablation(
             1 for s in scores if s.compile_score is not None and s.compile_score > 0.5)
         compile_pass_rate = round(compile_pass_count / n, 4)
 
+    all_compile = (compile_pass_count == n) if cfg.use_compile_exec else False
+
     exec_pass_count = 0
     exec_pass_rate  = None
     if cfg.use_compile_exec:
@@ -225,12 +219,8 @@ def compute_suite_score_ablation(
             1 for s in scores if s.exec_score is not None and s.exec_score > 0.5)
         exec_pass_rate = round(exec_pass_count / n, 4)
 
-    per_line_coverage   = None
-    per_branch_coverage = None
-    coverage_line_avg   = None
-    coverage_line_max   = None
-    coverage_line_min   = None
-    coverage_branch_avg = None
+    cov_line_avg = cov_line_max = cov_line_min = cov_branch_avg = None
+    per_line = per_branch = []
     if cfg.use_coverage:
         per_line   = [s.focal_line_coverage   for s in scores]
         per_branch = [s.focal_branch_coverage for s in scores]
@@ -253,7 +243,6 @@ def compute_suite_score_ablation(
     high_redund_pairs = []
     max_pair_sim = None
     if cfg.use_redundancy and pairwise_sims:
-        # pairwise_sims = (tc1, tc2, redundancy_score=1-sim)
         sim_pairs = [(t1, t2, 1.0-rs) for t1, t2, rs in pairwise_sims]
         sim_pairs_s = sorted(sim_pairs, key=lambda x: x[2], reverse=True)
         if sim_pairs_s:
@@ -266,7 +255,7 @@ def compute_suite_score_ablation(
         for issue in s.issues:
             if issue in ("COMPILE_FAIL", "EXEC_FAIL", "EXEC_TIMEOUT") and not cfg.use_compile_exec:
                 continue
-            if issue in ("LOW_LINE_COV", "LOW_BRANCH_COV") and not cfg.use_coverage:
+            if issue in ("LOW_COVERAGE","LOW_LINE_COV","LOW_BRANCH_COV") and not cfg.use_coverage:
                 continue
             if issue == "NOT_BUG_REVEALING" and not cfg.use_bug_revealing:
                 continue
@@ -280,6 +269,7 @@ def compute_suite_score_ablation(
         compile_pass_rate   = compile_pass_rate,
         exec_pass_count     = exec_pass_count or 0,
         exec_pass_rate      = exec_pass_rate,
+        all_compile_pass    = all_compile,
         per_test_line_coverage   = per_line,
         per_test_branch_coverage = per_branch,
         coverage_line_avg   = cov_line_avg,
@@ -294,10 +284,6 @@ def compute_suite_score_ablation(
         problem_tests       = problem_tests,
     )
 
-
-# ════════════════════════════════════════════════════════════════════
-# Final score calculation (unchanged logic)
-# ════════════════════════════════════════════════════════════════════
 
 def compute_final_score_ablation(
     compile_score: float,
