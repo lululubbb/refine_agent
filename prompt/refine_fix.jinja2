@@ -12,7 +12,7 @@ You are an expert Java developer. Fix the following Test file based on the repai
 {# All other context is suppressed to avoid LLM confusion    #}
 {# ══════════════════════════════════════════════════════════ #}
 {% if use_compile_exec and not compile_ok %}
-## COMPILE ERRORS — Fix ONLY these. Do not change anything else.
+## COMPILE ERRORS — Fix ONLY these. 
 ```
 {% for err in compile_errors %}{{ err }}
 {% endfor %}```
@@ -22,7 +22,7 @@ You are an expert Java developer. Fix the following Test file based on the repai
 {# Runtime errors: ONLY shown when strategy is "exec"        #}
 {# ══════════════════════════════════════════════════════════ #}
 {% if use_compile_exec and compile_ok and not exec_ok %}
-## RUNTIME ERRORS — Fix the execution failure. Do not add new tests.
+## RUNTIME ERRORS — Fix the execution failure. 
 ```
 {% for err in exec_errors %}{{ err }}
 {% endfor %}```
@@ -88,7 +88,7 @@ Remove the most structurally similar test and replace with one targeting a diffe
 {{ method_code }}
 ```
 
-# Requirements
+## Requirements
 - Class name MUST be exactly: `{{ test_name }}`
 - {{ count_rationale if count_rationale else "Maintain the same number of @Test methods." }}
 - ALL `@Test` methods MUST declare `throws Exception`
