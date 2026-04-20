@@ -2,125 +2,96 @@ You are an expert Java developer. Fix the following Test file based on the repai
 
 ## Test File: `{{ test_name }}.java`
 
-
 ## Unit Test to Fix
-Here's the unit test that needs fixing.
 ```java
 {{ current_suite }}
 ```
 
-{# ══════════════════════════════════════════════════════════════════ #}
-{# Compile / Runtime error blocks (only when enabled + relevant)     #}
-{# ══════════════════════════════════════════════════════════════════ #}
-{% if use_compile_exec is not defined or use_compile_exec %}
-
-{% if not compile_ok %}
-## COMPILE ERRORS MESSAGE
+{# ══════════════════════════════════════════════════════════ #}
+{# Compile errors: ONLY shown when strategy is "compile"     #}
+{# All other context is suppressed to avoid LLM confusion    #}
+{# ══════════════════════════════════════════════════════════ #}
+{% if use_compile_exec and not compile_ok %}
+## COMPILE ERRORS — Fix ONLY these. Do not change anything else.
 ```
-{% for err in compile_errors %}
-{{ err }}
-{% endfor %}
-```
-
-{% elif not exec_ok %}
-## RUNTIME ERRORS MESSAGE
-```
-{% for err in exec_errors %}
-{{ err }}
-{% endfor %}
-```
-
-{% endif %}
+{% for err in compile_errors %}{{ err }}
+{% endfor %}```
 {% endif %}
 
-{# ══════════════════════════════════════════════════════════════════ #}
-{# Only shown when LOW_LINE_COV or LOW_BRANCH_COV is in `issues`.    #}
-{# Show focal-method line counts instead of class-level methods.      #}
-{# ══════════════════════════════════════════════════════════════════ #}
-{% if (use_coverage is not defined or use_coverage)
-      and compile_ok and exec_ok
-      and ("LOW_LINE_COV" in issues or "LOW_BRANCH_COV" in issues) %}
-
-## COVERAGE ISSUES — Focal method coverage is below the required threshold
-
-{% if focal_line_covered is not none and focal_line_total is not none and focal_line_total > 0 %}
-**Focal method line coverage**: {{ focal_line_covered }} / {{ focal_line_total }} lines covered
-  ({{ "%.1f"|format(focal_line_covered / focal_line_total * 100) }}%)
-  → {{ focal_line_total - focal_line_covered }} lines in the focal method are still **not executed**.
-{% elif focal_line_rate is not none %}
-**Focal method line coverage**: {{ "%.1f"|format(focal_line_rate) }}%
-  → Some lines in the focal method are still **not executed**.
+{# ══════════════════════════════════════════════════════════ #}
+{# Runtime errors: ONLY shown when strategy is "exec"        #}
+{# ══════════════════════════════════════════════════════════ #}
+{% if use_compile_exec and compile_ok and not exec_ok %}
+## RUNTIME ERRORS — Fix the execution failure. Do not add new tests.
+```
+{% for err in exec_errors %}{{ err }}
+{% endfor %}```
 {% endif %}
 
+{# ══════════════════════════════════════════════════════════ #}
+{# Branch hints: shown when strategy is "branch_coverage"    #}
+{# Contains specific uncovered line numbers from JaCoCo XML  #}
+{# ══════════════════════════════════════════════════════════ #}
+{% if use_coverage and compile_ok and exec_ok %}
+{% if branch_hint_text %}
+{{ branch_hint_text }}
+{% elif focal_line_covered is not none and focal_line_total is not none and focal_line_total > 0 %}
+## COVERAGE ISSUES — Focal method line coverage: {{ focal_line_covered }}/{{ focal_line_total }} ({{ "%.0f"|format(focal_line_covered / focal_line_total * 100) }}%)
+{{ focal_line_total - focal_line_covered }} lines in the focal method are NOT executed.
 {% if focal_branch_rate is not none and focal_branch_rate < 70 %}
-**Focal method branch coverage**: {{ "%.1f"|format(focal_branch_rate) }}%
-  → Some branches in the focal method are still **not taken**.
+Branch coverage: {{ "%.0f"|format(focal_branch_rate) }}% — some conditional branches are not taken.
+{% endif %}
+Add @Test methods targeting the specific uncovered paths in the focal method.
+{% endif %}
 {% endif %}
 
-**How to improve focal method coverage:**
-- Add `@Test` methods that exercise different **input values** and **code paths** inside the focal method.
-- Focus on: boundary values (null, empty, 0, -1, max), exception-throwing paths, and conditional branches.
-- Do **NOT** write tests for other methods in the class — focus only on `{{ focal_method }}`.
+{# ══════════════════════════════════════════════════════════ #}
+{# Assertion hardening: strategy is "assertion_hardening"    #}
+{# Only when coverage is sufficient but test is not revealing #}
+{# ══════════════════════════════════════════════════════════ #}
+{% if use_bug_revealing and compile_ok and exec_ok %}
+## BUG REVEALING — Coverage is sufficient but assertions are too weak
 
+The test reaches the focal method but cannot distinguish buggy from fixed behavior.
+
+Priority actions (in order):
+1. Replace `assertNotNull(result)` with `assertEquals(exactExpectedValue, result)`
+2. Trace the focal method logic manually to determine the exact expected value
+3. Assert specific numeric values, string contents, or state changes
+4. Focus on boundary values where the bug is most likely triggered
+5. DO NOT add many new tests — make existing assertions precise
 {% endif %}
 
-{# ══════════════════════════════════════════════════════════════════ #}
-{# Bug Revealing block                                                #}
-{# ══════════════════════════════════════════════════════════════════ #}
-{% if (use_bug_revealing is not defined or use_bug_revealing)
-      and compile_ok and exec_ok
-      and "NOT_BUG_REVEALING" in issues %}
-
-## BUG REVEALING — Tests pass on BOTH the buggy and fixed versions (not revealing the bug)
-
-To reveal the bug you should **strengthen existing assertions** in the current test methods:
-- Replace `assertNotNull(result)` with `assertEquals(exactExpectedValue, result)`.
-- Assert specific numeric values, string contents, or state changes.
-- Focus on boundary conditions, exception behavior, or invalid input handling.
-- **Do NOT add many new `@Test` methods** — instead make existing tests more precise.
-
+{# ══════════════════════════════════════════════════════════ #}
+{# Redundancy: strategy is "diversify"                        #}
+{# ══════════════════════════════════════════════════════════ #}
+{% if use_redundancy and compile_ok and exec_ok %}
+## HIGH REDUNDANCY — Rewrite to target a different code path
+Remove the most structurally similar test and replace with one targeting a different branch or input category.
 {% endif %}
 
-{# ══════════════════════════════════════════════════════════════════ #}
-{# Redundancy block                                                   #}
-{# ══════════════════════════════════════════════════════════════════ #}
-{% if (use_redundancy is not defined or use_redundancy)
-      and compile_ok and exec_ok
-      and "HIGH_REDUNDANCY" in issues %}
-
-## HIGH REDUNDANCY — Tests are structurally too similar to each other
-
-Minimize structural similarity between test cases:
-- Reduce repeated logic and near-duplicate code patterns.
-
+{# ══════════════════════════════════════════════════════════ #}
+{# Strategy rationale (from CoupledScore)                    #}
+{# ══════════════════════════════════════════════════════════ #}
+{% if suite_summary %}
+## Why this fix strategy
+{{ suite_summary }}
 {% endif %}
 
-
-## Repair Instructions for THIS Test File
-
+## Repair Instructions
 ```json
 {{ instructions_json }}
 ```
 
-## Source code of the method under test and its class:
+## Focal method source
 ```java
 {{ method_code }}
 ```
 
-# Procedures for Fixing the Unit Test:
-Let's proceed step by step:
-1. Pick out the statements where the errors occur.
-2. Explain the causes of the errors.
-3. Give solutions on how to fix the errors.
-4. Provide the complete fixed unit test, utilizing JUnit 5.
-
-# Requirements and Considerations for the Unit Test Fix:
-- Keep the class name exactly: `{{ test_name }}`
-- Ensure the unit tests are executable without compile errors, runtime errors, or timeouts.
-- Avoid modifying the method under test.
-- **ALL `@Test` method signatures MUST include `throws Exception`.**
-- Generate the entire unit test file, including package declaration and imports.
-- Only use APIs that appear in the Focal Method Context above; do NOT invent APIs.
-- Identify Abstraction: Before instantiating any class, check if it is marked as abstract.
-
-Please fix the error and return the whole fixed unit test. You can use JUnit 5, Mockito 3 and reflection. No explanation is needed.
+# Requirements
+- Class name MUST be exactly: `{{ test_name }}`
+- {{ count_rationale if count_rationale else "Maintain the same number of @Test methods." }}
+- ALL `@Test` methods MUST declare `throws Exception`
+- Include complete package declaration and all imports
+- Only use APIs present in the focal method source above
+- Output ONLY the complete Java class, no explanations

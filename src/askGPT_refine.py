@@ -73,6 +73,8 @@ from compile_error_analyzer import enrich_diag_with_fix_hints, get_error_summary
 from scoring import sort_issues_by_priority, issues_at_priority_level
 from stable_test_guard import StableTestGuard
 import assert_fixer as _af_module
+from scoring_improvements import build_improved_fix_context
+from branch_hint_extractor import find_jacoco_xml
 
 init()
 logger = logging.getLogger(__name__)
@@ -448,13 +450,36 @@ def remain_prompt_tokens(messages):
 
 def call_generator(gen_client: LLMClient, messages: List[Dict],
                    save_path: str) -> tuple[bool, LLMCallResult]:
-    result = gen_client.chat(messages)
-    with open(save_path, "w", encoding="utf-8") as f:
-        json.dump({
-            "choices": [{"message": {"role": "assistant", "content": result.content}}],
-            "usage":   result.to_usage_dict(),
-        }, f, indent=2, ensure_ascii=False)
-    return (not result.content.startswith("[LLM_ERROR]")), result
+    """
+    调用生成器并保存结果到 JSON。
+    始终尝试保存输出，即使发生异常。
+    
+    返回 (success: bool, result: LLMCallResult)
+    """
+    try:
+        result = gen_client.chat(messages)
+        with open(save_path, "w", encoding="utf-8") as f:
+            json.dump({
+                "choices": [{"message": {"role": "assistant", "content": result.content}}],
+                "usage":   result.to_usage_dict(),
+            }, f, indent=2, ensure_ascii=False)
+        return (not result.content.startswith("[LLM_ERROR]")), result
+    except Exception as e:
+        # 异常时也保存错误日志，便于调试
+        error_msg = f"[LLM_ERROR] Exception during generation: {type(e).__name__}: {str(e)}"
+        error_result = LLMCallResult(content=error_msg, prompt_tokens=0, 
+                                     completion_tokens=0, elapsed_seconds=0.0)
+        try:
+            with open(save_path, "w", encoding="utf-8") as f:
+                json.dump({
+                    "error": str(e),
+                    "error_type": type(e).__name__,
+                    "choices": [{"message": {"role": "assistant", "content": error_msg}}],
+                    "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
+                }, f, indent=2, ensure_ascii=False)
+        except Exception as write_err:
+            logger.warning("[CallGenerator] Failed to write error log: %s", write_err)
+        return False, error_result
 
 
 def _strip_pkg(s: str, imports: str, package: str) -> str:
@@ -1012,6 +1037,9 @@ def focal_method_pipeline(
         has_compile_fail = "COMPILE_FAIL" in issues
         has_exec_fail    = "EXEC_FAIL" in issues or "EXEC_TIMEOUT" in issues
 
+        # 对于不稳定测试，冻结测试计数以避免添加新测试
+        max_tests = current_test_count
+
         if has_compile_fail:
             relevant = [i for i in instructions if any(
                 kw in i.lower() for kw in [
@@ -1045,9 +1073,9 @@ def focal_method_pipeline(
             "delete_tests_json": "[]",
             "instructions_summary": "\n".join(f"  {i+1}. {inst}" for i, inst in enumerate(relevant)),
             "use_compile_exec":  True,
-            "use_coverage":      False,
-            "use_bug_revealing": False,
-            "use_redundancy":    False,
+            "use_coverage":      context["fix_strategy"] == "branch_coverage",
+            "use_bug_revealing": context["fix_strategy"] == "assertion_hardening",
+            "use_redundancy":    context["fix_strategy"] == "diversify",
             "compile_ok":        compile_ok,
             "exec_ok":           exec_ok,
             "compile_errors":    compile_errors,
@@ -1057,7 +1085,7 @@ def focal_method_pipeline(
             "focal_line_covered":None,
             "focal_line_total":  None,
             "issues":            issues,
-            "max_test_methods":  current_test_count,
+            "max_test_methods":  max_tests,
             "missed_methods":    [],
             "partial_methods":   [],
             "auto_fix_hints":    [],
@@ -1070,7 +1098,7 @@ def focal_method_pipeline(
             msgs = generate_messages(TEMPLATE_FIX, context)
 
         if msgs and msgs[-1]["role"] == "user":
-            suffix = f"\n\nCRITICAL: Keep exactly {current_test_count} @Test methods. Fix ONLY the error above."
+            suffix = f"\n\nCRITICAL: Keep exactly {max_tests} @Test methods. Fix ONLY the error above."
             if prev_unchanged:
                 suffix += "\nPrevious output was identical. Make concrete changes to fix the error."
             if has_compile_fail and validation_issues and tc_name in validation_issues:
@@ -1093,29 +1121,31 @@ def focal_method_pipeline(
         diag,
         issues: List[str],
         prev_unchanged: bool,
+        test_project_dir: str,
+        pkg_decl: str,
     ) -> List[Dict]:
-        """为"稳定"的test（compile+exec pass，但有覆盖率/bugrevealing问题）构建fix消息。"""
-        current_test_count = _count_test_methods(current_code)
+        """
+        为"稳定"的test（compile+exec pass，但有覆盖率/bugrevealing问题）构建fix消息。
+        使用改进的联合评分和分支提示。
+        """
         method_code = ctx_d1.get("information", ctx_d3.get("full_fm", ""))[:3000]
 
-        has_bug_issue = "NOT_BUG_REVEALING" in issues
-        has_cov_issue = "LOW_LINE_COV" in issues or "LOW_BRANCH_COV" in issues
+        # 使用改进的上下文构建
+        context = build_improved_fix_context(
+            tc_name=tc_name,
+            current_code=current_code,
+            diag=diag,
+            issues=issues,
+            instructions=instructions,
+            focal_method_name=focal_method,
+            focal_method_source=method_code,
+            class_name=class_name,
+            project_dir=test_project_dir,
+            package_name=pkg_decl.replace('package ', '').replace(';', '') if pkg_decl else "",
+        )
 
-        if has_cov_issue and not has_bug_issue:
-            max_tests = current_test_count + 3
-        elif has_bug_issue:
-            max_tests = current_test_count + 1
-        else:
-            max_tests = current_test_count
-
-        focal_line_rate    = getattr(diag, 'focal_line_rate',    None) if diag and has_cov_issue else None
-        focal_branch_rate  = getattr(diag, 'focal_branch_rate',  None) if diag and has_cov_issue else None
-        focal_line_covered = getattr(diag, 'focal_line_covered', None) if diag and has_cov_issue else None
-        focal_line_total   = getattr(diag, 'focal_line_total',   None) if diag and has_cov_issue else None
-
-        relevant = instructions[:3]
-
-        context = {
+        # 添加通用字段
+        context.update({
             "class_name":        class_name,
             "focal_method":      focal_method,
             "test_name":         tc_name,
@@ -1125,28 +1155,20 @@ def focal_method_pipeline(
             "imports":           imports,
             "contract_text":     "",
             "unchanged_warning": "",
-            "instructions_json": json.dumps(relevant, indent=2, ensure_ascii=False),
+            "instructions_json": json.dumps(context["filtered_instructions"], indent=2, ensure_ascii=False),
             "delete_tests_json": "[]",
-            "instructions_summary": "\n".join(f"  {i+1}. {inst}" for i, inst in enumerate(relevant)),
+            "instructions_summary": "\n".join(
+                f"  {i+1}. {instr}" for i, instr in enumerate(context["filtered_instructions"])
+            ),
             "use_compile_exec":  False,
-            "use_coverage":      has_cov_issue,
-            "use_bug_revealing": has_bug_issue,
-            "use_redundancy":    False,
-            "compile_ok":        True,
-            "exec_ok":           True,
-            "compile_errors":    [],
-            "exec_errors":       [],
-            "focal_line_rate":   focal_line_rate,
-            "focal_branch_rate": focal_branch_rate,
-            "focal_line_covered":focal_line_covered,
-            "focal_line_total":  focal_line_total,
-            "issues":            issues,
-            "max_test_methods":  max_tests,
+            "use_coverage":      context["fix_strategy"] == "branch_coverage",
+            "use_bug_revealing": context["fix_strategy"] == "assertion_hardening",
+            "use_redundancy":    context["fix_strategy"] == "diversify",
             "missed_methods":    getattr(diag, 'missed_methods', [])[:5] if diag else [],
             "partial_methods":   getattr(diag, 'partial_methods', [])[:5] if diag else [],
             "auto_fix_hints":    [],
             "error_summary":     "",
-        }
+        })
 
         msgs = generate_messages(TEMPLATE_FIX, context)
         if remain_prompt_tokens(msgs) < 0:
@@ -1154,18 +1176,22 @@ def focal_method_pipeline(
             msgs = generate_messages(TEMPLATE_FIX, context)
 
         if msgs and msgs[-1]["role"] == "user":
-            if has_bug_issue:
-                suffix = (
-                    f"\n\nThis test compiles and runs. Strengthen existing assertions first. "
-                    f"You may add at most 1 new @Test method only if it can reveal the bug. "
-                    f"When possible, use assertEquals(expected, actual) for exact checks; "
-                    f"without removing or weakening any existing @Test methods."
+            suffix = context["count_rationale"]
+            if context["fix_strategy"] == "branch_coverage":
+                suffix += (
+                    "\n\nEach new @Test must target a specific uncovered segment from the list above. "
+                    "Focus on BRANCH segments first. Do NOT add tests for already-covered paths."
                 )
-            else:
-                suffix = (
-                    f"\n\nThis test compiles and runs. "
-                    f"You may add at most 3 new @Test methods for uncovered branches. "
-                    f"Do NOT modify existing @Test methods that already pass."
+            elif context["fix_strategy"] == "assertion_hardening":
+                suffix += (
+                    "\n\nStrengthen existing assertions to distinguish buggy from fixed behavior. "
+                    "Use assertEquals(expected, actual) with exact values. "
+                    "Only add a new @Test if existing ones cannot be made precise enough."
+                )
+            elif context["fix_strategy"] == "diversify":
+                suffix += (
+                    "\n\nRewrite this test to cover a different input category or code branch. "
+                    "Remove redundancy while maintaining coverage."
                 )
             if prev_unchanged:
                 suffix += " Previous output was identical—make a concrete change."
@@ -1237,6 +1263,8 @@ def focal_method_pipeline(
                     diag=tc_diag,
                     issues=issues,
                     prev_unchanged=prev_unchanged,
+                    test_project_dir=test_project_dir,
+                    pkg_decl=pkg_decl,
                 )
             else:
                 tier_label = "🔴UNSTABLE-FIX"
@@ -1259,101 +1287,133 @@ def focal_method_pipeline(
                 f"\n    [{_ts()}] {tier_label} {tc_name} | issues={issues}",
                 flush=True
             )
-
-            fix_gen_path = os.path.join(fix_dir, "fix_gen.json")
-            ok, fix_result = call_generator(gen_client, fix_msgs, fix_gen_path)
-            tracker.record("generator", round_key, fix_result)
-
-            if not ok:
-                fix_results["fail"].append(tc_name)
-                continue
-
-            has_code, new_code, _ = extract_code(fix_result.content)
-            if not has_code or not new_code.strip():
-                fix_results["no_code"].append(tc_name)
-                continue
-
-            if pkg_decl:
-                new_code = repair_package(new_code, pkg_decl)
-            new_code = repair_imports(new_code, imports)
-            if pkg_decl:
-                new_code = _ensure_package_first(new_code, pkg_decl)
-
             try:
-                seq_num = int(tc_name.split("_")[-1].replace("Test", ""))
-            except ValueError:
-                seq_num = 1
-            new_code = change_class_name(new_code, class_name, method_id, seq_num)
-            if pkg_decl:
-                new_code = repair_package(new_code, pkg_decl)
-                new_code = _ensure_package_first(new_code, pkg_decl)
+                prompt_json_path = os.path.join(fix_dir, "fix_prompt.json")
+                with open(prompt_json_path, "w", encoding="utf-8") as pf:
+                    json.dump(fix_msgs, pf, ensure_ascii=False, indent=2)
+            except Exception as e:
+                print(f"    ⚠ 无法保存 fix prompt: {e}", flush=True)
 
-            if is_stable:
-                max_allowed = _count_test_methods(original_code) + 1
-            else:
-                max_allowed = _count_test_methods(original_code)
-            new_code = _enforce_test_method_limit(new_code, max_allowed)
+            # 核心修复流程：从生成器调用到文件保存，全部包装在异常处理中
+            try:
+                fix_gen_path = os.path.join(fix_dir, "fix_gen.json")
+                ok, fix_result = call_generator(gen_client, fix_msgs, fix_gen_path)
+                tracker.record("generator", round_key, fix_result)
 
-            if test_project_dir and focal_source_code:
-                from assert_fixer import fix_assertions
-                pf = _extract_private_fields_from_source(focal_source_code)
-                pkg_clean = re.sub(r'^package\s+', '', package or '').rstrip(';').strip()
-                new_code = fix_assertions(
-                    java_source=new_code,
-                    class_name=f"{class_name}_{method_id}_{seq_num}Test",
-                    package=pkg_clean,
-                    project_dir=test_project_dir,
-                    private_fields=pf,
+                if not ok:
+                    fix_results["fail"].append(tc_name)
+                    print(f"    ❌ {tc_name} FAILED | 生成器返回错误", flush=True)
+                    continue
+
+                has_code, new_code, _ = extract_code(fix_result.content)
+                if not has_code or not new_code.strip():
+                    fix_results["no_code"].append(tc_name)
+                    print(f"    ❌ {tc_name} NO_CODE | 无法提取代码", flush=True)
+                    continue
+
+                if pkg_decl:
+                    new_code = repair_package(new_code, pkg_decl)
+                new_code = repair_imports(new_code, imports)
+                if pkg_decl:
+                    new_code = _ensure_package_first(new_code, pkg_decl)
+
+                try:
+                    seq_num = int(tc_name.split("_")[-1].replace("Test", ""))
+                except ValueError:
+                    seq_num = 1
+                new_code = change_class_name(new_code, class_name, method_id, seq_num)
+                if pkg_decl:
+                    new_code = repair_package(new_code, pkg_decl)
+                    new_code = _ensure_package_first(new_code, pkg_decl)
+
+                if is_stable:
+                    max_allowed = _count_test_methods(original_code) + 1
+                else:
+                    max_allowed = _count_test_methods(original_code)
+                new_code = _enforce_test_method_limit(new_code, max_allowed)
+
+                if test_project_dir and focal_source_code:
+                    from assert_fixer import fix_assertions
+                    pf = _extract_private_fields_from_source(focal_source_code)
+                    pkg_clean = re.sub(r'^package\s+', '', package or '').rstrip(';').strip()
+                    new_code = fix_assertions(
+                        java_source=new_code,
+                        class_name=f"{class_name}_{method_id}_{seq_num}Test",
+                        package=pkg_clean,
+                        project_dir=test_project_dir,
+                        private_fields=pf,
+                    )
+
+                changed = _code_changed(original_code, new_code)
+
+                if not changed:
+                    unchanged_counts[tc_name] = unchanged_counts.get(tc_name, 0) + 1
+                    fix_results["unchanged"].append(tc_name)
+                    print(
+                        f"    ⚠️  {tc_name} UNCHANGED (streak={unchanged_counts[tc_name]})",
+                        flush=True
+                    )
+                    continue
+
+                new_code, rolled_back = guard.guard_after_fix(tc_name, new_code, tc_dir)
+                if rolled_back:
+                    fix_results["rollback"].append(tc_name)
+                    print(
+                        f"    🔄 {tc_name} ROLLED BACK (stable test lost @Test methods)",
+                        flush=True
+                    )
+                    continue
+
+                unchanged_counts[tc_name] = 0
+                has_val_errors, val_text = _run_syntax_validation(
+                    new_code, tc_name, focal_class_context=focal_class_ctx
                 )
+                if val_text:
+                    validation_issues_cache[tc_name] = {
+                        "has_errors": has_val_errors,
+                        "prompt_text": val_text,
+                    }
+                else:
+                    validation_issues_cache.pop(tc_name, None)
 
-            changed = _code_changed(original_code, new_code)
+                current_codes[tc_name] = new_code
+                tc_path = os.path.join(tc_dir, f"{tc_name}.java")
+                with open(tc_path, "w", encoding="utf-8") as f:
+                    f.write(new_code)
+                with open(os.path.join(fix_dir, "new.java"), "w", encoding="utf-8") as f:
+                    f.write(new_code)
 
-            if not changed:
-                unchanged_counts[tc_name] = unchanged_counts.get(tc_name, 0) + 1
-                fix_results["unchanged"].append(tc_name)
+                fix_results["ok"].append(tc_name)
+                orig_cnt = _count_test_methods(original_code)
+                new_cnt  = _count_test_methods(new_code)
                 print(
-                    f"    ⚠️  {tc_name} UNCHANGED (streak={unchanged_counts[tc_name]})",
+                    f"    ✅ {tc_name} FIXED | {tier_label} | "
+                    f"@Test: {orig_cnt}→{new_cnt} | "
+                    f"tokens={fix_result.prompt_tokens}+{fix_result.completion_tokens}",
                     flush=True
                 )
+
+            except Exception as e:
+                # 捕捉修复流程中的任何异常，记录错误并继续
+                fix_results["fail"].append(tc_name)
+                error_detail = f"{type(e).__name__}: {str(e)}"
+                print(f"    ❌ {tc_name} EXCEPTION | {error_detail}", flush=True)
+                logger.exception("[FixLoop] Exception processing %s: %s", tc_name, error_detail)
+                
+                # 写入错误诊断到 JSON，便于调试
+                try:
+                    error_diag_path = os.path.join(fix_dir, "error_diagnostic.json")
+                    with open(error_diag_path, "w", encoding="utf-8") as f:
+                        json.dump({
+                            "error": error_detail,
+                            "error_type": type(e).__name__,
+                            "tc_name": tc_name,
+                            "tier": tier_label,
+                            "timestamp": _ts(),
+                        }, f, indent=2, ensure_ascii=False)
+                except Exception as writes_err:
+                    logger.warning("[FixLoop] Failed to write error diagnostic: %s", writes_err)
                 continue
-
-            new_code, rolled_back = guard.guard_after_fix(tc_name, new_code, tc_dir)
-            if rolled_back:
-                fix_results["rollback"].append(tc_name)
-                print(
-                    f"    🔄 {tc_name} ROLLED BACK (stable test lost @Test methods)",
-                    flush=True
-                )
-                continue
-
-            unchanged_counts[tc_name] = 0
-            has_val_errors, val_text = _run_syntax_validation(
-                new_code, tc_name, focal_class_context=focal_class_ctx
-            )
-            if val_text:
-                validation_issues_cache[tc_name] = {
-                    "has_errors": has_val_errors,
-                    "prompt_text": val_text,
-                }
-            else:
-                validation_issues_cache.pop(tc_name, None)
-
-            current_codes[tc_name] = new_code
-            tc_path = os.path.join(tc_dir, f"{tc_name}.java")
-            with open(tc_path, "w", encoding="utf-8") as f:
-                f.write(new_code)
-            with open(os.path.join(fix_dir, "new.java"), "w", encoding="utf-8") as f:
-                f.write(new_code)
-
-            fix_results["ok"].append(tc_name)
-            orig_cnt = _count_test_methods(original_code)
-            new_cnt  = _count_test_methods(new_code)
-            print(
-                f"    ✅ {tc_name} FIXED | {tier_label} | "
-                f"@Test: {orig_cnt}→{new_cnt} | "
-                f"tokens={fix_result.prompt_tokens}+{fix_result.completion_tokens}",
-                flush=True
-            )
 
         return fix_results
 
