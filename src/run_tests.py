@@ -8,7 +8,7 @@ import subprocess
 import sys
 from tools import *
 # 使用示例：python3 run_tests.py /home/chenlu/refine_test_gen_v5/defect4j_projects
-# 目前这个脚本有问题，在跑对所有test%目录下进行百衲衣测试的时候，最新的tets%编译执行的文件错误
+# 目前这个脚本有问题，在跑对所有test%目录下进行编译测试的时候，最新的tets%编译执行的文件错误
 def run_tests(target_projects=None):
     """
     执行生成的所有测试用例，生成覆盖率报告

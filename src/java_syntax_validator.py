@@ -274,7 +274,7 @@ class JavaSyntaxValidator:
                 severity="error",
                 message="assertThrows() lambda must be zero-argument: use `() ->` not `e ->`",
                 line_hint=line_num,
-                fix_hint="Change `e -> method()` to `() -> method()`",
+                fix_hint="Ensure lambda matches functional interface signature (use `() ->` for assertThrows)",
             ))
         return issues
 
@@ -306,7 +306,10 @@ class JavaSyntaxValidator:
                     severity="error",
                     message=f"`{class_name}` is a final class and cannot be subclassed.",
                     line_hint=line_num,
-                    fix_hint=f"Use Mockito.spy(new {class_name}(...)) instead of anonymous subclass",
+                    fix_hint=(
+                        f"Avoid subclassing final class `{class_name}`; "
+                        f"use its public API or composition; mocking frameworks may be used if supported"
+                    ),
                 ))
 
         # 通用警告：任何匿名子类（警告级别，不确定是否 final）
@@ -327,7 +330,10 @@ class JavaSyntaxValidator:
                 message=f"Anonymous subclass of `{class_name}` detected. "
                         f"If `{class_name}` is final, this will fail to compile.",
                 line_hint=line_num,
-                fix_hint=f"If `{class_name}` is final: use Mockito.spy(new {class_name}(...))",
+                fix_hint=(
+                    f"Declare or handle specific checked exceptions; "
+                    f"use `throws Exception` only if appropriate"
+                ),
             ))
 
         return issues
@@ -360,7 +366,8 @@ class JavaSyntaxValidator:
                             f"via `{m.group().strip()}`.",
                     line_hint=line_num,
                     fix_hint=(
-                        f"Use reflection: getDeclaredField(\"{field_name}\") + setAccessible(true)"
+                        f"Avoid subclassing final class `{class_name}`; "
+                        f"use its public API or composition; mocking frameworks may be used if supported"
                     ),
                 ))
 
@@ -423,7 +430,10 @@ class JavaSyntaxValidator:
                     message=f"Test method `{method_name}()` may use checked exceptions "
                             f"but does not declare `throws Exception`.",
                     line_hint=line_num,
-                    fix_hint=f"Change to: `void {method_name}() throws Exception {{`",
+                    fix_hint=(
+                        f"Declare or handle specific checked exceptions; "
+                        f"use `throws Exception` only if appropriate"
+                    ),
                 ))
         return issues
 
@@ -450,7 +460,7 @@ class JavaSyntaxValidator:
                     severity="warning",
                     message=f"Test method `{method_name}()` has an empty body — no assertions.",
                     line_hint=line_num,
-                    fix_hint="Add at least one assertion to make this test meaningful.",
+                    fix_hint="Add assertions to validate behavior and ensure the test has semantic value",
                 ))
         return issues
 

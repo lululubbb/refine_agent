@@ -47,6 +47,8 @@ class AblationConfig:
     use_compile_exec : bool
         是否启用编译/执行维度（COMPILE_FAIL, EXEC_FAIL, EXEC_TIMEOUT）
         关闭后：所有 test 的 compile_score=1.0, exec_score=1.0（不产生这两类 issue）
+        关闭后：suite_score.all_compile_pass=True, exec_pass_count=n（避免
+        _get_suite_fix_mode 误判为 compile/exec 模式，直接进入 quality 阶段）
     use_coverage : bool
         是否启用覆盖率维度（LOW_LINE_COV, LOW_BRANCH_COV）
         关闭后：覆盖率不影响 issue 列表，Refiner 不会生成覆盖率相关指令
@@ -203,14 +205,22 @@ def compute_suite_score_ablation(
     scores = list(test_scores.values())
     n = len(scores)
 
+    # ── 编译/执行维度 ─────────────────────────────────────────────
+    # 修复：use_compile_exec=False 时，all_compile_pass=True 且 exec_pass_count=n，
+    # 确保 _get_suite_fix_mode() 跳过 compile/exec 阶段直接进入 quality 阶段，
+    # 而不会因为 all_compile_pass=False 误判为 compile 模式导致无限空转。
     compile_pass_count  = 0
     compile_pass_rate   = None
     if cfg.use_compile_exec:
         compile_pass_count = sum(
             1 for s in scores if s.compile_score is not None and s.compile_score > 0.5)
         compile_pass_rate = round(compile_pass_count / n, 4)
-
-    all_compile = (compile_pass_count == n) if cfg.use_compile_exec else False
+        all_compile = (compile_pass_count == n)
+    else:
+        # 关闭编译维度：视为全部编译通过，不进入 compile 修复模式
+        compile_pass_count = n
+        compile_pass_rate  = 1.0
+        all_compile        = True
 
     exec_pass_count = 0
     exec_pass_rate  = None
@@ -218,6 +228,10 @@ def compute_suite_score_ablation(
         exec_pass_count = sum(
             1 for s in scores if s.exec_score is not None and s.exec_score > 0.5)
         exec_pass_rate = round(exec_pass_count / n, 4)
+    else:
+        # 关闭编译维度：视为全部执行通过，不进入 exec 修复模式
+        exec_pass_count = n
+        exec_pass_rate  = 1.0
 
     cov_line_avg = cov_line_max = cov_line_min = cov_branch_avg = None
     per_line = per_branch = []
@@ -237,6 +251,12 @@ def compute_suite_score_ablation(
         ok_scores  = [s for s in scores if s.compile_score is not None and s.compile_score > 0.5]
         checked    = [s for s in ok_scores if s.bug_reveal_score is not None]
         yes        = [s for s in checked   if s.bug_reveal_score is True]
+        br_count   = len(yes); br_checked = len(checked)
+        br_rate    = round(len(yes)/len(checked), 4) if checked else 0.0
+    elif cfg.use_bug_revealing and not cfg.use_compile_exec:
+        # use_compile_exec=False 时，所有 test 都视为编译通过，检查 bug_reveal
+        checked    = [s for s in scores if s.bug_reveal_score is not None]
+        yes        = [s for s in checked if s.bug_reveal_score is True]
         br_count   = len(yes); br_checked = len(checked)
         br_rate    = round(len(yes)/len(checked), 4) if checked else 0.0
 
@@ -265,9 +285,9 @@ def compute_suite_score_ablation(
 
     return SuiteScore(
         n_tests             = n,
-        compile_pass_count  = compile_pass_count or 0,
+        compile_pass_count  = compile_pass_count,
         compile_pass_rate   = compile_pass_rate,
-        exec_pass_count     = exec_pass_count or 0,
+        exec_pass_count     = exec_pass_count,
         exec_pass_rate      = exec_pass_rate,
         all_compile_pass    = all_compile,
         per_test_line_coverage   = per_line,

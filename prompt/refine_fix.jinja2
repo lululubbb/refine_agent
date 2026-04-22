@@ -38,7 +38,7 @@ You are an expert Java developer. Fix the following Test file based on the repai
 {% elif focal_line_covered is not none and focal_line_total is not none and focal_line_total > 0 %}
 ## COVERAGE ISSUES — Focal method line coverage: {{ focal_line_covered }}/{{ focal_line_total }} ({{ "%.0f"|format(focal_line_covered / focal_line_total * 100) }}%)
 {{ focal_line_total - focal_line_covered }} lines in the focal method are NOT executed.
-{% if focal_branch_rate is not none and focal_branch_rate < 70 %}
+{% if focal_branch_rate is not none and focal_branch_rate < 80 %}
 Branch coverage: {{ "%.0f"|format(focal_branch_rate) }}% — some conditional branches are not taken.
 {% endif %}
 Add @Test methods targeting the specific uncovered paths in the focal method.
@@ -59,7 +59,6 @@ Priority actions (in order):
 2. Trace the focal method logic manually to determine the exact expected value
 3. Assert specific numeric values, string contents, or state changes
 4. Focus on boundary values where the bug is most likely triggered
-5. DO NOT add many new tests — make existing assertions precise
 {% endif %}
 
 {# ══════════════════════════════════════════════════════════ #}
@@ -73,10 +72,6 @@ Remove the most structurally similar test and replace with one targeting a diffe
 {# ══════════════════════════════════════════════════════════ #}
 {# Strategy rationale (from CoupledScore)                    #}
 {# ══════════════════════════════════════════════════════════ #}
-{% if suite_summary %}
-## Why this fix strategy
-{{ suite_summary }}
-{% endif %}
 
 ## Repair Instructions
 ```json
@@ -95,3 +90,4 @@ Remove the most structurally similar test and replace with one targeting a diffe
 - Include complete package declaration and all imports
 - Only use APIs present in the focal method source above
 - Output ONLY the complete Java class, no explanations
+- Ensure that the unit tests are executable: they should run without any compilation errors, runtime errors, or timeouts.

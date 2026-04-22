@@ -867,7 +867,12 @@ def focal_method_pipeline(
             )
 
             print(f"\n    [{_ts()}] Fix {tc_name} | mode={suite_mode} | issues={issues}", flush=True)
-
+            try:
+                prompt_json_path = os.path.join(fix_dir, "fix_prompt.json")
+                with open(prompt_json_path, "w", encoding="utf-8") as pf:
+                    json.dump(fix_msgs, pf, ensure_ascii=False, indent=2)
+            except Exception as e:
+                print(f"    ⚠ 无法保存 fix prompt: {e}", flush=True)
             try:
                 fix_gen_path = os.path.join(fix_dir, "fix_gen.json")
                 ok, fix_result = call_generator(gen_client, fix_msgs, fix_gen_path)

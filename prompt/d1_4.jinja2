@@ -18,19 +18,15 @@ The whole unit test file is:
 ```
 </generate>
 
-Now please generate a whole unit test file for the focal method
+Now please generate a whole unit test file for the focal method.
 #### Requirements and Attention for the Unit Test to Generate:
 - Class name: `{{ class_name }}Test`
 - Ensure that the unit tests are executable: they should run without any compilation errors, runtime errors, or timeouts.
 - Aim for comprehensive coverage: the unit tests should encompass a significant portion of the codebase, including instructions and branches within the method under test.
 - Avoid altering the method under test.
-- Generate a complete unit test file, including the package declaration and all imports.
 - Import all dependent libraries used in the unit test file.
 - Use JUnit 5 (`@Test`, `Assertions.*`) and Mockito and reflection if needed.
-- Each test name must be descriptive (e.g., `test{{ focal_method }}_nullInput`).
+- Each test name must be descriptive (e.g., `test{{ focal_method }}_normalCase`).
 - All @Test methods must declare `throws Exception`.
-- Identify Abstraction: Before instantiating any class, check if it is marked as abstract in the provided context or common knowledge.
-- Strict Prohibition: NEVER use the new keyword to directly instantiate an abstract class (e.g., new AbstractClass(...) is FORBIDDEN).
-- NEVER use anonymous inner class syntax for final classes (e.g., new FinalClass(...) { ... } is a syntax error).
 - Only use APIs that appear in the provided class context above.
 - Output **ONLY** the complete Java class — no prose, no markdown fences.
