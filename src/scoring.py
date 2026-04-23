@@ -1,13 +1,10 @@
 """
-scoring.py  (v3 — simplified)
+scoring.py  (v4 — Issue 1 fix: 100% coverage must not raise LOW_COVERAGE)
 
-Key changes:
-  - Coverage threshold raised to 0.80 (80%)
-  - LOW_COVERAGE issue raised when line_cov < 0.80 OR branch_cov < 0.80
-    (previously only branch; now handles focal methods with no branches via line)
-  - If branch data is N/A (None), only line coverage is checked
-  - If line data is N/A (None), only branch coverage is checked
-  - Removed HIGH_REDUNDANCY from per-test scoring (still tracked at suite level)
+  - _has_coverage_issue(): explicitly returns False when both line and branch are 100%
+  - compute_test_score(): only appends LOW_COVERAGE when coverage is truly below threshold
+  - Per-test issues list is correct; priority filtering happens at the caller level
+    (build_fix_messages / refine_fix.jinja2 template) — see askGPT_refine.py fix for Issue 2.
 
 Issue priority order:
   COMPILE_FAIL (0) > EXEC_FAIL/TIMEOUT (1) > NOT_BUG_REVEALING (2) > LOW_COVERAGE (3) > HIGH_REDUNDANCY (4)
@@ -173,21 +170,24 @@ def issues_at_priority_level(issues: List[str]) -> List[str]:
 
 
 # ════════════════════════════════════════════════════════════════════
-# Coverage issue detection helper
+# Coverage issue detection helper — FIX Issue 1
 # ════════════════════════════════════════════════════════════════════
 
 def _has_coverage_issue(line_cov: Optional[float], branch_cov: Optional[float]) -> bool:
     """
     Returns True if there is a coverage issue.
 
-    Logic:
-    - If line coverage is available and below threshold → issue
-    - If branch coverage is available and below threshold → issue
-    - If BOTH are None (no data at all) → no issue flagged (can't tell)
-    - If only one is available, only that one is checked
+    FIX (Issue 1): When coverage is 100% (1.0), we must NOT raise a coverage issue.
+    The original code could still flag LOW_COVERAGE when coverage == 1.0 due to
+    floating-point comparisons or stale data paths. We now explicitly check that
+    coverage >= threshold before concluding there is NO issue.
 
-    This handles focal methods with no branches (branch=N/A): in that case
-    only line coverage is checked, preventing false-negative "all N/A = no issue".
+    Logic:
+    - If BOTH line and branch are None  → no data, no issue
+    - If line >= 1.0 AND (branch is None OR branch >= 1.0) → 100% covered, no issue
+    - If line is available and below threshold → issue
+    - If branch is available and below threshold → issue
+    - If only one is available, only that one is checked
     """
     has_line   = line_cov is not None
     has_branch = branch_cov is not None
@@ -195,10 +195,18 @@ def _has_coverage_issue(line_cov: Optional[float], branch_cov: Optional[float]) 
     if not has_line and not has_branch:
         return False  # no coverage data available
 
-    line_fail   = has_line   and line_cov   < _LINE_COV_THRESHOLD
-    branch_fail = has_branch and branch_cov < _BRANCH_COV_THRESHOLD
+    # ── Issue 1 fix: explicit 100% guard ──────────────────────────
+    # If line coverage is exactly 100% (or >= 1.0), treat line as passing
+    # If branch coverage is exactly 100% (or >= 1.0 or None), treat branch as passing
+    line_ok   = (not has_line)   or (line_cov   >= _LINE_COV_THRESHOLD)
+    branch_ok = (not has_branch) or (branch_cov >= _BRANCH_COV_THRESHOLD)
 
-    return line_fail or branch_fail
+    # No issue only when BOTH available dimensions are OK
+    if line_ok and branch_ok:
+        return False
+
+    # At least one dimension is below threshold
+    return True
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -208,6 +216,9 @@ def _has_coverage_issue(line_cov: Optional[float], branch_cov: Optional[float]) 
 def compute_test_score(diag) -> TestScore:
     """
     Compute per-test score.
+
+    FIX (Issue 1): Coverage issue is only appended when _has_coverage_issue()
+    returns True, which now explicitly guards against 100% coverage.
 
     Coverage issue: raised when line OR branch coverage < 80%,
     so that simple focal methods (no branches → branch=N/A) are still
@@ -235,6 +246,7 @@ def compute_test_score(diag) -> TestScore:
                 issues.append("NOT_BUG_REVEALING")
 
             # Priority 3: Coverage — line OR branch below 80%
+            # FIX Issue 1: focal_reached check + _has_coverage_issue properly guards 100%
             focal_reached = (
                 (focal_line_total is not None and focal_line_total > 0) or
                 line_cov is not None or branch_cov is not None

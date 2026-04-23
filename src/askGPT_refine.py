@@ -1,19 +1,33 @@
 """
-askGPT_refine.py  (v7 — simplified, ChatUniTest-style fix logic)
+askGPT_refine.py  (v8 — Issue 2 & Issue 3 fixes)
 
-Key changes vs v6:
-  1. Removed assert_fixer integration entirely
-  2. Removed scoring_improvements / branch_hint_extractor integration
-  3. Removed StableTestGuard (stable test protection)
-  4. Simplified fix loop: suite-level priority logic
-     - Phase 2 round logic:
-       * If NOT all tests compile → fix only compile-failing tests (compile errors)
-       * If all tests compile but some have exec errors → fix exec-failing tests
-       * If all compile AND all exec pass → fix remaining issues (coverage, bug-revealing, redundancy)
-       per-test: fix based on that test's highest-priority issue
-  5. Removed contract_integration, project_version_extractor usage
-  6. Removed _enforce_test_method_limit (over-engineering)
-  7. Kept _run_syntax_validation as a lightweight pre-check
+Issue 2 fix (per-test priority in fix prompt):
+  Previously build_fix_messages() passed all three context blocks
+  (coverage, bug-revealing, redundancy) simultaneously regardless of the
+  test's actual highest-priority issue.  The refine_fix.jinja2 template
+  then rendered ALL of them at once.
+
+  Fix: build_fix_messages() now computes the per-test top-priority issue
+  via issues_at_priority_level() and sets ONLY the corresponding
+  use_* flag to True.  Lower-priority fix blocks are suppressed.
+
+Issue 3 fix (suite-level fix mode):
+  Old: compile errors are fixed first exclusively; exec errors only after
+  ALL tests compile; quality issues only after ALL tests exec-pass.
+
+  New rules:
+  ┌────────────────────────────────────────────────────────────────────┐
+  │ • If ANY test has COMPILE_FAIL and ANY other test has EXEC_FAIL:   │
+  │   fix compile-failing tests AND exec-failing tests simultaneously.  │
+  │   Do NOT fix quality-only tests yet.                               │
+  │                                                                    │
+  │ • If ALL tests compile (no COMPILE_FAIL anywhere):                 │
+  │   fix exec-failing tests AND quality-issue tests simultaneously.   │
+  │   Per-test priority still governs WHAT to fix per test.            │
+  └────────────────────────────────────────────────────────────────────┘
+  This is implemented via:
+    _get_suite_fix_mode()  →  "compile_and_exec" | "all_issues" | "done"
+    _should_fix_test()     →  decides per test given the suite mode
 """
 from __future__ import annotations
 
@@ -312,7 +326,7 @@ def _strip_pkg(s: str, imports: str, package: str) -> str:
 
 
 # ════════════════════════════════════════════════════════════════════
-# Syntax validation (lightweight, no assert_fixer)
+# Syntax validation (lightweight)
 # ════════════════════════════════════════════════════════════════════
 
 def _run_syntax_validation(
@@ -439,50 +453,125 @@ def _ensure_package_first(code: str, pkg_decl: str) -> str:
 
 
 # ════════════════════════════════════════════════════════════════════
-# Suite-level fix priority logic
+# Suite-level fix mode — FIX Issue 3
 # ════════════════════════════════════════════════════════════════════
 
 def _get_suite_fix_mode(suite_score) -> str:
     """
-    Determine the suite-level fix mode based on current state.
+    Determine the suite-level fix mode.
 
-    Returns:
-      "compile"   — at least one test has COMPILE_FAIL → fix compile errors first
-      "exec"      — all compile, but at least one has exec error → fix exec errors
-      "quality"   — all compile AND all exec pass → fix coverage/bugrevealing/redundancy
-      "done"      — no issues
+    FIX Issue 3 — New two-phase logic:
+
+    Phase A ("compile_and_exec"):
+      Triggered when ANY test still has COMPILE_FAIL.
+      In this phase we fix BOTH compile-failing tests AND exec-failing tests.
+      Quality-only tests (cov/bug-revealing/redundancy) are skipped.
+
+    Phase B ("all_issues"):
+      Triggered only when ALL tests compile successfully.
+      In this phase we fix exec-failing tests AND quality-issue tests together.
+      Per-test priority still governs WHAT to fix inside each test.
+
+    "done":
+      No issues remain.
     """
-    if not suite_score.all_compile_pass:
-        return "compile"
-    if suite_score.exec_pass_count < suite_score.n_tests:
-        return "exec"
-    if suite_score.problem_tests:
-        return "quality"
+    has_compile_fail = bool(suite_score.problem_tests.get("COMPILE_FAIL"))
+    has_exec_fail    = (
+        bool(suite_score.problem_tests.get("EXEC_FAIL")) or
+        bool(suite_score.problem_tests.get("EXEC_TIMEOUT"))
+    )
+    has_quality_only = any(
+        suite_score.problem_tests.get(k)
+        for k in ("NOT_BUG_REVEALING", "LOW_COVERAGE",
+                  "LOW_LINE_COV", "LOW_BRANCH_COV", "HIGH_REDUNDANCY")
+    )
+
+    if has_compile_fail:
+        # Phase A: fix compile failures + exec failures simultaneously
+        # (but NOT quality-only issues)
+        return "compile_and_exec"
+
+    if has_exec_fail or has_quality_only:
+        # Phase B: all tests compile; fix everything remaining
+        return "all_issues"
+
     return "done"
 
 
 def _should_fix_test(tc_name: str, issues: List[str], suite_fix_mode: str) -> bool:
     """
-    Decide whether to fix this test given the current suite mode.
+    Decide whether this test should be fixed in the current suite mode.
 
-    compile mode: only fix tests with COMPILE_FAIL
-    exec mode:    only fix tests with EXEC_FAIL or EXEC_TIMEOUT
-    quality mode: fix tests with any issue (coverage, bug-revealing, redundancy)
+    compile_and_exec mode:
+      Fix a test if it has COMPILE_FAIL OR EXEC_FAIL/EXEC_TIMEOUT.
+      Skip quality-only tests.
+
+    all_issues mode:
+      Fix a test if it has ANY issue (compile already resolved, so this
+      covers exec failures and quality issues together).
+
+    done:
+      Nothing to fix.
     """
     if not issues:
         return False
-    if suite_fix_mode == "compile":
-        return "COMPILE_FAIL" in issues
-    if suite_fix_mode == "exec":
-        return "EXEC_FAIL" in issues or "EXEC_TIMEOUT" in issues
-    if suite_fix_mode == "quality":
+
+    if suite_fix_mode == "compile_and_exec":
+        # Fix compile AND exec failures; ignore quality-only tests
+        compile_exec_issues = {"COMPILE_FAIL", "EXEC_FAIL", "EXEC_TIMEOUT"}
+        return any(i in compile_exec_issues for i in issues)
+
+    if suite_fix_mode == "all_issues":
+        # Fix everything (all tests now compile, so exec+quality together)
         return True
+
     return False
 
 
 # ════════════════════════════════════════════════════════════════════
-# build_fix_messages — simplified ChatUniTest style
+# build_fix_messages — FIX Issue 2: per-test single-priority fix context
 # ════════════════════════════════════════════════════════════════════
+
+def _select_fix_flags_for_test(issues: List[str], cfg) -> dict:
+    """
+    FIX Issue 2: Given a test's full issue list, determine which fix-context
+    blocks to enable in the prompt.
+
+    Rule: Only enable the block corresponding to the HIGHEST-PRIORITY issue.
+    Lower-priority issues are suppressed so the LLM focuses on one thing.
+
+    Priority order (from scoring.py):
+      COMPILE_FAIL (0) > EXEC_FAIL/EXEC_TIMEOUT (1) >
+      NOT_BUG_REVEALING (2) > LOW_COVERAGE (3) > HIGH_REDUNDANCY (4)
+
+    Returns a dict of use_* flags.
+    """
+    top_issues = issues_at_priority_level(issues)  # only the highest-priority group
+
+    # Determine which single block to enable
+    has_compile = any(i == "COMPILE_FAIL" for i in top_issues)
+    has_exec    = any(i in ("EXEC_FAIL", "EXEC_TIMEOUT") for i in top_issues)
+    has_bug     = any(i == "NOT_BUG_REVEALING" for i in top_issues)
+    has_cov     = any(i in ("LOW_COVERAGE", "LOW_LINE_COV", "LOW_BRANCH_COV") for i in top_issues)
+    has_redun   = any(i == "HIGH_REDUNDANCY" for i in top_issues)
+
+    # Enable compile+exec context simultaneously (they're at different priorities,
+    # so only one will be true here, but guard with cfg flags anyway)
+    use_compile_exec = (has_compile or has_exec) and cfg.use_compile_exec
+    # Coverage context only when top issue IS coverage (not compile/exec/bug)
+    use_coverage     = has_cov and (not has_compile) and (not has_exec) and cfg.use_coverage
+    # Bug-revealing only when top issue IS bug-revealing
+    use_bug_reveal   = has_bug and (not has_compile) and (not has_exec) and cfg.use_bug_revealing
+    # Redundancy only when top issue IS redundancy (lowest priority)
+    use_redundancy   = has_redun and (not has_compile) and (not has_exec) and (not has_bug) and (not has_cov) and cfg.use_redundancy
+
+    return {
+        "use_compile_exec":  use_compile_exec,
+        "use_coverage":      use_coverage,
+        "use_bug_revealing": use_bug_reveal,
+        "use_redundancy":    use_redundancy,
+    }
+
 
 def build_fix_messages(
     test_name: str,
@@ -496,17 +585,16 @@ def build_fix_messages(
     suite_summary: str,
     prev_unchanged: bool = False,
     diag=None,
-    suite_fix_mode: str = "compile",
+    suite_fix_mode: str = "compile_and_exec",
     cfg=None,
     issues: List[str] = None,
 ) -> List[Dict]:
     """
     Build fix messages for a single test file.
 
-    The context injected depends on the suite_fix_mode:
-    - compile: inject compile errors only
-    - exec:    inject exec errors only
-    - quality: inject coverage/bug-revealing info + Refiner instructions
+    FIX Issue 2: The context injected into the prompt is now determined by
+    the per-test HIGHEST-PRIORITY issue only, via _select_fix_flags_for_test().
+    This prevents the template from rendering multiple conflicting fix sections.
     """
     if cfg is None:
         cfg = global_ablation_config()
@@ -515,20 +603,27 @@ def build_fix_messages(
 
     method_code = ctx_d1.get("information", ctx_d3.get("full_fm", ""))
 
-    # Compile errors
+    # Raw diagnostic data
     compile_ok     = getattr(diag, 'compile_ok', True) if diag else True
     exec_ok        = getattr(diag, 'exec_ok', True)    if diag else True
     compile_errors = list(getattr(diag, 'compile_errors', []))[:30] if diag else []
     exec_errors    = list(getattr(diag, 'exec_errors', []))[:30]    if diag else []
 
-    # Coverage info — only in quality mode
+    # ── FIX Issue 2: derive use_* flags from per-test top priority ──
+    fix_flags = _select_fix_flags_for_test(issues, cfg)
+    use_compile_exec = fix_flags["use_compile_exec"]
+    use_coverage     = fix_flags["use_coverage"]
+    use_bug_reveal   = fix_flags["use_bug_revealing"]
+    use_redundancy   = fix_flags["use_redundancy"]
+
+    # Coverage info — only populated when use_coverage is True
     focal_line_rate    = None
     focal_branch_rate  = None
     focal_line_covered = None
     focal_line_total   = None
     missed_methods     = []
     partial_methods    = []
-    if suite_fix_mode == "quality" and diag:
+    if use_coverage and diag:
         focal_line_rate    = getattr(diag, 'focal_line_rate',    None)
         focal_branch_rate  = getattr(diag, 'focal_branch_rate',  None)
         focal_line_covered = getattr(diag, 'focal_line_covered', None)
@@ -540,11 +635,6 @@ def build_fix_messages(
         "\n\n⚠️ CRITICAL: Your previous output was IDENTICAL to the input. "
         "You MUST make substantial changes this time."
         if prev_unchanged else "")
-
-    use_compile = suite_fix_mode in ("compile", "exec")
-    use_cov     = suite_fix_mode == "quality" and cfg.use_coverage
-    use_bug     = suite_fix_mode == "quality" and cfg.use_bug_revealing
-    use_redun   = suite_fix_mode == "quality" and cfg.use_redundancy
 
     context = {
         "class_name":           class_name,
@@ -561,14 +651,17 @@ def build_fix_messages(
         "instructions_summary": "\n".join(
             f"  {i+1}. {instr}" for i, instr in enumerate(instructions[:4])
         ),
-        "use_compile_exec":  use_compile,
-        "use_coverage":      use_cov,
-        "use_bug_revealing": use_bug,
-        "use_redundancy":    use_redun,
+        # ── FIX Issue 2: only the highest-priority block is True ──
+        "use_compile_exec":  use_compile_exec,
+        "use_coverage":      use_coverage,
+        "use_bug_revealing": use_bug_reveal,
+        "use_redundancy":    use_redundancy,
+        # raw compile/exec data (template guards these with use_compile_exec)
         "compile_ok":     compile_ok,
         "exec_ok":        exec_ok,
-        "compile_errors": compile_errors,
-        "exec_errors":    exec_errors,
+        "compile_errors": compile_errors if use_compile_exec else [],
+        "exec_errors":    exec_errors    if use_compile_exec else [],
+        # coverage data (template guards these with use_coverage)
         "focal_line_rate":    focal_line_rate,
         "focal_branch_rate":  focal_branch_rate,
         "focal_line_covered": focal_line_covered,
@@ -579,7 +672,6 @@ def build_fix_messages(
         "partial_methods":    partial_methods,
         "auto_fix_hints":     [],
         "error_summary":      "",
-        # Simplified mode hint for the template
         "suite_fix_mode":     suite_fix_mode,
         "branch_hint_text":   "",
         "count_rationale":    "",
@@ -605,15 +697,32 @@ def build_fix_messages(
                 "Previous output was identical. Rewrite the problematic sections completely."
             )
 
-        if suite_fix_mode == "compile":
+        # ── FIX Issue 2: mode hint reflects per-test top priority ──
+        top_issues = issues_at_priority_level(issues)
+        if any(i == "COMPILE_FAIL" for i in top_issues):
             suffix_parts.append(
                 "\n\n⚠️ COMPILE FIX MODE: Fix ONLY the compile errors shown above. "
                 "Do NOT change test logic or add new @Test methods."
             )
-        elif suite_fix_mode == "exec":
+        elif any(i in ("EXEC_FAIL", "EXEC_TIMEOUT") for i in top_issues):
             suffix_parts.append(
                 "\n\n⚠️ EXEC FIX MODE: Fix ONLY the runtime errors shown above. "
                 "Keep the same test structure, just correct the failing assertions/setup."
+            )
+        elif any(i in ("LOW_COVERAGE", "LOW_LINE_COV", "LOW_BRANCH_COV") for i in top_issues):
+            suffix_parts.append(
+                "\n\n⚠️ COVERAGE FIX MODE: Improve focal method line/branch coverage. "
+                "Add @Test methods targeting uncovered branches."
+            )
+        elif any(i == "NOT_BUG_REVEALING" for i in top_issues):
+            suffix_parts.append(
+                "\n\n⚠️ BUG-REVEALING FIX MODE: Strengthen assertions to detect the bug. "
+                "Replace weak assertions (assertNotNull) with precise assertEquals calls."
+            )
+        elif any(i == "HIGH_REDUNDANCY" for i in top_issues):
+            suffix_parts.append(
+                "\n\n⚠️ REDUNDANCY FIX MODE: Rewrite to target a different code path. "
+                "The test is structurally too similar to another test in the suite."
             )
 
         msgs[-1]["content"] += "".join(suffix_parts)
@@ -783,10 +892,17 @@ def focal_method_pipeline(
         if refine_result.suite_score:
             _print_suite_score(refine_result.suite_score, tag=f"Round {r}")
 
-        # Determine suite-level fix mode
-        suite_score  = refine_result.suite_score
-        suite_mode   = _get_suite_fix_mode(suite_score) if suite_score else "done"
-        print(f"  🎯 Suite fix mode: {Fore.CYAN}{suite_mode}{Style.RESET_ALL}", flush=True)
+        # ── FIX Issue 3: new suite fix mode ──────────────────────
+        suite_score = refine_result.suite_score
+        suite_mode  = _get_suite_fix_mode(suite_score) if suite_score else "done"
+
+        # Human-readable description of the mode
+        mode_desc = {
+            "compile_and_exec": "编译+执行同步修复 (compile_and_exec)",
+            "all_issues":       "全量修复: 执行失败+质量问题 (all_issues)",
+            "done":             "无需修复 (done)",
+        }.get(suite_mode, suite_mode)
+        print(f"  🎯 Suite fix mode: {Fore.CYAN}{mode_desc}{Style.RESET_ALL}", flush=True)
 
         problematic = [n for n, s in refine_result.test_scores.items() if s.issues]
         if problematic:
@@ -812,28 +928,25 @@ def focal_method_pipeline(
                                 {}, refine_result.suite_summary)
             break
 
-        # ── Fix loop: suite-level priority ───────────────────────
+        # ── Fix loop ─────────────────────────────────────────────
         fix_results = {"ok": [], "unchanged": [], "no_code": [], "fail": []}
 
-        # Determine which tests to fix based on suite_mode
-        tests_to_fix = {
-            tc: refine_result.test_scores[tc].issues
-            for tc in refine_result.instructions
-            if tc in current_codes
-               and _should_fix_test(tc, refine_result.test_scores.get(tc, type('', (), {'issues': []})()).issues, suite_mode)
-        }
-
-        # If Refiner gave no instructions for fixable tests, use rule-based hints
-        for tc_name in list(current_codes.keys()):
-            score = refine_result.test_scores.get(tc_name)
-            if not score:
+        # ── FIX Issue 3: determine which tests to fix based on suite_mode ──
+        # tests_to_fix: {tc_name: issues_list}
+        tests_to_fix: Dict[str, List[str]] = {}
+        for tc_name, score in refine_result.test_scores.items():
+            if tc_name not in current_codes:
                 continue
             if not _should_fix_test(tc_name, score.issues, suite_mode):
+                # Skip quality-only tests when suite is still in compile_and_exec mode
                 continue
-            if tc_name not in tests_to_fix:
-                tests_to_fix[tc_name] = score.issues
+            tests_to_fix[tc_name] = score.issues
 
-        print(f"\n  🔧 Fix mode [{suite_mode}]: targeting {len(tests_to_fix)} tests", flush=True)
+        print(f"\n  🔧 Fix mode [{suite_mode}]: targeting {len(tests_to_fix)}/{len(current_codes)} tests", flush=True)
+        if tests_to_fix:
+            for tc, iss in tests_to_fix.items():
+                top = issues_at_priority_level(iss)
+                print(f"     • {tc}: top_issue={top}  all_issues={iss}", flush=True)
 
         for tc_name, issues in tests_to_fix.items():
             original_code = current_codes[tc_name]
@@ -849,6 +962,7 @@ def focal_method_pipeline(
             fix_dir = os.path.join(round_log_dir, f"fix_{tc_name}")
             os.makedirs(fix_dir, exist_ok=True)
 
+            # ── FIX Issue 2: build_fix_messages now uses per-test priority ──
             fix_msgs = build_fix_messages(
                 test_name=tc_name,
                 current_code=original_code,
@@ -866,7 +980,8 @@ def focal_method_pipeline(
                 issues=issues,
             )
 
-            print(f"\n    [{_ts()}] Fix {tc_name} | mode={suite_mode} | issues={issues}", flush=True)
+            top_issues = issues_at_priority_level(issues)
+            print(f"\n    [{_ts()}] Fix {tc_name} | top_priority={top_issues} | suite_mode={suite_mode}", flush=True)
             try:
                 prompt_json_path = os.path.join(fix_dir, "fix_prompt.json")
                 with open(prompt_json_path, "w", encoding="utf-8") as pf:
