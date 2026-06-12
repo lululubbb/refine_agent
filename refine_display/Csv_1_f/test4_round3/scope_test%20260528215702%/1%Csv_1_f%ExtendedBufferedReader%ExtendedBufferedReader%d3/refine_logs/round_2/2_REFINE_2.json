@@ -1,0 +1,26 @@
+{
+  "raw": "{\n  \"suite_summary\": \"The test suite for the ExtendedBufferedReader class has a 100% compile pass rate but only a 25% execution pass rate, indicating significant runtime issues. Three test files are failing during execution, while one test file is not revealing any bugs despite having complete coverage.\",\n  \"test_instructions\": {\n    \"ExtendedBufferedReader_1_1Test\": [\n      \"Fix the assertion in testReadAgain: expected: < -1 > but was: < 100 >. Trace the focal method logic carefully; assert the actual return value.\"\n    ],\n    \"ExtendedBufferedReader_1_2Test\": [\n      \"Fix the assertion in testReadWithBuffer: expected: <Buffered Re> but was: <Buffered R>. Trace the focal method logic carefully; assert the actual return value.\"\n    ],\n    \"ExtendedBufferedReader_1_3Test\": [\n      \"Fix the assertion in testRead_AfterEndOfStream: expected: < -1 > but was: < 100 >. Trace the focal method logic carefully; assert the actual return value.\"\n    ],\n    \"ExtendedBufferedReader_1_4Test\": [\n      \"Add tests for boundary values and exception-throwing paths to cover missed lines/branches, specifically for readAgain() and read().\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "The test suite for the ExtendedBufferedReader class has a 100% compile pass rate but only a 25% execution pass rate, indicating significant runtime issues. Three test files are failing during execution, while one test file is not revealing any bugs despite having complete coverage.",
+    "test_instructions": {
+      "ExtendedBufferedReader_1_1Test": [
+        "Fix the assertion in testReadAgain: expected: < -1 > but was: < 100 >. Trace the focal method logic carefully; assert the actual return value."
+      ],
+      "ExtendedBufferedReader_1_2Test": [
+        "Fix the assertion in testReadWithBuffer: expected: <Buffered Re> but was: <Buffered R>. Trace the focal method logic carefully; assert the actual return value."
+      ],
+      "ExtendedBufferedReader_1_3Test": [
+        "Fix the assertion in testRead_AfterEndOfStream: expected: < -1 > but was: < 100 >. Trace the focal method logic carefully; assert the actual return value."
+      ],
+      "ExtendedBufferedReader_1_4Test": [
+        "Add tests for boundary values and exception-throwing paths to cover missed lines/branches, specifically for readAgain() and read()."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 7283,
+    "completion_tokens": 272,
+    "total_tokens": 7555,
+    "llm_elapsed_time_seconds": 6.602
+  }
+}

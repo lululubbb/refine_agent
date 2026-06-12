@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport org.mockito.Mockito;\n\nimport java.io.IOException;\nimport java.io.Reader;\nimport java.io.StringReader;\n\nclass ExtendedBufferedReaderTest {\n\n    @Test\n    void testLookAhead_normalCase() throws Exception {\n        String input = \"Hello\";\n        Reader stringReader = new StringReader(input);\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(stringReader);\n\n        int result = invokeLookAhead(reader);\n\n        Assertions.assertEquals('H', result);\n    }\n\n    @Test\n    void testLookAhead_endOfStream() throws Exception {\n        String input = \"\";\n        Reader stringReader = new StringReader(input);\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(stringReader);\n\n        int result = invokeLookAhead(reader);\n\n        Assertions.assertEquals(ExtendedBufferedReader.END_OF_STREAM, result);\n    }\n\n    @Test\n    void testLookAhead_exceptionDuringRead() throws Exception {\n        Reader mockReader = Mockito.mock(Reader.class);\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(mockReader);\n\n        Mockito.when(mockReader.read()).thenThrow(new IOException(\"Read error\"));\n\n        Assertions.assertThrows(IOException.class, () -> {\n            invokeLookAhead(reader);\n        });\n    }\n\n    private int invokeLookAhead(ExtendedBufferedReader reader) throws Exception {\n        var method = ExtendedBufferedReader.class.getDeclaredMethod(\"lookAhead\");\n        method.setAccessible(true);\n        return (int) method.invoke(reader);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 567,
+    "completion_tokens": 299,
+    "total_tokens": 866,
+    "llm_elapsed_time_seconds": 6.11
+  }
+}

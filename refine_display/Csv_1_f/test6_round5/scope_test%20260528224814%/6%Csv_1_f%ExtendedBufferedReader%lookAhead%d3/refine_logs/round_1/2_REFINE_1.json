@@ -1,0 +1,20 @@
+{
+  "raw": "{\n  \"suite_summary\": \"The test suite for the `lookAhead` method in `ExtendedBufferedReader` has a 100% compile pass rate but faces execution timeouts in two test files. All tests achieve full line coverage, but none reveal bugs. The redundancy among tests indicates potential for optimization.\",\n  \"test_instructions\": {\n    \"ExtendedBufferedReader_6_4Test\": [\n      \"Fix the execution timeout issue: 'Exceeded TIMEOUT limit'. Consider optimizing the test logic or increasing the timeout duration.\"\n    ],\n    \"ExtendedBufferedReader_6_5Test\": [\n      \"Fix the execution timeout issue: 'Exceeded TIMEOUT limit'. Consider optimizing the test logic or increasing the timeout duration.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "The test suite for the `lookAhead` method in `ExtendedBufferedReader` has a 100% compile pass rate but faces execution timeouts in two test files. All tests achieve full line coverage, but none reveal bugs. The redundancy among tests indicates potential for optimization.",
+    "test_instructions": {
+      "ExtendedBufferedReader_6_4Test": [
+        "Fix the execution timeout issue: 'Exceeded TIMEOUT limit'. Consider optimizing the test logic or increasing the timeout duration."
+      ],
+      "ExtendedBufferedReader_6_5Test": [
+        "Fix the execution timeout issue: 'Exceeded TIMEOUT limit'. Consider optimizing the test logic or increasing the timeout duration."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 3092,
+    "completion_tokens": 151,
+    "total_tokens": 3243,
+    "llm_elapsed_time_seconds": 3.967
+  }
+}

@@ -1,0 +1,13 @@
+project,target_class,test_class,compile_status,exec_status,exec_timeout,jacoco_exec_size,compile_score,exec_score
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_1Test,pass,fail,False,32068,1.0,0.0
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_2Test,pass,fail,False,32179,1.0,0.0
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_3Test,pass,pass,False,31582,1.0,1.0
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_4Test,pass,pass,False,31691,1.0,1.0
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_1Test,pass,fail,False,32067,1.0,0.0
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_2Test,pass,fail,False,32178,1.0,0.0
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_3Test,pass,fail,False,32020,1.0,0.0
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_4Test,pass,pass,False,31584,1.0,1.0
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_1Test,pass,fail,False,32068,1.0,0.0
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_2Test,pass,fail,False,32179,1.0,0.0
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_3Test,pass,pass,False,31581,1.0,1.0
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_4Test,pass,fail,False,32025,1.0,0.0

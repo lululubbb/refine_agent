@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport static org.junit.jupiter.api.Assertions.assertEquals;\n\nimport java.io.IOException;\nimport java.io.Reader;\nimport java.io.StringReader;\n\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\n\nclass ExtendedBufferedReader_2_2Test {\n\n    private ExtendedBufferedReader reader;\n\n    @BeforeEach\n    void setUp() {\n        String input = \"Line 1\\nLine 2\\rLine 3\\n\";\n        Reader stringReader = new StringReader(input);\n        reader = new ExtendedBufferedReader(stringReader);\n    }\n\n    @Test\n    void testRead_normalCase() throws Exception {\n        assertEquals('L', reader.read());\n        assertEquals('i', reader.read());\n        assertEquals('n', reader.read());\n        assertEquals('e', reader.read());\n        assertEquals(' ', reader.read());\n        assertEquals('1', reader.read());\n        assertEquals('\\n', reader.read());\n    }\n\n    @Test\n    void testRead_lineBreaks() throws Exception {\n        reader.read(); // Read until the end of Line 1\n        reader.read(); // Read Line break\n        assertEquals('L', reader.read()); // Start of Line 2\n        assertEquals('i', reader.read());\n        assertEquals('n', reader.read());\n        assertEquals('e', reader.read());\n        assertEquals(' ', reader.read());\n        assertEquals('2', reader.read());\n        assertEquals('\\r', reader.read());\n        assertEquals('L', reader.read()); // Start of Line 3\n        assertEquals('i', reader.read()); // Read 'i'\n        assertEquals('n', reader.read()); // Read 'n'\n        assertEquals('e', reader.read()); // Read 'e'\n        assertEquals(' ', reader.read()); // Read ' '\n        assertEquals('3', reader.read()); // Read '3'\n        assertEquals('\\n', reader.read()); // Read end of Line 3\n    }\n\n    @Test\n    void testRead_endOfStream() throws Exception {\n        while (reader.read() != ExtendedBufferedReader.END_OF_STREAM) {\n            // Read until end of stream\n        }\n        assertEquals(ExtendedBufferedReader.END_OF_STREAM, reader.read());\n    }\n\n    @Test\n    void testRead_invalidCharacter() throws Exception {\n        Reader stringReader = new StringReader(\"\\r\\n\");\n        reader = new ExtendedBufferedReader(stringReader);\n        assertEquals('\\r', reader.read());\n        assertEquals('\\n', reader.read());\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1261,
+    "completion_tokens": 521,
+    "total_tokens": 1782,
+    "llm_elapsed_time_seconds": 7.945
+  }
+}

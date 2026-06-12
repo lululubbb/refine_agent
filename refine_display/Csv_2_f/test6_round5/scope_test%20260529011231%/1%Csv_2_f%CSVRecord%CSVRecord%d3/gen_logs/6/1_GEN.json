@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Method;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecordTest {\n\n    @Test\n    public void testCSVRecord_normalCase() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"col1\", 0);\n        mapping.put(\"col2\", 1);\n        CSVRecord record = new CSVRecord(values, mapping, \"This is a comment\", 1L);\n\n        Assertions.assertEquals(\"value1\", record.get(0));\n        Assertions.assertEquals(\"value2\", record.get(1));\n        Assertions.assertEquals(\"value3\", record.get(2));\n        Assertions.assertEquals(\"This is a comment\", record.getComment());\n        Assertions.assertEquals(1L, record.getRecordNumber());\n        Assertions.assertEquals(3, record.size());\n    }\n\n    @Test\n    public void testCSVRecord_emptyValues() throws Exception {\n        String[] values = null;\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, \"No values\", 2L);\n\n        Assertions.assertEquals(0, record.size());\n        Assertions.assertEquals(\"\", record.get(0)); // Should return empty string\n    }\n\n    @Test\n    public void testCSVRecord_withNullMapping() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        CSVRecord record = new CSVRecord(values, null, \"No mapping\", 3L);\n\n        Assertions.assertEquals(2, record.size());\n        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> record.get(2));\n    }\n\n    @Test\n    public void testCSVRecord_isMapped() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"col1\", 0);\n        CSVRecord record = new CSVRecord(values, mapping, null, 4L);\n\n        Method isMappedMethod = CSVRecord.class.getDeclaredMethod(\"isMapped\", String.class);\n        isMappedMethod.setAccessible(true);\n        \n        boolean result1 = (boolean) isMappedMethod.invoke(record, \"col1\");\n        boolean result2 = (boolean) isMappedMethod.invoke(record, \"col2\");\n\n        Assertions.assertTrue(result1);\n        Assertions.assertFalse(result2);\n    }\n\n    @Test\n    public void testCSVRecord_isConsistent() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"col1\", 0);\n        CSVRecord record = new CSVRecord(values, mapping, null, 5L);\n\n        Method isConsistentMethod = CSVRecord.class.getDeclaredMethod(\"isConsistent\");\n        isConsistentMethod.setAccessible(true);\n        \n        boolean isConsistent = (boolean) isConsistentMethod.invoke(record);\n        Assertions.assertTrue(isConsistent);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 645,
+    "completion_tokens": 640,
+    "total_tokens": 1285,
+    "llm_elapsed_time_seconds": 12.221
+  }
+}

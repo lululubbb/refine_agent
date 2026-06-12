@@ -1,0 +1,52 @@
+{
+  "ExtendedBufferedReader_4_1Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "=> org.opentest4j.AssertionFailedError: expected: <40> but was: <34>",
+      "Failures (1):",
+      "JUnit Jupiter:ExtendedBufferedReader_4_1Test:testRead_normalCase()",
+      "MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_4_1Test', methodName = 'testRead_normalCase', methodParameterTypes = '']",
+      "org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)",
+      "org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)",
+      "org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)",
+      "org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)",
+      "org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)",
+      "org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:528)",
+      "org.apache.commons.csv.ExtendedBufferedReader_4_1Test.testRead_normalCase(ExtendedBufferedReader_4_1Test.java:21)",
+      "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)",
+      "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)",
+      "java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)",
+      "[...]",
+      "Test run finished after 164 ms",
+      "[         4 containers found      ]",
+      "[         0 containers skipped    ]",
+      "[         4 containers started    ]",
+      "[         0 containers aborted    ]"
+    ],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": 93.75,
+    "focal_line_covered": 15,
+    "focal_line_total": 15,
+    "missed_methods": [],
+    "partial_methods": []
+  },
+  "ExtendedBufferedReader_4_2Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "=> org.opentest4j.AssertionFailedError: expected: <-1> but was: <2>",
+      "=> org.opentest4j.AssertionFailedError: expected: <3> but was: <2>",
+      "=> org.opentest4j.AssertionFailedError: expected: <Line 1",
+      "> but was: <Line 1"
+    ],
+    "focal_line_rate": 86.67,
+    "focal_branch_rate": 75.0,
+    "focal_line_covered": 13,
+    "focal_line_total": 15,
+    "missed_methods": [],
+    "partial_methods": []
+  }
+}

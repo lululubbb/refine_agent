@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\nimport org.mockito.Mockito;\n\nimport java.io.StringReader;\nimport java.lang.reflect.Field;\n\nclass ExtendedBufferedReaderTest {\n\n    private ExtendedBufferedReader extendedBufferedReader;\n\n    @BeforeEach\n    void setUp() {\n        extendedBufferedReader = new ExtendedBufferedReader(new StringReader(\"line1\\nline2\\nline3\"));\n    }\n\n    @Test\n    void testgetLineNumber_initialState() throws Exception {\n        int lineNumber = invokeGetLineNumber();\n        Assertions.assertEquals(0, lineNumber, \"Initial line number should be 0\");\n    }\n\n    @Test\n    void testgetLineNumber_afterReadingLines() throws Exception {\n        extendedBufferedReader.readLine(); // Read first line\n        int lineNumber = invokeGetLineNumber();\n        Assertions.assertEquals(0, lineNumber, \"Line number should still be 0 after reading first line\");\n        \n        extendedBufferedReader.readLine(); // Read second line\n        lineNumber = invokeGetLineNumber();\n        Assertions.assertEquals(0, lineNumber, \"Line number should still be 0 after reading second line\");\n        \n        // Simulate incrementing lineCounter manually for testing\n        incrementLineCounter(2);\n        lineNumber = invokeGetLineNumber();\n        Assertions.assertEquals(2, lineNumber, \"Line number should be 2 after incrementing lineCounter\");\n    }\n\n    private int invokeGetLineNumber() throws Exception {\n        Field field = ExtendedBufferedReader.class.getDeclaredField(\"lineCounter\");\n        field.setAccessible(true);\n        return (int) field.get(extendedBufferedReader);\n    }\n\n    private void incrementLineCounter(int increment) throws Exception {\n        Field field = ExtendedBufferedReader.class.getDeclaredField(\"lineCounter\");\n        field.setAccessible(true);\n        int currentValue = (int) field.get(extendedBufferedReader);\n        field.set(extendedBufferedReader, currentValue + increment);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 551,
+    "completion_tokens": 408,
+    "total_tokens": 959,
+    "llm_elapsed_time_seconds": 6.591
+  }
+}

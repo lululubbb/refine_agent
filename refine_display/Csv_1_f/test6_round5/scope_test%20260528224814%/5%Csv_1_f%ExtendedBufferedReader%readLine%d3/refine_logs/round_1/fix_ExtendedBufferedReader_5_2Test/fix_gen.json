@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.io.StringReader;\nimport java.lang.reflect.Method;\n\nclass ExtendedBufferedReader_5_2Test {\n\n    @Test\n    public void testReadLine_normalCase() throws Exception {\n        String input = \"Hello World\\nThis is a test\\n\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n\n        String line1 = reader.readLine();\n        Assertions.assertEquals(\"Hello World\", line1);\n        Assertions.assertEquals(1, invokeLineCounter(reader));\n\n        String line2 = reader.readLine();\n        Assertions.assertEquals(\"This is a test\", line2);\n        Assertions.assertEquals(2, invokeLineCounter(reader));\n    }\n\n    @Test\n    public void testReadLine_emptyLine() throws Exception {\n        String input = \"Hello World\\n\\nThis is a test\\n\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n\n        reader.readLine(); // Read first line\n        String emptyLine = reader.readLine(); // Read empty line\n        Assertions.assertEquals(\"\", emptyLine);\n        Assertions.assertEquals(2, invokeLineCounter(reader));\n    }\n\n    @Test\n    public void testReadLine_endOfStream() throws Exception {\n        String input = \"Hello World\\nThis is a test\\n\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n\n        reader.readLine(); // Read first line\n        reader.readLine(); // Read second line\n        String end = reader.readLine(); // Read end of stream\n        Assertions.assertNull(end);\n        Assertions.assertEquals(2, invokeLineCounter(reader));\n        Assertions.assertEquals(ExtendedBufferedReader.END_OF_STREAM, invokeLastChar(reader));\n    }\n\n    @Test\n    public void testReadLine_singleCharacter() throws Exception {\n        String input = \"A\\n\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n\n        String line = reader.readLine();\n        Assertions.assertEquals(\"A\", line);\n        Assertions.assertEquals(1, invokeLineCounter(reader));\n        Assertions.assertEquals('A', invokeLastChar(reader));\n    }\n\n    private int invokeLineCounter(ExtendedBufferedReader reader) throws Exception {\n        Method method = ExtendedBufferedReader.class.getDeclaredMethod(\"getLineNumber\");\n        method.setAccessible(true);\n        return (int) method.invoke(reader);\n    }\n\n    private int invokeLastChar(ExtendedBufferedReader reader) throws Exception {\n        java.lang.reflect.Field field = ExtendedBufferedReader.class.getDeclaredField(\"lastChar\");\n        field.setAccessible(true);\n        return (int) field.get(reader);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1056,
+    "completion_tokens": 550,
+    "total_tokens": 1606,
+    "llm_elapsed_time_seconds": 9.071
+  }
+}

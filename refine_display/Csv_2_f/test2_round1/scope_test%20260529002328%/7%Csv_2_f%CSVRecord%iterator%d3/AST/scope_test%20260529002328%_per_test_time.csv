@@ -1,0 +1,10 @@
+project,version,test_case,ast_generation_time_nanosec
+scope_test%20260529002328%,7%Csv_2_f%CSVRecord%iterator%d3,CSVRecord_7_2Test.testIterator_withValues,16423098
+scope_test%20260529002328%,7%Csv_2_f%CSVRecord%iterator%d3,CSVRecord_7_2Test.testIterator_withEmptyValues,17022157
+scope_test%20260529002328%,7%Csv_2_f%CSVRecord%iterator%d3,CSVRecord_7_2Test.testIterator_withNullValues,19124806
+scope_test%20260529002328%,7%Csv_2_f%CSVRecord%iterator%d3,CSVRecord_7_2Test.testIterator_withSingleValue,19708007
+scope_test%20260529002328%,7%Csv_2_f%CSVRecord%iterator%d3,CSVRecord_7_2Test,20992627
+scope_test%20260529002328%,7%Csv_2_f%CSVRecord%iterator%d3,CSVRecord_7_1Test.testiterator_normalCase,10946183
+scope_test%20260529002328%,7%Csv_2_f%CSVRecord%iterator%d3,CSVRecord_7_1Test.testiterator_emptyArray,11438772
+scope_test%20260529002328%,7%Csv_2_f%CSVRecord%iterator%d3,CSVRecord_7_1Test.testiterator_singleElement,11826392
+scope_test%20260529002328%,7%Csv_2_f%CSVRecord%iterator%d3,CSVRecord_7_1Test,12806016

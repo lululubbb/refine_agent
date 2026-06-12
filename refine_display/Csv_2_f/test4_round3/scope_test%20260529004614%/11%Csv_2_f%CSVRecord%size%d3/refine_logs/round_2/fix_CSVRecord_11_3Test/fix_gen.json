@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport java.lang.reflect.Constructor;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_11_3Test {\n\n    @Test\n    public void testSize_emptyArray() throws Exception {\n        String[] values = new String[0];\n        CSVRecord record = createCSVRecord(values, null, null, 0);\n        Assertions.assertEquals(0, record.size());\n    }\n\n    @Test\n    public void testSize_nonEmptyArray() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        CSVRecord record = createCSVRecord(values, null, null, 0);\n        Assertions.assertEquals(3, record.size());\n    }\n\n    @Test\n    public void testSize_singleElementArray() throws Exception {\n        String[] values = {\"singleValue\"};\n        CSVRecord record = createCSVRecord(values, null, null, 0);\n        Assertions.assertEquals(1, record.size());\n    }\n\n    @Test\n    public void testSize_boundaryValue() throws Exception {\n        // Avoid creating an array with size Integer.MAX_VALUE\n        String[] values = new String[1000]; // Use a reasonable size for testing\n        CSVRecord record = createCSVRecord(values, null, null, 0);\n        Assertions.assertEquals(1000, record.size());\n    }\n\n    @Test\n    public void testSize_nullArray() throws Exception {\n        String[] values = null;\n        CSVRecord record = createCSVRecord(values, null, null, 0);\n        Assertions.assertEquals(0, record.size());\n    }\n\n    private CSVRecord createCSVRecord(String[] values, Map<String, Integer> mapping, String comment, long recordNumber) throws Exception {\n        Constructor<CSVRecord> constructor = CSVRecord.class.getDeclaredConstructor(String[].class, Map.class, String.class, long.class);\n        constructor.setAccessible(true);\n        return constructor.newInstance(values, mapping, comment, recordNumber);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1016,
+    "completion_tokens": 443,
+    "total_tokens": 1459,
+    "llm_elapsed_time_seconds": 9.951
+  }
+}

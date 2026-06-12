@@ -1,0 +1,250 @@
+bug_revealing log started: 2026-05-29T00:24:59.901949
+buggy=/home/chenlu/refine_test_gen_v5/defect4j_projects/Csv_2_b
+fixed=/home/chenlu/refine_test_gen_v5/defect4j_projects/Csv_2_f
+tests_dir=/home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test2_round1/scope_test%20260529002328%/2%Csv_2_f%CSVRecord%get%d3/test_cases
+
+Running org.apache.commons.csv.CSVRecord_2_1Test#testget_validIndex on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_2_1Test#testget_validIndex on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_2_1Test#testget_firstIndex on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_2_1Test#testget_firstIndex on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_2_1Test#testget_lastIndex on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_2_1Test#testget_lastIndex on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_2_1Test#testget_outOfBoundsLow on buggy...
+  -> fail
+Running org.apache.commons.csv.CSVRecord_2_1Test#testget_outOfBoundsLow on fixed...
+  -> fail
+---
+[2026-05-29T00:25:31.144389] buggy org.apache.commons.csv.CSVRecord_2_1Test#testget_outOfBoundsLow status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_2_1Test:testget_outOfBoundsLow()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_2_1Test', methodName = 'testget_outOfBoundsLow', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.ArrayIndexOutOfBoundsException> but was: <java.lang.reflect.InvocationTargetException>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+       org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)
+       org.apache.commons.csv.CSVRecord_2_1Test.testget_outOfBoundsLow(CSVRecord_2_1Test.java:46)
+       [...]
+     Caused by: java.lang.reflect.InvocationTargetException
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.apache.commons.csv.CSVRecord_2_1Test.invokeGetMethod(CSVRecord_2_1Test.java:57)
+       [...]
+     Caused by: java.lang.ArrayIndexOutOfBoundsException: Index -1 out of bounds for length 3
+       org.apache.commons.csv.CSVRecord.get(CSVRecord.java:64)
+       [...]
+
+Test run finished after 649 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+---
+[2026-05-29T00:25:31.144423] fixed org.apache.commons.csv.CSVRecord_2_1Test#testget_outOfBoundsLow status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_2_1Test:testget_outOfBoundsLow()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_2_1Test', methodName = 'testget_outOfBoundsLow', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.ArrayIndexOutOfBoundsException> but was: <java.lang.reflect.InvocationTargetException>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+       org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)
+       org.apache.commons.csv.CSVRecord_2_1Test.testget_outOfBoundsLow(CSVRecord_2_1Test.java:46)
+       [...]
+     Caused by: java.lang.reflect.InvocationTargetException
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.apache.commons.csv.CSVRecord_2_1Test.invokeGetMethod(CSVRecord_2_1Test.java:57)
+       [...]
+     Caused by: java.lang.ArrayIndexOutOfBoundsException: Index -1 out of bounds for length 3
+       org.apache.commons.csv.CSVRecord.get(CSVRecord.java:64)
+       [...]
+
+Test run finished after 569 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+Running org.apache.commons.csv.CSVRecord_2_1Test#testget_outOfBoundsHigh on buggy...
+  -> fail
+Running org.apache.commons.csv.CSVRecord_2_1Test#testget_outOfBoundsHigh on fixed...
+  -> fail
+---
+[2026-05-29T00:25:38.087917] buggy org.apache.commons.csv.CSVRecord_2_1Test#testget_outOfBoundsHigh status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_2_1Test:testget_outOfBoundsHigh()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_2_1Test', methodName = 'testget_outOfBoundsHigh', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.ArrayIndexOutOfBoundsException> but was: <java.lang.reflect.InvocationTargetException>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+       org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)
+       org.apache.commons.csv.CSVRecord_2_1Test.testget_outOfBoundsHigh(CSVRecord_2_1Test.java:51)
+       [...]
+     Caused by: java.lang.reflect.InvocationTargetException
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.apache.commons.csv.CSVRecord_2_1Test.invokeGetMethod(CSVRecord_2_1Test.java:57)
+       [...]
+     Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 3 out of bounds for length 3
+       org.apache.commons.csv.CSVRecord.get(CSVRecord.java:64)
+       [...]
+
+Test run finished after 359 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+---
+[2026-05-29T00:25:38.087955] fixed org.apache.commons.csv.CSVRecord_2_1Test#testget_outOfBoundsHigh status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_2_1Test:testget_outOfBoundsHigh()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_2_1Test', methodName = 'testget_outOfBoundsHigh', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.ArrayIndexOutOfBoundsException> but was: <java.lang.reflect.InvocationTargetException>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+       org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)
+       org.apache.commons.csv.CSVRecord_2_1Test.testget_outOfBoundsHigh(CSVRecord_2_1Test.java:51)
+       [...]
+     Caused by: java.lang.reflect.InvocationTargetException
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.apache.commons.csv.CSVRecord_2_1Test.invokeGetMethod(CSVRecord_2_1Test.java:57)
+       [...]
+     Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 3 out of bounds for length 3
+       org.apache.commons.csv.CSVRecord.get(CSVRecord.java:64)
+       [...]
+
+Test run finished after 414 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+Running org.apache.commons.csv.CSVRecord_2_2Test#testGet_validIndex on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_2_2Test#testGet_validIndex on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_2_2Test#testGet_indexOutOfBounds on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_2_2Test#testGet_indexOutOfBounds on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_2_2Test#testGet_negativeIndex on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_2_2Test#testGet_negativeIndex on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_2_2Test#testGet_emptyArray on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_2_2Test#testGet_emptyArray on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_2_2Test#testGet_singleElementArray on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_2_2Test#testGet_singleElementArray on fixed...
+  -> pass
+Class-level summary: /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test2_round1/scope_test%20260529002328%/2%Csv_2_f%CSVRecord%get%d3/Csv_2_CSVRecord_bugrevealing_class_level.csv
+Class-level CSV: /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test2_round1/scope_test%20260529002328%/2%Csv_2_f%CSVRecord%get%d3/Csv_2_CSVRecord_bugrevealing_class_level.csv
+@Test method-level stats: /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test2_round1/scope_test%20260529002328%/2%Csv_2_f%CSVRecord%get%d3/Csv_2_CSVRecord_bugrevealing_method_stats.csv
+
+===== SUMMARY =====
+Total tests evaluated: 10
+Bug revealing tests: 0
+Summary CSV: /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test2_round1/scope_test%20260529002328%/2%Csv_2_f%CSVRecord%get%d3/Csv_2_CSVRecord_bugrevealing.csv
+
+===== @Test METHOD-LEVEL STATISTICS =====
+Total @Test methods run: 10
+--- Fixed version (Csv_2_f) ---
+  PASS   : 8
+  FAIL   : 2
+  TIMEOUT: 0
+  Pass rate: 80.0%
+--- Buggy version (Csv_2_b) ---
+  PASS   : 8
+  FAIL   : 2
+  TIMEOUT: 0
+  Pass rate: 80.0%
+
+===== @Test METHOD-LEVEL STATISTICS =====
+Total @Test methods run: 10
+--- Fixed version (Csv_2_f) ---
+  PASS   : 8
+  FAIL   : 2
+  TIMEOUT: 0
+  Pass rate: 80.0%
+--- Buggy version (Csv_2_b) ---
+  PASS   : 8
+  FAIL   : 2
+  TIMEOUT: 0
+  Pass rate: 80.0%
+
+===== END =====
+log finished: 2026-05-29T00:26:13.349467

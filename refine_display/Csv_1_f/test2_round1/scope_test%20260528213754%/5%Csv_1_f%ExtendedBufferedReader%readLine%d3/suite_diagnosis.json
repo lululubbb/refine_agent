@@ -1,0 +1,36 @@
+{
+  "ExtendedBufferedReader_5_1Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [],
+    "exec_errors": [],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": 100.0,
+    "focal_line_covered": 7,
+    "focal_line_total": 7,
+    "missed_methods": [
+      "line 57: read() — completely uncovered",
+      "line 76: readAgain() — completely uncovered",
+      "line 81: read() — completely uncovered",
+      "line 146: lookAhead() — completely uncovered",
+      "line 159: getLineNumber() — completely uncovered"
+    ],
+    "partial_methods": []
+  },
+  "ExtendedBufferedReader_5_2Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "=> org.opentest4j.AssertionFailedError: expected: <",
+      "> but was: <-2>",
+      "=> org.opentest4j.AssertionFailedError: expected: <!> but was: <33>"
+    ],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": 100.0,
+    "focal_line_covered": 7,
+    "focal_line_total": 7,
+    "missed_methods": [],
+    "partial_methods": []
+  }
+}

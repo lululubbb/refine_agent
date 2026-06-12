@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Method;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_2_1Test {\n    private CSVRecord csvRecord;\n\n    @BeforeEach\n    public void setUp() {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"first\", 0);\n        mapping.put(\"second\", 1);\n        mapping.put(\"third\", 2);\n        csvRecord = new CSVRecord(values, mapping, \"This is a comment\", 1);\n    }\n\n    @Test\n    public void testget_validIndex() throws Exception {\n        String result = invokeGetMethod(1);\n        Assertions.assertEquals(\"value2\", result);\n    }\n\n    @Test\n    public void testget_firstIndex() throws Exception {\n        String result = invokeGetMethod(0);\n        Assertions.assertEquals(\"value1\", result);\n    }\n\n    @Test\n    public void testget_lastIndex() throws Exception {\n        String result = invokeGetMethod(2);\n        Assertions.assertEquals(\"value3\", result);\n    }\n\n    @Test\n    public void testget_outOfBoundsLow() throws Exception {\n        Assertions.assertThrows(ArrayIndexOutOfBoundsException.class, () -> invokeGetMethod(-1));\n    }\n\n    @Test\n    public void testget_outOfBoundsHigh() throws Exception {\n        Assertions.assertThrows(ArrayIndexOutOfBoundsException.class, () -> invokeGetMethod(3));\n    }\n\n    private String invokeGetMethod(int index) throws Exception {\n        Method method = CSVRecord.class.getDeclaredMethod(\"get\", int.class);\n        method.setAccessible(true);\n        try {\n            return (String) method.invoke(csvRecord, index);\n        } catch (InvocationTargetException e) {\n            throw e.getCause(); // Rethrow the underlying cause\n        }\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1007,
+    "completion_tokens": 439,
+    "total_tokens": 1446,
+    "llm_elapsed_time_seconds": 6.011
+  }
+}

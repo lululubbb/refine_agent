@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Collections;\nimport java.util.Iterator;\nimport java.util.Map;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\npublic class CSVRecord_7_3Test {\n\n    @Test\n    public void testiterator_normalCase() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = Collections.emptyMap();\n        CSVRecord csvRecord = new CSVRecord(values, mapping, null, 1);\n\n        Iterator<String> iterator = csvRecord.iterator();\n        Assertions.assertTrue(iterator.hasNext());\n        Assertions.assertEquals(\"value1\", iterator.next());\n        Assertions.assertTrue(iterator.hasNext());\n        Assertions.assertEquals(\"value2\", iterator.next());\n        Assertions.assertTrue(iterator.hasNext());\n        Assertions.assertEquals(\"value3\", iterator.next());\n        Assertions.assertFalse(iterator.hasNext());\n    }\n\n    @Test\n    public void testiterator_emptyValues() throws Exception {\n        String[] values = {};\n        Map<String, Integer> mapping = Collections.emptyMap();\n        CSVRecord csvRecord = new CSVRecord(values, mapping, null, 1);\n\n        Iterator<String> iterator = csvRecord.iterator();\n        Assertions.assertFalse(iterator.hasNext());\n    }\n\n    @Test\n    public void testiterator_singleValue() throws Exception {\n        String[] values = {\"singleValue\"};\n        Map<String, Integer> mapping = Collections.emptyMap();\n        CSVRecord csvRecord = new CSVRecord(values, mapping, null, 1);\n\n        Iterator<String> iterator = csvRecord.iterator();\n        Assertions.assertTrue(iterator.hasNext());\n        Assertions.assertEquals(\"singleValue\", iterator.next());\n        Assertions.assertFalse(iterator.hasNext());\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 919,
+    "completion_tokens": 364,
+    "total_tokens": 1283,
+    "llm_elapsed_time_seconds": 6.137
+  }
+}

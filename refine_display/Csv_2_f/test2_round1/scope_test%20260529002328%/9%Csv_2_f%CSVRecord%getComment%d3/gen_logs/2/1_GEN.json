@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Field;\nimport java.util.Collections;\nimport java.util.HashMap;\n\npublic class CSVRecordTest {\n\n    @Test\n    public void testGetComment_normalCase() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        HashMap<String, Integer> mapping = new HashMap<>();\n        String comment = \"This is a comment\";\n        long recordNumber = 1;\n\n        CSVRecord record = new CSVRecord(values, mapping, comment, recordNumber);\n        Assertions.assertEquals(comment, record.getComment());\n    }\n\n    @Test\n    public void testGetComment_emptyComment() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        HashMap<String, Integer> mapping = new HashMap<>();\n        String comment = \"\";\n        long recordNumber = 1;\n\n        CSVRecord record = new CSVRecord(values, mapping, comment, recordNumber);\n        Assertions.assertEquals(comment, record.getComment());\n    }\n\n    @Test\n    public void testGetComment_nullComment() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        HashMap<String, Integer> mapping = new HashMap<>();\n        String comment = null;\n        long recordNumber = 1;\n\n        CSVRecord record = new CSVRecord(values, mapping, comment, recordNumber);\n        Assertions.assertNull(record.getComment());\n    }\n\n    @Test\n    public void testGetComment_withDifferentRecordNumbers() throws Exception {\n        String[] values1 = {\"value1\", \"value2\"};\n        HashMap<String, Integer> mapping1 = new HashMap<>();\n        String comment1 = \"First comment\";\n        long recordNumber1 = 1;\n\n        CSVRecord record1 = new CSVRecord(values1, mapping1, comment1, recordNumber1);\n        Assertions.assertEquals(comment1, record1.getComment());\n\n        String[] values2 = {\"value3\", \"value4\"};\n        HashMap<String, Integer> mapping2 = new HashMap<>();\n        String comment2 = \"Second comment\";\n        long recordNumber2 = 2;\n\n        CSVRecord record2 = new CSVRecord(values2, mapping2, comment2, recordNumber2);\n        Assertions.assertEquals(comment2, record2.getComment());\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 616,
+    "completion_tokens": 475,
+    "total_tokens": 1091,
+    "llm_elapsed_time_seconds": 6.959
+  }
+}

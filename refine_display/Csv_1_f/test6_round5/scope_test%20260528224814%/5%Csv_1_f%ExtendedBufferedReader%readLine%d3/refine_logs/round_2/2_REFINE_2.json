@@ -1,0 +1,32 @@
+{
+  "raw": "{\n  \"suite_summary\": \"The test suite for the `readLine` method in `ExtendedBufferedReader` has a 83% compile pass rate and a 33% execution pass rate. There are several issues, including one compile failure and multiple execution failures. Additionally, some tests exhibit high redundancy and are not bug-revealing.\",\n  \"test_instructions\": {\n    \"ExtendedBufferedReader_5_5Test\": [\n      \"Fix compile errors: 'cannot find symbol' indicates that the method or variable being referenced does not exist in the current context. Check the provided class context for the correct API.\"\n    ],\n    \"ExtendedBufferedReader_5_1Test\": [\n      \"Fix execution failure: 'expected: < -1 > but was: < -2 >' indicates that the expected value does not match the actual return value. Trace the focal method logic carefully to assert the actual return value.\"\n    ],\n    \"ExtendedBufferedReader_5_3Test\": [\n      \"Fix execution failure: 'expected: < 10 > but was: < 101 >' indicates that the expected value does not match the actual return value. Trace the focal method logic carefully to assert the actual return value.\"\n    ],\n    \"ExtendedBufferedReader_5_6Test\": [\n      \"Fix execution failure: 'expected: < 78 > but was: < -2 >' indicates that the expected value does not match the actual return value. Trace the focal method logic carefully to assert the actual return value.\"\n    ],\n    \"ExtendedBufferedReader_5_2Test\": [\n      \"Address redundancy and bug-revealing issues: The tests are not revealing any bugs and exhibit high redundancy. Consider adding tests for boundary values and different input scenarios to cover missed lines and branches.\"\n    ],\n    \"ExtendedBufferedReader_5_4Test\": [\n      \"Address redundancy and bug-revealing issues: The tests are not revealing any bugs and exhibit high redundancy. Consider adding tests for boundary values and different input scenarios to cover missed lines and branches.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "The test suite for the `readLine` method in `ExtendedBufferedReader` has a 83% compile pass rate and a 33% execution pass rate. There are several issues, including one compile failure and multiple execution failures. Additionally, some tests exhibit high redundancy and are not bug-revealing.",
+    "test_instructions": {
+      "ExtendedBufferedReader_5_5Test": [
+        "Fix compile errors: 'cannot find symbol' indicates that the method or variable being referenced does not exist in the current context. Check the provided class context for the correct API."
+      ],
+      "ExtendedBufferedReader_5_1Test": [
+        "Fix execution failure: 'expected: < -1 > but was: < -2 >' indicates that the expected value does not match the actual return value. Trace the focal method logic carefully to assert the actual return value."
+      ],
+      "ExtendedBufferedReader_5_3Test": [
+        "Fix execution failure: 'expected: < 10 > but was: < 101 >' indicates that the expected value does not match the actual return value. Trace the focal method logic carefully to assert the actual return value."
+      ],
+      "ExtendedBufferedReader_5_6Test": [
+        "Fix execution failure: 'expected: < 78 > but was: < -2 >' indicates that the expected value does not match the actual return value. Trace the focal method logic carefully to assert the actual return value."
+      ],
+      "ExtendedBufferedReader_5_2Test": [
+        "Address redundancy and bug-revealing issues: The tests are not revealing any bugs and exhibit high redundancy. Consider adding tests for boundary values and different input scenarios to cover missed lines and branches."
+      ],
+      "ExtendedBufferedReader_5_4Test": [
+        "Address redundancy and bug-revealing issues: The tests are not revealing any bugs and exhibit high redundancy. Consider adding tests for boundary values and different input scenarios to cover missed lines and branches."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 9722,
+    "completion_tokens": 422,
+    "total_tokens": 10144,
+    "llm_elapsed_time_seconds": 7.774
+  }
+}

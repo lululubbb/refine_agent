@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport org.mockito.Mockito;\n\nimport java.lang.reflect.Method;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecordTest {\n\n    @Test\n    public void testisMapped_mappingIsNotNullAndContainsKey() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"key1\", 1);\n        CSVRecord csvRecord = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n\n        boolean result = invokeIsMapped(csvRecord, \"key1\");\n\n        Assertions.assertTrue(result);\n    }\n\n    @Test\n    public void testisMapped_mappingIsNotNullAndDoesNotContainKey() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"key1\", 1);\n        CSVRecord csvRecord = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n\n        boolean result = invokeIsMapped(csvRecord, \"key2\");\n\n        Assertions.assertFalse(result);\n    }\n\n    @Test\n    public void testisMapped_mappingIsNull() throws Exception {\n        CSVRecord csvRecord = new CSVRecord(new String[]{\"value1\"}, null, null, 1);\n\n        boolean result = invokeIsMapped(csvRecord, \"key1\");\n\n        Assertions.assertFalse(result);\n    }\n\n    private boolean invokeIsMapped(CSVRecord csvRecord, String name) throws Exception {\n        Method method = CSVRecord.class.getDeclaredMethod(\"isMapped\", String.class);\n        method.setAccessible(true);\n        return (boolean) method.invoke(csvRecord, name);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 626,
+    "completion_tokens": 336,
+    "total_tokens": 962,
+    "llm_elapsed_time_seconds": 5.442
+  }
+}

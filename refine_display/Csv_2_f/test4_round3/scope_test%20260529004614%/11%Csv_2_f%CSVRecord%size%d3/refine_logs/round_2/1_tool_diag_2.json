@@ -1,0 +1,294 @@
+{
+  "test_diags": {
+    "CSVRecord_11_1Test": {
+      "test_name": "CSVRecord_11_1Test",
+      "compile_ok": true,
+      "exec_ok": true,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [],
+      "focal_line_rate": 100.0,
+      "focal_branch_rate": null,
+      "focal_line_covered": 1,
+      "focal_line_total": 1,
+      "missed_methods": [
+        "line 80: get() — completely uncovered",
+        "line 103: isConsistent() — completely uncovered",
+        "line 114: isMapped() — completely uncovered",
+        "line 125: isSet() — completely uncovered",
+        "line 134: iterator() — completely uncovered",
+        "line 138: values() — completely uncovered",
+        "line 148: getComment() — completely uncovered",
+        "line 157: getRecordNumber() — completely uncovered",
+        "line 171: toString() — completely uncovered"
+      ],
+      "partial_methods": [
+        "line 49: CSVRecord()() — 1/2 branches missed"
+      ],
+      "bug_revealing": false,
+      "redundancy_score": 0.2088,
+      "most_similar_to": "CSVRecord_11_3Test",
+      "diag_data_valid": true
+    },
+    "CSVRecord_11_2Test": {
+      "test_name": "CSVRecord_11_2Test",
+      "compile_ok": true,
+      "exec_ok": true,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [],
+      "focal_line_rate": 100.0,
+      "focal_branch_rate": null,
+      "focal_line_covered": 1,
+      "focal_line_total": 1,
+      "missed_methods": [
+        "line 80: get() — completely uncovered",
+        "line 103: isConsistent() — completely uncovered",
+        "line 114: isMapped() — completely uncovered",
+        "line 125: isSet() — completely uncovered",
+        "line 134: iterator() — completely uncovered",
+        "line 138: values() — completely uncovered",
+        "line 148: getComment() — completely uncovered",
+        "line 157: getRecordNumber() — completely uncovered",
+        "line 171: toString() — completely uncovered"
+      ],
+      "partial_methods": [
+        "line 49: CSVRecord()() — 1/2 branches missed"
+      ],
+      "bug_revealing": false,
+      "redundancy_score": 0.0208,
+      "most_similar_to": "CSVRecord_11_1Test",
+      "diag_data_valid": true
+    },
+    "CSVRecord_11_3Test": {
+      "test_name": "CSVRecord_11_3Test",
+      "compile_ok": true,
+      "exec_ok": false,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [
+        "Exception in thread \"main\" java.lang.OutOfMemoryError: Requested array size exceeds VM limit",
+        "at org.apache.commons.csv.CSVRecord_11_3Test.testSize_boundaryValue(CSVRecord_11_3Test.java:37)",
+        "at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)",
+        "at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)"
+      ],
+      "focal_line_rate": 100.0,
+      "focal_branch_rate": null,
+      "focal_line_covered": 1,
+      "focal_line_total": 1,
+      "missed_methods": [],
+      "partial_methods": [],
+      "bug_revealing": false,
+      "redundancy_score": 0.381,
+      "most_similar_to": "CSVRecord_11_4Test",
+      "diag_data_valid": true
+    },
+    "CSVRecord_11_4Test": {
+      "test_name": "CSVRecord_11_4Test",
+      "compile_ok": true,
+      "exec_ok": true,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [],
+      "focal_line_rate": 100.0,
+      "focal_branch_rate": null,
+      "focal_line_covered": 1,
+      "focal_line_total": 1,
+      "missed_methods": [
+        "line 80: get() — completely uncovered",
+        "line 103: isConsistent() — completely uncovered",
+        "line 114: isMapped() — completely uncovered",
+        "line 125: isSet() — completely uncovered",
+        "line 134: iterator() — completely uncovered",
+        "line 138: values() — completely uncovered",
+        "line 148: getComment() — completely uncovered",
+        "line 157: getRecordNumber() — completely uncovered",
+        "line 171: toString() — completely uncovered"
+      ],
+      "partial_methods": [],
+      "bug_revealing": false,
+      "redundancy_score": 0.381,
+      "most_similar_to": "CSVRecord_11_3Test",
+      "diag_data_valid": true
+    }
+  },
+  "test_scores": {
+    "CSVRecord_11_1Test": {
+      "test_name": "CSVRecord_11_1Test",
+      "compile_score": 1.0,
+      "exec_score": 1.0,
+      "focal_line_coverage": 1.0,
+      "focal_branch_coverage": null,
+      "focal_line_covered": 1,
+      "focal_line_total": 1,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.2088,
+      "similarity": 0.7912,
+      "most_similar_to": "CSVRecord_11_3Test",
+      "issues": [
+        "NOT_BUG_REVEALING",
+        "HIGH_REDUNDANCY"
+      ]
+    },
+    "CSVRecord_11_2Test": {
+      "test_name": "CSVRecord_11_2Test",
+      "compile_score": 1.0,
+      "exec_score": 1.0,
+      "focal_line_coverage": 1.0,
+      "focal_branch_coverage": null,
+      "focal_line_covered": 1,
+      "focal_line_total": 1,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.0208,
+      "similarity": 0.9792,
+      "most_similar_to": "CSVRecord_11_1Test",
+      "issues": [
+        "NOT_BUG_REVEALING",
+        "HIGH_REDUNDANCY"
+      ]
+    },
+    "CSVRecord_11_3Test": {
+      "test_name": "CSVRecord_11_3Test",
+      "compile_score": 1.0,
+      "exec_score": 0.0,
+      "focal_line_coverage": 1.0,
+      "focal_branch_coverage": null,
+      "focal_line_covered": 1,
+      "focal_line_total": 1,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.381,
+      "similarity": 0.619,
+      "most_similar_to": "CSVRecord_11_4Test",
+      "issues": [
+        "EXEC_FAIL"
+      ]
+    },
+    "CSVRecord_11_4Test": {
+      "test_name": "CSVRecord_11_4Test",
+      "compile_score": 1.0,
+      "exec_score": 1.0,
+      "focal_line_coverage": 1.0,
+      "focal_branch_coverage": null,
+      "focal_line_covered": 1,
+      "focal_line_total": 1,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.381,
+      "similarity": 0.619,
+      "most_similar_to": "CSVRecord_11_3Test",
+      "issues": [
+        "NOT_BUG_REVEALING"
+      ]
+    }
+  },
+  "suite_score": {
+    "n_tests": 4,
+    "compile_pass_count": 4,
+    "compile_pass_rate": 1.0,
+    "exec_pass_count": 3,
+    "exec_pass_rate": 0.75,
+    "all_compile_pass": true,
+    "per_test_line_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_test_branch_coverage": [
+      null,
+      null,
+      null,
+      null
+    ],
+    "coverage_line_avg": 1.0,
+    "coverage_line_max": 1.0,
+    "coverage_line_min": 1.0,
+    "coverage_branch_avg": null,
+    "bug_reveal_count": 0,
+    "bug_reveal_checked": 4,
+    "bug_reveal_rate": 0.0,
+    "max_pairwise_similarity": 0.9859,
+    "high_redundancy_pairs": [
+      {
+        "test1": "CSVRecord_11_1Test",
+        "test2": "CSVRecord_11_2Test",
+        "similarity": 0.9859
+      },
+      {
+        "test1": "CSVRecord_11_2Test",
+        "test2": "CSVRecord_11_1Test",
+        "similarity": 0.9859
+      },
+      {
+        "test1": "CSVRecord_11_1Test",
+        "test2": "CSVRecord_11_2Test",
+        "similarity": 0.9792
+      },
+      {
+        "test1": "CSVRecord_11_2Test",
+        "test2": "CSVRecord_11_1Test",
+        "similarity": 0.9792
+      },
+      {
+        "test1": "CSVRecord_11_3Test",
+        "test2": "CSVRecord_11_1Test",
+        "similarity": 0.7912
+      }
+    ],
+    "problem_tests": {
+      "NOT_BUG_REVEALING": [
+        "CSVRecord_11_1Test",
+        "CSVRecord_11_2Test",
+        "CSVRecord_11_4Test"
+      ],
+      "HIGH_REDUNDANCY": [
+        "CSVRecord_11_1Test",
+        "CSVRecord_11_2Test"
+      ],
+      "EXEC_FAIL": [
+        "CSVRecord_11_3Test"
+      ]
+    }
+  },
+  "pairwise_sims": [
+    {
+      "tc1": "CSVRecord_11_1Test",
+      "tc2": "CSVRecord_11_2Test",
+      "score": 0.0141
+    },
+    {
+      "tc1": "CSVRecord_11_2Test",
+      "tc2": "CSVRecord_11_1Test",
+      "score": 0.0141
+    },
+    {
+      "tc1": "CSVRecord_11_4Test",
+      "tc2": "CSVRecord_11_3Test",
+      "score": 0.381
+    },
+    {
+      "tc1": "CSVRecord_11_3Test",
+      "tc2": "CSVRecord_11_1Test",
+      "score": 0.2088
+    },
+    {
+      "tc1": "CSVRecord_11_1Test",
+      "tc2": "CSVRecord_11_2Test",
+      "score": 0.0208
+    },
+    {
+      "tc1": "CSVRecord_11_2Test",
+      "tc2": "CSVRecord_11_1Test",
+      "score": 0.0208
+    },
+    {
+      "tc1": "CSVRecord_11_4Test",
+      "tc2": "CSVRecord_11_3Test",
+      "score": 0.3043
+    },
+    {
+      "tc1": "CSVRecord_11_3Test",
+      "tc2": "CSVRecord_11_4Test",
+      "score": 0.3043
+    }
+  ]
+}

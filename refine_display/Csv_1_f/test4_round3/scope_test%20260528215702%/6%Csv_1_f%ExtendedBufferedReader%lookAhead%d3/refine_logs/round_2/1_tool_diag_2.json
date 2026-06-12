@@ -1,0 +1,277 @@
+{
+  "test_diags": {
+    "ExtendedBufferedReader_6_1Test": {
+      "test_name": "ExtendedBufferedReader_6_1Test",
+      "compile_ok": true,
+      "exec_ok": false,
+      "exec_timeout": true,
+      "compile_errors": [],
+      "exec_errors": [
+        "Exceeded TIMEOUT limit"
+      ],
+      "focal_line_rate": null,
+      "focal_branch_rate": null,
+      "focal_line_covered": null,
+      "focal_line_total": null,
+      "missed_methods": [],
+      "partial_methods": [],
+      "bug_revealing": null,
+      "redundancy_score": 0.209,
+      "most_similar_to": "ExtendedBufferedReader_6_2Test",
+      "diag_data_valid": true
+    },
+    "ExtendedBufferedReader_6_2Test": {
+      "test_name": "ExtendedBufferedReader_6_2Test",
+      "compile_ok": true,
+      "exec_ok": true,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [],
+      "focal_line_rate": 100.0,
+      "focal_branch_rate": null,
+      "focal_line_covered": 4,
+      "focal_line_total": 4,
+      "missed_methods": [
+        "line 76: readAgain() — completely uncovered",
+        "line 81: read() — completely uncovered",
+        "line 123: readLine() — completely uncovered",
+        "line 159: getLineNumber() — completely uncovered"
+      ],
+      "partial_methods": [
+        "line 57: read() — 4/6 branches missed"
+      ],
+      "bug_revealing": null,
+      "redundancy_score": 0.209,
+      "most_similar_to": "ExtendedBufferedReader_6_1Test",
+      "diag_data_valid": true
+    },
+    "ExtendedBufferedReader_6_3Test": {
+      "test_name": "ExtendedBufferedReader_6_3Test",
+      "compile_ok": true,
+      "exec_ok": false,
+      "exec_timeout": true,
+      "compile_errors": [],
+      "exec_errors": [
+        "Exceeded TIMEOUT limit"
+      ],
+      "focal_line_rate": null,
+      "focal_branch_rate": null,
+      "focal_line_covered": null,
+      "focal_line_total": null,
+      "missed_methods": [],
+      "partial_methods": [],
+      "bug_revealing": null,
+      "redundancy_score": 0.0143,
+      "most_similar_to": "ExtendedBufferedReader_6_1Test",
+      "diag_data_valid": true
+    },
+    "ExtendedBufferedReader_6_4Test": {
+      "test_name": "ExtendedBufferedReader_6_4Test",
+      "compile_ok": true,
+      "exec_ok": false,
+      "exec_timeout": true,
+      "compile_errors": [],
+      "exec_errors": [
+        "Exceeded TIMEOUT limit"
+      ],
+      "focal_line_rate": null,
+      "focal_branch_rate": null,
+      "focal_line_covered": null,
+      "focal_line_total": null,
+      "missed_methods": [],
+      "partial_methods": [],
+      "bug_revealing": null,
+      "redundancy_score": null,
+      "most_similar_to": null,
+      "diag_data_valid": true
+    }
+  },
+  "test_scores": {
+    "ExtendedBufferedReader_6_1Test": {
+      "test_name": "ExtendedBufferedReader_6_1Test",
+      "compile_score": 1.0,
+      "exec_score": 0.0,
+      "focal_line_coverage": null,
+      "focal_branch_coverage": null,
+      "focal_line_covered": null,
+      "focal_line_total": null,
+      "bug_reveal_score": null,
+      "redundancy_score": 0.209,
+      "similarity": 0.791,
+      "most_similar_to": "ExtendedBufferedReader_6_2Test",
+      "issues": [
+        "EXEC_TIMEOUT"
+      ]
+    },
+    "ExtendedBufferedReader_6_2Test": {
+      "test_name": "ExtendedBufferedReader_6_2Test",
+      "compile_score": 1.0,
+      "exec_score": 1.0,
+      "focal_line_coverage": 1.0,
+      "focal_branch_coverage": null,
+      "focal_line_covered": 4,
+      "focal_line_total": 4,
+      "bug_reveal_score": null,
+      "redundancy_score": 0.209,
+      "similarity": 0.791,
+      "most_similar_to": "ExtendedBufferedReader_6_1Test",
+      "issues": [
+        "HIGH_REDUNDANCY"
+      ]
+    },
+    "ExtendedBufferedReader_6_3Test": {
+      "test_name": "ExtendedBufferedReader_6_3Test",
+      "compile_score": 1.0,
+      "exec_score": 0.0,
+      "focal_line_coverage": null,
+      "focal_branch_coverage": null,
+      "focal_line_covered": null,
+      "focal_line_total": null,
+      "bug_reveal_score": null,
+      "redundancy_score": 0.0143,
+      "similarity": 0.9857,
+      "most_similar_to": "ExtendedBufferedReader_6_1Test",
+      "issues": [
+        "EXEC_TIMEOUT"
+      ]
+    },
+    "ExtendedBufferedReader_6_4Test": {
+      "test_name": "ExtendedBufferedReader_6_4Test",
+      "compile_score": 1.0,
+      "exec_score": 0.0,
+      "focal_line_coverage": null,
+      "focal_branch_coverage": null,
+      "focal_line_covered": null,
+      "focal_line_total": null,
+      "bug_reveal_score": null,
+      "redundancy_score": null,
+      "similarity": null,
+      "most_similar_to": null,
+      "issues": [
+        "EXEC_TIMEOUT"
+      ]
+    }
+  },
+  "suite_score": {
+    "n_tests": 4,
+    "compile_pass_count": 4,
+    "compile_pass_rate": 1.0,
+    "exec_pass_count": 1,
+    "exec_pass_rate": 0.25,
+    "all_compile_pass": true,
+    "per_test_line_coverage": [
+      null,
+      1.0,
+      null,
+      null
+    ],
+    "per_test_branch_coverage": [
+      null,
+      null,
+      null,
+      null
+    ],
+    "coverage_line_avg": 1.0,
+    "coverage_line_max": 1.0,
+    "coverage_line_min": 1.0,
+    "coverage_branch_avg": null,
+    "bug_reveal_count": 0,
+    "bug_reveal_checked": 0,
+    "bug_reveal_rate": 0.0,
+    "max_pairwise_similarity": 1.0,
+    "high_redundancy_pairs": [
+      {
+        "test1": "ExtendedBufferedReader_6_1Test",
+        "test2": "ExtendedBufferedReader_6_4Test",
+        "similarity": 1.0
+      },
+      {
+        "test1": "ExtendedBufferedReader_6_4Test",
+        "test2": "ExtendedBufferedReader_6_1Test",
+        "similarity": 1.0
+      },
+      {
+        "test1": "ExtendedBufferedReader_6_1Test",
+        "test2": "ExtendedBufferedReader_6_4Test",
+        "similarity": 1.0
+      },
+      {
+        "test1": "ExtendedBufferedReader_6_4Test",
+        "test2": "ExtendedBufferedReader_6_1Test",
+        "similarity": 1.0
+      },
+      {
+        "test1": "ExtendedBufferedReader_6_3Test",
+        "test2": "ExtendedBufferedReader_6_1Test",
+        "similarity": 0.9857
+      },
+      {
+        "test1": "ExtendedBufferedReader_6_3Test",
+        "test2": "ExtendedBufferedReader_6_1Test",
+        "similarity": 0.9857
+      },
+      {
+        "test1": "ExtendedBufferedReader_6_2Test",
+        "test2": "ExtendedBufferedReader_6_1Test",
+        "similarity": 0.806
+      },
+      {
+        "test1": "ExtendedBufferedReader_6_2Test",
+        "test2": "ExtendedBufferedReader_6_1Test",
+        "similarity": 0.791
+      }
+    ],
+    "problem_tests": {
+      "EXEC_TIMEOUT": [
+        "ExtendedBufferedReader_6_1Test",
+        "ExtendedBufferedReader_6_3Test",
+        "ExtendedBufferedReader_6_4Test"
+      ],
+      "HIGH_REDUNDANCY": [
+        "ExtendedBufferedReader_6_2Test"
+      ]
+    }
+  },
+  "pairwise_sims": [
+    {
+      "tc1": "ExtendedBufferedReader_6_1Test",
+      "tc2": "ExtendedBufferedReader_6_4Test",
+      "score": 0.0
+    },
+    {
+      "tc1": "ExtendedBufferedReader_6_2Test",
+      "tc2": "ExtendedBufferedReader_6_1Test",
+      "score": 0.194
+    },
+    {
+      "tc1": "ExtendedBufferedReader_6_4Test",
+      "tc2": "ExtendedBufferedReader_6_1Test",
+      "score": 0.0
+    },
+    {
+      "tc1": "ExtendedBufferedReader_6_3Test",
+      "tc2": "ExtendedBufferedReader_6_1Test",
+      "score": 0.0143
+    },
+    {
+      "tc1": "ExtendedBufferedReader_6_1Test",
+      "tc2": "ExtendedBufferedReader_6_4Test",
+      "score": 0.0
+    },
+    {
+      "tc1": "ExtendedBufferedReader_6_2Test",
+      "tc2": "ExtendedBufferedReader_6_1Test",
+      "score": 0.209
+    },
+    {
+      "tc1": "ExtendedBufferedReader_6_4Test",
+      "tc2": "ExtendedBufferedReader_6_1Test",
+      "score": 0.0
+    },
+    {
+      "tc1": "ExtendedBufferedReader_6_3Test",
+      "tc2": "ExtendedBufferedReader_6_1Test",
+      "score": 0.0143
+    }
+  ]
+}

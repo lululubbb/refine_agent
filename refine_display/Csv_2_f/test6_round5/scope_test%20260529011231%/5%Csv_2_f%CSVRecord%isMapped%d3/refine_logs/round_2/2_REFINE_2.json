@@ -1,0 +1,38 @@
+{
+  "raw": "{\n  \"suite_summary\": \"All test files compile and execute successfully, but they exhibit high redundancy and do not reveal any bugs. Each test file has similar test cases that cover the same scenarios for the `isMapped` method in the `CSVRecord` class, leading to redundancy issues. Additionally, none of the tests are designed to reveal potential bugs in the method.\",\n  \"test_instructions\": {\n    \"CSVRecord_5_1Test\": [\n      \"This test is not bug-revealing. Consider adding assertions that check for specific values returned by the method to ensure it behaves as expected under various conditions.\",\n      \"The test is highly redundant with CSVRecord_5_4Test. Consider merging similar tests or varying the input values to reduce redundancy.\"\n    ],\n    \"CSVRecord_5_2Test\": [\n      \"This test is not bug-revealing. Consider adding assertions that check for specific values returned by the method to ensure it behaves as expected under various conditions.\",\n      \"The test is highly redundant with CSVRecord_5_5Test. Consider merging similar tests or varying the input values to reduce redundancy.\"\n    ],\n    \"CSVRecord_5_3Test\": [\n      \"This test is not bug-revealing. Consider adding assertions that check for specific values returned by the method to ensure it behaves as expected under various conditions.\",\n      \"The test is highly redundant with CSVRecord_5_1Test. Consider merging similar tests or varying the input values to reduce redundancy.\"\n    ],\n    \"CSVRecord_5_4Test\": [\n      \"This test is not bug-revealing. Consider adding assertions that check for specific values returned by the method to ensure it behaves as expected under various conditions.\",\n      \"The test is highly redundant with CSVRecord_5_1Test. Consider merging similar tests or varying the input values to reduce redundancy.\"\n    ],\n    \"CSVRecord_5_5Test\": [\n      \"This test is not bug-revealing. Consider adding assertions that check for specific values returned by the method to ensure it behaves as expected under various conditions.\",\n      \"The test is highly redundant with CSVRecord_5_2Test. Consider merging similar tests or varying the input values to reduce redundancy.\"\n    ],\n    \"CSVRecord_5_6Test\": [\n      \"This test is not bug-revealing. Consider adding assertions that check for specific values returned by the method to ensure it behaves as expected under various conditions.\",\n      \"The test is highly redundant with CSVRecord_5_1Test. Consider merging similar tests or varying the input values to reduce redundancy.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "All test files compile and execute successfully, but they exhibit high redundancy and do not reveal any bugs. Each test file has similar test cases that cover the same scenarios for the `isMapped` method in the `CSVRecord` class, leading to redundancy issues. Additionally, none of the tests are designed to reveal potential bugs in the method.",
+    "test_instructions": {
+      "CSVRecord_5_1Test": [
+        "This test is not bug-revealing. Consider adding assertions that check for specific values returned by the method to ensure it behaves as expected under various conditions.",
+        "The test is highly redundant with CSVRecord_5_4Test. Consider merging similar tests or varying the input values to reduce redundancy."
+      ],
+      "CSVRecord_5_2Test": [
+        "This test is not bug-revealing. Consider adding assertions that check for specific values returned by the method to ensure it behaves as expected under various conditions.",
+        "The test is highly redundant with CSVRecord_5_5Test. Consider merging similar tests or varying the input values to reduce redundancy."
+      ],
+      "CSVRecord_5_3Test": [
+        "This test is not bug-revealing. Consider adding assertions that check for specific values returned by the method to ensure it behaves as expected under various conditions.",
+        "The test is highly redundant with CSVRecord_5_1Test. Consider merging similar tests or varying the input values to reduce redundancy."
+      ],
+      "CSVRecord_5_4Test": [
+        "This test is not bug-revealing. Consider adding assertions that check for specific values returned by the method to ensure it behaves as expected under various conditions.",
+        "The test is highly redundant with CSVRecord_5_1Test. Consider merging similar tests or varying the input values to reduce redundancy."
+      ],
+      "CSVRecord_5_5Test": [
+        "This test is not bug-revealing. Consider adding assertions that check for specific values returned by the method to ensure it behaves as expected under various conditions.",
+        "The test is highly redundant with CSVRecord_5_2Test. Consider merging similar tests or varying the input values to reduce redundancy."
+      ],
+      "CSVRecord_5_6Test": [
+        "This test is not bug-revealing. Consider adding assertions that check for specific values returned by the method to ensure it behaves as expected under various conditions.",
+        "The test is highly redundant with CSVRecord_5_1Test. Consider merging similar tests or varying the input values to reduce redundancy."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 7882,
+    "completion_tokens": 536,
+    "total_tokens": 8418,
+    "llm_elapsed_time_seconds": 10.35
+  }
+}

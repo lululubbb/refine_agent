@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "package org.apache.commons.csv;\n\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.io.StringReader;\nimport java.lang.reflect.Method;\n\nclass ExtendedBufferedReaderTest {\n\n    @Test\n    void testReadAgain_initialState() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"test\"));\n        Method method = ExtendedBufferedReader.class.getDeclaredMethod(\"readAgain\");\n        method.setAccessible(true);\n        \n        int result = (int) method.invoke(reader);\n        Assertions.assertEquals(-2, result);\n    }\n\n    @Test\n    void testReadAgain_afterReading() throws Exception {\n        String input = \"test\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n        \n        // Simulate reading to set lastChar\n        reader.read(); // This would set lastChar to the first character read\n        \n        Method method = ExtendedBufferedReader.class.getDeclaredMethod(\"readAgain\");\n        method.setAccessible(true);\n        \n        int result = (int) method.invoke(reader);\n        Assertions.assertNotEquals(-2, result);\n    }\n\n    @Test\n    void testReadAgain_afterMultipleReads() throws Exception {\n        String input = \"test\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n        \n        // Simulate reading multiple characters\n        reader.read(); // Read first character\n        reader.read(); // Read second character\n        \n        Method method = ExtendedBufferedReader.class.getDeclaredMethod(\"readAgain\");\n        method.setAccessible(true);\n        \n        int result = (int) method.invoke(reader);\n        Assertions.assertNotEquals(-2, result);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 549,
+    "completion_tokens": 334,
+    "total_tokens": 883,
+    "llm_elapsed_time_seconds": 6.079
+  }
+}

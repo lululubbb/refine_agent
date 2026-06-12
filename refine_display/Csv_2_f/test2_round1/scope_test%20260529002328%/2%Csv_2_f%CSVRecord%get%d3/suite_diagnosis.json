@@ -1,0 +1,44 @@
+{
+  "CSVRecord_2_1Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "=> org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.ArrayIndexOutOfBoundsException> but was: <java.lang.reflect.InvocationTargetException>",
+      "Caused by: java.lang.reflect.InvocationTargetException",
+      "Caused by: java.lang.ArrayIndexOutOfBoundsException: Index -1 out of bounds for length 3",
+      "Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 3 out of bounds for length 3"
+    ],
+    "focal_line_rate": 11.11,
+    "focal_branch_rate": 0.0,
+    "focal_line_covered": 1,
+    "focal_line_total": 9,
+    "missed_methods": [],
+    "partial_methods": []
+  },
+  "CSVRecord_2_2Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [],
+    "exec_errors": [],
+    "focal_line_rate": 11.11,
+    "focal_branch_rate": 0.0,
+    "focal_line_covered": 1,
+    "focal_line_total": 9,
+    "missed_methods": [
+      "line 80: get() — completely uncovered",
+      "line 103: isConsistent() — completely uncovered",
+      "line 114: isMapped() — completely uncovered",
+      "line 125: isSet() — completely uncovered",
+      "line 134: iterator() — completely uncovered",
+      "line 138: values() — completely uncovered",
+      "line 148: getComment() — completely uncovered",
+      "line 157: getRecordNumber() — completely uncovered",
+      "line 166: size() — completely uncovered",
+      "line 171: toString() — completely uncovered"
+    ],
+    "partial_methods": [
+      "line 49: CSVRecord()() — 1/2 branches missed"
+    ]
+  }
+}

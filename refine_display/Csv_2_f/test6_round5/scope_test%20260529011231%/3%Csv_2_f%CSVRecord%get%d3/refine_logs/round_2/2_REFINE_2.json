@@ -1,0 +1,32 @@
+{
+  "raw": "{\n  \"suite_summary\": \"The test suite for the `get` method in `CSVRecord` has a 83% compile pass rate, but only 33% of tests execute successfully. There are issues with compile errors in one test file and runtime errors in three others. Additionally, some tests are redundant and others have low coverage, indicating a need for improved test diversity and coverage.\",\n  \"test_instructions\": {\n    \"CSVRecord_3_4Test\": [\n      \"Fix compile error: 'cannot find symbol' as indicated by the error message: 'error: cannot find symbol'. Check the provided class context for the correct API.\"\n    ],\n    \"CSVRecord_3_1Test\": [\n      \"Fix runtime error: 'Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>'. Ensure the test correctly triggers the expected exception.\"\n    ],\n    \"CSVRecord_3_3Test\": [\n      \"Fix runtime error: 'Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>'. Ensure the test correctly triggers the expected exception.\"\n    ],\n    \"CSVRecord_3_5Test\": [\n      \"Fix runtime error: 'Index for header 'header3' is 2 but CSVRecord only has 2 values!'. Adjust the test to ensure that the index used is valid for the provided values.\"\n    ],\n    \"CSVRecord_3_2Test\": [\n      \"Reduce redundancy: This test has a high redundancy score of 0.206. Consider modifying the test to target different code paths in the focal method.\"\n    ],\n    \"CSVRecord_3_6Test\": [\n      \"Increase coverage: This test has low coverage with a focal line rate of 44.44%. Add tests for boundary values and exception-throwing paths to improve coverage.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "The test suite for the `get` method in `CSVRecord` has a 83% compile pass rate, but only 33% of tests execute successfully. There are issues with compile errors in one test file and runtime errors in three others. Additionally, some tests are redundant and others have low coverage, indicating a need for improved test diversity and coverage.",
+    "test_instructions": {
+      "CSVRecord_3_4Test": [
+        "Fix compile error: 'cannot find symbol' as indicated by the error message: 'error: cannot find symbol'. Check the provided class context for the correct API."
+      ],
+      "CSVRecord_3_1Test": [
+        "Fix runtime error: 'Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>'. Ensure the test correctly triggers the expected exception."
+      ],
+      "CSVRecord_3_3Test": [
+        "Fix runtime error: 'Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>'. Ensure the test correctly triggers the expected exception."
+      ],
+      "CSVRecord_3_5Test": [
+        "Fix runtime error: 'Index for header 'header3' is 2 but CSVRecord only has 2 values!'. Adjust the test to ensure that the index used is valid for the provided values."
+      ],
+      "CSVRecord_3_2Test": [
+        "Reduce redundancy: This test has a high redundancy score of 0.206. Consider modifying the test to target different code paths in the focal method."
+      ],
+      "CSVRecord_3_6Test": [
+        "Increase coverage: This test has low coverage with a focal line rate of 44.44%. Add tests for boundary values and exception-throwing paths to improve coverage."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 9290,
+    "completion_tokens": 396,
+    "total_tokens": 9686,
+    "llm_elapsed_time_seconds": 6.189
+  }
+}

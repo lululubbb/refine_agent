@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Reader;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport java.io.StringReader;\nimport java.io.IOException;\n\nclass ExtendedBufferedReader_5_2Test {\n\n    @Test\n    void testReadLine_normalCase() throws Exception {\n        String input = \"Hello, World!\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n        \n        String result = reader.readLine();\n        \n        Assertions.assertEquals(input, result);\n        Assertions.assertEquals('!', getPrivateField(reader, \"lastChar\"));\n        Assertions.assertEquals(1, getPrivateField(reader, \"lineCounter\"));\n    }\n\n    @Test\n    void testReadLine_emptyLine() throws Exception {\n        String input = \"\\n\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n        \n        String result = reader.readLine();\n        \n        Assertions.assertEquals(\"\", result);\n        Assertions.assertEquals('\\n', getPrivateField(reader, \"lastChar\"));\n        Assertions.assertEquals(1, getPrivateField(reader, \"lineCounter\"));\n    }\n\n    @Test\n    void testReadLine_endOfStream() throws Exception {\n        String input = \"First line\\nSecond line\\n\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n        \n        reader.readLine(); // Read first line\n        reader.readLine(); // Read second line\n        String result = reader.readLine(); // Read end of stream\n        \n        Assertions.assertNull(result);\n        Assertions.assertEquals(-1, getPrivateField(reader, \"lastChar\"));\n        Assertions.assertEquals(2, getPrivateField(reader, \"lineCounter\"));\n    }\n\n    @Test\n    void testReadLine_multipleLines() throws Exception {\n        String input = \"Line 1\\nLine 2\\nLine 3\\n\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n        \n        Assertions.assertEquals(\"Line 1\", reader.readLine());\n        Assertions.assertEquals(\"Line 2\", reader.readLine());\n        Assertions.assertEquals(\"Line 3\", reader.readLine());\n        Assertions.assertNull(reader.readLine());\n        \n        Assertions.assertEquals(-1, getPrivateField(reader, \"lastChar\"));\n        Assertions.assertEquals(3, getPrivateField(reader, \"lineCounter\"));\n    }\n\n    private Object getPrivateField(ExtendedBufferedReader reader, String fieldName) throws Exception {\n        var field = ExtendedBufferedReader.class.getDeclaredField(fieldName);\n        field.setAccessible(true);\n        return field.get(reader);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1102,
+    "completion_tokens": 526,
+    "total_tokens": 1628,
+    "llm_elapsed_time_seconds": 8.219
+  }
+}

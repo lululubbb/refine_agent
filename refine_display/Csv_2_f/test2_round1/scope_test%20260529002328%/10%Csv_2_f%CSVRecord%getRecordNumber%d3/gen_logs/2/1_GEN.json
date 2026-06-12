@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Field;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecordTest {\n\n    @Test\n    public void testgetRecordNumber_normalCase() throws Exception {\n        // Arrange\n        String[] values = {\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = \"This is a comment\";\n        long expectedRecordNumber = 5L;\n\n        CSVRecord csvRecord = new CSVRecord(values, mapping, comment, expectedRecordNumber);\n\n        // Act\n        long actualRecordNumber = csvRecord.getRecordNumber();\n\n        // Assert\n        Assertions.assertEquals(expectedRecordNumber, actualRecordNumber);\n    }\n\n    @Test\n    public void testgetRecordNumber_zeroRecordNumber() throws Exception {\n        // Arrange\n        String[] values = {};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = null;\n        long expectedRecordNumber = 0L;\n\n        CSVRecord csvRecord = new CSVRecord(values, mapping, comment, expectedRecordNumber);\n\n        // Act\n        long actualRecordNumber = csvRecord.getRecordNumber();\n\n        // Assert\n        Assertions.assertEquals(expectedRecordNumber, actualRecordNumber);\n    }\n\n    @Test\n    public void testgetRecordNumber_negativeRecordNumber() throws Exception {\n        // Arrange\n        String[] values = {\"value1\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = \"Negative record number\";\n        long expectedRecordNumber = -1L;\n\n        CSVRecord csvRecord = new CSVRecord(values, mapping, comment, expectedRecordNumber);\n\n        // Act\n        long actualRecordNumber = csvRecord.getRecordNumber();\n\n        // Assert\n        Assertions.assertEquals(expectedRecordNumber, actualRecordNumber);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 619,
+    "completion_tokens": 382,
+    "total_tokens": 1001,
+    "llm_elapsed_time_seconds": 7.234
+  }
+}

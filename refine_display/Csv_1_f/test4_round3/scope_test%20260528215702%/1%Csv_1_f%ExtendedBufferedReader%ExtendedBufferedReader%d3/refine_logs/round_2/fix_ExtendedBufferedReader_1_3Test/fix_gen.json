@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.BufferedReader;\nimport java.io.Reader;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\nimport java.io.IOException;\nimport java.io.StringReader;\n\nclass ExtendedBufferedReader_1_3Test {\n    private ExtendedBufferedReader extendedBufferedReader;\n\n    @BeforeEach\n    void setUp() {\n        StringReader stringReader = new StringReader(\"Hello\\nWorld\");\n        extendedBufferedReader = new ExtendedBufferedReader(stringReader);\n    }\n\n    @Test\n    void testRead_normalCase() throws Exception {\n        int result = extendedBufferedReader.read();\n        Assertions.assertEquals('H', result);\n    }\n\n    @Test\n    void testRead_AfterRead() throws Exception {\n        extendedBufferedReader.read(); // Read first character\n        int result = extendedBufferedReader.read();\n        Assertions.assertEquals('e', result);\n    }\n\n    @Test\n    void testRead_AfterEndOfStream() throws Exception {\n        // Read until the end of the stream\n        while (extendedBufferedReader.read() != ExtendedBufferedReader.END_OF_STREAM) {}\n        int result = extendedBufferedReader.read(); // Read past the end\n        Assertions.assertEquals(ExtendedBufferedReader.END_OF_STREAM, result);\n    }\n\n    @Test\n    void testReadLine_normalCase() throws Exception {\n        String line = extendedBufferedReader.readLine();\n        Assertions.assertEquals(\"Hello\", line);\n    }\n\n    @Test\n    void testReadLine_AfterRead() throws Exception {\n        extendedBufferedReader.read(); // Read first character\n        String line = extendedBufferedReader.readLine();\n        Assertions.assertEquals(\"ello\", line);\n    }\n\n    @Test\n    void testGetLineNumber() throws Exception {\n        extendedBufferedReader.readLine(); // Read first line\n        int lineNumber = invokeGetLineNumber();\n        Assertions.assertEquals(1, lineNumber);\n    }\n\n    private int invokeGetLineNumber() throws Exception {\n        java.lang.reflect.Method method = ExtendedBufferedReader.class.getDeclaredMethod(\"getLineNumber\");\n        method.setAccessible(true);\n        return (int) method.invoke(extendedBufferedReader);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1190,
+    "completion_tokens": 451,
+    "total_tokens": 1641,
+    "llm_elapsed_time_seconds": 16.189
+  }
+}

@@ -1,0 +1,13 @@
+[PER_TEST_RUN] ExtendedBufferedReader_2_1Test.java exec_ok=False exec_size=0
+[PER_TEST_RUN] ExtendedBufferedReader_2_2Test.java exec_ok=False exec_size=31967
+[ALL ATTEMPTS]
+  total_tests=2
+  syntax_errors=0
+  compile_errors=0
+  test_run_errors=2
+  全项目行覆盖率: 1.98% (9/455)
+  全项目分支覆盖率: 2.03% (6/296)
+  target_classes: ['ExtendedBufferedReader']
+  target_class: ExtendedBufferedReader
+    行覆盖率: 24.32% (9/37)
+    分支覆盖率: 23.08% (6/26)

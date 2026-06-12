@@ -1,0 +1,8 @@
+project_name,target_class,test_class,test_method,buggy_status,fixed_status,bug_revealing,buggy_rc,fixed_rc,notes
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_7_1Test,testgetLineNumber_initialValue,pass,pass,false,0,0,
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_7_1Test,testgetLineNumber_afterReadingLines,pass,pass,false,0,0,
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_7_1Test,testgetLineNumber_noLinesRead,pass,pass,false,0,0,
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_7_2Test,testGetLineNumber_initialState,pass,pass,false,0,0,
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_7_2Test,testGetLineNumber_afterReadingLines,pass,pass,false,0,0,
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_7_2Test,testGetLineNumber_afterReadingAllLines,pass,pass,false,0,0,
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_7_2Test,testGetLineNumber_noLinesRead,pass,pass,false,0,0,

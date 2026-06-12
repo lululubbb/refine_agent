@@ -1,0 +1,3 @@
+project,target_class,test_class,compile_status,exec_status,exec_timeout,jacoco_exec_size,compile_score,exec_score
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_12_1Test,pass,pass,False,31668,1.0,1.0
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_12_2Test,pass,pass,False,31668,1.0,1.0

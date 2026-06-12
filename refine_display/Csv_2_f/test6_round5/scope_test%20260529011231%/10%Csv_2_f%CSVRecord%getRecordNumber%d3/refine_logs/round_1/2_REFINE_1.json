@@ -1,0 +1,32 @@
+{
+  "raw": "{\n  \"suite_summary\": \"All test files compile and execute successfully, but several tests exhibit issues related to redundancy and lack of bug-revealing capabilities. The tests are well-structured but need enhancements to ensure they cover a broader range of scenarios and reduce redundancy.\",\n  \"test_instructions\": {\n    \"CSVRecord_10_1Test\": [\n      \"This test is not bug-revealing. Consider adding tests for boundary values and exception-throwing paths to ensure comprehensive coverage.\"\n    ],\n    \"CSVRecord_10_2Test\": [\n      \"This test is not bug-revealing and has high redundancy with CSVRecord_10_4Test. Consider removing redundant tests and adding new tests that cover different scenarios.\"\n    ],\n    \"CSVRecord_10_3Test\": [\n      \"This test is not bug-revealing. Enhance it by adding tests for edge cases and different input values to ensure it exercises different code paths.\"\n    ],\n    \"CSVRecord_10_4Test\": [\n      \"This test is not bug-revealing and has high redundancy with CSVRecord_10_2Test. Consider removing redundant tests and adding new tests that cover different scenarios.\"\n    ],\n    \"CSVRecord_10_5Test\": [\n      \"This test is not bug-revealing. Add tests for boundary values and exception-throwing paths to ensure comprehensive coverage.\"\n    ],\n    \"CSVRecord_10_6Test\": [\n      \"This test is not bug-revealing. Consider adding tests for edge cases and different input values to ensure it exercises different code paths.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "All test files compile and execute successfully, but several tests exhibit issues related to redundancy and lack of bug-revealing capabilities. The tests are well-structured but need enhancements to ensure they cover a broader range of scenarios and reduce redundancy.",
+    "test_instructions": {
+      "CSVRecord_10_1Test": [
+        "This test is not bug-revealing. Consider adding tests for boundary values and exception-throwing paths to ensure comprehensive coverage."
+      ],
+      "CSVRecord_10_2Test": [
+        "This test is not bug-revealing and has high redundancy with CSVRecord_10_4Test. Consider removing redundant tests and adding new tests that cover different scenarios."
+      ],
+      "CSVRecord_10_3Test": [
+        "This test is not bug-revealing. Enhance it by adding tests for edge cases and different input values to ensure it exercises different code paths."
+      ],
+      "CSVRecord_10_4Test": [
+        "This test is not bug-revealing and has high redundancy with CSVRecord_10_2Test. Consider removing redundant tests and adding new tests that cover different scenarios."
+      ],
+      "CSVRecord_10_5Test": [
+        "This test is not bug-revealing. Add tests for boundary values and exception-throwing paths to ensure comprehensive coverage."
+      ],
+      "CSVRecord_10_6Test": [
+        "This test is not bug-revealing. Consider adding tests for edge cases and different input values to ensure it exercises different code paths."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 7580,
+    "completion_tokens": 330,
+    "total_tokens": 7910,
+    "llm_elapsed_time_seconds": 7.377
+  }
+}

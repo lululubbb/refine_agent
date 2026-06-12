@@ -1,0 +1,34 @@
+{
+  "raw": "{\n  \"suite_summary\": \"All test files compile and execute successfully, but several exhibit issues related to redundancy and lack of bug-revealing capabilities. The tests primarily cover normal and boundary cases for the `getRecordNumber` method in the `CSVRecord` class, but they do not reveal any bugs. There is a high degree of redundancy among the tests, indicating that many tests are similar in structure and purpose.\",\n  \"test_instructions\": {\n    \"CSVRecord_10_1Test\": [\n      \"This test is not bug-revealing. Consider adding tests that assert specific numeric values or edge cases to reveal potential bugs.\"\n    ],\n    \"CSVRecord_10_2Test\": [\n      \"This test is not bug-revealing. Consider adding tests that assert specific numeric values or edge cases to reveal potential bugs.\",\n      \"This test has high redundancy with CSVRecord_10_4Test. Consider refactoring to reduce redundancy.\"\n    ],\n    \"CSVRecord_10_3Test\": [\n      \"This test is not bug-revealing. Consider adding tests that assert specific numeric values or edge cases to reveal potential bugs.\"\n    ],\n    \"CSVRecord_10_4Test\": [\n      \"This test is not bug-revealing. Consider adding tests that assert specific numeric values or edge cases to reveal potential bugs.\",\n      \"This test has high redundancy with CSVRecord_10_2Test. Consider refactoring to reduce redundancy.\"\n    ],\n    \"CSVRecord_10_5Test\": [\n      \"This test is not bug-revealing. Consider adding tests that assert specific numeric values or edge cases to reveal potential bugs.\"\n    ],\n    \"CSVRecord_10_6Test\": [\n      \"This test is not bug-revealing. Consider adding tests that assert specific numeric values or edge cases to reveal potential bugs.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "All test files compile and execute successfully, but several exhibit issues related to redundancy and lack of bug-revealing capabilities. The tests primarily cover normal and boundary cases for the `getRecordNumber` method in the `CSVRecord` class, but they do not reveal any bugs. There is a high degree of redundancy among the tests, indicating that many tests are similar in structure and purpose.",
+    "test_instructions": {
+      "CSVRecord_10_1Test": [
+        "This test is not bug-revealing. Consider adding tests that assert specific numeric values or edge cases to reveal potential bugs."
+      ],
+      "CSVRecord_10_2Test": [
+        "This test is not bug-revealing. Consider adding tests that assert specific numeric values or edge cases to reveal potential bugs.",
+        "This test has high redundancy with CSVRecord_10_4Test. Consider refactoring to reduce redundancy."
+      ],
+      "CSVRecord_10_3Test": [
+        "This test is not bug-revealing. Consider adding tests that assert specific numeric values or edge cases to reveal potential bugs."
+      ],
+      "CSVRecord_10_4Test": [
+        "This test is not bug-revealing. Consider adding tests that assert specific numeric values or edge cases to reveal potential bugs.",
+        "This test has high redundancy with CSVRecord_10_2Test. Consider refactoring to reduce redundancy."
+      ],
+      "CSVRecord_10_5Test": [
+        "This test is not bug-revealing. Consider adding tests that assert specific numeric values or edge cases to reveal potential bugs."
+      ],
+      "CSVRecord_10_6Test": [
+        "This test is not bug-revealing. Consider adding tests that assert specific numeric values or edge cases to reveal potential bugs."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 10413,
+    "completion_tokens": 382,
+    "total_tokens": 10795,
+    "llm_elapsed_time_seconds": 6.309
+  }
+}

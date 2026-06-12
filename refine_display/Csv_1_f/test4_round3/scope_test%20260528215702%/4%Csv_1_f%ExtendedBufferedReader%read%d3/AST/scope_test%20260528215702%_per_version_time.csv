@@ -1,0 +1,4 @@
+project,version,ast_generation_time_nanosec
+scope_test%20260528215702%,4%Csv_1_f%ExtendedBufferedReader%read%d3,42262459
+scope_test%20260528215702%,4%Csv_1_f%ExtendedBufferedReader%read%d3,41173083
+scope_test%20260528215702%,4%Csv_1_f%ExtendedBufferedReader%read%d3,50000108

@@ -1,0 +1,466 @@
+{
+  "test_diags": {
+    "ExtendedBufferedReader_5_1Test": {
+      "test_name": "ExtendedBufferedReader_5_1Test",
+      "compile_ok": true,
+      "exec_ok": false,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [
+        "=> org.opentest4j.AssertionFailedError: expected: <-1> but was: <-2>",
+        "Failures (1):",
+        "JUnit Jupiter:ExtendedBufferedReader_5_1Test:testreadLine_emptyLine()",
+        "MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_5_1Test', methodName = 'testreadLine_emptyLine', methodParameterTypes = '']",
+        "org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)",
+        "org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)",
+        "org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)",
+        "org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)",
+        "org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)",
+        "org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:528)",
+        "org.apache.commons.csv.ExtendedBufferedReader_5_1Test.testreadLine_emptyLine(ExtendedBufferedReader_5_1Test.java:34)",
+        "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)",
+        "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)",
+        "java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)",
+        "[...]",
+        "Test run finished after 496 ms",
+        "[         4 containers found      ]",
+        "[         0 containers skipped    ]",
+        "[         4 containers started    ]",
+        "[         0 containers aborted    ]"
+      ],
+      "focal_line_rate": 100.0,
+      "focal_branch_rate": 100.0,
+      "focal_line_covered": 7,
+      "focal_line_total": 7,
+      "missed_methods": [],
+      "partial_methods": [],
+      "bug_revealing": false,
+      "redundancy_score": 0.0497,
+      "most_similar_to": "ExtendedBufferedReader_5_2Test",
+      "diag_data_valid": true
+    },
+    "ExtendedBufferedReader_5_2Test": {
+      "test_name": "ExtendedBufferedReader_5_2Test",
+      "compile_ok": true,
+      "exec_ok": true,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [],
+      "focal_line_rate": 100.0,
+      "focal_branch_rate": 100.0,
+      "focal_line_covered": 7,
+      "focal_line_total": 7,
+      "missed_methods": [
+        "line 57: read() — completely uncovered",
+        "line 76: readAgain() — completely uncovered",
+        "line 81: read() — completely uncovered",
+        "line 146: lookAhead() — completely uncovered"
+      ],
+      "partial_methods": [],
+      "bug_revealing": false,
+      "redundancy_score": 0.2258,
+      "most_similar_to": "ExtendedBufferedReader_5_6Test",
+      "diag_data_valid": true
+    },
+    "ExtendedBufferedReader_5_3Test": {
+      "test_name": "ExtendedBufferedReader_5_3Test",
+      "compile_ok": true,
+      "exec_ok": false,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [
+        "=> org.opentest4j.AssertionFailedError: expected: <10> but was: <101>",
+        "Failures (1):",
+        "JUnit Jupiter:ExtendedBufferedReader_5_3Test:testreadLine_emptyLine()",
+        "MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_5_3Test', methodName = 'testreadLine_emptyLine', methodParameterTypes = '']",
+        "org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)",
+        "org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)",
+        "org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)",
+        "org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)",
+        "org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)",
+        "org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:528)",
+        "org.apache.commons.csv.ExtendedBufferedReader_5_3Test.testreadLine_emptyLine(ExtendedBufferedReader_5_3Test.java:42)",
+        "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)",
+        "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)",
+        "java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)",
+        "[...]",
+        "Test run finished after 429 ms",
+        "[         4 containers found      ]",
+        "[         0 containers skipped    ]",
+        "[         4 containers started    ]",
+        "[         0 containers aborted    ]"
+      ],
+      "focal_line_rate": 100.0,
+      "focal_branch_rate": 100.0,
+      "focal_line_covered": 7,
+      "focal_line_total": 7,
+      "missed_methods": [],
+      "partial_methods": [],
+      "bug_revealing": false,
+      "redundancy_score": 0.1138,
+      "most_similar_to": "ExtendedBufferedReader_5_2Test",
+      "diag_data_valid": true
+    },
+    "ExtendedBufferedReader_5_4Test": {
+      "test_name": "ExtendedBufferedReader_5_4Test",
+      "compile_ok": true,
+      "exec_ok": true,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [],
+      "focal_line_rate": 100.0,
+      "focal_branch_rate": 100.0,
+      "focal_line_covered": 7,
+      "focal_line_total": 7,
+      "missed_methods": [
+        "line 57: read() — completely uncovered",
+        "line 76: readAgain() — completely uncovered",
+        "line 81: read() — completely uncovered",
+        "line 146: lookAhead() — completely uncovered",
+        "line 159: getLineNumber() — completely uncovered"
+      ],
+      "partial_methods": [],
+      "bug_revealing": false,
+      "redundancy_score": 0.1471,
+      "most_similar_to": "ExtendedBufferedReader_5_5Test",
+      "diag_data_valid": true
+    },
+    "ExtendedBufferedReader_5_5Test": {
+      "test_name": "ExtendedBufferedReader_5_5Test",
+      "compile_ok": false,
+      "exec_ok": false,
+      "exec_timeout": false,
+      "compile_errors": [
+        "Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC",
+        "/home/chenlu/refine_test_gen_v5/refine_display/Csv_1_f/test6_round5/scope_test%20260528224814%/5%Csv_1_f%ExtendedBufferedReader%readLine%d3/test_cases/ExtendedBufferedReader_5_5Test.java:64: error: cannot find symbol",
+        "                                           ^",
+        "  location: variable reader of type ExtendedBufferedReader",
+        "/home/chenlu/refine_test_gen_v5/refine_display/Csv_1_f/test6_round5/scope_test%20260528224814%/5%Csv_1_f%ExtendedBufferedReader%readLine%d3/test_cases/ExtendedBufferedReader_5_5Test.java:69: error: cannot find symbol"
+      ],
+      "exec_errors": [],
+      "focal_line_rate": null,
+      "focal_branch_rate": null,
+      "focal_line_covered": null,
+      "focal_line_total": null,
+      "missed_methods": [],
+      "partial_methods": [],
+      "bug_revealing": false,
+      "redundancy_score": 0.1471,
+      "most_similar_to": "ExtendedBufferedReader_5_4Test",
+      "diag_data_valid": true
+    },
+    "ExtendedBufferedReader_5_6Test": {
+      "test_name": "ExtendedBufferedReader_5_6Test",
+      "compile_ok": true,
+      "exec_ok": false,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [
+        "=> org.opentest4j.AssertionFailedError: expected: <78> but was: <-2>",
+        "Failures (1):",
+        "JUnit Jupiter:ExtendedBufferedReader_5_6Test:testReadLine_emptyLine()",
+        "MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_5_6Test', methodName = 'testReadLine_emptyLine', methodParameterTypes = '']",
+        "org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)",
+        "org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)",
+        "org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)",
+        "org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)",
+        "org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)",
+        "org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:528)",
+        "org.apache.commons.csv.ExtendedBufferedReader_5_6Test.testReadLine_emptyLine(ExtendedBufferedReader_5_6Test.java:36)",
+        "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)",
+        "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)",
+        "java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)",
+        "[...]",
+        "Test run finished after 587 ms",
+        "[         4 containers found      ]",
+        "[         0 containers skipped    ]",
+        "[         4 containers started    ]",
+        "[         0 containers aborted    ]"
+      ],
+      "focal_line_rate": 100.0,
+      "focal_branch_rate": 100.0,
+      "focal_line_covered": 7,
+      "focal_line_total": 7,
+      "missed_methods": [],
+      "partial_methods": [],
+      "bug_revealing": false,
+      "redundancy_score": 0.2258,
+      "most_similar_to": "ExtendedBufferedReader_5_2Test",
+      "diag_data_valid": true
+    }
+  },
+  "test_scores": {
+    "ExtendedBufferedReader_5_1Test": {
+      "test_name": "ExtendedBufferedReader_5_1Test",
+      "compile_score": 1.0,
+      "exec_score": 0.0,
+      "focal_line_coverage": 1.0,
+      "focal_branch_coverage": 1.0,
+      "focal_line_covered": 7,
+      "focal_line_total": 7,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.0497,
+      "similarity": 0.9503,
+      "most_similar_to": "ExtendedBufferedReader_5_2Test",
+      "issues": [
+        "EXEC_FAIL"
+      ]
+    },
+    "ExtendedBufferedReader_5_2Test": {
+      "test_name": "ExtendedBufferedReader_5_2Test",
+      "compile_score": 1.0,
+      "exec_score": 1.0,
+      "focal_line_coverage": 1.0,
+      "focal_branch_coverage": 1.0,
+      "focal_line_covered": 7,
+      "focal_line_total": 7,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.2258,
+      "similarity": 0.7742,
+      "most_similar_to": "ExtendedBufferedReader_5_6Test",
+      "issues": [
+        "NOT_BUG_REVEALING",
+        "HIGH_REDUNDANCY"
+      ]
+    },
+    "ExtendedBufferedReader_5_3Test": {
+      "test_name": "ExtendedBufferedReader_5_3Test",
+      "compile_score": 1.0,
+      "exec_score": 0.0,
+      "focal_line_coverage": 1.0,
+      "focal_branch_coverage": 1.0,
+      "focal_line_covered": 7,
+      "focal_line_total": 7,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.1138,
+      "similarity": 0.8862,
+      "most_similar_to": "ExtendedBufferedReader_5_2Test",
+      "issues": [
+        "EXEC_FAIL"
+      ]
+    },
+    "ExtendedBufferedReader_5_4Test": {
+      "test_name": "ExtendedBufferedReader_5_4Test",
+      "compile_score": 1.0,
+      "exec_score": 1.0,
+      "focal_line_coverage": 1.0,
+      "focal_branch_coverage": 1.0,
+      "focal_line_covered": 7,
+      "focal_line_total": 7,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.1471,
+      "similarity": 0.8529,
+      "most_similar_to": "ExtendedBufferedReader_5_5Test",
+      "issues": [
+        "NOT_BUG_REVEALING",
+        "HIGH_REDUNDANCY"
+      ]
+    },
+    "ExtendedBufferedReader_5_5Test": {
+      "test_name": "ExtendedBufferedReader_5_5Test",
+      "compile_score": 0.0,
+      "exec_score": 0.0,
+      "focal_line_coverage": null,
+      "focal_branch_coverage": null,
+      "focal_line_covered": null,
+      "focal_line_total": null,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.1471,
+      "similarity": 0.8529,
+      "most_similar_to": "ExtendedBufferedReader_5_4Test",
+      "issues": [
+        "COMPILE_FAIL"
+      ]
+    },
+    "ExtendedBufferedReader_5_6Test": {
+      "test_name": "ExtendedBufferedReader_5_6Test",
+      "compile_score": 1.0,
+      "exec_score": 0.0,
+      "focal_line_coverage": 1.0,
+      "focal_branch_coverage": 1.0,
+      "focal_line_covered": 7,
+      "focal_line_total": 7,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.2258,
+      "similarity": 0.7742,
+      "most_similar_to": "ExtendedBufferedReader_5_2Test",
+      "issues": [
+        "EXEC_FAIL"
+      ]
+    }
+  },
+  "suite_score": {
+    "n_tests": 6,
+    "compile_pass_count": 5,
+    "compile_pass_rate": 0.8333,
+    "exec_pass_count": 2,
+    "exec_pass_rate": 0.3333,
+    "all_compile_pass": false,
+    "per_test_line_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      null,
+      1.0
+    ],
+    "per_test_branch_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      null,
+      1.0
+    ],
+    "coverage_line_avg": 1.0,
+    "coverage_line_max": 1.0,
+    "coverage_line_min": 1.0,
+    "coverage_branch_avg": 1.0,
+    "bug_reveal_count": 0,
+    "bug_reveal_checked": 5,
+    "bug_reveal_rate": 0.0,
+    "max_pairwise_similarity": 0.9503,
+    "high_redundancy_pairs": [
+      {
+        "test1": "ExtendedBufferedReader_5_2Test",
+        "test2": "ExtendedBufferedReader_5_1Test",
+        "similarity": 0.9503
+      },
+      {
+        "test1": "ExtendedBufferedReader_5_1Test",
+        "test2": "ExtendedBufferedReader_5_2Test",
+        "similarity": 0.9503
+      },
+      {
+        "test1": "ExtendedBufferedReader_5_2Test",
+        "test2": "ExtendedBufferedReader_5_1Test",
+        "similarity": 0.9503
+      },
+      {
+        "test1": "ExtendedBufferedReader_5_1Test",
+        "test2": "ExtendedBufferedReader_5_2Test",
+        "similarity": 0.9503
+      },
+      {
+        "test1": "ExtendedBufferedReader_5_3Test",
+        "test2": "ExtendedBufferedReader_5_2Test",
+        "similarity": 0.8862
+      },
+      {
+        "test1": "ExtendedBufferedReader_5_3Test",
+        "test2": "ExtendedBufferedReader_5_2Test",
+        "similarity": 0.8862
+      },
+      {
+        "test1": "ExtendedBufferedReader_5_4Test",
+        "test2": "ExtendedBufferedReader_5_5Test",
+        "similarity": 0.8828
+      },
+      {
+        "test1": "ExtendedBufferedReader_5_5Test",
+        "test2": "ExtendedBufferedReader_5_4Test",
+        "similarity": 0.8828
+      },
+      {
+        "test1": "ExtendedBufferedReader_5_4Test",
+        "test2": "ExtendedBufferedReader_5_5Test",
+        "similarity": 0.8529
+      },
+      {
+        "test1": "ExtendedBufferedReader_5_5Test",
+        "test2": "ExtendedBufferedReader_5_4Test",
+        "similarity": 0.8529
+      },
+      {
+        "test1": "ExtendedBufferedReader_5_6Test",
+        "test2": "ExtendedBufferedReader_5_2Test",
+        "similarity": 0.7742
+      },
+      {
+        "test1": "ExtendedBufferedReader_5_6Test",
+        "test2": "ExtendedBufferedReader_5_2Test",
+        "similarity": 0.7742
+      }
+    ],
+    "problem_tests": {
+      "EXEC_FAIL": [
+        "ExtendedBufferedReader_5_1Test",
+        "ExtendedBufferedReader_5_3Test",
+        "ExtendedBufferedReader_5_6Test"
+      ],
+      "NOT_BUG_REVEALING": [
+        "ExtendedBufferedReader_5_2Test",
+        "ExtendedBufferedReader_5_4Test"
+      ],
+      "HIGH_REDUNDANCY": [
+        "ExtendedBufferedReader_5_2Test",
+        "ExtendedBufferedReader_5_4Test"
+      ],
+      "COMPILE_FAIL": [
+        "ExtendedBufferedReader_5_5Test"
+      ]
+    }
+  },
+  "pairwise_sims": [
+    {
+      "tc1": "ExtendedBufferedReader_5_6Test",
+      "tc2": "ExtendedBufferedReader_5_2Test",
+      "score": 0.2258
+    },
+    {
+      "tc1": "ExtendedBufferedReader_5_4Test",
+      "tc2": "ExtendedBufferedReader_5_5Test",
+      "score": 0.1471
+    },
+    {
+      "tc1": "ExtendedBufferedReader_5_2Test",
+      "tc2": "ExtendedBufferedReader_5_1Test",
+      "score": 0.0497
+    },
+    {
+      "tc1": "ExtendedBufferedReader_5_1Test",
+      "tc2": "ExtendedBufferedReader_5_2Test",
+      "score": 0.0497
+    },
+    {
+      "tc1": "ExtendedBufferedReader_5_3Test",
+      "tc2": "ExtendedBufferedReader_5_2Test",
+      "score": 0.1138
+    },
+    {
+      "tc1": "ExtendedBufferedReader_5_5Test",
+      "tc2": "ExtendedBufferedReader_5_4Test",
+      "score": 0.1471
+    },
+    {
+      "tc1": "ExtendedBufferedReader_5_6Test",
+      "tc2": "ExtendedBufferedReader_5_2Test",
+      "score": 0.2258
+    },
+    {
+      "tc1": "ExtendedBufferedReader_5_4Test",
+      "tc2": "ExtendedBufferedReader_5_5Test",
+      "score": 0.1172
+    },
+    {
+      "tc1": "ExtendedBufferedReader_5_2Test",
+      "tc2": "ExtendedBufferedReader_5_1Test",
+      "score": 0.0497
+    },
+    {
+      "tc1": "ExtendedBufferedReader_5_1Test",
+      "tc2": "ExtendedBufferedReader_5_2Test",
+      "score": 0.0497
+    },
+    {
+      "tc1": "ExtendedBufferedReader_5_3Test",
+      "tc2": "ExtendedBufferedReader_5_2Test",
+      "score": 0.1138
+    },
+    {
+      "tc1": "ExtendedBufferedReader_5_5Test",
+      "tc2": "ExtendedBufferedReader_5_4Test",
+      "score": 0.1172
+    }
+  ]
+}

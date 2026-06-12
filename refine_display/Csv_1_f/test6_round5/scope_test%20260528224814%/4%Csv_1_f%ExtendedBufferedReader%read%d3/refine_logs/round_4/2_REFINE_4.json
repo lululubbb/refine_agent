@@ -1,0 +1,37 @@
+{
+  "raw": "{\n  \"suite_summary\": \"All test files in the suite compile successfully, but they all fail during execution due to various assertion errors. Each test needs to be reviewed to correct the expected values in assertions to match the actual behavior of the `read` method in `ExtendedBufferedReader`. Additionally, there are high redundancy issues among some tests that should be addressed to improve test quality.\",\n  \"test_instructions\": {\n    \"ExtendedBufferedReader_4_1Test\": [\n      \"Fix the assertion in 'testRead_normalCase': expected: <8> but was: <10>\",\n      \"Fix the assertion in 'testRead_endOfStream': expected: <-1> but was: <1>\"\n    ],\n    \"ExtendedBufferedReader_4_2Test\": [\n      \"Fix the assertion in 'testRead_normalCase': expected: <10> but was: <8>\",\n      \"Fix the assertion in 'testRead_normalCase': expected: <2> but was: <1>\"\n    ],\n    \"ExtendedBufferedReader_4_3Test\": [\n      \"Fix the assertion in 'testRead_normalCase': expected: <10> but was: <8>\",\n      \"Fix the assertion in 'testRead_newLineCount': expected: <2> but was: <1>\"\n    ],\n    \"ExtendedBufferedReader_4_4Test\": [\n      \"Fix the assertion in 'testRead_normalCase': expected: <10> but was: <8>\",\n      \"Fix the assertion in 'testRead_mixedLineEndings': expected: <22> but was: <19>\"\n    ],\n    \"ExtendedBufferedReader_4_5Test\": [\n      \"Fix the assertion in 'testRead_normalCase': expected: <8> but was: <10>\",\n      \"Fix the assertion in 'testRead_withNewLine': expected: <2> but was: <8>\"\n    ],\n    \"ExtendedBufferedReader_4_6Test\": [\n      \"Fix the assertion in 'testRead_lineBreaks': expected: <[L, i, n, e, 1,]> but was: <[L, i, n, e, 1,>\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "All test files in the suite compile successfully, but they all fail during execution due to various assertion errors. Each test needs to be reviewed to correct the expected values in assertions to match the actual behavior of the `read` method in `ExtendedBufferedReader`. Additionally, there are high redundancy issues among some tests that should be addressed to improve test quality.",
+    "test_instructions": {
+      "ExtendedBufferedReader_4_1Test": [
+        "Fix the assertion in 'testRead_normalCase': expected: <8> but was: <10>",
+        "Fix the assertion in 'testRead_endOfStream': expected: <-1> but was: <1>"
+      ],
+      "ExtendedBufferedReader_4_2Test": [
+        "Fix the assertion in 'testRead_normalCase': expected: <10> but was: <8>",
+        "Fix the assertion in 'testRead_normalCase': expected: <2> but was: <1>"
+      ],
+      "ExtendedBufferedReader_4_3Test": [
+        "Fix the assertion in 'testRead_normalCase': expected: <10> but was: <8>",
+        "Fix the assertion in 'testRead_newLineCount': expected: <2> but was: <1>"
+      ],
+      "ExtendedBufferedReader_4_4Test": [
+        "Fix the assertion in 'testRead_normalCase': expected: <10> but was: <8>",
+        "Fix the assertion in 'testRead_mixedLineEndings': expected: <22> but was: <19>"
+      ],
+      "ExtendedBufferedReader_4_5Test": [
+        "Fix the assertion in 'testRead_normalCase': expected: <8> but was: <10>",
+        "Fix the assertion in 'testRead_withNewLine': expected: <2> but was: <8>"
+      ],
+      "ExtendedBufferedReader_4_6Test": [
+        "Fix the assertion in 'testRead_lineBreaks': expected: <[L, i, n, e, 1,]> but was: <[L, i, n, e, 1,>"
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 10144,
+    "completion_tokens": 454,
+    "total_tokens": 10598,
+    "llm_elapsed_time_seconds": 7.067
+  }
+}

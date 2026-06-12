@@ -1,0 +1,32 @@
+
+Failures (1):
+  JUnit Jupiter:ExtendedBufferedReader_4_6Test:testRead_lineBreaks()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_4_6Test', methodName = 'testRead_lineBreaks', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: array lengths differ, expected: <19> but was: <20>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertArrayEquals.assertArraysHaveSameLength(AssertArrayEquals.java:428)
+       org.junit.jupiter.api.AssertArrayEquals.assertArrayEquals(AssertArrayEquals.java:189)
+       org.junit.jupiter.api.AssertArrayEquals.assertArrayEquals(AssertArrayEquals.java:47)
+       org.junit.jupiter.api.AssertArrayEquals.assertArrayEquals(AssertArrayEquals.java:51)
+       org.junit.jupiter.api.Assertions.assertArrayEquals(Assertions.java:1200)
+       org.apache.commons.csv.ExtendedBufferedReader_4_6Test.testRead_lineBreaks(ExtendedBufferedReader_4_6Test.java:62)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       [...]
+
+Test run finished after 405 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         5 tests found           ]
+[         0 tests skipped         ]
+[         5 tests started         ]
+[         0 tests aborted         ]
+[         4 tests successful      ]
+[         1 tests failed          ]
+
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC

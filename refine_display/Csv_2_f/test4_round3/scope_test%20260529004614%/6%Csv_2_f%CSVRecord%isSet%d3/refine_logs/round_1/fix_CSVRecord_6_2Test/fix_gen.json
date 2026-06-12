@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_6_2Test {\n    private CSVRecord csvRecord;\n    private Map<String, Integer> mapping;\n\n    @BeforeEach\n    public void setUp() {\n        mapping = new HashMap<>();\n    }\n\n    @Test\n    public void testisSet_nameMappedAndWithinBounds() throws Exception {\n        mapping.put(\"name\", 0);\n        String[] values = {\"value1\", \"value2\"};\n        csvRecord = new CSVRecord(values, mapping, null, 1);\n        \n        Assertions.assertTrue(csvRecord.isSet(\"name\"));\n    }\n\n    @Test\n    public void testisSet_nameMappedButOutOfBounds() throws Exception {\n        mapping.put(\"name\", 2);\n        String[] values = {\"value1\", \"value2\"};\n        csvRecord = new CSVRecord(values, mapping, null, 1);\n        \n        Assertions.assertFalse(csvRecord.isSet(\"name\"));\n    }\n\n    @Test\n    public void testisSet_nameNotMapped() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        csvRecord = new CSVRecord(values, mapping, null, 1);\n        \n        Assertions.assertFalse(csvRecord.isSet(\"name\"));\n    }\n\n    @Test\n    public void testisSet_emptyMapping() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        csvRecord = new CSVRecord(values, mapping, null, 1);\n        \n        Assertions.assertFalse(csvRecord.isSet(\"nonExistentName\"));\n    }\n\n    @Test\n    public void testisSet_nullName() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        csvRecord = new CSVRecord(values, mapping, null, 1);\n        \n        Assertions.assertFalse(csvRecord.isSet(null));\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1259,
+    "completion_tokens": 430,
+    "total_tokens": 1689,
+    "llm_elapsed_time_seconds": 10.274
+  }
+}

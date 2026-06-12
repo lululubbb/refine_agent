@@ -1,0 +1,9 @@
+project_name,target_class,test_class,test_method,fixed_status,buggy_status,bug_revealing
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_3_1Test,testGet_normalCase,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_3_1Test,testGet_nonExistentHeader,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_3_1Test,testGet_noHeaderMapping,fail,fail,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_3_1Test,testGet_indexOutOfBounds,fail,fail,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_3_2Test,testGet_normalCase,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_3_2Test,testGet_nonExistentHeader,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_3_2Test,testGet_nullMapping,fail,fail,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_3_2Test,testGet_indexOutOfBounds,fail,fail,false

@@ -1,0 +1,17 @@
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+/home/chenlu/refine_test_gen_v5/refine_display/Csv_1_f/test4_round3/scope_test%20260528215702%/3%Csv_1_f%ExtendedBufferedReader%readAgain%d3/test_cases/ExtendedBufferedReader_3_4Test.java:15: error: cannot find symbol
+        reader.setLastChar(ExtendedBufferedReader.UNDEFINED);
+              ^
+  symbol:   method setLastChar(int)
+  location: variable reader of type ExtendedBufferedReader
+/home/chenlu/refine_test_gen_v5/refine_display/Csv_1_f/test4_round3/scope_test%20260528215702%/3%Csv_1_f%ExtendedBufferedReader%readAgain%d3/test_cases/ExtendedBufferedReader_3_4Test.java:22: error: cannot find symbol
+        reader.setLastChar(5);
+              ^
+  symbol:   method setLastChar(int)
+  location: variable reader of type ExtendedBufferedReader
+/home/chenlu/refine_test_gen_v5/refine_display/Csv_1_f/test4_round3/scope_test%20260528215702%/3%Csv_1_f%ExtendedBufferedReader%readAgain%d3/test_cases/ExtendedBufferedReader_3_4Test.java:29: error: cannot find symbol
+        reader.setLastChar(ExtendedBufferedReader.END_OF_STREAM);
+              ^
+  symbol:   method setLastChar(int)
+  location: variable reader of type ExtendedBufferedReader
+3 errors

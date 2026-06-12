@@ -1,0 +1,20 @@
+{
+  "raw": "{\n  \"suite_summary\": \"The test suite for the `read` method in `ExtendedBufferedReader` has two test files, both of which currently fail during execution. The first test file times out, while the second one fails due to an assertion error. Both files have passed compilation, indicating no syntax issues.\",\n  \"test_instructions\": {\n    \"ExtendedBufferedReader_2_1Test\": [\n      \"Fix the timeout issue by optimizing the test logic to ensure it completes within the allowed time limit. The current error is: 'Exceeded TIMEOUT limit'.\"\n    ],\n    \"ExtendedBufferedReader_2_2Test\": [\n      \"Fix the assertion failure in the testRead_lineBreaks method. The error is: '=> org.opentest4j.AssertionFailedError: expected: <76> but was: <110>'. Trace the focal method logic carefully to assert the actual return value.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "The test suite for the `read` method in `ExtendedBufferedReader` has two test files, both of which currently fail during execution. The first test file times out, while the second one fails due to an assertion error. Both files have passed compilation, indicating no syntax issues.",
+    "test_instructions": {
+      "ExtendedBufferedReader_2_1Test": [
+        "Fix the timeout issue by optimizing the test logic to ensure it completes within the allowed time limit. The current error is: 'Exceeded TIMEOUT limit'."
+      ],
+      "ExtendedBufferedReader_2_2Test": [
+        "Fix the assertion failure in the testRead_lineBreaks method. The error is: '=> org.opentest4j.AssertionFailedError: expected: <76> but was: <110>'. Trace the focal method logic carefully to assert the actual return value."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 4234,
+    "completion_tokens": 191,
+    "total_tokens": 4425,
+    "llm_elapsed_time_seconds": 3.002
+  }
+}

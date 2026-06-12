@@ -1,0 +1,7 @@
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+/home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test6_round5/scope_test%20260529011231%/1%Csv_2_f%CSVRecord%CSVRecord%d3/test_cases/CSVRecord_1_4Test.java:107: error: cannot find symbol
+        Method method = CSVRecord.class.getDeclaredMethod("get", int.class);
+        ^
+  symbol:   class Method
+  location: class CSVRecord_1_4Test
+1 error

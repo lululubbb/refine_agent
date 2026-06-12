@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Field;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecordTest {\n\n    @Test\n    public void testGetComment_normalCase() throws Exception {\n        // Arrange\n        String[] values = new String[]{\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"key1\", 0);\n        String comment = \"This is a comment\";\n        long recordNumber = 1;\n\n        CSVRecord csvRecord = new CSVRecord(values, mapping, comment, recordNumber);\n\n        // Act\n        String result = csvRecord.getComment();\n\n        // Assert\n        Assertions.assertEquals(comment, result);\n    }\n\n    @Test\n    public void testGetComment_emptyComment() throws Exception {\n        // Arrange\n        String[] values = new String[]{\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = \"\"; // Empty comment\n        long recordNumber = 1;\n\n        CSVRecord csvRecord = new CSVRecord(values, mapping, comment, recordNumber);\n\n        // Act\n        String result = csvRecord.getComment();\n\n        // Assert\n        Assertions.assertEquals(comment, result);\n    }\n\n    @Test\n    public void testGetComment_nullComment() throws Exception {\n        // Arrange\n        String[] values = new String[]{\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = null; // Null comment\n        long recordNumber = 1;\n\n        CSVRecord csvRecord = new CSVRecord(values, mapping, comment, recordNumber);\n\n        // Act\n        String result = csvRecord.getComment();\n\n        // Assert\n        Assertions.assertNull(result);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 616,
+    "completion_tokens": 376,
+    "total_tokens": 992,
+    "llm_elapsed_time_seconds": 5.033
+  }
+}

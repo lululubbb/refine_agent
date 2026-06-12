@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Field;\nimport java.util.Collections;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_11_2Test {\n\n    @Test\n    public void testSize_emptyArray() throws Exception {\n        String[] values = new String[0];\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 0);\n        Assertions.assertEquals(0, record.size());\n    }\n\n    @Test\n    public void testSize_nonEmptyArray() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 0);\n        Assertions.assertEquals(3, record.size());\n    }\n\n    @Test\n    public void testSize_singleElementArray() throws Exception {\n        String[] values = {\"singleValue\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 0);\n        Assertions.assertEquals(1, record.size());\n    }\n\n    @Test\n    public void testSize_withNullValues() throws Exception {\n        String[] values = {null, null, null};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 0);\n        Assertions.assertEquals(3, record.size());\n    }\n\n    @Test\n    public void testSize_largeArray() throws Exception {\n        String[] values = new String[1000];\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 0);\n        Assertions.assertEquals(1000, record.size());\n    }\n\n    @Test\n    public void testSize_boundaryValues() throws Exception {\n        String[] values = {\"\"}; // Testing with an empty string\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 0);\n        Assertions.assertEquals(1, record.size());\n\n        values = new String[1]; // Testing with a single null element\n        record = new CSVRecord(values, mapping, null, 0);\n        Assertions.assertEquals(1, record.size());\n        \n        // Additional boundary test with a very large array\n        values = new String[Integer.MAX_VALUE]; // Testing with maximum array size\n        record = new CSVRecord(values, mapping, null, 0);\n        Assertions.assertEquals(Integer.MAX_VALUE, record.size());\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1092,
+    "completion_tokens": 583,
+    "total_tokens": 1675,
+    "llm_elapsed_time_seconds": 10.163
+  }
+}

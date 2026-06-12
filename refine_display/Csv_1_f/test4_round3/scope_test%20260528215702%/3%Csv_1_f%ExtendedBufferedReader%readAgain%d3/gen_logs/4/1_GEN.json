@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "package org.apache.commons.csv;\n\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport org.mockito.Mockito;\n\nimport java.io.StringReader;\nimport java.lang.reflect.Method;\n\nclass ExtendedBufferedReaderTest {\n\n    @Test\n    void testReadAgain_initialState() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"\"));\n        invokeSetLastChar(reader, ExtendedBufferedReader.UNDEFINED);\n        Assertions.assertEquals(ExtendedBufferedReader.UNDEFINED, reader.readAgain());\n    }\n\n    @Test\n    void testReadAgain_afterSettingLastChar() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"\"));\n        invokeSetLastChar(reader, 5);\n        Assertions.assertEquals(5, reader.readAgain());\n    }\n\n    @Test\n    void testReadAgain_afterSettingLastCharToEndOfStream() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"\"));\n        invokeSetLastChar(reader, ExtendedBufferedReader.END_OF_STREAM);\n        Assertions.assertEquals(ExtendedBufferedReader.END_OF_STREAM, reader.readAgain());\n    }\n\n    private void invokeSetLastChar(ExtendedBufferedReader reader, int value) throws Exception {\n        Method method = ExtendedBufferedReader.class.getDeclaredMethod(\"setLastChar\", int.class);\n        method.setAccessible(true);\n        method.invoke(reader, value);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 549,
+    "completion_tokens": 278,
+    "total_tokens": 827,
+    "llm_elapsed_time_seconds": 6.762
+  }
+}

@@ -1,0 +1,7 @@
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+/home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/2%Csv_2_f%CSVRecord%get%d3/test_cases/CSVRecord_2_2Test.java:50: error: cannot find symbol
+            } catch (InvocationTargetException e) {
+                     ^
+  symbol:   class InvocationTargetException
+  location: class CSVRecord_2_2Test
+1 error

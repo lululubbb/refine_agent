@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport org.mockito.Mockito;\n\nimport java.io.StringReader;\nimport java.lang.reflect.Field;\nimport java.lang.reflect.Method;\n\nclass ExtendedBufferedReaderTest {\n\n    @Test\n    void testreadAgain_initialValue() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"test\"));\n        setPrivateField(reader, \"lastChar\", -2);\n        \n        int result = invokePrivateMethod(reader, \"readAgain\");\n        \n        Assertions.assertEquals(-2, result);\n    }\n\n    @Test\n    void testreadAgain_afterReading() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"test\"));\n        setPrivateField(reader, \"lastChar\", 97); // ASCII for 'a'\n        \n        int result = invokePrivateMethod(reader, \"readAgain\");\n        \n        Assertions.assertEquals(97, result);\n    }\n\n    private void setPrivateField(ExtendedBufferedReader reader, String fieldName, int value) throws Exception {\n        Field field = ExtendedBufferedReader.class.getDeclaredField(fieldName);\n        field.setAccessible(true);\n        field.setInt(reader, value);\n    }\n\n    private int invokePrivateMethod(ExtendedBufferedReader reader, String methodName) throws Exception {\n        Method method = ExtendedBufferedReader.class.getDeclaredMethod(methodName);\n        method.setAccessible(true);\n        return (int) method.invoke(reader);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 549,
+    "completion_tokens": 293,
+    "total_tokens": 842,
+    "llm_elapsed_time_seconds": 5.215
+  }
+}

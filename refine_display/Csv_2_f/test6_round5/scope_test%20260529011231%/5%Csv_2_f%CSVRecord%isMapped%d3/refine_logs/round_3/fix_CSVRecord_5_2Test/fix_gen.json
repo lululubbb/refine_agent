@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport java.io.Serializable;\nimport java.util.HashMap;\nimport java.util.Map;\nimport java.lang.reflect.Method;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\npublic class CSVRecord_5_2Test {\n\n    @Test\n    public void testIsMapped_mappingIsNull() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, null, null, 1);\n        boolean result = invokeIsMapped(record, \"name\");\n        Assertions.assertEquals(false, result, \"Expected mapping to be null, thus isMapped should return false.\");\n    }\n\n    @Test\n    public void testIsMapped_mappingDoesNotContainKey() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"otherName\", 0);\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n        boolean result = invokeIsMapped(record, \"name\");\n        Assertions.assertEquals(false, result, \"Expected mapping to not contain 'name', thus isMapped should return false.\");\n    }\n\n    @Test\n    public void testIsMapped_mappingContainsKey() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"name\", 0);\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n        boolean result = invokeIsMapped(record, \"name\");\n        Assertions.assertEquals(true, result, \"Expected mapping to contain 'name', thus isMapped should return true.\");\n    }\n\n    private boolean invokeIsMapped(CSVRecord record, String name) throws Exception {\n        Method method = CSVRecord.class.getDeclaredMethod(\"isMapped\", String.class);\n        method.setAccessible(true);\n        return (boolean) method.invoke(record, name);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 985,
+    "completion_tokens": 391,
+    "total_tokens": 1376,
+    "llm_elapsed_time_seconds": 5.586
+  }
+}

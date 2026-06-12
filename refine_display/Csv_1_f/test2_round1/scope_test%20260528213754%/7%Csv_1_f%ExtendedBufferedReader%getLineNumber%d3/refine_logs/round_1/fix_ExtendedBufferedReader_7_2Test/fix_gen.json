@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.BufferedReader;\nimport java.io.IOException;\nimport java.io.Reader;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\n\nimport java.io.StringReader;\nimport java.lang.reflect.Field;\n\nclass ExtendedBufferedReader_7_2Test {\n    private ExtendedBufferedReader reader;\n\n    @BeforeEach\n    void setUp() {\n        reader = new ExtendedBufferedReader(new StringReader(\"Line 1\\nLine 2\\nLine 3\"));\n    }\n\n    @Test\n    void testGetLineNumber_initialState() throws Exception {\n        Assertions.assertEquals(0, reader.getLineNumber());\n    }\n\n    @Test\n    void testGetLineNumber_afterReadingLines() throws Exception {\n        reader.readLine(); // Read first line\n        reader.readLine(); // Read second line\n        Assertions.assertEquals(2, reader.getLineNumber());\n    }\n\n    @Test\n    void testGetLineNumber_afterReadingAllLines() throws Exception {\n        reader.readLine(); // Read first line\n        reader.readLine(); // Read second line\n        reader.readLine(); // Read third line\n        Assertions.assertEquals(3, reader.getLineNumber());\n    }\n\n    @Test\n    void testGetLineNumber_noLinesRead() throws Exception {\n        Assertions.assertEquals(0, reader.getLineNumber());\n    }\n    \n    @Test\n    void testRead() throws Exception {\n        int firstChar = reader.read();\n        Assertions.assertEquals('L', firstChar);\n        Assertions.assertEquals(1, reader.getLineNumber());\n    }\n    \n    @Test\n    void testReadAgain() throws Exception {\n        reader.read(); // Read first character\n        int secondChar = reader.read(); // Read second character\n        Assertions.assertEquals('i', secondChar);\n        Assertions.assertEquals(1, reader.getLineNumber());\n    }\n    \n    @Test\n    void testLookAhead() throws Exception {\n        // Assuming lookAhead() returns the next character without advancing the reader\n        int nextChar = reader.lookAhead(); // Peek the next character\n        Assertions.assertEquals('L', nextChar);\n        Assertions.assertEquals(0, reader.getLineNumber()); // Should still be on the first line\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 956,
+    "completion_tokens": 471,
+    "total_tokens": 1427,
+    "llm_elapsed_time_seconds": 7.165
+  }
+}

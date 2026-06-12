@@ -1,0 +1,32 @@
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_3_5Test:testGet_withDifferentMapping()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_3_5Test', methodName = 'testGet_withDifferentMapping', methodParameterTypes = '']
+    => java.lang.IllegalArgumentException: Index for header 'header3' is 2 but CSVRecord only has 2 values!
+       org.apache.commons.csv.CSVRecord.get(CSVRecord.java:89)
+       org.apache.commons.csv.CSVRecord_3_5Test.testGet_withDifferentMapping(CSVRecord_3_5Test.java:89)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+       org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+       org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+       org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)
+       [...]
+
+Test run finished after 205 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         6 tests found           ]
+[         0 tests skipped         ]
+[         6 tests started         ]
+[         0 tests aborted         ]
+[         5 tests successful      ]
+[         1 tests failed          ]
+
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC

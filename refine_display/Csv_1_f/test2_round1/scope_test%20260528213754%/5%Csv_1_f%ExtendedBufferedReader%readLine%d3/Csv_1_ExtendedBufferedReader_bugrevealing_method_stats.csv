@@ -1,0 +1,10 @@
+project_name,target_class,test_class,test_method,fixed_status,buggy_status,bug_revealing
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_5_1Test,testreadLine_normalCase,pass,pass,false
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_5_1Test,testreadLine_emptyLine,pass,pass,false
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_5_1Test,testreadLine_endOfStream,pass,pass,false
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_5_1Test,testreadLine_lastCharSet,pass,pass,false
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_5_1Test,testreadLine_lineCounterIncrement,pass,pass,false
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_5_2Test,testReadLine_normalCase,fail,fail,false
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_5_2Test,testReadLine_emptyLine,fail,fail,false
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_5_2Test,testReadLine_endOfStream,pass,pass,false
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_5_2Test,testReadLine_multipleLines,pass,pass,false

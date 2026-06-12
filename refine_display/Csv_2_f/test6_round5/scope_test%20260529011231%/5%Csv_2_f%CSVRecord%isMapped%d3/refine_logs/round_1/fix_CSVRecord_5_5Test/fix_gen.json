@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport java.lang.reflect.Method;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_5_5Test {\n\n    @Test\n    public void testisMapped_mappingIsNotNullAndContainsKey() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"key1\", 1);\n        CSVRecord csvRecord = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n\n        boolean result = invokeIsMapped(csvRecord, \"key1\");\n\n        Assertions.assertEquals(true, result);\n    }\n\n    @Test\n    public void testisMapped_mappingIsNotNullAndDoesNotContainKey() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"key1\", 1);\n        CSVRecord csvRecord = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n\n        boolean result = invokeIsMapped(csvRecord, \"key2\");\n\n        Assertions.assertEquals(false, result);\n    }\n\n    @Test\n    public void testisMapped_mappingIsNull() throws Exception {\n        CSVRecord csvRecord = new CSVRecord(new String[]{\"value1\"}, null, null, 1);\n\n        boolean result = invokeIsMapped(csvRecord, \"key1\");\n\n        Assertions.assertEquals(false, result);\n    }\n\n    private boolean invokeIsMapped(CSVRecord csvRecord, String name) throws Exception {\n        Method method = CSVRecord.class.getDeclaredMethod(\"isMapped\", String.class);\n        method.setAccessible(true);\n        return (boolean) method.invoke(csvRecord, name);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 926,
+    "completion_tokens": 366,
+    "total_tokens": 1292,
+    "llm_elapsed_time_seconds": 5.666
+  }
+}

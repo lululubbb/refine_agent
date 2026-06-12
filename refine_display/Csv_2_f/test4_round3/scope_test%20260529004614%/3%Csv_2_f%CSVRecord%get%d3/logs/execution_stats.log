@@ -1,0 +1,15 @@
+[PER_TEST_RUN] CSVRecord_3_1Test.java exec_ok=False exec_size=32204
+[PER_TEST_RUN] CSVRecord_3_2Test.java exec_ok=False exec_size=32132
+[PER_TEST_RUN] CSVRecord_3_3Test.java exec_ok=False exec_size=32203
+[PER_TEST_RUN] CSVRecord_3_4Test.java exec_ok=False exec_size=32204
+[ALL ATTEMPTS]
+  total_tests=4
+  syntax_errors=0
+  compile_errors=0
+  test_run_errors=4
+  全项目行覆盖率: 2.48% (15/605)
+  全项目分支覆盖率: 1.22% (5/411)
+  target_classes: ['CSVRecord']
+  target_class: CSVRecord
+    行覆盖率: 60.0% (15/25)
+    分支覆盖率: 31.25% (5/16)

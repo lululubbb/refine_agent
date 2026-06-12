@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Field;\nimport java.util.Collections;\nimport java.util.HashMap;\n\npublic class CSVRecordTest {\n\n    @Test\n    public void testgetRecordNumber_normalCase() throws Exception {\n        // Arrange\n        String[] values = {\"value1\", \"value2\"};\n        HashMap<String, Integer> mapping = new HashMap<>();\n        String comment = \"This is a comment\";\n        long recordNumber = 42L;\n\n        CSVRecord csvRecord = new CSVRecord(values, mapping, comment, recordNumber);\n\n        // Act\n        long result = invokeGetRecordNumber(csvRecord);\n\n        // Assert\n        Assertions.assertEquals(recordNumber, result);\n    }\n\n    @Test\n    public void testgetRecordNumber_zeroRecordNumber() throws Exception {\n        // Arrange\n        String[] values = {\"value1\", \"value2\"};\n        HashMap<String, Integer> mapping = new HashMap<>();\n        String comment = \"This is a comment\";\n        long recordNumber = 0L;\n\n        CSVRecord csvRecord = new CSVRecord(values, mapping, comment, recordNumber);\n\n        // Act\n        long result = invokeGetRecordNumber(csvRecord);\n\n        // Assert\n        Assertions.assertEquals(recordNumber, result);\n    }\n\n    @Test\n    public void testgetRecordNumber_negativeRecordNumber() throws Exception {\n        // Arrange\n        String[] values = {\"value1\", \"value2\"};\n        HashMap<String, Integer> mapping = new HashMap<>();\n        String comment = \"This is a comment\";\n        long recordNumber = -1L;\n\n        CSVRecord csvRecord = new CSVRecord(values, mapping, comment, recordNumber);\n\n        // Act\n        long result = invokeGetRecordNumber(csvRecord);\n\n        // Assert\n        Assertions.assertEquals(recordNumber, result);\n    }\n\n    private long invokeGetRecordNumber(CSVRecord csvRecord) throws Exception {\n        Field field = CSVRecord.class.getDeclaredField(\"recordNumber\");\n        field.setAccessible(true);\n        return (long) field.get(csvRecord);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 619,
+    "completion_tokens": 431,
+    "total_tokens": 1050,
+    "llm_elapsed_time_seconds": 8.559
+  }
+}

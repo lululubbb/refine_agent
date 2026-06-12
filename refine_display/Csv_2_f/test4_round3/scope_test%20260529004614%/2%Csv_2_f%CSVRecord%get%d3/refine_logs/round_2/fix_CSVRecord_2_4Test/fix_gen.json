@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.lang.reflect.InvocationTargetException;\nimport java.lang.reflect.Method;\nimport java.util.Arrays;\nimport java.util.Collections;\nimport java.util.HashMap;\nimport java.util.Iterator;\nimport java.util.Map;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\npublic class CSVRecord_2_4Test {\n\n    @Test\n    public void testGet_validIndex() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"first\", 0);\n        mapping.put(\"second\", 1);\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        \n        String result = invokeGetMethod(record, 1);\n        \n        Assertions.assertEquals(\"value2\", result);\n    }\n\n    @Test\n    public void testGet_indexOutOfBounds() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        \n        Assertions.assertThrows(ArrayIndexOutOfBoundsException.class, () -> {\n            invokeGetMethod(record, 3);\n        });\n    }\n\n    @Test\n    public void testGet_emptyArray() throws Exception {\n        String[] values = {};\n        Map<String, Integer> mapping = Collections.emptyMap();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        \n        Assertions.assertThrows(ArrayIndexOutOfBoundsException.class, () -> {\n            invokeGetMethod(record, 0);\n        });\n    }\n\n    private String invokeGetMethod(CSVRecord record, int index) throws Exception {\n        try {\n            Method method = CSVRecord.class.getDeclaredMethod(\"get\", int.class);\n            method.setAccessible(true);\n            return (String) method.invoke(record, index);\n        } catch (InvocationTargetException e) {\n            throw (Exception) e.getCause();\n        }\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1007,
+    "completion_tokens": 433,
+    "total_tokens": 1440,
+    "llm_elapsed_time_seconds": 7.64
+  }
+}

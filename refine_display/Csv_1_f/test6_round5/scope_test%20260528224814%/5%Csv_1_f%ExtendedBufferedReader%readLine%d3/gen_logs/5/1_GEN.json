@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "package org.apache.commons.csv;\n\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport org.mockito.Mockito;\n\nimport java.io.BufferedReader;\nimport java.io.IOException;\nimport java.io.StringReader;\nimport java.lang.reflect.Method;\n\nclass ExtendedBufferedReaderTest {\n\n    @Test\n    void testReadLine_normalCase() throws Exception {\n        String input = \"Hello, World!\\nThis is a test.\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n\n        String line1 = reader.readLine();\n        String line2 = reader.readLine();\n\n        Assertions.assertEquals(\"Hello, World!\", line1);\n        Assertions.assertEquals(\"This is a test.\", line2);\n    }\n\n    @Test\n    void testReadLine_emptyLine() throws Exception {\n        String input = \"\\nThis is a test.\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n\n        String line1 = reader.readLine();\n        String line2 = reader.readLine();\n\n        Assertions.assertEquals(\"\", line1);\n        Assertions.assertEquals(\"This is a test.\", line2);\n    }\n\n    @Test\n    void testReadLine_endOfStream() throws Exception {\n        String input = \"Hello, World!\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n\n        String line1 = reader.readLine();\n        String line2 = reader.readLine(); // This should reach end of stream\n\n        Assertions.assertEquals(\"Hello, World!\", line1);\n        Assertions.assertNull(line2);\n    }\n\n    @Test\n    void testReadLine_multipleLines() throws Exception {\n        String input = \"Line 1\\nLine 2\\nLine 3\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n\n        Assertions.assertEquals(\"Line 1\", reader.readLine());\n        Assertions.assertEquals(\"Line 2\", reader.readLine());\n        Assertions.assertEquals(\"Line 3\", reader.readLine());\n    }\n\n    @Test\n    void testReadLine_lastCharTracking() throws Exception {\n        String input = \"Hello\\nWorld\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n\n        reader.readLine(); // Read \"Hello\"\n        Method getLastCharMethod = ExtendedBufferedReader.class.getDeclaredMethod(\"getLastChar\");\n        getLastCharMethod.setAccessible(true);\n        int lastCharAfterFirstLine = (int) getLastCharMethod.invoke(reader);\n\n        Assertions.assertEquals('o', lastCharAfterFirstLine); // last char of \"Hello\"\n\n        reader.readLine(); // Read \"World\"\n        int lastCharAfterSecondLine = (int) getLastCharMethod.invoke(reader);\n\n        Assertions.assertEquals('d', lastCharAfterSecondLine); // last char of \"World\"\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 613,
+    "completion_tokens": 569,
+    "total_tokens": 1182,
+    "llm_elapsed_time_seconds": 8.343
+  }
+}

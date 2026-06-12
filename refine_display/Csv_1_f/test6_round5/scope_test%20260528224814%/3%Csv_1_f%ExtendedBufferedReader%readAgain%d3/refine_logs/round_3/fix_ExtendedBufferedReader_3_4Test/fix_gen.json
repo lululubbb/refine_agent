@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.BufferedReader;\nimport java.io.IOException;\nimport java.io.Reader;\nimport java.io.StringReader;\nimport java.lang.reflect.Field;\nimport java.lang.reflect.Method;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nclass ExtendedBufferedReader_3_4Test {\n\n    @Test\n    void testreadAgain_initialValue() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"test\"));\n        setPrivateField(reader, \"lastChar\", ExtendedBufferedReader.UNDEFINED);\n        \n        int result = invokePrivateMethod(reader, \"readAgain\");\n        \n        Assertions.assertEquals(ExtendedBufferedReader.UNDEFINED, result);\n    }\n\n    @Test\n    void testreadAgain_afterReading() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"test\"));\n        setPrivateField(reader, \"lastChar\", 97); // ASCII for 'a'\n        \n        int result = invokePrivateMethod(reader, \"readAgain\");\n        \n        Assertions.assertEquals(97, result);\n    }\n\n    @Test\n    void testreadAgain_boundaryValue() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"test\"));\n        setPrivateField(reader, \"lastChar\", ExtendedBufferedReader.END_OF_STREAM);\n        \n        int result = invokePrivateMethod(reader, \"readAgain\");\n        \n        Assertions.assertEquals(ExtendedBufferedReader.END_OF_STREAM, result);\n    }\n\n    @Test\n    void testreadAgain_afterMultipleReads() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"test\"));\n        setPrivateField(reader, \"lastChar\", 116); // ASCII for 't'\n        \n        int result = invokePrivateMethod(reader, \"readAgain\");\n        \n        Assertions.assertEquals(116, result);\n    }\n\n    private void setPrivateField(ExtendedBufferedReader reader, String fieldName, int value) throws Exception {\n        Field field = ExtendedBufferedReader.class.getDeclaredField(fieldName);\n        field.setAccessible(true);\n        field.setInt(reader, value);\n    }\n\n    private int invokePrivateMethod(ExtendedBufferedReader reader, String methodName) throws Exception {\n        Method method = ExtendedBufferedReader.class.getDeclaredMethod(methodName);\n        method.setAccessible(true);\n        return (int) method.invoke(reader);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 959,
+    "completion_tokens": 481,
+    "total_tokens": 1440,
+    "llm_elapsed_time_seconds": 8.675
+  }
+}

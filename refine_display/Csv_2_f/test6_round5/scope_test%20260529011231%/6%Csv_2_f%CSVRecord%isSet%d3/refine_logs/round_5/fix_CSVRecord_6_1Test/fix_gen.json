@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.HashMap;\nimport java.util.Map;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\n\npublic class CSVRecord_6_1Test {\n    private CSVRecord csvRecord;\n    private Map<String, Integer> mapping;\n\n    @BeforeEach\n    public void setUp() {\n        mapping = new HashMap<>();\n    }\n\n    @Test\n    public void testisSet_nameMappedAndIndexInBounds() throws Exception {\n        String name = \"column1\";\n        mapping.put(name, 0);\n        String[] values = {\"value1\"};\n        csvRecord = new CSVRecord(values, mapping, null, 1);\n\n        boolean result = csvRecord.isSet(name);\n\n        Assertions.assertEquals(true, result, \"Expected result to be true when name is mapped and index is in bounds.\");\n    }\n\n    @Test\n    public void testisSet_nameMappedAndIndexOutOfBounds() throws Exception {\n        String name = \"column1\";\n        mapping.put(name, 1);\n        String[] values = {\"value1\"};\n        csvRecord = new CSVRecord(values, mapping, null, 1);\n\n        boolean result = csvRecord.isSet(name);\n\n        Assertions.assertEquals(false, result, \"Expected result to be false when name is mapped but index is out of bounds.\");\n    }\n\n    @Test\n    public void testisSet_nameNotMapped() throws Exception {\n        String name = \"column2\";\n        String[] values = {\"value1\"};\n        csvRecord = new CSVRecord(values, mapping, null, 1);\n\n        boolean result = csvRecord.isSet(name);\n\n        Assertions.assertEquals(false, result, \"Expected result to be false when name is not mapped.\");\n    }\n\n    @Test\n    public void testisSet_emptyMapping() throws Exception {\n        String name = \"column1\";\n        String[] values = {\"value1\"};\n        csvRecord = new CSVRecord(values, mapping, null, 1);\n\n        boolean result = csvRecord.isSet(name);\n\n        Assertions.assertEquals(false, result, \"Expected result to be false when mapping is empty.\");\n    }\n\n    @Test\n    public void testisSet_nullName() throws Exception {\n        String name = null;\n        String[] values = {\"value1\"};\n        csvRecord = new CSVRecord(values, mapping, null, 1);\n\n        boolean result = csvRecord.isSet(name);\n\n        Assertions.assertEquals(false, result, \"Expected result to be false when name is null.\");\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1097,
+    "completion_tokens": 533,
+    "total_tokens": 1630,
+    "llm_elapsed_time_seconds": 7.032
+  }
+}

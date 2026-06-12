@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\nimport org.mockito.Mockito;\n\nimport java.io.StringReader;\nimport java.lang.reflect.Field;\n\nclass ExtendedBufferedReaderTest {\n    private ExtendedBufferedReader reader;\n\n    @BeforeEach\n    void setUp() {\n        reader = new ExtendedBufferedReader(new StringReader(\"Line 1\\nLine 2\\nLine 3\"));\n    }\n\n    @Test\n    void testgetLineNumber_initialValue() throws Exception {\n        // Accessing the private field 'lineCounter' using reflection\n        Field lineCounterField = ExtendedBufferedReader.class.getDeclaredField(\"lineCounter\");\n        lineCounterField.setAccessible(true);\n        lineCounterField.setInt(reader, 0);\n\n        int lineNumber = reader.getLineNumber();\n        Assertions.assertEquals(0, lineNumber);\n    }\n\n    @Test\n    void testgetLineNumber_afterReadingLines() throws Exception {\n        // Simulate reading lines to change lineCounter\n        reader.readLine(); // Reads \"Line 1\"\n        reader.readLine(); // Reads \"Line 2\"\n\n        // Accessing the private field 'lineCounter' using reflection\n        Field lineCounterField = ExtendedBufferedReader.class.getDeclaredField(\"lineCounter\");\n        lineCounterField.setAccessible(true);\n        lineCounterField.setInt(reader, 2);\n\n        int lineNumber = reader.getLineNumber();\n        Assertions.assertEquals(2, lineNumber);\n    }\n\n    @Test\n    void testgetLineNumber_afterMultipleReads() throws Exception {\n        // Simulate reading lines to change lineCounter\n        reader.readLine(); // Reads \"Line 1\"\n        reader.readLine(); // Reads \"Line 2\"\n        reader.readLine(); // Reads \"Line 3\"\n\n        // Accessing the private field 'lineCounter' using reflection\n        Field lineCounterField = ExtendedBufferedReader.class.getDeclaredField(\"lineCounter\");\n        lineCounterField.setAccessible(true);\n        lineCounterField.setInt(reader, 3);\n\n        int lineNumber = reader.getLineNumber();\n        Assertions.assertEquals(3, lineNumber);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 551,
+    "completion_tokens": 438,
+    "total_tokens": 989,
+    "llm_elapsed_time_seconds": 5.16
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "package org.apache.commons.csv;\n\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Field;\nimport java.util.Collections;\nimport java.util.HashMap;\n\npublic class CSVRecordTest {\n\n    @Test\n    public void testSize_emptyArray() throws Exception {\n        String[] values = new String[0];\n        CSVRecord record = new CSVRecord(values, Collections.emptyMap(), null, 0);\n        Assertions.assertEquals(0, record.size());\n    }\n\n    @Test\n    public void testSize_nonEmptyArray() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        CSVRecord record = new CSVRecord(values, Collections.emptyMap(), null, 0);\n        Assertions.assertEquals(3, record.size());\n    }\n\n    @Test\n    public void testSize_singleElementArray() throws Exception {\n        String[] values = {\"singleValue\"};\n        CSVRecord record = new CSVRecord(values, Collections.emptyMap(), null, 0);\n        Assertions.assertEquals(1, record.size());\n    }\n\n    @Test\n    public void testSize_nullValuesArray() throws Exception {\n        String[] values = null;\n        CSVRecord record = new CSVRecord(values, Collections.emptyMap(), null, 0);\n        Field valuesField = CSVRecord.class.getDeclaredField(\"values\");\n        valuesField.setAccessible(true);\n        valuesField.set(record, new String[0]); // Simulating null values as empty array\n        Assertions.assertEquals(0, record.size());\n    }\n\n    @Test\n    public void testSize_largeArray() throws Exception {\n        String[] values = new String[1000];\n        Arrays.fill(values, \"value\");\n        CSVRecord record = new CSVRecord(values, Collections.emptyMap(), null, 0);\n        Assertions.assertEquals(1000, record.size());\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 615,
+    "completion_tokens": 382,
+    "total_tokens": 997,
+    "llm_elapsed_time_seconds": 6.107
+  }
+}

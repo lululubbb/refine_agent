@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\n\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_6_3Test {\n    private CSVRecord csvRecord;\n    private Map<String, Integer> mapping;\n\n    @BeforeEach\n    public void setUp() {\n        mapping = new HashMap<>();\n    }\n\n    @Test\n    public void testisSet_normalCase() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        mapping.put(\"key1\", 0);\n        csvRecord = new CSVRecord(values, mapping, null, 1);\n        \n        boolean result = csvRecord.isSet(\"key1\");\n        Assertions.assertEquals(true, result);\n    }\n\n    @Test\n    public void testisSet_keyNotMapped() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        csvRecord = new CSVRecord(values, mapping, null, 1);\n        \n        boolean result = csvRecord.isSet(\"key2\");\n        Assertions.assertEquals(false, result);\n    }\n\n    @Test\n    public void testisSet_indexOutOfBounds() throws Exception {\n        String[] values = {\"value1\"};\n        mapping.put(\"key1\", 1);\n        csvRecord = new CSVRecord(values, mapping, null, 1);\n        \n        boolean result = csvRecord.isSet(\"key1\");\n        Assertions.assertEquals(false, result);\n    }\n\n    @Test\n    public void testisSet_emptyValuesArray() throws Exception {\n        String[] values = {};\n        mapping.put(\"key1\", 0);\n        csvRecord = new CSVRecord(values, mapping, null, 1);\n        \n        boolean result = csvRecord.isSet(\"key1\");\n        Assertions.assertEquals(false, result);\n    }\n\n    @Test\n    public void testisSet_mappedButNotSet() throws Exception {\n        String[] values = {\"value1\"};\n        mapping.put(\"key1\", 0);\n        mapping.put(\"key2\", 1);\n        csvRecord = new CSVRecord(values, mapping, null, 1);\n        \n        boolean result1 = csvRecord.isSet(\"key1\");\n        boolean result2 = csvRecord.isSet(\"key2\");\n        Assertions.assertEquals(true, result1);\n        Assertions.assertEquals(false, result2);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1075,
+    "completion_tokens": 513,
+    "total_tokens": 1588,
+    "llm_elapsed_time_seconds": 8.127
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Method;\nimport java.util.Collections;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecordTest {\n\n    @Test\n    public void testToString_emptyArray() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{}, Collections.emptyMap(), null, 0);\n        String result = invokeToString(record);\n        Assertions.assertEquals(\"[]\", result);\n    }\n\n    @Test\n    public void testToString_singleElementArray() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, Collections.emptyMap(), null, 1);\n        String result = invokeToString(record);\n        Assertions.assertEquals(\"[value1]\", result);\n    }\n\n    @Test\n    public void testToString_multipleElementsArray() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{\"value1\", \"value2\", \"value3\"}, Collections.emptyMap(), null, 2);\n        String result = invokeToString(record);\n        Assertions.assertEquals(\"[value1, value2, value3]\", result);\n    }\n\n    @Test\n    public void testToString_nullElementsArray() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{null, \"value2\", null}, Collections.emptyMap(), null, 3);\n        String result = invokeToString(record);\n        Assertions.assertEquals(\"[null, value2, null]\", result);\n    }\n\n    private String invokeToString(CSVRecord record) throws Exception {\n        Method method = CSVRecord.class.getDeclaredMethod(\"toString\");\n        method.setAccessible(true);\n        return (String) method.invoke(record);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 621,
+    "completion_tokens": 352,
+    "total_tokens": 973,
+    "llm_elapsed_time_seconds": 6.79
+  }
+}

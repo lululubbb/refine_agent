@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.BufferedReader;\nimport java.io.IOException;\nimport java.io.Reader;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\n\nimport java.io.StringReader;\nimport java.lang.reflect.Method;\n\nclass ExtendedBufferedReader_3_2Test {\n    private ExtendedBufferedReader reader;\n\n    @BeforeEach\n    void setUp() {\n        reader = new ExtendedBufferedReader(new StringReader(\"Test input\"));\n    }\n\n    @Test\n    void testreadAgain_initialValue() throws Exception {\n        Method method = ExtendedBufferedReader.class.getDeclaredMethod(\"readAgain\");\n        method.setAccessible(true);\n        int result = (int) method.invoke(reader);\n        Assertions.assertEquals(ExtendedBufferedReader.UNDEFINED, result);\n    }\n\n    @Test\n    void testreadAgain_afterRead() throws Exception {\n        reader.read(); // Simulate reading a character to change lastChar\n        \n        // Use reflection to set lastChar to a specific value\n        var lastCharField = ExtendedBufferedReader.class.getDeclaredField(\"lastChar\");\n        lastCharField.setAccessible(true);\n        lastCharField.setInt(reader, 'A'); // Set lastChar to 'A' (ASCII 65)\n\n        Method method = ExtendedBufferedReader.class.getDeclaredMethod(\"readAgain\");\n        method.setAccessible(true);\n        int result = (int) method.invoke(reader);\n        Assertions.assertEquals('A', result);\n    }\n\n    @Test\n    void testreadAgain_afterReset() throws Exception {\n        reader.read(); // Simulate reading\n        var lastCharField = ExtendedBufferedReader.class.getDeclaredField(\"lastChar\");\n        lastCharField.setAccessible(true);\n        lastCharField.setInt(reader, ExtendedBufferedReader.UNDEFINED); // Reset lastChar to UNDEFINED\n\n        Method method = ExtendedBufferedReader.class.getDeclaredMethod(\"readAgain\");\n        method.setAccessible(true);\n        int result = (int) method.invoke(reader);\n        Assertions.assertEquals(ExtendedBufferedReader.UNDEFINED, result);\n    }\n\n    @Test\n    void testreadAgain_boundaryValue() throws Exception {\n        // Test the boundary condition by reading from an empty input\n        ExtendedBufferedReader emptyReader = new ExtendedBufferedReader(new StringReader(\"\"));\n        Method method = ExtendedBufferedReader.class.getDeclaredMethod(\"readAgain\");\n        method.setAccessible(true);\n        int result = (int) method.invoke(emptyReader);\n        Assertions.assertEquals(ExtendedBufferedReader.UNDEFINED, result);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 985,
+    "completion_tokens": 512,
+    "total_tokens": 1497,
+    "llm_elapsed_time_seconds": 6.35
+  }
+}

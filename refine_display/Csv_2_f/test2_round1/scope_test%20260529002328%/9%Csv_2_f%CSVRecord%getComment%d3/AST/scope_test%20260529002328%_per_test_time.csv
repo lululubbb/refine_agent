@@ -1,0 +1,9 @@
+project,version,test_case,ast_generation_time_nanosec
+scope_test%20260529002328%,9%Csv_2_f%CSVRecord%getComment%d3,CSVRecord_9_2Test.testGetComment_normalCase,8048653
+scope_test%20260529002328%,9%Csv_2_f%CSVRecord%getComment%d3,CSVRecord_9_2Test.testGetComment_emptyComment,8634897
+scope_test%20260529002328%,9%Csv_2_f%CSVRecord%getComment%d3,CSVRecord_9_2Test.testGetComment_nullComment,9166309
+scope_test%20260529002328%,9%Csv_2_f%CSVRecord%getComment%d3,CSVRecord_9_2Test.testGetComment_withDifferentRecordNumbers,10001443
+scope_test%20260529002328%,9%Csv_2_f%CSVRecord%getComment%d3,CSVRecord_9_2Test,11456352
+scope_test%20260529002328%,9%Csv_2_f%CSVRecord%getComment%d3,CSVRecord_9_1Test.testGetComment_withValidComment,5048209
+scope_test%20260529002328%,9%Csv_2_f%CSVRecord%getComment%d3,CSVRecord_9_1Test.testGetComment_withNullComment,5645241
+scope_test%20260529002328%,9%Csv_2_f%CSVRecord%getComment%d3,CSVRecord_9_1Test,6761314

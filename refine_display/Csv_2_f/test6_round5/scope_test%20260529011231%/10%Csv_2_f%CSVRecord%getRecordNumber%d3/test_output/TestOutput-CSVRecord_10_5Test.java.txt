@@ -1,0 +1,32 @@
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_10_5Test:testgetRecordNumber_negativeRecordNumber()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_10_5Test', methodName = 'testgetRecordNumber_negativeRecordNumber', methodParameterTypes = '']
+    => java.lang.IllegalArgumentException: Record number cannot be negative
+       org.apache.commons.csv.CSVRecord_10_5Test.createCSVRecord(CSVRecord_10_5Test.java:102)
+       org.apache.commons.csv.CSVRecord_10_5Test.testgetRecordNumber_negativeRecordNumber(CSVRecord_10_5Test.java:60)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+       org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+       org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+       org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)
+       [...]
+
+Test run finished after 285 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         5 tests found           ]
+[         0 tests skipped         ]
+[         5 tests started         ]
+[         0 tests aborted         ]
+[         4 tests successful      ]
+[         1 tests failed          ]
+
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC

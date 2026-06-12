@@ -1,0 +1,2 @@
+test_class,focal_method,compile_score,exec_score,coverage_score,bug_revealing_score,redundancy_score,final_score,valid_weight_pct
+org.apache.commons.csv.CSVRecord_3,get,1.0,0.0,0.944445,,,0.722222,0.6

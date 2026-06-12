@@ -1,0 +1,46 @@
+
+Failures (2):
+  JUnit Jupiter:ExtendedBufferedReader_5_2Test:testReadLine_lineCounterIncrement()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_5_2Test', methodName = 'testReadLine_lineCounterIncrement', methodParameterTypes = '']
+    => java.lang.NoSuchMethodException: org.apache.commons.csv.ExtendedBufferedReader.lineCounter()
+       java.base/java.lang.Class.getDeclaredMethod(Class.java:2475)
+       org.apache.commons.csv.ExtendedBufferedReader_5_2Test.invokePrivateMethod(ExtendedBufferedReader_5_2Test.java:90)
+       org.apache.commons.csv.ExtendedBufferedReader_5_2Test.testReadLine_lineCounterIncrement(ExtendedBufferedReader_5_2Test.java:74)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+       org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+       org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+       [...]
+  JUnit Jupiter:ExtendedBufferedReader_5_2Test:testReadLine_lastCharAssignment()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_5_2Test', methodName = 'testReadLine_lastCharAssignment', methodParameterTypes = '']
+    => java.lang.NoSuchMethodException: org.apache.commons.csv.ExtendedBufferedReader.lastChar()
+       java.base/java.lang.Class.getDeclaredMethod(Class.java:2475)
+       org.apache.commons.csv.ExtendedBufferedReader_5_2Test.invokePrivateMethod(ExtendedBufferedReader_5_2Test.java:90)
+       org.apache.commons.csv.ExtendedBufferedReader_5_2Test.testReadLine_lastCharAssignment(ExtendedBufferedReader_5_2Test.java:66)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+       org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+       org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+       [...]
+
+Test run finished after 226 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         6 tests found           ]
+[         0 tests skipped         ]
+[         6 tests started         ]
+[         0 tests aborted         ]
+[         4 tests successful      ]
+[         2 tests failed          ]
+
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC

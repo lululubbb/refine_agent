@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport java.io.Serializable;\nimport java.lang.reflect.Method;\nimport java.lang.reflect.InvocationTargetException;\nimport java.util.HashMap;\nimport java.util.Map;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\n\npublic class CSVRecord_3_4Test {\n    private CSVRecord csvRecord;\n    private Map<String, Integer> mapping;\n\n    @BeforeEach\n    public void setUp() {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        mapping = new HashMap<>();\n        mapping.put(\"header1\", 0);\n        mapping.put(\"header2\", 1);\n        mapping.put(\"header3\", 2);\n        csvRecord = new CSVRecord(values, mapping, null, 1);\n    }\n\n    @Test\n    public void testGet_normalCase() throws Exception {\n        String result = invokeGetMethod(\"header1\");\n        Assertions.assertEquals(\"value1\", result);\n    }\n\n    @Test\n    public void testGet_nonExistentHeader() throws Exception {\n        String result = invokeGetMethod(\"header4\");\n        Assertions.assertNull(result);\n    }\n\n    @Test\n    public void testGet_nullMapping() throws Exception {\n        CSVRecord recordWithNullMapping = new CSVRecord(new String[]{\"value1\"}, null, null, 1);\n        IllegalStateException thrown = Assertions.assertThrows(IllegalStateException.class, () -> {\n            recordWithNullMapping.get(\"header1\");\n        });\n        Assertions.assertEquals(\"No header mapping was specified, the record values can't be accessed by name\", thrown.getMessage());\n    }\n\n    @Test\n    public void testGet_indexOutOfBounds() throws Exception {\n        mapping.put(\"header2\", 5); // intentionally setting an out-of-bounds index\n        IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () -> {\n            invokeGetMethod(\"header2\");\n        });\n        Assertions.assertEquals(\"Index for header 'header2' is 5 but CSVRecord only has 3 values!\", thrown.getMessage());\n    }\n\n    private String invokeGetMethod(String header) throws Exception {\n        Method method = CSVRecord.class.getDeclaredMethod(\"get\", String.class);\n        method.setAccessible(true);\n        try {\n            return (String) method.invoke(csvRecord, header);\n        } catch (InvocationTargetException e) {\n            throw e.getCause(); // unwrap the InvocationTargetException to throw the actual cause\n        }\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1202,
+    "completion_tokens": 529,
+    "total_tokens": 1731,
+    "llm_elapsed_time_seconds": 5.558
+  }
+}

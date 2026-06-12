@@ -1,0 +1,29 @@
+{
+  "raw": "{\n  \"suite_summary\": \"The test suite for the ExtendedBufferedReader class has a total of 6 test files, with 4 experiencing runtime execution failures. All tests compile successfully, but only 2 tests are currently bug-revealing. The suite exhibits high line coverage but suffers from redundancy and lacks tests that reveal potential bugs.\",\n  \"test_instructions\": {\n    \"ExtendedBufferedReader_2_2Test\": [\n      \"Fix the assertion in testRead_lineBreaks: expected:<4> but was:<3>. Trace the focal method logic carefully; assert the actual return value.\"\n    ],\n    \"ExtendedBufferedReader_2_3Test\": [\n      \"Fix the assertion in testRead_newLine: expected:<13> but was:<111>. Trace the focal method logic carefully; assert the actual return value.\"\n    ],\n    \"ExtendedBufferedReader_2_4Test\": [\n      \"Fix the assertion in testRead_normalCase: expected:<108> but was:<10>. Trace the focal method logic carefully; assert the actual return value.\"\n    ],\n    \"ExtendedBufferedReader_2_5Test\": [\n      \"Fix the assertion in testRead_multipleNewLines: expected:<-1> but was:<10>. Trace the focal method logic carefully; assert the actual return value.\"\n    ],\n    \"ExtendedBufferedReader_2_6Test\": [\n      \"Add tests for boundary values and exception-throwing paths to cover missed lines/branches.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "The test suite for the ExtendedBufferedReader class has a total of 6 test files, with 4 experiencing runtime execution failures. All tests compile successfully, but only 2 tests are currently bug-revealing. The suite exhibits high line coverage but suffers from redundancy and lacks tests that reveal potential bugs.",
+    "test_instructions": {
+      "ExtendedBufferedReader_2_2Test": [
+        "Fix the assertion in testRead_lineBreaks: expected:<4> but was:<3>. Trace the focal method logic carefully; assert the actual return value."
+      ],
+      "ExtendedBufferedReader_2_3Test": [
+        "Fix the assertion in testRead_newLine: expected:<13> but was:<111>. Trace the focal method logic carefully; assert the actual return value."
+      ],
+      "ExtendedBufferedReader_2_4Test": [
+        "Fix the assertion in testRead_normalCase: expected:<108> but was:<10>. Trace the focal method logic carefully; assert the actual return value."
+      ],
+      "ExtendedBufferedReader_2_5Test": [
+        "Fix the assertion in testRead_multipleNewLines: expected:<-1> but was:<10>. Trace the focal method logic carefully; assert the actual return value."
+      ],
+      "ExtendedBufferedReader_2_6Test": [
+        "Add tests for boundary values and exception-throwing paths to cover missed lines/branches."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 10661,
+    "completion_tokens": 304,
+    "total_tokens": 10965,
+    "llm_elapsed_time_seconds": 6.811
+  }
+}

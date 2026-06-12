@@ -1,0 +1,13 @@
+test_class,focal_method,compile_score,exec_score,coverage_score,bug_revealing_score,redundancy_score,final_score,valid_weight_pct
+org.apache.commons.csv.ExtendedBufferedReader_7_1Test,getLineNumber,1.0,0.0,,,,0.5,0.3
+org.apache.commons.csv.ExtendedBufferedReader_7_2Test,getLineNumber,1.0,0.0,,,,0.5,0.3
+org.apache.commons.csv.ExtendedBufferedReader_7_3Test,getLineNumber,1.0,1.0,,,,1.0,0.3
+org.apache.commons.csv.ExtendedBufferedReader_7_4Test,getLineNumber,1.0,1.0,,,,1.0,0.3
+org.apache.commons.csv.ExtendedBufferedReader_7_1Test,getLineNumber,1.0,1.0,,0.0,,0.6,0.5
+org.apache.commons.csv.ExtendedBufferedReader_7_2Test,getLineNumber,1.0,1.0,,0.0,,0.6,0.5
+org.apache.commons.csv.ExtendedBufferedReader_7_3Test,getLineNumber,1.0,1.0,,0.0,,0.6,0.5
+org.apache.commons.csv.ExtendedBufferedReader_7_4Test,getLineNumber,1.0,1.0,,0.0,,0.6,0.5
+org.apache.commons.csv.ExtendedBufferedReader_7_1Test,getLineNumber,1.0,0.0,,0.0,,0.3,0.5
+org.apache.commons.csv.ExtendedBufferedReader_7_2Test,getLineNumber,1.0,0.0,,0.0,,0.3,0.5
+org.apache.commons.csv.ExtendedBufferedReader_7_3Test,getLineNumber,1.0,1.0,,0.0,,0.6,0.5
+org.apache.commons.csv.ExtendedBufferedReader_7_4Test,getLineNumber,1.0,1.0,,0.0,,0.6,0.5

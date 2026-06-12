@@ -1,0 +1,7 @@
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+/home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test6_round5/scope_test%20260529011231%/5%Csv_2_f%CSVRecord%isMapped%d3/test_cases/CSVRecord_5_2Test.java:39: error: cannot find symbol
+        Method method = CSVRecord.class.getDeclaredMethod("isMapped", String.class);
+        ^
+  symbol:   class Method
+  location: class CSVRecord_5_2Test
+1 error

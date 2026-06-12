@@ -1,0 +1,34 @@
+{
+  "raw": "{\n  \"suite_summary\": \"All test files in the suite for the `read` method of `ExtendedBufferedReader` are currently failing at runtime. Each test file has specific assertion errors that need to be addressed to ensure the tests pass successfully. The tests exhibit high redundancy, particularly between `ExtendedBufferedReader_4_2Test` and `ExtendedBufferedReader_4_4Test`, which should be optimized.\",\n  \"test_instructions\": {\n    \"ExtendedBufferedReader_4_1Test\": [\n      \"Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <2> but was: <1>. Check the logic in the focal method to ensure the correct line count is being tracked.\",\n      \"Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <3> but was: <2>. Ensure that the line counting logic correctly accounts for all line endings.\"\n    ],\n    \"ExtendedBufferedReader_4_2Test\": [\n      \"Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <1> but was: <0>. Verify that the line counter is incremented correctly for the input provided.\",\n      \"Fix the assertion error: => org.opentest4j.AssertionFailedError: array lengths differ, expected: <9> but was: <10>. Ensure the buffer is filled correctly according to the expected output.\",\n      \"Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <2> but was: <1>. Check the line counting logic for correctness.\",\n      \"Fix the assertion error: => org.opentest4j.AssertionFailedError: array lengths differ, expected: <17> but was: <20>. Ensure the buffer's expected length matches the actual length.\"\n    ],\n    \"ExtendedBufferedReader_4_3Test\": [\n      \"Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <1> but was: <0>. Verify that the line counter is correctly incremented for the input provided.\",\n      \"Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <3> but was: <2>. Ensure that the line counting logic correctly accounts for all line endings.\"\n    ],\n    \"ExtendedBufferedReader_4_4Test\": [\n      \"Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <15> but was: <13>. Verify that the buffer is filled correctly according to the expected output.\",\n      \"Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <17> but was: <15>. Ensure the buffer's expected length matches the actual length.\",\n      \"Fix the assertion error: => org.opentest4j.AssertionFailedError: array lengths differ, expected: <7> but was: <10>. Ensure the buffer is filled correctly according to the expected output.\",\n      \"Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <21> but was: <19>. Verify that the line counter is incremented correctly for the input provided.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "All test files in the suite for the `read` method of `ExtendedBufferedReader` are currently failing at runtime. Each test file has specific assertion errors that need to be addressed to ensure the tests pass successfully. The tests exhibit high redundancy, particularly between `ExtendedBufferedReader_4_2Test` and `ExtendedBufferedReader_4_4Test`, which should be optimized.",
+    "test_instructions": {
+      "ExtendedBufferedReader_4_1Test": [
+        "Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <2> but was: <1>. Check the logic in the focal method to ensure the correct line count is being tracked.",
+        "Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <3> but was: <2>. Ensure that the line counting logic correctly accounts for all line endings."
+      ],
+      "ExtendedBufferedReader_4_2Test": [
+        "Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <1> but was: <0>. Verify that the line counter is incremented correctly for the input provided.",
+        "Fix the assertion error: => org.opentest4j.AssertionFailedError: array lengths differ, expected: <9> but was: <10>. Ensure the buffer is filled correctly according to the expected output.",
+        "Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <2> but was: <1>. Check the line counting logic for correctness.",
+        "Fix the assertion error: => org.opentest4j.AssertionFailedError: array lengths differ, expected: <17> but was: <20>. Ensure the buffer's expected length matches the actual length."
+      ],
+      "ExtendedBufferedReader_4_3Test": [
+        "Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <1> but was: <0>. Verify that the line counter is correctly incremented for the input provided.",
+        "Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <3> but was: <2>. Ensure that the line counting logic correctly accounts for all line endings."
+      ],
+      "ExtendedBufferedReader_4_4Test": [
+        "Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <15> but was: <13>. Verify that the buffer is filled correctly according to the expected output.",
+        "Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <17> but was: <15>. Ensure the buffer's expected length matches the actual length.",
+        "Fix the assertion error: => org.opentest4j.AssertionFailedError: array lengths differ, expected: <7> but was: <10>. Ensure the buffer is filled correctly according to the expected output.",
+        "Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <21> but was: <19>. Verify that the line counter is incremented correctly for the input provided."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 7184,
+    "completion_tokens": 663,
+    "total_tokens": 7847,
+    "llm_elapsed_time_seconds": 11.644
+  }
+}

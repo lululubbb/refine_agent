@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\nimport java.lang.reflect.Method;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_6_2Test {\n    private CSVRecord csvRecord;\n    private Map<String, Integer> mapping;\n\n    @BeforeEach\n    public void setUp() {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        mapping = new HashMap<>();\n        mapping.put(\"key1\", 0);\n        mapping.put(\"key2\", 1);\n        mapping.put(\"key3\", 3); // This key is out of bounds\n        csvRecord = new CSVRecord(values, mapping, \"comment\", 1L);\n    }\n\n    @Test\n    public void testisSet_keyExistsAndWithinBounds() throws Exception {\n        boolean result = invokeIsSet(\"key1\");\n        Assertions.assertEquals(true, result);\n    }\n\n    @Test\n    public void testisSet_keyExistsAndOutOfBounds() throws Exception {\n        boolean result = invokeIsSet(\"key3\");\n        Assertions.assertEquals(false, result);\n    }\n\n    @Test\n    public void testisSet_keyDoesNotExist() throws Exception {\n        boolean result = invokeIsSet(\"key4\");\n        Assertions.assertEquals(false, result);\n    }\n\n    @Test\n    public void testisSet_emptyMapping() throws Exception {\n        mapping.clear();\n        boolean result = invokeIsSet(\"key1\");\n        Assertions.assertEquals(false, result);\n    }\n\n    private boolean invokeIsSet(String name) throws Exception {\n        Method method = CSVRecord.class.getDeclaredMethod(\"isSet\", String.class);\n        method.setAccessible(true);\n        return (boolean) method.invoke(csvRecord, name);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 963,
+    "completion_tokens": 396,
+    "total_tokens": 1359,
+    "llm_elapsed_time_seconds": 5.191
+  }
+}

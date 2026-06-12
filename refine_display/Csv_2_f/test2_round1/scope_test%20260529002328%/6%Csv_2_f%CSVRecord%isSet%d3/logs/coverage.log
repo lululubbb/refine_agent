@@ -1,0 +1,8 @@
+===== Coverage report (all attempts) =====
+--- STDOUT ---
+[INFO] Loading execution data file /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test2_round1/scope_test%20260529002328%/6%Csv_2_f%CSVRecord%isSet%d3/tests_ChatGPT/jacoco_merged.exec.
+[INFO] Analyzing 13 classes.
+
+--- STDERR ---
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+

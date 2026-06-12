@@ -1,0 +1,63 @@
+{
+  "ExtendedBufferedReader_6_1Test": {
+    "compile_status": "pass",
+    "exec_status": "timeout",
+    "compile_errors": [],
+    "exec_errors": [
+      "Exceeded TIMEOUT limit"
+    ],
+    "focal_line_rate": null,
+    "focal_branch_rate": null,
+    "focal_line_covered": null,
+    "focal_line_total": null,
+    "missed_methods": [],
+    "partial_methods": []
+  },
+  "ExtendedBufferedReader_6_2Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [],
+    "exec_errors": [],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": null,
+    "focal_line_covered": 4,
+    "focal_line_total": 4,
+    "missed_methods": [
+      "line 76: readAgain() — completely uncovered",
+      "line 81: read() — completely uncovered",
+      "line 123: readLine() — completely uncovered",
+      "line 159: getLineNumber() — completely uncovered"
+    ],
+    "partial_methods": [
+      "line 57: read() — 4/6 branches missed"
+    ]
+  },
+  "ExtendedBufferedReader_6_3Test": {
+    "compile_status": "pass",
+    "exec_status": "timeout",
+    "compile_errors": [],
+    "exec_errors": [
+      "Exceeded TIMEOUT limit"
+    ],
+    "focal_line_rate": null,
+    "focal_branch_rate": null,
+    "focal_line_covered": null,
+    "focal_line_total": null,
+    "missed_methods": [],
+    "partial_methods": []
+  },
+  "ExtendedBufferedReader_6_4Test": {
+    "compile_status": "pass",
+    "exec_status": "timeout",
+    "compile_errors": [],
+    "exec_errors": [
+      "Exceeded TIMEOUT limit"
+    ],
+    "focal_line_rate": null,
+    "focal_branch_rate": null,
+    "focal_line_covered": null,
+    "focal_line_total": null,
+    "missed_methods": [],
+    "partial_methods": []
+  }
+}

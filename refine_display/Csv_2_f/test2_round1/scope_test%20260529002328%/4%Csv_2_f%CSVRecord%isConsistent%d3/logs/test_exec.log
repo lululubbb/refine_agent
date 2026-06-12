@@ -1,0 +1,6 @@
+[EXEC_OK] /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test2_round1/scope_test%20260529002328%/4%Csv_2_f%CSVRecord%isConsistent%d3/test_cases/CSVRecord_4_1Test.java
+[EXEC_FAILED] /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test2_round1/scope_test%20260529002328%/4%Csv_2_f%CSVRecord%isConsistent%d3/test_cases/CSVRecord_4_2Test.java:
+[EXEC_CORE_ERROR] 未提取到明确异常信息
+[EXEC_STDERR]
+    Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+================================================================================

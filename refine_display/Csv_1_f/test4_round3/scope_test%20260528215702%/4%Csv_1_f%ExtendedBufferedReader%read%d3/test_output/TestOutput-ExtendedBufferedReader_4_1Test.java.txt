@@ -1,0 +1,60 @@
+
+Failures (3):
+  JUnit Jupiter:ExtendedBufferedReader_4_1Test:testRead_endOfStream()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_4_1Test', methodName = 'testRead_endOfStream', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: expected: <2> but was: <1>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+       org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:528)
+       org.apache.commons.csv.ExtendedBufferedReader_4_1Test.testRead_endOfStream(ExtendedBufferedReader_4_1Test.java:47)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       [...]
+  JUnit Jupiter:ExtendedBufferedReader_4_1Test:testRead_withMixedLineEndings()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_4_1Test', methodName = 'testRead_withMixedLineEndings', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: expected: <3> but was: <2>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+       org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:528)
+       org.apache.commons.csv.ExtendedBufferedReader_4_1Test.testRead_withMixedLineEndings(ExtendedBufferedReader_4_1Test.java:67)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       [...]
+  JUnit Jupiter:ExtendedBufferedReader_4_1Test:testRead_normalCase()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_4_1Test', methodName = 'testRead_normalCase', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: expected: <3> but was: <2>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+       org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:528)
+       org.apache.commons.csv.ExtendedBufferedReader_4_1Test.testRead_normalCase(ExtendedBufferedReader_4_1Test.java:23)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       [...]
+
+Test run finished after 189 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         5 tests found           ]
+[         0 tests skipped         ]
+[         5 tests started         ]
+[         0 tests aborted         ]
+[         2 tests successful      ]
+[         3 tests failed          ]
+
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC

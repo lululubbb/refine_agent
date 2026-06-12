@@ -1,0 +1,4 @@
+test_class,focal_method,compile_score,exec_score,coverage_score,bug_revealing_score,redundancy_score,final_score,valid_weight_pct
+org.apache.commons.csv.CSVRecord_12,toString,1.0,1.0,0.5,,,0.75,0.6
+org.apache.commons.csv.CSVRecord_12,toString,1.0,1.0,0.5,0.0,,0.5625,0.8
+org.apache.commons.csv.CSVRecord_12,toString,1.0,0.75,0.5,0.0,,0.515625,0.8

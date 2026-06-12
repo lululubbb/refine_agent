@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Method;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_3_3Test {\n\n    @Test\n    public void testGet_normalCase() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"header1\", 0);\n        mapping.put(\"header2\", 1);\n        String[] values = {\"value1\", \"value2\"};\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n\n        String result = invokeGet(record, \"header1\");\n        Assertions.assertEquals(\"value1\", result);\n\n        result = invokeGet(record, \"header2\");\n        Assertions.assertEquals(\"value2\", result);\n    }\n\n    @Test\n    public void testGet_nullMapping() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        CSVRecord record = new CSVRecord(values, null, null, 1);\n\n        Assertions.assertThrows(IllegalStateException.class, () -> {\n            invokeGet(record, \"header1\");\n        });\n    }\n\n    @Test\n    public void testGet_indexNotFound() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"header1\", 0);\n        String[] values = {\"value1\"};\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n\n        String result = invokeGet(record, \"header2\");\n        Assertions.assertNull(result);\n    }\n\n    @Test\n    public void testGet_indexOutOfBounds() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"header1\", 1);\n        String[] values = {\"value1\"};\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n\n        Assertions.assertThrows(IllegalArgumentException.class, () -> {\n            invokeGet(record, \"header1\");\n        });\n    }\n\n    private String invokeGet(CSVRecord record, String name) throws Exception {\n        Method method = CSVRecord.class.getDeclaredMethod(\"get\", String.class);\n        method.setAccessible(true);\n        return (String) method.invoke(record, name);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1223,
+    "completion_tokens": 487,
+    "total_tokens": 1710,
+    "llm_elapsed_time_seconds": 8.093
+  }
+}

@@ -1,0 +1,13 @@
+project,target_class,test_class,focal_method,exec_status,m_per_line_cov,m_per_line_total,m_per_line_rate,m_per_branch_cov,m_per_branch_total,m_per_branch_rate,m_line_contrib_pct,m_branch_contrib_pct,m_coverage_score,f_per_line_cov,f_per_line_total,f_per_line_rate,f_per_branch_cov,f_per_branch_total,f_per_branch_rate,f_line_contrib_pct,f_branch_contrib_pct,f_coverage_score
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_1Test,ExtendedBufferedReader,fail,21,37,56.7568,5,26,19.2308,24.1379,18.5185,0.29661,4,4,100.0,,,,100.0,0.0,0.5
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_2Test,ExtendedBufferedReader,fail,30,37,81.0811,11,26,42.3077,34.4828,40.7407,0.496531,4,4,100.0,,,,100.0,0.0,0.5
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_3Test,ExtendedBufferedReader,ok,16,37,43.2432,6,26,23.0769,18.3908,22.2222,0.267333,4,4,100.0,,,,100.0,0.0,0.5
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_4Test,ExtendedBufferedReader,ok,20,37,54.0541,5,26,19.2308,22.9885,18.5185,0.28698,4,4,100.0,,,,100.0,0.0,0.5
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_1Test,ExtendedBufferedReader,fail,21,37,56.7568,5,26,19.2308,24.1379,18.5185,0.29661,4,4,100.0,,,,100.0,0.0,0.5
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_2Test,ExtendedBufferedReader,fail,30,37,81.0811,11,26,42.3077,34.4828,40.7407,0.496531,4,4,100.0,,,,100.0,0.0,0.5
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_3Test,ExtendedBufferedReader,fail,16,37,43.2432,6,26,23.0769,18.3908,22.2222,0.267333,4,4,100.0,,,,100.0,0.0,0.5
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_4Test,ExtendedBufferedReader,ok,20,37,54.0541,5,26,19.2308,22.9885,18.5185,0.28698,4,4,100.0,,,,100.0,0.0,0.5
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_1Test,ExtendedBufferedReader,fail,21,37,56.7568,5,26,19.2308,23.5955,17.2414,0.292061,4,4,100.0,,,,100.0,0.0,0.5
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_2Test,ExtendedBufferedReader,fail,30,37,81.0811,11,26,42.3077,33.7079,37.931,0.487569,4,4,100.0,,,,100.0,0.0,0.5
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_3Test,ExtendedBufferedReader,ok,16,37,43.2432,6,26,23.0769,17.9775,20.6897,0.262468,4,4,100.0,,,,100.0,0.0,0.5
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_1_4Test,ExtendedBufferedReader,fail,22,37,59.4595,7,26,26.9231,24.7191,24.1379,0.338099,4,4,100.0,,,,100.0,0.0,0.5

@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Collections;\nimport java.util.HashMap;\nimport java.util.Map;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\npublic class CSVRecord_5_2Test {\n\n    @Test\n    public void testisMapped_mappingIsNull() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, null, \"comment\", 1L);\n        Assertions.assertEquals(false, record.isMapped(\"name\"));\n    }\n\n    @Test\n    public void testisMapped_nameExistsInMapping() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"name\", 0);\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, \"comment\", 1L);\n        Assertions.assertEquals(true, record.isMapped(\"name\"));\n    }\n\n    @Test\n    public void testisMapped_nameDoesNotExistInMapping() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"otherName\", 0);\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, \"comment\", 1L);\n        Assertions.assertEquals(false, record.isMapped(\"name\"));\n    }\n\n    @Test\n    public void testisMapped_emptyMapping() throws Exception {\n        Map<String, Integer> mapping = Collections.emptyMap();\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, \"comment\", 1L);\n        Assertions.assertEquals(false, record.isMapped(\"name\"));\n    }\n\n    @Test\n    public void testisMapped_mappingIsNotNullAndEmpty() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, \"comment\", 1L);\n        Assertions.assertEquals(false, record.isMapped(\"name\"));\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1048,
+    "completion_tokens": 400,
+    "total_tokens": 1448,
+    "llm_elapsed_time_seconds": 6.609
+  }
+}

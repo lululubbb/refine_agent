@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.BufferedReader;\nimport java.io.IOException;\nimport java.io.Reader;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\n\nimport java.io.StringReader;\nimport java.lang.reflect.Field;\n\nclass ExtendedBufferedReader_3_3Test {\n    private ExtendedBufferedReader reader;\n\n    @BeforeEach\n    void setUp() {\n        reader = new ExtendedBufferedReader(new StringReader(\"Test input\"));\n    }\n\n    @Test\n    void testreadAgain_initialValue() throws Exception {\n        Field lastCharField = ExtendedBufferedReader.class.getDeclaredField(\"lastChar\");\n        lastCharField.setAccessible(true);\n        lastCharField.setInt(reader, -2); // Setting to UNDEFINED\n        Assertions.assertEquals(-2, reader.readAgain());\n    }\n\n    @Test\n    void testreadAgain_afterReading() throws Exception {\n        Field lastCharField = ExtendedBufferedReader.class.getDeclaredField(\"lastChar\");\n        lastCharField.setAccessible(true);\n        lastCharField.setInt(reader, 65); // Setting to a valid character (e.g., 'A')\n        Assertions.assertEquals(65, reader.readAgain());\n    }\n\n    @Test\n    void testreadAgain_afterStreamEnd() throws Exception {\n        Field lastCharField = ExtendedBufferedReader.class.getDeclaredField(\"lastChar\");\n        lastCharField.setAccessible(true);\n        lastCharField.setInt(reader, -1); // Setting to END_OF_STREAM\n        Assertions.assertEquals(-1, reader.readAgain());\n    }\n\n    @Test\n    void testRead() throws Exception {\n        int result = reader.read();\n        Assertions.assertEquals('T', result); // Expecting 'T' from \"Test input\"\n    }\n\n    @Test\n    void testReadWithBuffer() throws Exception {\n        char[] buf = new char[4];\n        int result = reader.read(buf, 0, 4);\n        Assertions.assertEquals(4, result); // Expecting to read 4 characters\n        Assertions.assertEquals(\"Test\", new String(buf)); // Expecting \"Test\"\n    }\n\n    @Test\n    void testReadLine() throws Exception {\n        String result = reader.readLine();\n        Assertions.assertEquals(\"Test input\", result); // Expecting the full line\n    }\n\n    @Test\n    void testLookAhead() throws Exception {\n        Field lastCharField = ExtendedBufferedReader.class.getDeclaredField(\"lastChar\");\n        lastCharField.setAccessible(true);\n        lastCharField.setInt(reader, 'T'); // Setting to 'T'\n        int result = reader.lookAhead();\n        Assertions.assertEquals('T', result); // Expecting to look ahead at 'T'\n    }\n\n    @Test\n    void testGetLineNumber() throws Exception {\n        Field lineCounterField = ExtendedBufferedReader.class.getDeclaredField(\"lineCounter\");\n        lineCounterField.setAccessible(true);\n        lineCounterField.setInt(reader, 1); // Setting line number to 1\n        int result = reader.getLineNumber();\n        Assertions.assertEquals(1, result); // Expecting line number 1\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 896,
+    "completion_tokens": 651,
+    "total_tokens": 1547,
+    "llm_elapsed_time_seconds": 11.635
+  }
+}

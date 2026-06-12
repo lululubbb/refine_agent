@@ -1,0 +1,24 @@
+{
+  "raw": "{\n  \"suite_summary\": \"The test suite for the ExtendedBufferedReader class has two test files, both of which compile successfully but fail during execution. The tests exhibit various assertion failures, indicating potential issues with the focal method's implementation or the test logic itself. No tests reveal bugs, and coverage is complete.\",\n  \"test_instructions\": {\n    \"ExtendedBufferedReader_1_1Test\": [\n      \"Fix the assertion in testExtendedBufferedReader_readWithBuffer: expected: <11> but was: <10>\",\n      \"Fix the assertion in testExtendedBufferedReader_readAgain: expected: <84> but was: <-2>\"\n    ],\n    \"ExtendedBufferedReader_1_2Test\": [\n      \"Fix the assertion in testRead_charArray_normalCase: array lengths differ, expected: <5> but was: <10>\",\n      \"Fix the assertion in testRead_endOfStream: expected: not equal but was: <-2>\",\n      \"Fix the assertion in testReadLine_endOfStream: expected: <null> but was: <World>\",\n      \"Fix the assertion in testGetLineNumber: expected: <1> but was: <0>\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "The test suite for the ExtendedBufferedReader class has two test files, both of which compile successfully but fail during execution. The tests exhibit various assertion failures, indicating potential issues with the focal method's implementation or the test logic itself. No tests reveal bugs, and coverage is complete.",
+    "test_instructions": {
+      "ExtendedBufferedReader_1_1Test": [
+        "Fix the assertion in testExtendedBufferedReader_readWithBuffer: expected: <11> but was: <10>",
+        "Fix the assertion in testExtendedBufferedReader_readAgain: expected: <84> but was: <-2>"
+      ],
+      "ExtendedBufferedReader_1_2Test": [
+        "Fix the assertion in testRead_charArray_normalCase: array lengths differ, expected: <5> but was: <10>",
+        "Fix the assertion in testRead_endOfStream: expected: not equal but was: <-2>",
+        "Fix the assertion in testReadLine_endOfStream: expected: <null> but was: <World>",
+        "Fix the assertion in testGetLineNumber: expected: <1> but was: <0>"
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 4474,
+    "completion_tokens": 247,
+    "total_tokens": 4721,
+    "llm_elapsed_time_seconds": 5.201
+  }
+}

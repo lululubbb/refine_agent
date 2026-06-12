@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Constructor;\nimport java.lang.reflect.Field;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_11_3Test {\n\n    @Test\n    public void testSize_emptyArray() throws Exception {\n        CSVRecord record = createCSVRecord(new String[]{});\n        Assertions.assertEquals(0, record.size());\n    }\n\n    @Test\n    public void testSize_singleElementArray() throws Exception {\n        CSVRecord record = createCSVRecord(new String[]{\"value1\"});\n        Assertions.assertEquals(1, record.size());\n        Assertions.assertEquals(\"value1\", record.get(0));\n    }\n\n    @Test\n    public void testSize_multipleElementsArray() throws Exception {\n        CSVRecord record = createCSVRecord(new String[]{\"value1\", \"value2\", \"value3\"});\n        Assertions.assertEquals(3, record.size());\n        Assertions.assertEquals(\"value1\", record.get(0));\n        Assertions.assertEquals(\"value2\", record.get(1));\n        Assertions.assertEquals(\"value3\", record.get(2));\n    }\n\n    @Test\n    public void testSize_largeArray() throws Exception {\n        String[] values = new String[1000];\n        Arrays.fill(values, \"value\");\n        CSVRecord record = createCSVRecord(values);\n        Assertions.assertEquals(1000, record.size());\n        for (int i = 0; i < 1000; i++) {\n            Assertions.assertEquals(\"value\", record.get(i));\n        }\n    }\n\n    @Test\n    public void testSize_boundaryArray() throws Exception {\n        CSVRecord record = createCSVRecord(new String[]{\"value1\", \"\", \"value3\"});\n        Assertions.assertEquals(3, record.size());\n        Assertions.assertEquals(\"value1\", record.get(0));\n        Assertions.assertEquals(\"\", record.get(1));\n        Assertions.assertEquals(\"value3\", record.get(2));\n    }\n\n    @Test\n    public void testSize_largeEmptyArray() throws Exception {\n        CSVRecord record = createCSVRecord(new String[1000]);\n        Assertions.assertEquals(1000, record.size());\n        for (int i = 0; i < 1000; i++) {\n            Assertions.assertEquals(null, record.get(i)); // Expecting null for empty strings\n        }\n    }\n\n    private CSVRecord createCSVRecord(String[] values) throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        Constructor<CSVRecord> constructor = CSVRecord.class.getDeclaredConstructor(String[].class, Map.class, String.class, long.class);\n        constructor.setAccessible(true);\n        return constructor.newInstance(values, mapping, null, 0);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1079,
+    "completion_tokens": 584,
+    "total_tokens": 1663,
+    "llm_elapsed_time_seconds": 6.992
+  }
+}

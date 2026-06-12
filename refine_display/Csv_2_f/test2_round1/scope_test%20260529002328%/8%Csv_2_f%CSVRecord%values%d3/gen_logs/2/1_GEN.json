@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Method;\nimport java.util.Collections;\nimport java.util.HashMap;\n\npublic class CSVRecordTest {\n\n    @Test\n    public void testvalues_normalCase() throws Exception {\n        String[] inputValues = {\"value1\", \"value2\", \"value3\"};\n        CSVRecord record = new CSVRecord(inputValues, new HashMap<>(), null, 1);\n        String[] result = invokeValuesMethod(record);\n        Assertions.assertArrayEquals(inputValues, result);\n    }\n\n    @Test\n    public void testvalues_emptyArray() throws Exception {\n        String[] inputValues = {};\n        CSVRecord record = new CSVRecord(inputValues, new HashMap<>(), null, 1);\n        String[] result = invokeValuesMethod(record);\n        Assertions.assertArrayEquals(inputValues, result);\n    }\n\n    @Test\n    public void testvalues_singleElement() throws Exception {\n        String[] inputValues = {\"singleValue\"};\n        CSVRecord record = new CSVRecord(inputValues, new HashMap<>(), null, 1);\n        String[] result = invokeValuesMethod(record);\n        Assertions.assertArrayEquals(inputValues, result);\n    }\n\n    private String[] invokeValuesMethod(CSVRecord record) throws Exception {\n        Method method = CSVRecord.class.getDeclaredMethod(\"values\");\n        method.setAccessible(true);\n        return (String[]) method.invoke(record);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 614,
+    "completion_tokens": 293,
+    "total_tokens": 907,
+    "llm_elapsed_time_seconds": 8.982
+  }
+}

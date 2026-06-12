@@ -1,0 +1,32 @@
+{
+  "raw": "{\n  \"suite_summary\": \"The test suite for the `get` method in the `CSVRecord` class has encountered several issues across its test files. Two test files failed to compile, while others exhibited low coverage and redundancy issues. The focus will be on resolving compile errors first, followed by execution failures, and finally addressing coverage and redundancy concerns.\",\n  \"test_instructions\": {\n    \"CSVRecord_2_1Test\": [\n      \"Fix compile error: 'error: unreported exception Throwable; must be caught or declared to be thrown' (CE-1). Add 'throws Exception' to all @Test methods.\"\n    ],\n    \"CSVRecord_2_5Test\": [\n      \"Fix compile error: 'error: cannot find symbol' (CE-13). Check the method name 'invokeGet' and ensure it exists in the context.\"\n    ],\n    \"CSVRecord_2_2Test\": [\n      \"Increase coverage by adding tests for boundary values and exception-throwing paths, such as testing with null values, negative indices, and empty arrays.\"\n    ],\n    \"CSVRecord_2_3Test\": [\n      \"Increase coverage by adding tests for boundary values and exception-throwing paths, such as testing with null values, negative indices, and empty arrays.\"\n    ],\n    \"CSVRecord_2_4Test\": [\n      \"Increase coverage by adding tests for boundary values and exception-throwing paths, such as testing with null values, negative indices, and empty arrays.\"\n    ],\n    \"CSVRecord_2_6Test\": [\n      \"Increase coverage by adding tests for boundary values and exception-throwing paths, such as testing with null values, negative indices, and empty arrays.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "The test suite for the `get` method in the `CSVRecord` class has encountered several issues across its test files. Two test files failed to compile, while others exhibited low coverage and redundancy issues. The focus will be on resolving compile errors first, followed by execution failures, and finally addressing coverage and redundancy concerns.",
+    "test_instructions": {
+      "CSVRecord_2_1Test": [
+        "Fix compile error: 'error: unreported exception Throwable; must be caught or declared to be thrown' (CE-1). Add 'throws Exception' to all @Test methods."
+      ],
+      "CSVRecord_2_5Test": [
+        "Fix compile error: 'error: cannot find symbol' (CE-13). Check the method name 'invokeGet' and ensure it exists in the context."
+      ],
+      "CSVRecord_2_2Test": [
+        "Increase coverage by adding tests for boundary values and exception-throwing paths, such as testing with null values, negative indices, and empty arrays."
+      ],
+      "CSVRecord_2_3Test": [
+        "Increase coverage by adding tests for boundary values and exception-throwing paths, such as testing with null values, negative indices, and empty arrays."
+      ],
+      "CSVRecord_2_4Test": [
+        "Increase coverage by adding tests for boundary values and exception-throwing paths, such as testing with null values, negative indices, and empty arrays."
+      ],
+      "CSVRecord_2_6Test": [
+        "Increase coverage by adding tests for boundary values and exception-throwing paths, such as testing with null values, negative indices, and empty arrays."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 11040,
+    "completion_tokens": 357,
+    "total_tokens": 11397,
+    "llm_elapsed_time_seconds": 6.287
+  }
+}

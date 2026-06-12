@@ -1,0 +1,10 @@
+[EXEC_OK] /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test6_round5/scope_test%20260529011231%/12%Csv_2_f%CSVRecord%toString%d3/test_cases/CSVRecord_12_1Test.java
+[EXEC_OK] /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test6_round5/scope_test%20260529011231%/12%Csv_2_f%CSVRecord%toString%d3/test_cases/CSVRecord_12_2Test.java
+[EXEC_OK] /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test6_round5/scope_test%20260529011231%/12%Csv_2_f%CSVRecord%toString%d3/test_cases/CSVRecord_12_3Test.java
+[EXEC_OK] /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test6_round5/scope_test%20260529011231%/12%Csv_2_f%CSVRecord%toString%d3/test_cases/CSVRecord_12_4Test.java
+[EXEC_FAILED] /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test6_round5/scope_test%20260529011231%/12%Csv_2_f%CSVRecord%toString%d3/test_cases/CSVRecord_12_5Test.java:
+[EXEC_CORE_ERROR] 未提取到明确异常信息
+[EXEC_STDERR]
+    Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+================================================================================
+[EXEC_OK] /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test6_round5/scope_test%20260529011231%/12%Csv_2_f%CSVRecord%toString%d3/test_cases/CSVRecord_12_6Test.java

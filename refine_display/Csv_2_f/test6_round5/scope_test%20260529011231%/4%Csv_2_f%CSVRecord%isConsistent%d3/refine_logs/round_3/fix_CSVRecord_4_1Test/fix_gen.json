@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport java.util.Collections;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_4_1Test {\n\n    @Test\n    public void testisConsistent_mappingIsNull() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{\"value1\", \"value2\"}, null, null, 1);\n        Assertions.assertEquals(true, record.isConsistent(), \"Expected isConsistent to return true when mapping is null.\");\n    }\n\n    @Test\n    public void testisConsistent_mappingSizeMatchesValuesLength() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"col1\", 0);\n        mapping.put(\"col2\", 1);\n        CSVRecord record = new CSVRecord(new String[]{\"value1\", \"value2\"}, mapping, null, 1);\n        Assertions.assertEquals(true, record.isConsistent(), \"Expected isConsistent to return true when mapping size matches values length.\");\n    }\n\n    @Test\n    public void testisConsistent_mappingSizeDoesNotMatchValuesLength() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"col1\", 0);\n        CSVRecord record = new CSVRecord(new String[]{\"value1\", \"value2\"}, mapping, null, 1);\n        Assertions.assertEquals(false, record.isConsistent(), \"Expected isConsistent to return false when mapping size does not match values length.\");\n    }\n\n    @Test\n    public void testisConsistent_emptyMappingAndValues() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{}, Collections.emptyMap(), null, 1);\n        Assertions.assertEquals(true, record.isConsistent(), \"Expected isConsistent to return true for empty mapping and values.\");\n    }\n\n    @Test\n    public void testisConsistent_emptyValuesWithNullMapping() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{}, null, null, 1);\n        Assertions.assertEquals(true, record.isConsistent(), \"Expected isConsistent to return true for empty values with null mapping.\");\n    }\n\n    @Test\n    public void testisConsistent_singleValueWithMapping() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"col1\", 0);\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n        Assertions.assertEquals(true, record.isConsistent(), \"Expected isConsistent to return true for single value with correct mapping.\");\n    }\n\n    @Test\n    public void testisConsistent_singleValueWithIncorrectMapping() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"col1\", 1); // Incorrect index\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n        Assertions.assertEquals(false, record.isConsistent(), \"Expected isConsistent to return false for single value with incorrect mapping.\");\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1050,
+    "completion_tokens": 659,
+    "total_tokens": 1709,
+    "llm_elapsed_time_seconds": 12.295
+  }
+}

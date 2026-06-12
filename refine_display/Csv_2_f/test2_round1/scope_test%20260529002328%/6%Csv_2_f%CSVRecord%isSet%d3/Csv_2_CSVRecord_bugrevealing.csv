@@ -1,0 +1,7 @@
+project_name,target_class,test_class,test_method,buggy_status,fixed_status,bug_revealing,buggy_rc,fixed_rc,notes
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_6_1Test,testisSet_nameMappedAndWithinBounds,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_6_1Test,testisSet_nameMappedButOutOfBounds,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_6_1Test,testisSet_nameNotMapped,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_6_2Test,testisSet_nameMappedAndWithinBounds,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_6_2Test,testisSet_nameMappedButOutOfBounds,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_6_2Test,testisSet_nameNotMapped,pass,pass,false,0,0,

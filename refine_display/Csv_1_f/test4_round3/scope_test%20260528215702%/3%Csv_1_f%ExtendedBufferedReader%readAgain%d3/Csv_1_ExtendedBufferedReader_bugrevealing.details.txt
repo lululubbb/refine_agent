@@ -1,0 +1,446 @@
+bug_revealing log started: 2026-05-28T22:03:06.475453
+buggy=/home/chenlu/refine_test_gen_v5/defect4j_projects/Csv_1_b
+fixed=/home/chenlu/refine_test_gen_v5/defect4j_projects/Csv_1_f
+tests_dir=/home/chenlu/refine_test_gen_v5/refine_display/Csv_1_f/test4_round3/scope_test%20260528215702%/3%Csv_1_f%ExtendedBufferedReader%readAgain%d3/test_cases
+
+Running org.apache.commons.csv.ExtendedBufferedReader_3_1Test#testReadAgain_initialValue on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_1Test#testReadAgain_initialValue on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_1Test#testReadAgain_afterReading on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_1Test#testReadAgain_afterReading on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_1Test#testReadAgain_afterMultipleReads on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_1Test#testReadAgain_afterMultipleReads on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_1Test#testReadAgain_noReads on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_1Test#testReadAgain_noReads on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_1Test#testRead on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_3_1Test#testRead on fixed...
+  -> fail
+---
+[2026-05-28T22:03:16.243287] buggy org.apache.commons.csv.ExtendedBufferedReader_3_1Test#testRead status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:ExtendedBufferedReader_3_1Test:testRead()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_3_1Test', methodName = 'testRead', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: expected: <1> but was: <0>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+       org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:528)
+       org.apache.commons.csv.ExtendedBufferedReader_3_1Test.testRead(ExtendedBufferedReader_3_1Test.java:63)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       [...]
+
+Test run finished after 101 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+---
+[2026-05-28T22:03:16.243324] fixed org.apache.commons.csv.ExtendedBufferedReader_3_1Test#testRead status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:ExtendedBufferedReader_3_1Test:testRead()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_3_1Test', methodName = 'testRead', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: expected: <1> but was: <0>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+       org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:528)
+       org.apache.commons.csv.ExtendedBufferedReader_3_1Test.testRead(ExtendedBufferedReader_3_1Test.java:63)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       [...]
+
+Test run finished after 94 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+Running org.apache.commons.csv.ExtendedBufferedReader_3_1Test#testReadLine on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_1Test#testReadLine on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_1Test#testLookAhead on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_1Test#testLookAhead on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_1Test#testGetLineNumber on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_1Test#testGetLineNumber on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_2Test#testReadAgain_initialState on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_2Test#testReadAgain_initialState on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_2Test#testReadAgain_afterReading on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_2Test#testReadAgain_afterReading on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_2Test#testReadAgain_afterEndOfStream on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_2Test#testReadAgain_afterEndOfStream on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_2Test#testRead_singleCharacter on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_2Test#testRead_singleCharacter on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_2Test#testRead_multipleCharacters on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_2Test#testRead_multipleCharacters on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_2Test#testReadLine on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_2Test#testReadLine on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_2Test#testLookAhead on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_2Test#testLookAhead on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_2Test#testGetLineNumber on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_2Test#testGetLineNumber on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_3Test#testreadAgain_initialValue on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_3Test#testreadAgain_initialValue on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_3Test#testreadAgain_afterReading on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_3Test#testreadAgain_afterReading on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_3Test#testreadAgain_afterStreamEnd on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_3Test#testreadAgain_afterStreamEnd on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_3Test#testRead on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_3Test#testRead on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_3Test#testReadWithBuffer on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_3Test#testReadWithBuffer on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_3Test#testReadLine on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_3Test#testReadLine on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_3Test#testLookAhead on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_3Test#testLookAhead on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_3Test#testGetLineNumber on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_3Test#testGetLineNumber on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_3_4Test#testReadAgain_initialState on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_3_4Test#testReadAgain_initialState on fixed...
+  -> fail
+---
+[2026-05-28T22:03:49.308334] buggy org.apache.commons.csv.ExtendedBufferedReader_3_4Test#testReadAgain_initialState status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:ExtendedBufferedReader_3_4Test:testReadAgain_initialState()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_3_4Test', methodName = 'testReadAgain_initialState', methodParameterTypes = '']
+    => java.lang.NoSuchMethodException: org.apache.commons.csv.ExtendedBufferedReader.setLastChar(int)
+       java.base/java.lang.Class.getDeclaredMethod(Class.java:2475)
+       org.apache.commons.csv.ExtendedBufferedReader_3_4Test.invokeSetLastChar(ExtendedBufferedReader_3_4Test.java:37)
+       org.apache.commons.csv.ExtendedBufferedReader_3_4Test.testReadAgain_initialState(ExtendedBufferedReader_3_4Test.java:18)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+       org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+       org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+       [...]
+
+Test run finished after 131 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+---
+[2026-05-28T22:03:49.308380] fixed org.apache.commons.csv.ExtendedBufferedReader_3_4Test#testReadAgain_initialState status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:ExtendedBufferedReader_3_4Test:testReadAgain_initialState()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_3_4Test', methodName = 'testReadAgain_initialState', methodParameterTypes = '']
+    => java.lang.NoSuchMethodException: org.apache.commons.csv.ExtendedBufferedReader.setLastChar(int)
+       java.base/java.lang.Class.getDeclaredMethod(Class.java:2475)
+       org.apache.commons.csv.ExtendedBufferedReader_3_4Test.invokeSetLastChar(ExtendedBufferedReader_3_4Test.java:37)
+       org.apache.commons.csv.ExtendedBufferedReader_3_4Test.testReadAgain_initialState(ExtendedBufferedReader_3_4Test.java:18)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+       org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+       org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+       [...]
+
+Test run finished after 109 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+Running org.apache.commons.csv.ExtendedBufferedReader_3_4Test#testReadAgain_afterSettingLastChar on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_3_4Test#testReadAgain_afterSettingLastChar on fixed...
+  -> fail
+---
+[2026-05-28T22:03:51.323309] buggy org.apache.commons.csv.ExtendedBufferedReader_3_4Test#testReadAgain_afterSettingLastChar status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:ExtendedBufferedReader_3_4Test:testReadAgain_afterSettingLastChar()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_3_4Test', methodName = 'testReadAgain_afterSettingLastChar', methodParameterTypes = '']
+    => java.lang.NoSuchMethodException: org.apache.commons.csv.ExtendedBufferedReader.setLastChar(int)
+       java.base/java.lang.Class.getDeclaredMethod(Class.java:2475)
+       org.apache.commons.csv.ExtendedBufferedReader_3_4Test.invokeSetLastChar(ExtendedBufferedReader_3_4Test.java:37)
+       org.apache.commons.csv.ExtendedBufferedReader_3_4Test.testReadAgain_afterSettingLastChar(ExtendedBufferedReader_3_4Test.java:25)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+       org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+       org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+       [...]
+
+Test run finished after 129 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+---
+[2026-05-28T22:03:51.323362] fixed org.apache.commons.csv.ExtendedBufferedReader_3_4Test#testReadAgain_afterSettingLastChar status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:ExtendedBufferedReader_3_4Test:testReadAgain_afterSettingLastChar()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_3_4Test', methodName = 'testReadAgain_afterSettingLastChar', methodParameterTypes = '']
+    => java.lang.NoSuchMethodException: org.apache.commons.csv.ExtendedBufferedReader.setLastChar(int)
+       java.base/java.lang.Class.getDeclaredMethod(Class.java:2475)
+       org.apache.commons.csv.ExtendedBufferedReader_3_4Test.invokeSetLastChar(ExtendedBufferedReader_3_4Test.java:37)
+       org.apache.commons.csv.ExtendedBufferedReader_3_4Test.testReadAgain_afterSettingLastChar(ExtendedBufferedReader_3_4Test.java:25)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+       org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+       org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+       [...]
+
+Test run finished after 107 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+Running org.apache.commons.csv.ExtendedBufferedReader_3_4Test#testReadAgain_afterSettingLastCharToEndOfStream on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_3_4Test#testReadAgain_afterSettingLastCharToEndOfStream on fixed...
+  -> fail
+---
+[2026-05-28T22:03:53.402196] buggy org.apache.commons.csv.ExtendedBufferedReader_3_4Test#testReadAgain_afterSettingLastCharToEndOfStream status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:ExtendedBufferedReader_3_4Test:testReadAgain_afterSettingLastCharToEndOfStream()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_3_4Test', methodName = 'testReadAgain_afterSettingLastCharToEndOfStream', methodParameterTypes = '']
+    => java.lang.NoSuchMethodException: org.apache.commons.csv.ExtendedBufferedReader.setLastChar(int)
+       java.base/java.lang.Class.getDeclaredMethod(Class.java:2475)
+       org.apache.commons.csv.ExtendedBufferedReader_3_4Test.invokeSetLastChar(ExtendedBufferedReader_3_4Test.java:37)
+       org.apache.commons.csv.ExtendedBufferedReader_3_4Test.testReadAgain_afterSettingLastCharToEndOfStream(ExtendedBufferedReader_3_4Test.java:32)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+       org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+       org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+       [...]
+
+Test run finished after 127 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+---
+[2026-05-28T22:03:53.402239] fixed org.apache.commons.csv.ExtendedBufferedReader_3_4Test#testReadAgain_afterSettingLastCharToEndOfStream status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:ExtendedBufferedReader_3_4Test:testReadAgain_afterSettingLastCharToEndOfStream()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_3_4Test', methodName = 'testReadAgain_afterSettingLastCharToEndOfStream', methodParameterTypes = '']
+    => java.lang.NoSuchMethodException: org.apache.commons.csv.ExtendedBufferedReader.setLastChar(int)
+       java.base/java.lang.Class.getDeclaredMethod(Class.java:2475)
+       org.apache.commons.csv.ExtendedBufferedReader_3_4Test.invokeSetLastChar(ExtendedBufferedReader_3_4Test.java:37)
+       org.apache.commons.csv.ExtendedBufferedReader_3_4Test.testReadAgain_afterSettingLastCharToEndOfStream(ExtendedBufferedReader_3_4Test.java:32)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+       org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+       org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+       [...]
+
+Test run finished after 142 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+Class-level summary: /home/chenlu/refine_test_gen_v5/refine_display/Csv_1_f/test4_round3/scope_test%20260528215702%/3%Csv_1_f%ExtendedBufferedReader%readAgain%d3/Csv_1_ExtendedBufferedReader_bugrevealing_class_level.csv
+Class-level CSV: /home/chenlu/refine_test_gen_v5/refine_display/Csv_1_f/test4_round3/scope_test%20260528215702%/3%Csv_1_f%ExtendedBufferedReader%readAgain%d3/Csv_1_ExtendedBufferedReader_bugrevealing_class_level.csv
+@Test method-level stats: /home/chenlu/refine_test_gen_v5/refine_display/Csv_1_f/test4_round3/scope_test%20260528215702%/3%Csv_1_f%ExtendedBufferedReader%readAgain%d3/Csv_1_ExtendedBufferedReader_bugrevealing_method_stats.csv
+
+===== SUMMARY =====
+Total tests evaluated: 27
+Bug revealing tests: 0
+Summary CSV: /home/chenlu/refine_test_gen_v5/refine_display/Csv_1_f/test4_round3/scope_test%20260528215702%/3%Csv_1_f%ExtendedBufferedReader%readAgain%d3/Csv_1_ExtendedBufferedReader_bugrevealing.csv
+
+===== @Test METHOD-LEVEL STATISTICS =====
+Total @Test methods run: 27
+--- Fixed version (Csv_1_f) ---
+  PASS   : 23
+  FAIL   : 4
+  TIMEOUT: 0
+  Pass rate: 85.19%
+--- Buggy version (Csv_1_b) ---
+  PASS   : 23
+  FAIL   : 4
+  TIMEOUT: 0
+  Pass rate: 85.19%
+
+===== @Test METHOD-LEVEL STATISTICS =====
+Total @Test methods run: 27
+--- Fixed version (Csv_1_f) ---
+  PASS   : 23
+  FAIL   : 4
+  TIMEOUT: 0
+  Pass rate: 85.19%
+--- Buggy version (Csv_1_b) ---
+  PASS   : 23
+  FAIL   : 4
+  TIMEOUT: 0
+  Pass rate: 85.19%
+
+===== END =====
+log finished: 2026-05-28T22:03:53.403504

@@ -1,0 +1,32 @@
+{
+  "raw": "{\n  \"suite_summary\": \"The test suite for the `CSVRecord` class has a total of 6 test files, with 4 failing during execution. All test files compile successfully. The suite exhibits high redundancy and low bug-revealing capabilities, indicating a need for more diverse and effective test cases. The overall line coverage is excellent, but several tests do not reveal any bugs.\",\n  \"test_instructions\": {\n    \"CSVRecord_1_1Test\": [\n      \"Fix the test method 'testCSVRecord_invalidMapping()' to ensure it triggers a NullPointerException. The error message states: 'Expected java.lang.NullPointerException to be thrown, but nothing was thrown.'\"\n    ],\n    \"CSVRecord_1_2Test\": [\n      \"Fix the test method 'testCSVRecord_noMapping()' to ensure it triggers an IllegalArgumentException. The error message states: 'Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.'\"\n    ],\n    \"CSVRecord_1_3Test\": [\n      \"This test is not bug-revealing. Consider adding assertions that check specific values returned by the methods to ensure they meet expected outcomes.\"\n    ],\n    \"CSVRecord_1_4Test\": [\n      \"This test is not bug-revealing. Consider adding assertions that check specific values returned by the methods to ensure they meet expected outcomes.\"\n    ],\n    \"CSVRecord_1_5Test\": [\n      \"This test is not bug-revealing. Consider adding assertions that check specific values returned by the methods to ensure they meet expected outcomes.\"\n    ],\n    \"CSVRecord_1_6Test\": [\n      \"This test is not bug-revealing. Consider adding assertions that check specific values returned by the methods to ensure they meet expected outcomes.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "The test suite for the `CSVRecord` class has a total of 6 test files, with 4 failing during execution. All test files compile successfully. The suite exhibits high redundancy and low bug-revealing capabilities, indicating a need for more diverse and effective test cases. The overall line coverage is excellent, but several tests do not reveal any bugs.",
+    "test_instructions": {
+      "CSVRecord_1_1Test": [
+        "Fix the test method 'testCSVRecord_invalidMapping()' to ensure it triggers a NullPointerException. The error message states: 'Expected java.lang.NullPointerException to be thrown, but nothing was thrown.'"
+      ],
+      "CSVRecord_1_2Test": [
+        "Fix the test method 'testCSVRecord_noMapping()' to ensure it triggers an IllegalArgumentException. The error message states: 'Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.'"
+      ],
+      "CSVRecord_1_3Test": [
+        "This test is not bug-revealing. Consider adding assertions that check specific values returned by the methods to ensure they meet expected outcomes."
+      ],
+      "CSVRecord_1_4Test": [
+        "This test is not bug-revealing. Consider adding assertions that check specific values returned by the methods to ensure they meet expected outcomes."
+      ],
+      "CSVRecord_1_5Test": [
+        "This test is not bug-revealing. Consider adding assertions that check specific values returned by the methods to ensure they meet expected outcomes."
+      ],
+      "CSVRecord_1_6Test": [
+        "This test is not bug-revealing. Consider adding assertions that check specific values returned by the methods to ensure they meet expected outcomes."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 12311,
+    "completion_tokens": 374,
+    "total_tokens": 12685,
+    "llm_elapsed_time_seconds": 7.008
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "package org.apache.commons.csv;\n\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Constructor;\nimport java.lang.reflect.Field;\nimport java.util.Collections;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecordTest {\n\n    @Test\n    public void testGetRecordNumber_normalCase() throws Exception {\n        long expectedRecordNumber = 5L;\n        CSVRecord csvRecord = createCSVRecord(expectedRecordNumber);\n\n        long actualRecordNumber = csvRecord.getRecordNumber();\n\n        Assertions.assertEquals(expectedRecordNumber, actualRecordNumber);\n    }\n\n    @Test\n    public void testGetRecordNumber_zeroRecordNumber() throws Exception {\n        long expectedRecordNumber = 0L;\n        CSVRecord csvRecord = createCSVRecord(expectedRecordNumber);\n\n        long actualRecordNumber = csvRecord.getRecordNumber();\n\n        Assertions.assertEquals(expectedRecordNumber, actualRecordNumber);\n    }\n\n    @Test\n    public void testGetRecordNumber_negativeRecordNumber() throws Exception {\n        long expectedRecordNumber = -1L;\n        CSVRecord csvRecord = createCSVRecord(expectedRecordNumber);\n\n        long actualRecordNumber = csvRecord.getRecordNumber();\n\n        Assertions.assertEquals(expectedRecordNumber, actualRecordNumber);\n    }\n\n    private CSVRecord createCSVRecord(long recordNumber) throws Exception {\n        String[] values = new String[] {};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = null;\n\n        Constructor<CSVRecord> constructor = CSVRecord.class.getDeclaredConstructor(String[].class, Map.class, String.class, long.class);\n        constructor.setAccessible(true);\n        return constructor.newInstance(values, mapping, comment, recordNumber);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 619,
+    "completion_tokens": 347,
+    "total_tokens": 966,
+    "llm_elapsed_time_seconds": 7.205
+  }
+}

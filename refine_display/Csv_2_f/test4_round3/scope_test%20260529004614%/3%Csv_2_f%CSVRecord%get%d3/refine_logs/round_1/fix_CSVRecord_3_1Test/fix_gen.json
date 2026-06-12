@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport java.lang.reflect.Method;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_3_1Test {\n\n    @Test\n    public void testGet_withValidHeader_returnsValue() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"header1\", 0);\n        mapping.put(\"header2\", 1);\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n\n        String result = invokeGet(record, \"header1\");\n\n        Assertions.assertEquals(\"value1\", result);\n    }\n\n    @Test\n    public void testGet_withNullMapping_throwsIllegalStateException() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        CSVRecord record = new CSVRecord(values, null, null, 1);\n\n        Exception exception = Assertions.assertThrows(IllegalStateException.class, () -> {\n            record.get(\"header1\");\n        });\n\n        Assertions.assertEquals(\"No header mapping was specified, the record values can't be accessed by name\", exception.getMessage());\n    }\n\n    @Test\n    public void testGet_withInvalidHeader_returnsNull() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"header1\", 0);\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n\n        String result = invokeGet(record, \"header2\");\n\n        Assertions.assertNull(result);\n    }\n\n    @Test\n    public void testGet_withOutOfBoundsIndex_throwsIllegalArgumentException() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"header1\", 0);\n        mapping.put(\"header2\", 1); // Correct index\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n\n        Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {\n            invokeGet(record, \"header2\"); // This should not throw an exception\n        });\n\n        Assertions.assertTrue(exception.getMessage().contains(\"Index for header 'header2' is 1 but CSVRecord only has 2 values!\"));\n    }\n\n    private String invokeGet(CSVRecord record, String name) throws Exception {\n        Method method = CSVRecord.class.getDeclaredMethod(\"get\", String.class);\n        method.setAccessible(true);\n        return (String) method.invoke(record, name);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1392,
+    "completion_tokens": 583,
+    "total_tokens": 1975,
+    "llm_elapsed_time_seconds": 8.741
+  }
+}

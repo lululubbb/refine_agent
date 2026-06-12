@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.BufferedReader;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport java.io.IOException;\nimport java.io.Reader;\nimport java.io.StringReader;\nimport java.lang.reflect.Method;\n\nclass ExtendedBufferedReader_4_1Test {\n\n    @Test\n    void testRead_normalCase() throws Exception {\n        String input = \"First line\\r\\nSecond line\\nThird line\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n        char[] buffer = new char[1024];\n        int length = reader.read(buffer, 0, 1024);\n        \n        Assertions.assertTrue(length > 0); // Changed assertion to check if length is greater than 0\n        Assertions.assertEquals(\"First line\\r\\nSecond line\\nThird line\", new String(buffer, 0, length));\n        Assertions.assertEquals(3, invokeGetLineNumber(reader));\n    }\n\n    @Test\n    void testRead_emptyBuffer() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"Some input\"));\n        char[] buffer = new char[1024];\n        int length = reader.read(buffer, 0, 0);\n        \n        Assertions.assertEquals(0, length);\n        Assertions.assertEquals(0, invokeGetLineNumber(reader));\n    }\n\n    @Test\n    void testRead_endOfStream() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"\"));\n        char[] buffer = new char[1024];\n        int length = reader.read(buffer, 0, 1024);\n        \n        Assertions.assertEquals(-1, length);\n        Assertions.assertEquals(0, invokeGetLineNumber(reader));\n    }\n\n    @Test\n    void testRead_singleNewline() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"\\n\"));\n        char[] buffer = new char[1024];\n        int length = reader.read(buffer, 0, 1024);\n        \n        Assertions.assertEquals(1, length);\n        Assertions.assertEquals('\\n', buffer[0]);\n        Assertions.assertEquals(1, invokeGetLineNumber(reader));\n    }\n\n    @Test\n    void testRead_multipleNewlines() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"\\r\\n\\n\\r\"));\n        char[] buffer = new char[1024];\n        int length = reader.read(buffer, 0, 1024);\n        \n        Assertions.assertEquals(4, length);\n        Assertions.assertEquals(\"\\r\\n\\n\\r\", new String(buffer, 0, length));\n        Assertions.assertEquals(3, invokeGetLineNumber(reader));\n    }\n\n    private int invokeGetLineNumber(ExtendedBufferedReader reader) throws Exception {\n        Method method = ExtendedBufferedReader.class.getDeclaredMethod(\"getLineNumber\");\n        method.setAccessible(true);\n        return (int) method.invoke(reader);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1494,
+    "completion_tokens": 603,
+    "total_tokens": 2097,
+    "llm_elapsed_time_seconds": 7.535
+  }
+}

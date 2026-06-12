@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_4_3Test {\n\n    @Test\n    public void testisConsistent_mappingIsNull() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{\"value1\", \"value2\"}, null, null, 1);\n        Assertions.assertEquals(true, record.isConsistent());\n    }\n\n    @Test\n    public void testisConsistent_mappingSizeEqualsValuesLength() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"column1\", 0);\n        mapping.put(\"column2\", 1);\n        \n        CSVRecord record = new CSVRecord(new String[]{\"value1\", \"value2\"}, mapping, null, 1);\n        Assertions.assertEquals(true, record.isConsistent());\n    }\n\n    @Test\n    public void testisConsistent_mappingSizeNotEqualsValuesLength() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"column1\", 0);\n        \n        CSVRecord record = new CSVRecord(new String[]{\"value1\", \"value2\"}, mapping, null, 1);\n        Assertions.assertEquals(false, record.isConsistent());\n    }\n\n    @Test\n    public void testisConsistent_emptyValuesAndNullMapping() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{}, null, null, 1);\n        Assertions.assertEquals(true, record.isConsistent());\n    }\n\n    @Test\n    public void testisConsistent_emptyValuesAndNonEmptyMapping() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"column1\", 0);\n        \n        CSVRecord record = new CSVRecord(new String[]{}, mapping, null, 1);\n        Assertions.assertEquals(false, record.isConsistent());\n    }\n\n    @Test\n    public void testisConsistent_singleValueWithMapping() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"column1\", 0);\n        \n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n        Assertions.assertEquals(true, record.isConsistent());\n    }\n\n    @Test\n    public void testisConsistent_multipleValuesWithMapping() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"column1\", 0);\n        mapping.put(\"column2\", 1);\n        \n        CSVRecord record = new CSVRecord(new String[]{\"value1\", \"value2\"}, mapping, null, 1);\n        Assertions.assertEquals(true, record.isConsistent());\n    }\n\n    @Test\n    public void testisConsistent_exceedsMapping() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"column1\", 0);\n        mapping.put(\"column2\", 1);\n        mapping.put(\"column3\", 2);\n        \n        CSVRecord record = new CSVRecord(new String[]{\"value1\", \"value2\"}, mapping, null, 1);\n        Assertions.assertEquals(false, record.isConsistent());\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 989,
+    "completion_tokens": 684,
+    "total_tokens": 1673,
+    "llm_elapsed_time_seconds": 8.321
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Collections;\nimport java.util.Iterator;\nimport java.util.HashMap;\nimport java.util.Map;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Method;\n\npublic class CSVRecord_12_1Test {\n\n    @Test\n    public void testToString_emptyArray() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{}, Collections.emptyMap(), null, 0);\n        String result = invokeToString(record);\n        Assertions.assertEquals(\"[]\", result);\n    }\n\n    @Test\n    public void testToString_singleElementArray() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, Collections.emptyMap(), null, 1);\n        String result = invokeToString(record);\n        Assertions.assertEquals(\"[value1]\", result);\n    }\n\n    @Test\n    public void testToString_multipleElementsArray() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{\"value1\", \"value2\", \"value3\"}, Collections.emptyMap(), null, 2);\n        String result = invokeToString(record);\n        Assertions.assertEquals(\"[value1, value2, value3]\", result);\n    }\n\n    @Test\n    public void testToString_nullElementsArray() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{null, \"value2\", null}, Collections.emptyMap(), null, 3);\n        String result = invokeToString(record);\n        Assertions.assertEquals(\"[null, value2, null]\", result);\n    }\n\n    @Test\n    public void testGet_validIndex() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{\"value1\", \"value2\"}, Collections.emptyMap(), null, 4);\n        String result = record.get(1);\n        Assertions.assertEquals(\"value2\", result);\n    }\n\n    @Test\n    public void testGet_invalidIndex() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{\"value1\", \"value2\"}, Collections.emptyMap(), null, 5);\n        Assertions.assertThrows(ArrayIndexOutOfBoundsException.class, () -> {\n            record.get(2);\n        });\n    }\n\n    @Test\n    public void testSize() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{\"value1\", \"value2\", \"value3\"}, Collections.emptyMap(), null, 6);\n        int size = record.size();\n        Assertions.assertEquals(3, size);\n    }\n\n    @Test\n    public void testIsConsistent() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{\"value1\", \"value2\"}, Collections.emptyMap(), null, 7);\n        boolean result = record.isConsistent();\n        Assertions.assertTrue(result);\n    }\n\n    private String invokeToString(CSVRecord record) throws Exception {\n        Method method = CSVRecord.class.getDeclaredMethod(\"toString\");\n        method.setAccessible(true);\n        return (String) method.invoke(record);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 981,
+    "completion_tokens": 632,
+    "total_tokens": 1613,
+    "llm_elapsed_time_seconds": 6.684
+  }
+}

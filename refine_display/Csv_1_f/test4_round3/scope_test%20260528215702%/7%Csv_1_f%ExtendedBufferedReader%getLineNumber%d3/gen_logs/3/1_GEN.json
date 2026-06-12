@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "package org.apache.commons.csv;\n\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport org.mockito.Mockito;\n\nimport java.io.StringReader;\nimport java.lang.reflect.Field;\n\nclass ExtendedBufferedReaderTest {\n\n    @Test\n    void testGetLineNumber_initialState() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"\"));\n\n        int lineNumber = invokeGetLineNumber(reader);\n        Assertions.assertEquals(0, lineNumber);\n    }\n\n    @Test\n    void testGetLineNumber_afterReading() throws Exception {\n        String testInput = \"First line\\nSecond line\\nThird line\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(testInput));\n\n        // Simulate reading lines\n        reader.readLine();\n        reader.readLine();\n\n        int lineNumber = invokeGetLineNumber(reader);\n        Assertions.assertEquals(2, lineNumber);\n    }\n\n    @Test\n    void testGetLineNumber_afterMultipleReads() throws Exception {\n        String testInput = \"Line 1\\nLine 2\\nLine 3\\nLine 4\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(testInput));\n\n        // Simulate reading multiple lines\n        reader.readLine();\n        reader.readLine();\n        reader.readLine();\n\n        int lineNumber = invokeGetLineNumber(reader);\n        Assertions.assertEquals(3, lineNumber);\n    }\n\n    private int invokeGetLineNumber(ExtendedBufferedReader reader) throws Exception {\n        Field lineCounterField = ExtendedBufferedReader.class.getDeclaredField(\"lineCounter\");\n        lineCounterField.setAccessible(true);\n        return (int) lineCounterField.get(reader);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 551,
+    "completion_tokens": 341,
+    "total_tokens": 892,
+    "llm_elapsed_time_seconds": 6.279
+  }
+}

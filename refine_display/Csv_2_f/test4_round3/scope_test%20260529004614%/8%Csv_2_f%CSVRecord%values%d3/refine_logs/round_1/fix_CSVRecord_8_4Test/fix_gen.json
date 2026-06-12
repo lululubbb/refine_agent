@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Method;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_8_4Test {\n\n    @Test\n    public void testvalues_nonEmptyArray() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        \n        Method method = CSVRecord.class.getDeclaredMethod(\"values\");\n        method.setAccessible(true);\n        \n        String[] result = (String[]) method.invoke(record);\n        Assertions.assertArrayEquals(values, result);\n    }\n\n    @Test\n    public void testvalues_emptyArray() throws Exception {\n        String[] values = {};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        \n        Method method = CSVRecord.class.getDeclaredMethod(\"values\");\n        method.setAccessible(true);\n        \n        String[] result = (String[]) method.invoke(record);\n        Assertions.assertArrayEquals(values, result);\n    }\n\n    @Test\n    public void testvalues_nullArray() throws Exception {\n        String[] values = null;\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        \n        Method method = CSVRecord.class.getDeclaredMethod(\"values\");\n        method.setAccessible(true);\n        \n        String[] result = (String[]) method.invoke(record);\n        Assertions.assertArrayEquals(new String[0], result);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1147,
+    "completion_tokens": 366,
+    "total_tokens": 1513,
+    "llm_elapsed_time_seconds": 7.191
+  }
+}

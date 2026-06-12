@@ -1,0 +1,87 @@
+{
+  "ExtendedBufferedReader_5_1Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [],
+    "exec_errors": [],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": 100.0,
+    "focal_line_covered": 7,
+    "focal_line_total": 7,
+    "missed_methods": [
+      "line 57: read() — completely uncovered",
+      "line 76: readAgain() — completely uncovered",
+      "line 81: read() — completely uncovered",
+      "line 146: lookAhead() — completely uncovered"
+    ],
+    "partial_methods": []
+  },
+  "ExtendedBufferedReader_5_2Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [],
+    "exec_errors": [],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": 100.0,
+    "focal_line_covered": 7,
+    "focal_line_total": 7,
+    "missed_methods": [
+      "line 57: read() — completely uncovered",
+      "line 76: readAgain() — completely uncovered",
+      "line 81: read() — completely uncovered",
+      "line 146: lookAhead() — completely uncovered",
+      "line 159: getLineNumber() — completely uncovered"
+    ],
+    "partial_methods": []
+  },
+  "ExtendedBufferedReader_5_3Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [],
+    "exec_errors": [],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": 100.0,
+    "focal_line_covered": 7,
+    "focal_line_total": 7,
+    "missed_methods": [
+      "line 57: read() — completely uncovered",
+      "line 76: readAgain() — completely uncovered",
+      "line 81: read() — completely uncovered",
+      "line 146: lookAhead() — completely uncovered"
+    ],
+    "partial_methods": []
+  },
+  "ExtendedBufferedReader_5_4Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "=> org.opentest4j.AssertionFailedError: expected: <true> but was: <false>",
+      "Failures (1):",
+      "JUnit Jupiter:ExtendedBufferedReader_5_4Test:testReadLine_emptyLine()",
+      "MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_5_4Test', methodName = 'testReadLine_emptyLine', methodParameterTypes = '']",
+      "org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)",
+      "org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)",
+      "org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)",
+      "org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)",
+      "org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:31)",
+      "org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:180)",
+      "org.apache.commons.csv.ExtendedBufferedReader_5_4Test.testReadLine_emptyLine(ExtendedBufferedReader_5_4Test.java:33)",
+      "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)",
+      "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)",
+      "java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)",
+      "[...]",
+      "Test run finished after 162 ms",
+      "[         4 containers found      ]",
+      "[         0 containers skipped    ]",
+      "[         4 containers started    ]",
+      "[         0 containers aborted    ]"
+    ],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": 100.0,
+    "focal_line_covered": 7,
+    "focal_line_total": 7,
+    "missed_methods": [],
+    "partial_methods": []
+  }
+}

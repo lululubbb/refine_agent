@@ -1,0 +1,6 @@
+[SYNTAX_SEMANTIC] CSVRecord_2_1Test.java: Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+[SYNTAX_OK] CSVRecord_2_2Test.java
+[SYNTAX_OK] CSVRecord_2_3Test.java
+[SYNTAX_OK] CSVRecord_2_4Test.java
+[SYNTAX_SEMANTIC] CSVRecord_2_5Test.java: Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+[SYNTAX_OK] CSVRecord_2_6Test.java

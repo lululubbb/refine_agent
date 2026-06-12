@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "package org.apache.commons.csv;\n\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport org.mockito.Mockito;\n\nimport java.io.StringReader;\nimport java.lang.reflect.Field;\n\nclass ExtendedBufferedReaderTest {\n\n    @Test\n    void testReadAgain_initialState() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"test\"));\n        Field lastCharField = ExtendedBufferedReader.class.getDeclaredField(\"lastChar\");\n        lastCharField.setAccessible(true);\n        lastCharField.setInt(reader, -2); // Set to UNDEFINED\n        \n        int result = reader.readAgain();\n        \n        Assertions.assertEquals(-2, result);\n    }\n\n    @Test\n    void testReadAgain_afterReading() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"test\"));\n        Field lastCharField = ExtendedBufferedReader.class.getDeclaredField(\"lastChar\");\n        lastCharField.setAccessible(true);\n        lastCharField.setInt(reader, 116); // Set lastChar to 't'\n        \n        int result = reader.readAgain();\n        \n        Assertions.assertEquals(116, result);\n    }\n\n    @Test\n    void testReadAgain_afterEndOfStream() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"\"));\n        Field lastCharField = ExtendedBufferedReader.class.getDeclaredField(\"lastChar\");\n        lastCharField.setAccessible(true);\n        lastCharField.setInt(reader, -1); // Set to END_OF_STREAM\n        \n        int result = reader.readAgain();\n        \n        Assertions.assertEquals(-1, result);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 549,
+    "completion_tokens": 328,
+    "total_tokens": 877,
+    "llm_elapsed_time_seconds": 4.592
+  }
+}

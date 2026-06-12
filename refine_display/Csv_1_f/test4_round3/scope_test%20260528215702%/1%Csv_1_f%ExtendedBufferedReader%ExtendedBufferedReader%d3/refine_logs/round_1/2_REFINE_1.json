@@ -1,0 +1,21 @@
+{
+  "raw": "{\n  \"suite_summary\": \"The test suite for the ExtendedBufferedReader class has a 100% compile pass rate, but only 50% of the tests pass execution. Two tests are failing due to assertion errors, and two tests are not revealing any bugs. The tests have high line coverage, but redundancy is noted between some tests.\",\n  \"test_instructions\": {\n    \"ExtendedBufferedReader_1_1Test\": [\n      \"Fix the assertion in testReadAgain: expected: < -1 > but was: < -2 >. Ensure the readAgain method is returning the expected value.\",\n      \"Fix the assertion in testLookAhead: expected: < -1 > but was: < 76 >. Ensure the lookAhead method is returning the expected value.\"\n    ],\n    \"ExtendedBufferedReader_1_2Test\": [\n      \"Fix the assertion in testReadWithBuffer: expected: < Buffered Re > but was: < Buffered R >. Ensure the read method is correctly populating the buffer.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "The test suite for the ExtendedBufferedReader class has a 100% compile pass rate, but only 50% of the tests pass execution. Two tests are failing due to assertion errors, and two tests are not revealing any bugs. The tests have high line coverage, but redundancy is noted between some tests.",
+    "test_instructions": {
+      "ExtendedBufferedReader_1_1Test": [
+        "Fix the assertion in testReadAgain: expected: < -1 > but was: < -2 >. Ensure the readAgain method is returning the expected value.",
+        "Fix the assertion in testLookAhead: expected: < -1 > but was: < 76 >. Ensure the lookAhead method is returning the expected value."
+      ],
+      "ExtendedBufferedReader_1_2Test": [
+        "Fix the assertion in testReadWithBuffer: expected: < Buffered Re > but was: < Buffered R >. Ensure the read method is correctly populating the buffer."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 7062,
+    "completion_tokens": 214,
+    "total_tokens": 7276,
+    "llm_elapsed_time_seconds": 7.031
+  }
+}

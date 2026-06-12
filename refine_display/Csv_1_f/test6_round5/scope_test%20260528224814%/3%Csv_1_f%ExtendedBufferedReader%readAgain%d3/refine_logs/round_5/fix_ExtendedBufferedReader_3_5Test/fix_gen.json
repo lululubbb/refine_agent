@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.BufferedReader;\nimport java.io.IOException;\nimport java.io.Reader;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\n\nimport java.io.StringReader;\nimport java.lang.reflect.Field;\n\nclass ExtendedBufferedReader_3_5Test {\n\n    private ExtendedBufferedReader reader;\n\n    @BeforeEach\n    void setUp() {\n        reader = new ExtendedBufferedReader(new StringReader(\"Sample line\"));\n    }\n\n    @Test\n    void testReadAgain_initialValue() throws Exception {\n        Field lastCharField = ExtendedBufferedReader.class.getDeclaredField(\"lastChar\");\n        lastCharField.setAccessible(true);\n        lastCharField.setInt(reader, ExtendedBufferedReader.UNDEFINED);\n        \n        int result = reader.readAgain();\n        Assertions.assertEquals(ExtendedBufferedReader.UNDEFINED, result, \"Expected lastChar to be UNDEFINED\");\n    }\n\n    @Test\n    void testReadAgain_afterSettingLastChar() throws Exception {\n        Field lastCharField = ExtendedBufferedReader.class.getDeclaredField(\"lastChar\");\n        lastCharField.setAccessible(true);\n        lastCharField.setInt(reader, 100); \n        \n        int result = reader.readAgain();\n        Assertions.assertEquals(100, result, \"Expected lastChar to be 100\");\n    }\n\n    @Test\n    void testReadAgain_afterSettingLastCharToEndOfStream() throws Exception {\n        Field lastCharField = ExtendedBufferedReader.class.getDeclaredField(\"lastChar\");\n        lastCharField.setAccessible(true);\n        lastCharField.setInt(reader, ExtendedBufferedReader.END_OF_STREAM);\n        \n        int result = reader.readAgain();\n        Assertions.assertEquals(ExtendedBufferedReader.END_OF_STREAM, result, \"Expected lastChar to be END_OF_STREAM\");\n    }\n\n    @Test\n    void testReadAgain_afterSettingLastCharToBoundaryValue() throws Exception {\n        Field lastCharField = ExtendedBufferedReader.class.getDeclaredField(\"lastChar\");\n        lastCharField.setAccessible(true);\n        lastCharField.setInt(reader, 0); \n        \n        int result = reader.readAgain();\n        Assertions.assertEquals(0, result, \"Expected lastChar to be 0\");\n    }\n\n    @Test\n    void testReadAgain_afterSettingLastCharToNegativeBoundary() throws Exception {\n        Field lastCharField = ExtendedBufferedReader.class.getDeclaredField(\"lastChar\");\n        lastCharField.setAccessible(true);\n        lastCharField.setInt(reader, -10); // Testing negative boundary value\n        \n        int result = reader.readAgain();\n        Assertions.assertEquals(-10, result, \"Expected lastChar to be -10\");\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1036,
+    "completion_tokens": 546,
+    "total_tokens": 1582,
+    "llm_elapsed_time_seconds": 8.856
+  }
+}

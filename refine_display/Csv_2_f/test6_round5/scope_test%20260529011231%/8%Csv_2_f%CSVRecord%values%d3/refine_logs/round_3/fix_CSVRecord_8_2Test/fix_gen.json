@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Method;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_8_2Test {\n\n    @Test\n    public void testvalues_normalCase() throws Exception {\n        String[] inputValues = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(inputValues, mapping, null, 1);\n        \n        Method method = CSVRecord.class.getDeclaredMethod(\"values\");\n        method.setAccessible(true);\n        String[] result = (String[]) method.invoke(record);\n        \n        Assertions.assertArrayEquals(inputValues, result);\n    }\n\n    @Test\n    public void testvalues_emptyArray() throws Exception {\n        String[] inputValues = {};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(inputValues, mapping, null, 1);\n        \n        Method method = CSVRecord.class.getDeclaredMethod(\"values\");\n        method.setAccessible(true);\n        String[] result = (String[]) method.invoke(record);\n        \n        Assertions.assertArrayEquals(inputValues, result);\n    }\n\n    @Test\n    public void testvalues_singleElement() throws Exception {\n        String[] inputValues = {\"singleValue\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(inputValues, mapping, null, 1);\n        \n        Method method = CSVRecord.class.getDeclaredMethod(\"values\");\n        method.setAccessible(true);\n        String[] result = (String[]) method.invoke(record);\n        \n        Assertions.assertArrayEquals(inputValues, result);\n    }\n\n    @Test\n    public void testvalues_nullValues() throws Exception {\n        String[] inputValues = {null, \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(inputValues, mapping, null, 1);\n        \n        Method method = CSVRecord.class.getDeclaredMethod(\"values\");\n        method.setAccessible(true);\n        String[] result = (String[]) method.invoke(record);\n        \n        Assertions.assertArrayEquals(inputValues, result);\n    }\n\n    @Test\n    public void testvalues_largeInput() throws Exception {\n        String[] inputValues = new String[1000];\n        for (int i = 0; i < inputValues.length; i++) {\n            inputValues[i] = \"value\" + i;\n        }\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(inputValues, mapping, null, 1);\n        \n        Method method = CSVRecord.class.getDeclaredMethod(\"values\");\n        method.setAccessible(true);\n        String[] result = (String[]) method.invoke(record);\n        \n        Assertions.assertArrayEquals(inputValues, result);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1196,
+    "completion_tokens": 614,
+    "total_tokens": 1810,
+    "llm_elapsed_time_seconds": 10.837
+  }
+}

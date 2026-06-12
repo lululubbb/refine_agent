@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport java.lang.reflect.Method;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_6_4Test {\n\n    @Test\n    public void testisSet_nameMappedAndWithinBounds() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"key1\", 0);\n        String[] values = {\"value1\"};\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n\n        boolean result = invokeIsSet(record, \"key1\");\n        Assertions.assertEquals(true, result, \"Expected 'key1' to be set and within bounds.\");\n    }\n\n    @Test\n    public void testisSet_nameMappedButOutOfBounds() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"key1\", 1);\n        String[] values = {\"value1\"};\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n\n        boolean result = invokeIsSet(record, \"key1\");\n        Assertions.assertEquals(false, result, \"Expected 'key1' to be out of bounds.\");\n    }\n\n    @Test\n    public void testisSet_nameNotMapped() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        String[] values = {\"value1\"};\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n\n        boolean result = invokeIsSet(record, \"key1\");\n        Assertions.assertEquals(false, result, \"Expected 'key1' to not be mapped.\");\n    }\n\n    @Test\n    public void testisSet_emptyValuesArray() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"key1\", 0);\n        String[] values = {};\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n\n        boolean result = invokeIsSet(record, \"key1\");\n        Assertions.assertEquals(false, result, \"Expected 'key1' to be out of bounds due to empty values.\");\n    }\n\n    private boolean invokeIsSet(CSVRecord record, String name) throws Exception {\n        Method method = CSVRecord.class.getDeclaredMethod(\"isSet\", String.class);\n        method.setAccessible(true);\n        return (boolean) method.invoke(record, name);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1052,
+    "completion_tokens": 517,
+    "total_tokens": 1569,
+    "llm_elapsed_time_seconds": 5.188
+  }
+}

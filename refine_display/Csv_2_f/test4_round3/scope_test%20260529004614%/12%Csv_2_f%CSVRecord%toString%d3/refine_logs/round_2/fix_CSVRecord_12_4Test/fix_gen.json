@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport java.lang.reflect.Method;\nimport java.util.Collections;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_12_4Test {\n\n    private static final String EMPTY_STRING_REPRESENTATION = \"[]\";\n    private static final String NULL_STRING_REPRESENTATION = \"null\";\n\n    @Test\n    public void testtoString_emptyValues() throws Exception {\n        String[] values = {};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        String result = invokeToString(record);\n        Assertions.assertEquals(EMPTY_STRING_REPRESENTATION, result);\n    }\n\n    @Test\n    public void testtoString_singleValue() throws Exception {\n        String[] values = {\"value1\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        String result = invokeToString(record);\n        Assertions.assertEquals(\"[value1]\", result);\n    }\n\n    @Test\n    public void testtoString_multipleValues() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        String result = invokeToString(record);\n        Assertions.assertEquals(\"[value1, value2, value3]\", result);\n    }\n\n    @Test\n    public void testtoString_withNullValue() throws Exception {\n        String[] values = {\"value1\", null, \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        String result = invokeToString(record);\n        Assertions.assertEquals(\"[value1, null, value3]\", result);\n    }\n\n    @Test\n    public void testtoString_withAllNullValues() throws Exception {\n        String[] values = {null, null, null};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        String result = invokeToString(record);\n        Assertions.assertEquals(\"[null, null, null]\", result);\n    }\n\n    @Test\n    public void testtoString_boundaryValues() throws Exception {\n        String[] values = {\"\"}; // Test with an empty string\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        String result = invokeToString(record);\n        Assertions.assertEquals(\"[ ]\", result); // Expecting space between brackets\n    }\n\n    private String invokeToString(CSVRecord record) throws Exception {\n        Method method = CSVRecord.class.getDeclaredMethod(\"toString\");\n        method.setAccessible(true);\n        return (String) method.invoke(record);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1168,
+    "completion_tokens": 645,
+    "total_tokens": 1813,
+    "llm_elapsed_time_seconds": 10.619
+  }
+}

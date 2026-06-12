@@ -1,0 +1,32 @@
+{
+  "raw": "{\n  \"suite_summary\": \"All test files compile and execute successfully, but they exhibit high redundancy and do not reveal any bugs. Each test file has similar logic and coverage, indicating a lack of diversity in testing scenarios. Improvements can be made to enhance the bug-revealing capability and reduce redundancy across the tests.\",\n  \"test_instructions\": {\n    \"CSVRecord_5_1Test\": [\n      \"This test is not bug-revealing. Consider adding tests that assert specific values or edge cases to reveal potential bugs.\"\n    ],\n    \"CSVRecord_5_2Test\": [\n      \"This test is not bug-revealing. Consider adding tests that assert specific values or edge cases to reveal potential bugs.\"\n    ],\n    \"CSVRecord_5_3Test\": [\n      \"This test is not bug-revealing. Consider adding tests that assert specific values or edge cases to reveal potential bugs.\"\n    ],\n    \"CSVRecord_5_4Test\": [\n      \"This test is not bug-revealing. Consider adding tests that assert specific values or edge cases to reveal potential bugs.\"\n    ],\n    \"CSVRecord_5_5Test\": [\n      \"This test is not bug-revealing. Consider adding tests that assert specific values or edge cases to reveal potential bugs.\"\n    ],\n    \"CSVRecord_5_6Test\": [\n      \"This test is not bug-revealing. Consider adding tests that assert specific values or edge cases to reveal potential bugs.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "All test files compile and execute successfully, but they exhibit high redundancy and do not reveal any bugs. Each test file has similar logic and coverage, indicating a lack of diversity in testing scenarios. Improvements can be made to enhance the bug-revealing capability and reduce redundancy across the tests.",
+    "test_instructions": {
+      "CSVRecord_5_1Test": [
+        "This test is not bug-revealing. Consider adding tests that assert specific values or edge cases to reveal potential bugs."
+      ],
+      "CSVRecord_5_2Test": [
+        "This test is not bug-revealing. Consider adding tests that assert specific values or edge cases to reveal potential bugs."
+      ],
+      "CSVRecord_5_3Test": [
+        "This test is not bug-revealing. Consider adding tests that assert specific values or edge cases to reveal potential bugs."
+      ],
+      "CSVRecord_5_4Test": [
+        "This test is not bug-revealing. Consider adding tests that assert specific values or edge cases to reveal potential bugs."
+      ],
+      "CSVRecord_5_5Test": [
+        "This test is not bug-revealing. Consider adding tests that assert specific values or edge cases to reveal potential bugs."
+      ],
+      "CSVRecord_5_6Test": [
+        "This test is not bug-revealing. Consider adding tests that assert specific values or edge cases to reveal potential bugs."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 9726,
+    "completion_tokens": 309,
+    "total_tokens": 10035,
+    "llm_elapsed_time_seconds": 7.83
+  }
+}

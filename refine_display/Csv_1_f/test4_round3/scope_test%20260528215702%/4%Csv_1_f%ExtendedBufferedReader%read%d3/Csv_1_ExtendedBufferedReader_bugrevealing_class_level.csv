@@ -1,0 +1,15 @@
+project_name,target_class,test_class,total_methods,bug_revealing_methods,bug_revealing_rate,has_bug_revealing,br_score
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_4_1Test,5,0,0.0,false,0.0
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_4_2Test,5,0,0.0,false,0.0
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_4_3Test,5,0,0.0,false,0.0
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_4_4Test,5,0,0.0,false,0.0
+project_name,target_class,test_class,total_methods,bug_revealing_methods,bug_revealing_rate,has_bug_revealing,br_score
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_4_1Test,5,0,0.0,false,0.0
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_4_2Test,5,0,0.0,false,0.0
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_4_3Test,5,0,0.0,false,0.0
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_4_4Test,5,0,0.0,false,0.0
+project_name,target_class,test_class,total_methods,bug_revealing_methods,bug_revealing_rate,has_bug_revealing,br_score
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_4_1Test,5,0,0.0,false,0.0
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_4_2Test,5,0,0.0,false,0.0
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_4_3Test,5,0,0.0,false,0.0
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_4_4Test,5,0,0.0,false,0.0

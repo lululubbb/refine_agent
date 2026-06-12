@@ -1,0 +1,32 @@
+{
+  "raw": "{\n  \"suite_summary\": \"All test files compile and execute successfully, but they exhibit high redundancy and are not bug-revealing. Each test file contains similar test cases that do not explore different paths or edge cases in the focal method, leading to a lack of diversity in testing. Improvements are needed to enhance the test suite's effectiveness.\",\n  \"test_instructions\": {\n    \"CSVRecord_8_1Test\": [\n      \"This test is not bug-revealing. Consider adding tests for boundary values, exception-throwing paths, and different input scenarios to ensure comprehensive coverage of the 'values' method.\"\n    ],\n    \"CSVRecord_8_2Test\": [\n      \"This test is not bug-revealing. Consider adding tests for boundary values, exception-throwing paths, and different input scenarios to ensure comprehensive coverage of the 'values' method.\"\n    ],\n    \"CSVRecord_8_3Test\": [\n      \"This test is not bug-revealing. Consider adding tests for boundary values, exception-throwing paths, and different input scenarios to ensure comprehensive coverage of the 'values' method.\"\n    ],\n    \"CSVRecord_8_4Test\": [\n      \"This test is not bug-revealing. Consider adding tests for boundary values, exception-throwing paths, and different input scenarios to ensure comprehensive coverage of the 'values' method.\"\n    ],\n    \"CSVRecord_8_5Test\": [\n      \"This test is not bug-revealing. Consider adding tests for boundary values, exception-throwing paths, and different input scenarios to ensure comprehensive coverage of the 'values' method.\"\n    ],\n    \"CSVRecord_8_6Test\": [\n      \"This test is not bug-revealing. Consider adding tests for boundary values, exception-throwing paths, and different input scenarios to ensure comprehensive coverage of the 'values' method.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "All test files compile and execute successfully, but they exhibit high redundancy and are not bug-revealing. Each test file contains similar test cases that do not explore different paths or edge cases in the focal method, leading to a lack of diversity in testing. Improvements are needed to enhance the test suite's effectiveness.",
+    "test_instructions": {
+      "CSVRecord_8_1Test": [
+        "This test is not bug-revealing. Consider adding tests for boundary values, exception-throwing paths, and different input scenarios to ensure comprehensive coverage of the 'values' method."
+      ],
+      "CSVRecord_8_2Test": [
+        "This test is not bug-revealing. Consider adding tests for boundary values, exception-throwing paths, and different input scenarios to ensure comprehensive coverage of the 'values' method."
+      ],
+      "CSVRecord_8_3Test": [
+        "This test is not bug-revealing. Consider adding tests for boundary values, exception-throwing paths, and different input scenarios to ensure comprehensive coverage of the 'values' method."
+      ],
+      "CSVRecord_8_4Test": [
+        "This test is not bug-revealing. Consider adding tests for boundary values, exception-throwing paths, and different input scenarios to ensure comprehensive coverage of the 'values' method."
+      ],
+      "CSVRecord_8_5Test": [
+        "This test is not bug-revealing. Consider adding tests for boundary values, exception-throwing paths, and different input scenarios to ensure comprehensive coverage of the 'values' method."
+      ],
+      "CSVRecord_8_6Test": [
+        "This test is not bug-revealing. Consider adding tests for boundary values, exception-throwing paths, and different input scenarios to ensure comprehensive coverage of the 'values' method."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 12015,
+    "completion_tokens": 392,
+    "total_tokens": 12407,
+    "llm_elapsed_time_seconds": 7.391
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.BufferedReader;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport java.io.IOException;\nimport java.io.Reader;\nimport java.io.StringReader;\n\nclass ExtendedBufferedReader_6_2Test {\n\n    @Test\n    void testLookAhead_normalCase() throws Exception {\n        Reader reader = new StringReader(\"Hello\");\n        ExtendedBufferedReader ebr = new ExtendedBufferedReader(reader);\n\n        int result = invokeLookAhead(ebr);\n        Assertions.assertEquals('H', result);\n    }\n\n    @Test\n    void testLookAhead_multipleCharacters() throws Exception {\n        Reader reader = new StringReader(\"World\");\n        ExtendedBufferedReader ebr = new ExtendedBufferedReader(reader);\n\n        int firstResult = invokeLookAhead(ebr);\n        Assertions.assertEquals('W', firstResult); // Look ahead first character\n\n        ebr.read(); // Consume the first character\n        int secondResult = invokeLookAhead(ebr);\n        Assertions.assertEquals('o', secondResult); // Look ahead second character\n    }\n\n    @Test\n    void testLookAhead_endOfStream() throws Exception {\n        Reader reader = new StringReader(\"A\");\n        ExtendedBufferedReader ebr = new ExtendedBufferedReader(reader);\n        ebr.read(); // Consume the first character\n\n        int result = invokeLookAhead(ebr);\n        Assertions.assertEquals(ExtendedBufferedReader.END_OF_STREAM, result);\n    }\n\n    private int invokeLookAhead(ExtendedBufferedReader ebr) throws Exception {\n        java.lang.reflect.Method method = ExtendedBufferedReader.class.getDeclaredMethod(\"lookAhead\");\n        method.setAccessible(true);\n        return (int) method.invoke(ebr);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 755,
+    "completion_tokens": 350,
+    "total_tokens": 1105,
+    "llm_elapsed_time_seconds": 5.104
+  }
+}

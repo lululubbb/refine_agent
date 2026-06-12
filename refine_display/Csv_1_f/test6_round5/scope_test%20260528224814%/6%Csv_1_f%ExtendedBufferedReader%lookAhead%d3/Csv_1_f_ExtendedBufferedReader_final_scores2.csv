@@ -1,0 +1,6 @@
+test_class,focal_method,compile_score,exec_score,coverage_score,bug_revealing_score,redundancy_score,final_score,valid_weight_pct
+org.apache.commons.csv.ExtendedBufferedReader_6,lookAhead,1.0,0.666667,0.5,,,0.666667,0.6
+org.apache.commons.csv.ExtendedBufferedReader_6,lookAhead,1.0,0.666667,0.5,,,0.666667,0.6
+org.apache.commons.csv.ExtendedBufferedReader_6,lookAhead,1.0,0.666667,0.5,,,0.666667,0.6
+org.apache.commons.csv.ExtendedBufferedReader_6,lookAhead,1.0,0.666667,0.5,,,0.666667,0.6
+org.apache.commons.csv.ExtendedBufferedReader_6,lookAhead,1.0,0.666667,0.5,,,0.666667,0.6

@@ -1,0 +1,13 @@
+project,version,test_case,ast_generation_time_nanosec
+scope_test%20260529002328%,2%Csv_2_f%CSVRecord%get%d3,CSVRecord_2_1Test.testget_validIndex,21386688
+scope_test%20260529002328%,2%Csv_2_f%CSVRecord%get%d3,CSVRecord_2_1Test.testget_firstIndex,21565351
+scope_test%20260529002328%,2%Csv_2_f%CSVRecord%get%d3,CSVRecord_2_1Test.testget_lastIndex,21699781
+scope_test%20260529002328%,2%Csv_2_f%CSVRecord%get%d3,CSVRecord_2_1Test.testget_outOfBoundsLow,21780026
+scope_test%20260529002328%,2%Csv_2_f%CSVRecord%get%d3,CSVRecord_2_1Test.testget_outOfBoundsHigh,21852874
+scope_test%20260529002328%,2%Csv_2_f%CSVRecord%get%d3,CSVRecord_2_1Test,22754902
+scope_test%20260529002328%,2%Csv_2_f%CSVRecord%get%d3,CSVRecord_2_2Test.testGet_validIndex,22472673
+scope_test%20260529002328%,2%Csv_2_f%CSVRecord%get%d3,CSVRecord_2_2Test.testGet_indexOutOfBounds,41299190
+scope_test%20260529002328%,2%Csv_2_f%CSVRecord%get%d3,CSVRecord_2_2Test.testGet_negativeIndex,41812575
+scope_test%20260529002328%,2%Csv_2_f%CSVRecord%get%d3,CSVRecord_2_2Test.testGet_emptyArray,42239902
+scope_test%20260529002328%,2%Csv_2_f%CSVRecord%get%d3,CSVRecord_2_2Test.testGet_singleElementArray,42706850
+scope_test%20260529002328%,2%Csv_2_f%CSVRecord%get%d3,CSVRecord_2_2Test,43900467

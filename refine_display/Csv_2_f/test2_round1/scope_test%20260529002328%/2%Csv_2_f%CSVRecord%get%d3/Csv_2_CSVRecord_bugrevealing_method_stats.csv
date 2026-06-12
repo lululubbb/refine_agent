@@ -1,0 +1,11 @@
+project_name,target_class,test_class,test_method,fixed_status,buggy_status,bug_revealing
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_2_1Test,testget_validIndex,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_2_1Test,testget_firstIndex,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_2_1Test,testget_lastIndex,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_2_1Test,testget_outOfBoundsLow,fail,fail,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_2_1Test,testget_outOfBoundsHigh,fail,fail,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_2_2Test,testGet_validIndex,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_2_2Test,testGet_indexOutOfBounds,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_2_2Test,testGet_negativeIndex,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_2_2Test,testGet_emptyArray,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_2_2Test,testGet_singleElementArray,pass,pass,false

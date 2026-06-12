@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport static org.junit.jupiter.api.Assertions.*;\nimport static org.mockito.Mockito.*;\n\nimport java.lang.reflect.Method;\nimport java.util.HashMap;\nimport java.util.Map;\n\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\n\nclass CSVRecord_6_6Test {\n    private CSVRecord csvRecord;\n    private Map<String, Integer> mapping;\n\n    @BeforeEach\n    void setUp() {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        mapping = new HashMap<>();\n        mapping.put(\"key1\", 0);\n        mapping.put(\"key2\", 1);\n        csvRecord = new CSVRecord(values, mapping, null, 1);\n    }\n\n    @Test\n    void testisSet_keyExistsAndWithinBounds() throws Exception {\n        assertTrue(csvRecord.isSet(\"key1\"));\n    }\n\n    @Test\n    void testisSet_keyExistsButOutOfBounds() throws Exception {\n        mapping.put(\"key3\", 3);\n        assertFalse(csvRecord.isSet(\"key3\"));\n    }\n\n    @Test\n    void testisSet_keyDoesNotExist() throws Exception {\n        assertFalse(csvRecord.isSet(\"keyNonExistent\"));\n    }\n\n    @Test\n    void testisSet_keyExistsButNotMapped() throws Exception {\n        mapping.clear();\n        assertFalse(csvRecord.isSet(\"key1\"));\n    }\n\n    @Test\n    void testisSet_emptyMapping() throws Exception {\n        mapping.clear();\n        assertFalse(csvRecord.isSet(\"key1\"));\n    }\n\n    @Test\n    void testisSet_nullKey() throws Exception {\n        assertThrows(NullPointerException.class, () -> {\n            csvRecord.isSet(null);\n        });\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1215,
+    "completion_tokens": 381,
+    "total_tokens": 1596,
+    "llm_elapsed_time_seconds": 5.294
+  }
+}

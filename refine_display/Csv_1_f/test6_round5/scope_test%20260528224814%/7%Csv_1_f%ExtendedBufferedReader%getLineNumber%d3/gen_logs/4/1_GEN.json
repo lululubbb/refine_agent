@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "package org.apache.commons.csv;\n\nimport static org.junit.jupiter.api.Assertions.assertEquals;\n\nimport java.io.StringReader;\nimport java.lang.reflect.Field;\n\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\n\nclass ExtendedBufferedReaderTest {\n    private ExtendedBufferedReader extendedBufferedReader;\n\n    @BeforeEach\n    void setUp() {\n        extendedBufferedReader = new ExtendedBufferedReader(new StringReader(\"Line 1\\nLine 2\\nLine 3\"));\n    }\n\n    @Test\n    void testgetLineNumber_initialValue() throws Exception {\n        // Access the private field lineCounter using reflection\n        Field lineCounterField = ExtendedBufferedReader.class.getDeclaredField(\"lineCounter\");\n        lineCounterField.setAccessible(true);\n        lineCounterField.set(extendedBufferedReader, 0);\n\n        // Invoke the method\n        int lineNumber = extendedBufferedReader.getLineNumber();\n\n        // Assert the expected line number\n        assertEquals(0, lineNumber);\n    }\n\n    @Test\n    void testgetLineNumber_afterReadingLines() throws Exception {\n        // Simulate reading lines to increment the lineCounter\n        extendedBufferedReader.readLine(); // Read first line\n        extendedBufferedReader.readLine(); // Read second line\n\n        // Access the private field lineCounter using reflection\n        Field lineCounterField = ExtendedBufferedReader.class.getDeclaredField(\"lineCounter\");\n        lineCounterField.setAccessible(true);\n        lineCounterField.set(extendedBufferedReader, 2); // Simulate lineCounter being 2\n\n        // Invoke the method\n        int lineNumber = extendedBufferedReader.getLineNumber();\n\n        // Assert the expected line number\n        assertEquals(2, lineNumber);\n    }\n\n    @Test\n    void testgetLineNumber_afterMultipleReads() throws Exception {\n        // Simulate reading lines\n        extendedBufferedReader.readLine(); // Read first line\n        extendedBufferedReader.readLine(); // Read second line\n        extendedBufferedReader.readLine(); // Read third line\n\n        // Access the private field lineCounter using reflection\n        Field lineCounterField = ExtendedBufferedReader.class.getDeclaredField(\"lineCounter\");\n        lineCounterField.setAccessible(true);\n        lineCounterField.set(extendedBufferedReader, 3); // Simulate lineCounter being 3\n\n        // Invoke the method\n        int lineNumber = extendedBufferedReader.getLineNumber();\n\n        // Assert the expected line number\n        assertEquals(3, lineNumber);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 551,
+    "completion_tokens": 503,
+    "total_tokens": 1054,
+    "llm_elapsed_time_seconds": 8.078
+  }
+}

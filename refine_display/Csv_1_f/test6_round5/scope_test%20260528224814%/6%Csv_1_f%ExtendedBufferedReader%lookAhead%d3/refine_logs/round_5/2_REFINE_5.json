@@ -1,0 +1,20 @@
+{
+  "raw": "{\n  \"suite_summary\": \"The test suite for the `lookAhead` method in `ExtendedBufferedReader` has a compile pass rate of 100%, but only 67% of the tests pass execution. Two tests are experiencing execution timeouts. The suite has excellent line coverage but lacks bug-revealing tests and has high redundancy among several test pairs.\",\n  \"test_instructions\": {\n    \"ExtendedBufferedReader_6_4Test\": [\n      \"Fix the timeout issue by adjusting the execution time threshold in the method 'invokeLookAhead'. The current implementation throws a RuntimeException if the elapsed time exceeds 1000 milliseconds, which may be too strict. Consider increasing this limit.\"\n    ],\n    \"ExtendedBufferedReader_6_5Test\": [\n      \"Fix the timeout issue by adjusting the execution time threshold in the method 'invokeLookAhead'. The current implementation asserts that the duration must be less than 200 milliseconds, which may be too strict. Consider increasing this limit.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "The test suite for the `lookAhead` method in `ExtendedBufferedReader` has a compile pass rate of 100%, but only 67% of the tests pass execution. Two tests are experiencing execution timeouts. The suite has excellent line coverage but lacks bug-revealing tests and has high redundancy among several test pairs.",
+    "test_instructions": {
+      "ExtendedBufferedReader_6_4Test": [
+        "Fix the timeout issue by adjusting the execution time threshold in the method 'invokeLookAhead'. The current implementation throws a RuntimeException if the elapsed time exceeds 1000 milliseconds, which may be too strict. Consider increasing this limit."
+      ],
+      "ExtendedBufferedReader_6_5Test": [
+        "Fix the timeout issue by adjusting the execution time threshold in the method 'invokeLookAhead'. The current implementation asserts that the duration must be less than 200 milliseconds, which may be too strict. Consider increasing this limit."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 3735,
+    "completion_tokens": 206,
+    "total_tokens": 3941,
+    "llm_elapsed_time_seconds": 5.197
+  }
+}

@@ -1,0 +1,102 @@
+bug_revealing log started: 2026-05-29T00:54:00.836282
+buggy=/home/chenlu/refine_test_gen_v5/defect4j_projects/Csv_2_b
+fixed=/home/chenlu/refine_test_gen_v5/defect4j_projects/Csv_2_f
+tests_dir=/home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/10%Csv_2_f%CSVRecord%getRecordNumber%d3/test_cases
+
+Running org.apache.commons.csv.CSVRecord_10_1Test#testgetRecordNumber_normalCase on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_1Test#testgetRecordNumber_normalCase on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_1Test#testgetRecordNumber_zeroRecordNumber on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_1Test#testgetRecordNumber_zeroRecordNumber on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_1Test#testgetRecordNumber_negativeRecordNumber on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_1Test#testgetRecordNumber_negativeRecordNumber on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_2Test#testGetRecordNumber_normalCase on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_2Test#testGetRecordNumber_normalCase on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_2Test#testGetRecordNumber_zeroRecordNumber on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_2Test#testGetRecordNumber_zeroRecordNumber on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_2Test#testGetRecordNumber_negativeRecordNumber on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_2Test#testGetRecordNumber_negativeRecordNumber on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_3Test#testGetRecordNumber_normalCase on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_3Test#testGetRecordNumber_normalCase on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_3Test#testGetRecordNumber_boundaryCase on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_3Test#testGetRecordNumber_boundaryCase on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_4Test#testGetRecordNumber_normalCase on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_4Test#testGetRecordNumber_normalCase on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_4Test#testGetRecordNumber_zeroRecordNumber on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_4Test#testGetRecordNumber_zeroRecordNumber on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_4Test#testGetRecordNumber_negativeRecordNumber on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_4Test#testGetRecordNumber_negativeRecordNumber on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_4Test#testGetRecordNumber_boundaryValues on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_4Test#testGetRecordNumber_boundaryValues on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_4Test#testGetRecordNumber_exceptionCase on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_4Test#testGetRecordNumber_exceptionCase on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_4Test#testGetRecordNumber_emptyValues on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_4Test#testGetRecordNumber_emptyValues on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_4Test#testGetRecordNumber_nullValues on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_10_4Test#testGetRecordNumber_nullValues on fixed...
+  -> pass
+Class-level summary: /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/10%Csv_2_f%CSVRecord%getRecordNumber%d3/Csv_2_CSVRecord_bugrevealing_class_level.csv
+Class-level CSV: /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/10%Csv_2_f%CSVRecord%getRecordNumber%d3/Csv_2_CSVRecord_bugrevealing_class_level.csv
+@Test method-level stats: /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/10%Csv_2_f%CSVRecord%getRecordNumber%d3/Csv_2_CSVRecord_bugrevealing_method_stats.csv
+
+===== SUMMARY =====
+Total tests evaluated: 15
+Bug revealing tests: 0
+Summary CSV: /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/10%Csv_2_f%CSVRecord%getRecordNumber%d3/Csv_2_CSVRecord_bugrevealing.csv
+
+===== @Test METHOD-LEVEL STATISTICS =====
+Total @Test methods run: 15
+--- Fixed version (Csv_2_f) ---
+  PASS   : 15
+  FAIL   : 0
+  TIMEOUT: 0
+  Pass rate: 100.0%
+--- Buggy version (Csv_2_b) ---
+  PASS   : 15
+  FAIL   : 0
+  TIMEOUT: 0
+  Pass rate: 100.0%
+
+===== @Test METHOD-LEVEL STATISTICS =====
+Total @Test methods run: 15
+--- Fixed version (Csv_2_f) ---
+  PASS   : 15
+  FAIL   : 0
+  TIMEOUT: 0
+  Pass rate: 100.0%
+--- Buggy version (Csv_2_b) ---
+  PASS   : 15
+  FAIL   : 0
+  TIMEOUT: 0
+  Pass rate: 100.0%
+
+===== END =====
+log finished: 2026-05-29T00:54:56.323780

@@ -1,0 +1,35 @@
+{
+  "raw": "{\n  \"suite_summary\": \"All test files for the focal method `read` in `ExtendedBufferedReader` are currently failing at runtime. Each test file has multiple assertion failures that need to be addressed. The tests are well-structured but require adjustments to their expected outcomes to align with the actual behavior of the focal method.\",\n  \"test_instructions\": {\n    \"ExtendedBufferedReader_4_1Test\": [\n      \"Fix the assertion in testRead_normalCase: expected: <2> but was: <1>\",\n      \"Fix the assertion in testRead_normalCase: expected: <3> but was: <2>\",\n      \"Fix the assertion in testRead_normalCase: expected: <Line 1> but was: <Line 1>\"\n    ],\n    \"ExtendedBufferedReader_4_2Test\": [\n      \"Fix the assertion in testRead_singleLine: expected: <1> but was: <0>\",\n      \"Fix the assertion in testRead_singleLine: expected: <[L, i, n, e, 1,> but was: <[L, i, n, e, 1,>\",\n      \"Fix the assertion in testRead_singleLine: expected: <[C@a09303> but was: <[H, e, l, l, o,>\",\n      \"Fix the assertion in testRead_singleLine: expected: <20> but was: <19>\"\n    ],\n    \"ExtendedBufferedReader_4_3Test\": [\n      \"Fix the assertion in testRead_normalCase: expected: <15> but was: <2>\",\n      \"Fix the assertion in testRead_normalCase: expected: <2> but was: <1>\",\n      \"Fix the assertion in testRead_mixedLineEndings: expected: <15> but was: <13>\"\n    ],\n    \"ExtendedBufferedReader_4_4Test\": [\n      \"Fix the assertion in testRead_multipleLines: expected: <15> but was: <13>\",\n      \"Fix the assertion in testRead_multipleLines: expected: <17> but was: <15>\",\n      \"Fix the assertion in testRead_multipleLines: expected: <[H, e, l, l, o,> but was: <[H, e, l, l, o,>\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "All test files for the focal method `read` in `ExtendedBufferedReader` are currently failing at runtime. Each test file has multiple assertion failures that need to be addressed. The tests are well-structured but require adjustments to their expected outcomes to align with the actual behavior of the focal method.",
+    "test_instructions": {
+      "ExtendedBufferedReader_4_1Test": [
+        "Fix the assertion in testRead_normalCase: expected: <2> but was: <1>",
+        "Fix the assertion in testRead_normalCase: expected: <3> but was: <2>",
+        "Fix the assertion in testRead_normalCase: expected: <Line 1> but was: <Line 1>"
+      ],
+      "ExtendedBufferedReader_4_2Test": [
+        "Fix the assertion in testRead_singleLine: expected: <1> but was: <0>",
+        "Fix the assertion in testRead_singleLine: expected: <[L, i, n, e, 1,> but was: <[L, i, n, e, 1,>",
+        "Fix the assertion in testRead_singleLine: expected: <[C@a09303> but was: <[H, e, l, l, o,>",
+        "Fix the assertion in testRead_singleLine: expected: <20> but was: <19>"
+      ],
+      "ExtendedBufferedReader_4_3Test": [
+        "Fix the assertion in testRead_normalCase: expected: <15> but was: <2>",
+        "Fix the assertion in testRead_normalCase: expected: <2> but was: <1>",
+        "Fix the assertion in testRead_mixedLineEndings: expected: <15> but was: <13>"
+      ],
+      "ExtendedBufferedReader_4_4Test": [
+        "Fix the assertion in testRead_multipleLines: expected: <15> but was: <13>",
+        "Fix the assertion in testRead_multipleLines: expected: <17> but was: <15>",
+        "Fix the assertion in testRead_multipleLines: expected: <[H, e, l, l, o,> but was: <[H, e, l, l, o,>"
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 7069,
+    "completion_tokens": 483,
+    "total_tokens": 7552,
+    "llm_elapsed_time_seconds": 7.343
+  }
+}

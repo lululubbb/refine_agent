@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.BufferedReader;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\nimport java.io.IOException;\nimport java.io.Reader;\nimport java.io.StringReader;\nimport java.lang.reflect.Method;\n\nclass ExtendedBufferedReader_1_1Test {\n    private ExtendedBufferedReader extendedBufferedReader;\n\n    @BeforeEach\n    void setUp() {\n        Reader reader = new StringReader(\"Line 1\\nLine 2\\nLine 3\");\n        extendedBufferedReader = new ExtendedBufferedReader(reader);\n    }\n\n    @Test\n    void testRead_normalCase() throws Exception {\n        int firstChar = extendedBufferedReader.read();\n        Assertions.assertEquals('L', firstChar);\n        Assertions.assertEquals(0, invokeGetLineNumber());\n    }\n\n    @Test\n    void testReadLine_normalCase() throws Exception {\n        String line = extendedBufferedReader.readLine();\n        Assertions.assertEquals(\"Line 1\", line);\n        Assertions.assertEquals(1, invokeGetLineNumber());\n    }\n\n    @Test\n    void testReadLine_endOfStream() throws Exception {\n        extendedBufferedReader.readLine(); // Read first line\n        extendedBufferedReader.readLine(); // Read second line\n        String line = extendedBufferedReader.readLine(); // Read third line\n        Assertions.assertEquals(\"Line 3\", line);\n        Assertions.assertEquals(3, invokeGetLineNumber());\n        Assertions.assertNull(extendedBufferedReader.readLine()); // Should return null\n    }\n\n    @Test\n    void testReadAgain() throws Exception {\n        // Read until the end of the stream\n        while (extendedBufferedReader.read() != ExtendedBufferedReader.END_OF_STREAM) {}\n        \n        Method method = ExtendedBufferedReader.class.getDeclaredMethod(\"readAgain\");\n        method.setAccessible(true);\n        int result = (int) method.invoke(extendedBufferedReader);\n        Assertions.assertEquals(ExtendedBufferedReader.END_OF_STREAM, result); // Assuming readAgain returns -1 for EOF\n    }\n\n    @Test\n    void testLookAhead() throws Exception {\n        Method method = ExtendedBufferedReader.class.getDeclaredMethod(\"lookAhead\");\n        method.setAccessible(true);\n        int result = (int) method.invoke(extendedBufferedReader);\n        Assertions.assertEquals('L', result); // Assuming lookAhead returns the next character before reading\n    }\n\n    private int invokeGetLineNumber() throws Exception {\n        Method method = ExtendedBufferedReader.class.getDeclaredMethod(\"getLineNumber\");\n        method.setAccessible(true);\n        return (int) method.invoke(extendedBufferedReader);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1318,
+    "completion_tokens": 538,
+    "total_tokens": 1856,
+    "llm_elapsed_time_seconds": 17.833
+  }
+}

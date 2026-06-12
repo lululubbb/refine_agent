@@ -1,0 +1,32 @@
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_4_3Test:testIsConsistent_boundaryValues()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_4_3Test', methodName = 'testIsConsistent_boundaryValues', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: Expected isConsistent to be true for mapping size equal to values length with additional mapping. ==> expected: <true> but was: <false>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+       org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+       org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:211)
+       org.apache.commons.csv.CSVRecord_4_3Test.testIsConsistent_boundaryValues(CSVRecord_4_3Test.java:74)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       [...]
+
+Test run finished after 231 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         8 tests found           ]
+[         0 tests skipped         ]
+[         8 tests started         ]
+[         0 tests aborted         ]
+[         7 tests successful      ]
+[         1 tests failed          ]
+
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC

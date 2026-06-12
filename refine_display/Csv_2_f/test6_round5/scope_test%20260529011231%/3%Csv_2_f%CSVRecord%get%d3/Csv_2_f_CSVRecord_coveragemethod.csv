@@ -1,0 +1,6 @@
+project,target_class,focal_method,exec_status,f_per_line_cov,f_per_line_total,f_per_line_rate,f_per_branch_cov,f_per_branch_total,f_per_branch_rate,line_contrib_pct,branch_contrib_pct,coverage_score
+Csv_2_f,CSVRecord,get,ok,8,9,88.8889,4,4,100.0,88.8889,100.0,0.944445
+Csv_2_f,CSVRecord,get,ok,8,9,88.8889,4,4,100.0,88.8889,100.0,0.944445
+Csv_2_f,CSVRecord,get,ok,8,9,88.8889,4,4,100.0,88.8889,100.0,0.944445
+Csv_2_f,CSVRecord,get,ok,8,9,88.8889,4,4,100.0,88.8889,100.0,0.944445
+Csv_2_f,CSVRecord,get,ok,8,9,88.8889,4,4,100.0,88.8889,100.0,0.944445

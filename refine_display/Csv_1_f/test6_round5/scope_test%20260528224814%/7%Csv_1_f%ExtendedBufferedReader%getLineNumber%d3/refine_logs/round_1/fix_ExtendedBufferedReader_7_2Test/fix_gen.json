@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.BufferedReader;\nimport java.io.IOException;\nimport java.io.Reader;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.io.StringReader;\nimport java.lang.reflect.Field;\n\nclass ExtendedBufferedReader_7_2Test {\n\n    @Test\n    void testGetLineNumber_initialValue() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"line1\\nline2\"));\n        int lineNumber = invokeGetLineNumber(reader);\n        Assertions.assertEquals(0, lineNumber);\n    }\n\n    @Test\n    void testGetLineNumber_afterReading() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"line1\\nline2\"));\n        reader.readLine(); // Simulate reading a line\n        int lineNumber = invokeGetLineNumber(reader);\n        Assertions.assertEquals(1, lineNumber);\n    }\n\n    @Test\n    void testGetLineNumber_multipleReads() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"line1\\nline2\\nline3\"));\n        reader.readLine(); // Read first line\n        reader.readLine(); // Read second line\n        int lineNumber = invokeGetLineNumber(reader);\n        Assertions.assertEquals(2, lineNumber);\n    }\n\n    @Test\n    void testGetLineNumber_noReads() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"line1\\nline2\"));\n        int lineNumber = invokeGetLineNumber(reader);\n        Assertions.assertEquals(0, lineNumber);\n    }\n\n    @Test\n    void testGetLineNumber_boundaryCase() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"\"));\n        int lineNumber = invokeGetLineNumber(reader);\n        Assertions.assertEquals(0, lineNumber); // No lines read\n    }\n\n    @Test\n    void testGetLineNumber_singleEmptyLine() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"\\n\"));\n        reader.readLine(); // Read the empty line\n        int lineNumber = invokeGetLineNumber(reader);\n        Assertions.assertEquals(1, lineNumber); // Should count the empty line as a valid line\n    }\n\n    @Test\n    void testGetLineNumber_multipleEmptyLines() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"\\n\\n\\n\"));\n        reader.readLine(); // Read first empty line\n        reader.readLine(); // Read second empty line\n        int lineNumber = invokeGetLineNumber(reader);\n        Assertions.assertEquals(2, lineNumber); // Should count the first two empty lines\n    }\n\n    private int invokeGetLineNumber(ExtendedBufferedReader reader) throws Exception {\n        Field field = ExtendedBufferedReader.class.getDeclaredField(\"lineCounter\");\n        field.setAccessible(true);\n        return (int) field.get(reader);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 882,
+    "completion_tokens": 608,
+    "total_tokens": 1490,
+    "llm_elapsed_time_seconds": 12.65
+  }
+}

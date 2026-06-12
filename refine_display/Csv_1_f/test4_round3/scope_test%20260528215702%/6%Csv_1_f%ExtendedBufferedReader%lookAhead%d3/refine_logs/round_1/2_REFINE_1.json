@@ -1,0 +1,26 @@
+{
+  "raw": "{\n  \"suite_summary\": \"The test suite for the `lookAhead` method in `ExtendedBufferedReader` has a compile pass rate of 100%, but only 25% of tests execute successfully. Three tests are experiencing execution timeouts, while one test has high redundancy with another. The overall line coverage is perfect, but no tests are revealing bugs.\",\n  \"test_instructions\": {\n    \"ExtendedBufferedReader_6_1Test\": [\n      \"Fix the execution timeout issue: 'Exceeded TIMEOUT limit'. Consider optimizing the test logic or increasing the timeout duration.\"\n    ],\n    \"ExtendedBufferedReader_6_3Test\": [\n      \"Fix the execution timeout issue: 'Exceeded TIMEOUT limit'. Consider optimizing the test logic or increasing the timeout duration.\"\n    ],\n    \"ExtendedBufferedReader_6_4Test\": [\n      \"Fix the execution timeout issue: 'Exceeded TIMEOUT limit'. Consider optimizing the test logic or increasing the timeout duration.\"\n    ],\n    \"ExtendedBufferedReader_6_2Test\": [\n      \"Reduce redundancy: This test is highly similar to 'ExtendedBufferedReader_6_1Test'. Consider modifying the test to target different code paths or use different input values.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "The test suite for the `lookAhead` method in `ExtendedBufferedReader` has a compile pass rate of 100%, but only 25% of tests execute successfully. Three tests are experiencing execution timeouts, while one test has high redundancy with another. The overall line coverage is perfect, but no tests are revealing bugs.",
+    "test_instructions": {
+      "ExtendedBufferedReader_6_1Test": [
+        "Fix the execution timeout issue: 'Exceeded TIMEOUT limit'. Consider optimizing the test logic or increasing the timeout duration."
+      ],
+      "ExtendedBufferedReader_6_3Test": [
+        "Fix the execution timeout issue: 'Exceeded TIMEOUT limit'. Consider optimizing the test logic or increasing the timeout duration."
+      ],
+      "ExtendedBufferedReader_6_4Test": [
+        "Fix the execution timeout issue: 'Exceeded TIMEOUT limit'. Consider optimizing the test logic or increasing the timeout duration."
+      ],
+      "ExtendedBufferedReader_6_2Test": [
+        "Reduce redundancy: This test is highly similar to 'ExtendedBufferedReader_6_1Test'. Consider modifying the test to target different code paths or use different input values."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 4622,
+    "completion_tokens": 251,
+    "total_tokens": 4873,
+    "llm_elapsed_time_seconds": 4.489
+  }
+}

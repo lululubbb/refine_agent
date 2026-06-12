@@ -1,0 +1,26 @@
+{
+  "raw": "{\n  \"suite_summary\": \"All test files in the suite are currently failing at runtime, indicating issues with the execution of the tests. Each test file has specific errors related to exception handling and assertion failures. The tests need to be revised to correctly handle expected exceptions and improve their assertions.\",\n  \"test_instructions\": {\n    \"CSVRecord_3_1Test\": [\n      \"In the testGet_withOutOfBoundsIndex_throwsIllegalArgumentException method, fix the assertion to check for the correct exception type. The error states: 'Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.reflect.InvocationTargetException>'. Ensure that the correct exception is being thrown and caught.\"\n    ],\n    \"CSVRecord_3_2Test\": [\n      \"In the testGet_invalidHeaderName method, ensure that the expected exception is thrown. The error states: 'Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.' Verify that the input is correctly set up to trigger the exception.\"\n    ],\n    \"CSVRecord_3_3Test\": [\n      \"In the testGet_noHeaderMapping method, fix the assertion to check for the correct exception type. The error states: 'Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>'. Ensure that the correct exception is being thrown and caught.\"\n    ],\n    \"CSVRecord_3_4Test\": [\n      \"In the testGet_indexOutOfBounds method, fix the assertion to check for the correct exception type. The error states: 'Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.reflect.InvocationTargetException>'. Ensure that the correct exception is being thrown and caught.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "All test files in the suite are currently failing at runtime, indicating issues with the execution of the tests. Each test file has specific errors related to exception handling and assertion failures. The tests need to be revised to correctly handle expected exceptions and improve their assertions.",
+    "test_instructions": {
+      "CSVRecord_3_1Test": [
+        "In the testGet_withOutOfBoundsIndex_throwsIllegalArgumentException method, fix the assertion to check for the correct exception type. The error states: 'Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.reflect.InvocationTargetException>'. Ensure that the correct exception is being thrown and caught."
+      ],
+      "CSVRecord_3_2Test": [
+        "In the testGet_invalidHeaderName method, ensure that the expected exception is thrown. The error states: 'Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.' Verify that the input is correctly set up to trigger the exception."
+      ],
+      "CSVRecord_3_3Test": [
+        "In the testGet_noHeaderMapping method, fix the assertion to check for the correct exception type. The error states: 'Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>'. Ensure that the correct exception is being thrown and caught."
+      ],
+      "CSVRecord_3_4Test": [
+        "In the testGet_indexOutOfBounds method, fix the assertion to check for the correct exception type. The error states: 'Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.reflect.InvocationTargetException>'. Ensure that the correct exception is being thrown and caught."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 7550,
+    "completion_tokens": 370,
+    "total_tokens": 7920,
+    "llm_elapsed_time_seconds": 5.906
+  }
+}

@@ -1,0 +1,6 @@
+project,modified_class,Attempts,Aborted,SyntaxError,SyntaxRate,CompileError,CompileRate,RuntimeError,RunRate,Passed,PassRate,line_cov,line_total,line_rate,branch_cov,branch_total,branch_rate,m_line_cov,m_line_total,m_line_rate,m_branch_cov,m_branch_total,m_branch_rate,run_time
+Csv_2_f,CSVRecord,6,0,0,1.0,0,1.0,0,1.0,6,1.0,8,605,1.32,6,411,1.46,8,25,32.0,6,16,37.5,35.88
+Csv_2_f,CSVRecord,6,0,0,1.0,0,1.0,0,1.0,6,1.0,8,605,1.32,6,411,1.46,8,25,32.0,6,16,37.5,31.49
+Csv_2_f,CSVRecord,6,0,0,1.0,0,1.0,1,0.8333,5,0.8333,8,605,1.32,6,411,1.46,8,25,32.0,6,16,37.5,40.14
+Csv_2_f,CSVRecord,6,0,0,1.0,0,1.0,3,0.5,3,0.5,8,605,1.32,6,411,1.46,8,25,32.0,6,16,37.5,38.37
+Csv_2_f,CSVRecord,6,0,0,1.0,0,1.0,1,0.8333,5,0.8333,8,605,1.32,6,411,1.46,8,25,32.0,6,16,37.5,34.51

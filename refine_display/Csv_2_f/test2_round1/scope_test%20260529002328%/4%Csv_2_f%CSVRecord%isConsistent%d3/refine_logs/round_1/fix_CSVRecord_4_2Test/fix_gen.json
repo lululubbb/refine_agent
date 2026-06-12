@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport org.mockito.Mockito;\n\nimport java.lang.reflect.Method;\nimport java.util.Collections;\nimport java.util.HashMap;\nimport java.util.Map;\n\nclass CSVRecord_4_2Test {\n\n    @Test\n    void testisConsistent_mappingIsNull() throws Exception {\n        CSVRecord csvRecord = new CSVRecord(new String[]{\"value1\", \"value2\"}, null, null, 1);\n        Assertions.assertTrue(csvRecord.isConsistent());\n    }\n\n    @Test\n    void testisConsistent_mappingSizeEqualsValuesLength() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"col1\", 0);\n        mapping.put(\"col2\", 1);\n        \n        CSVRecord csvRecord = new CSVRecord(new String[]{\"value1\", \"value2\"}, mapping, null, 1);\n        Assertions.assertTrue(csvRecord.isConsistent());\n    }\n\n    @Test\n    void testisConsistent_mappingSizeNotEqualsValuesLength() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"col1\", 0);\n        \n        CSVRecord csvRecord = new CSVRecord(new String[]{\"value1\", \"value2\"}, mapping, null, 1);\n        Assertions.assertFalse(csvRecord.isConsistent());\n    }\n\n    @Test\n    void testisConsistent_emptyValuesArray() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        \n        CSVRecord csvRecord = new CSVRecord(new String[]{}, mapping, null, 1);\n        Assertions.assertFalse(csvRecord.isConsistent());\n    }\n\n    @Test\n    void testisConsistent_emptyMapping() throws Exception {\n        Map<String, Integer> mapping = Collections.emptyMap();\n        \n        CSVRecord csvRecord = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n        Assertions.assertFalse(csvRecord.isConsistent());\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1253,
+    "completion_tokens": 428,
+    "total_tokens": 1681,
+    "llm_elapsed_time_seconds": 7.06
+  }
+}

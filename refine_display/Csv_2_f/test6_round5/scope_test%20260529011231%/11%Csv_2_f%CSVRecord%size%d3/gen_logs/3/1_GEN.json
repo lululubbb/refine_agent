@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Constructor;\nimport java.lang.reflect.Field;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecordTest {\n\n    @Test\n    public void testSize_emptyArray() throws Exception {\n        CSVRecord record = createCSVRecord(new String[]{});\n        Assertions.assertEquals(0, record.size());\n    }\n\n    @Test\n    public void testSize_singleElementArray() throws Exception {\n        CSVRecord record = createCSVRecord(new String[]{\"value1\"});\n        Assertions.assertEquals(1, record.size());\n    }\n\n    @Test\n    public void testSize_multipleElementsArray() throws Exception {\n        CSVRecord record = createCSVRecord(new String[]{\"value1\", \"value2\", \"value3\"});\n        Assertions.assertEquals(3, record.size());\n    }\n\n    private CSVRecord createCSVRecord(String[] values) throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        Constructor<CSVRecord> constructor = CSVRecord.class.getDeclaredConstructor(String[].class, Map.class, String.class, long.class);\n        constructor.setAccessible(true);\n        return constructor.newInstance(values, mapping, null, 0);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 615,
+    "completion_tokens": 252,
+    "total_tokens": 867,
+    "llm_elapsed_time_seconds": 4.843
+  }
+}

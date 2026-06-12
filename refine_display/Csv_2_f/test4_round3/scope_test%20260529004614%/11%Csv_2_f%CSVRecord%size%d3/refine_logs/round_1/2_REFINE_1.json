@@ -1,0 +1,26 @@
+{
+  "raw": "{\n  \"suite_summary\": \"All test files compile and execute successfully, but there are issues related to redundancy and bug-revealing capabilities. The tests are highly redundant, with multiple files testing the same scenarios without revealing any bugs. Improvements are needed to enhance the diversity and effectiveness of the test suite.\",\n  \"test_instructions\": {\n    \"CSVRecord_11_1Test\": [\n      \"This test is not bug-revealing. Consider adding tests for boundary values and exception-throwing paths to improve bug detection.\"\n    ],\n    \"CSVRecord_11_2Test\": [\n      \"This test is not bug-revealing. Consider adding tests for boundary values and exception-throwing paths to improve bug detection.\"\n    ],\n    \"CSVRecord_11_3Test\": [\n      \"This test is not bug-revealing. Consider adding tests for boundary values and exception-throwing paths to improve bug detection.\"\n    ],\n    \"CSVRecord_11_4Test\": [\n      \"This test is not bug-revealing. Consider adding tests for boundary values and exception-throwing paths to improve bug detection.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "All test files compile and execute successfully, but there are issues related to redundancy and bug-revealing capabilities. The tests are highly redundant, with multiple files testing the same scenarios without revealing any bugs. Improvements are needed to enhance the diversity and effectiveness of the test suite.",
+    "test_instructions": {
+      "CSVRecord_11_1Test": [
+        "This test is not bug-revealing. Consider adding tests for boundary values and exception-throwing paths to improve bug detection."
+      ],
+      "CSVRecord_11_2Test": [
+        "This test is not bug-revealing. Consider adding tests for boundary values and exception-throwing paths to improve bug detection."
+      ],
+      "CSVRecord_11_3Test": [
+        "This test is not bug-revealing. Consider adding tests for boundary values and exception-throwing paths to improve bug detection."
+      ],
+      "CSVRecord_11_4Test": [
+        "This test is not bug-revealing. Consider adding tests for boundary values and exception-throwing paths to improve bug detection."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 5332,
+    "completion_tokens": 236,
+    "total_tokens": 5568,
+    "llm_elapsed_time_seconds": 5.559
+  }
+}

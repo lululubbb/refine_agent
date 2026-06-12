@@ -1,0 +1,26 @@
+{
+  "raw": "{\n  \"suite_summary\": \"All test files for the `read` method in `ExtendedBufferedReader` compile successfully, but they all fail at runtime due to various assertion errors. The tests exhibit high line coverage but do not reveal any bugs. There is a notable redundancy among some test files, indicating potential for consolidation.\",\n  \"test_instructions\": {\n    \"ExtendedBufferedReader_2_1Test\": [\n      \"Fix the error in testLookAhead(): 'java.lang.NoSuchFieldException: lookAhead' by ensuring the field name in getDeclaredField(\\\"lookAhead\\\") is correct.\"\n    ],\n    \"ExtendedBufferedReader_2_2Test\": [\n      \"Fix the error in testRead_lineBreaks(): 'expected: <4> but was: <3>' by reviewing the logic in the read method to ensure the lineCounter is incremented correctly.\"\n    ],\n    \"ExtendedBufferedReader_2_3Test\": [\n      \"Fix the error in testRead_boundaryConditions(): 'expected: <0> but was: <1>' by checking the lineCounter logic in the read method.\"\n    ],\n    \"ExtendedBufferedReader_2_4Test\": [\n      \"Fix the error in testRead_lineBreaks(): 'expected: <0> but was: <1>' by verifying the lineCounter increment logic in the read method.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "All test files for the `read` method in `ExtendedBufferedReader` compile successfully, but they all fail at runtime due to various assertion errors. The tests exhibit high line coverage but do not reveal any bugs. There is a notable redundancy among some test files, indicating potential for consolidation.",
+    "test_instructions": {
+      "ExtendedBufferedReader_2_1Test": [
+        "Fix the error in testLookAhead(): 'java.lang.NoSuchFieldException: lookAhead' by ensuring the field name in getDeclaredField(\"lookAhead\") is correct."
+      ],
+      "ExtendedBufferedReader_2_2Test": [
+        "Fix the error in testRead_lineBreaks(): 'expected: <4> but was: <3>' by reviewing the logic in the read method to ensure the lineCounter is incremented correctly."
+      ],
+      "ExtendedBufferedReader_2_3Test": [
+        "Fix the error in testRead_boundaryConditions(): 'expected: <0> but was: <1>' by checking the lineCounter logic in the read method."
+      ],
+      "ExtendedBufferedReader_2_4Test": [
+        "Fix the error in testRead_lineBreaks(): 'expected: <0> but was: <1>' by verifying the lineCounter increment logic in the read method."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 8732,
+    "completion_tokens": 281,
+    "total_tokens": 9013,
+    "llm_elapsed_time_seconds": 4.844
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport org.mockito.Mockito;\n\nimport java.lang.reflect.Field;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_9_3Test {\n\n    @Test\n    public void testGetComment_normalCase() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"key1\", 0);\n        String comment = \"This is a comment\";\n        long recordNumber = 1;\n\n        CSVRecord csvRecord = new CSVRecord(values, mapping, comment, recordNumber);\n        \n        Assertions.assertEquals(comment, csvRecord.getComment());\n    }\n\n    @Test\n    public void testGetComment_emptyComment() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = \"\";\n        long recordNumber = 1;\n\n        CSVRecord csvRecord = new CSVRecord(values, mapping, comment, recordNumber);\n        \n        Assertions.assertEquals(comment, csvRecord.getComment());\n    }\n\n    @Test\n    public void testGetComment_nullComment() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = null;\n        long recordNumber = 1;\n\n        CSVRecord csvRecord = new CSVRecord(values, mapping, comment, recordNumber);\n        \n        Assertions.assertEquals(null, csvRecord.getComment());\n    }\n\n    @Test\n    public void testGetComment_specialCharacters() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = \"!@#$%^&*()_+\";\n        long recordNumber = 1;\n\n        CSVRecord csvRecord = new CSVRecord(values, mapping, comment, recordNumber);\n        \n        Assertions.assertEquals(comment, csvRecord.getComment());\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 993,
+    "completion_tokens": 442,
+    "total_tokens": 1435,
+    "llm_elapsed_time_seconds": 5.806
+  }
+}

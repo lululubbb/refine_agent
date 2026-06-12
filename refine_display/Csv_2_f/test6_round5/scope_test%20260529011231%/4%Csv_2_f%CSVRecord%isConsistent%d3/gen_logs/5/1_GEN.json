@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport org.mockito.Mockito;\n\nimport java.lang.reflect.Method;\nimport java.util.HashMap;\nimport java.util.Map;\n\nclass CSVRecordTest {\n\n    @Test\n    void testIsConsistent_mappingIsNull() {\n        CSVRecord record = new CSVRecord(new String[]{\"value1\", \"value2\"}, null, null, 1);\n        Assertions.assertTrue(record.isConsistent());\n    }\n\n    @Test\n    void testIsConsistent_mappingSizeEqualsValuesLength() {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"key1\", 0);\n        mapping.put(\"key2\", 1);\n        \n        CSVRecord record = new CSVRecord(new String[]{\"value1\", \"value2\"}, mapping, null, 1);\n        Assertions.assertTrue(record.isConsistent());\n    }\n\n    @Test\n    void testIsConsistent_mappingSizeNotEqualsValuesLength() {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"key1\", 0);\n\n        CSVRecord record = new CSVRecord(new String[]{\"value1\", \"value2\"}, mapping, null, 1);\n        Assertions.assertFalse(record.isConsistent());\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 629,
+    "completion_tokens": 256,
+    "total_tokens": 885,
+    "llm_elapsed_time_seconds": 4.119
+  }
+}

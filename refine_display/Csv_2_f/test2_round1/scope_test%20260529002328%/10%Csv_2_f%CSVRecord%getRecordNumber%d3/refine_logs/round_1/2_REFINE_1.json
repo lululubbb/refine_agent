@@ -1,0 +1,20 @@
+{
+  "raw": "{\n  \"suite_summary\": \"The test suite for the `getRecordNumber` method in the `CSVRecord` class has two test files, both of which are not bug-revealing. They cover the focal method completely but do not reveal any bugs. The tests need to be enhanced to ensure they are bug-revealing and cover additional edge cases.\",\n  \"test_instructions\": {\n    \"CSVRecord_10_1Test\": [\n      \"Add additional tests to cover missed methods: 'get()', 'isConsistent()', 'isMapped()', 'isSet()', 'iterator()', 'values()', 'getComment()', 'size()', 'toString()' to ensure bug-revealing capability.\"\n    ],\n    \"CSVRecord_10_2Test\": [\n      \"Add additional tests to cover missed methods: 'get()', 'isConsistent()', 'isMapped()', 'isSet()', 'iterator()', 'values()', 'getComment()', 'size()', 'toString()' to ensure bug-revealing capability.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "The test suite for the `getRecordNumber` method in the `CSVRecord` class has two test files, both of which are not bug-revealing. They cover the focal method completely but do not reveal any bugs. The tests need to be enhanced to ensure they are bug-revealing and cover additional edge cases.",
+    "test_instructions": {
+      "CSVRecord_10_1Test": [
+        "Add additional tests to cover missed methods: 'get()', 'isConsistent()', 'isMapped()', 'isSet()', 'iterator()', 'values()', 'getComment()', 'size()', 'toString()' to ensure bug-revealing capability."
+      ],
+      "CSVRecord_10_2Test": [
+        "Add additional tests to cover missed methods: 'get()', 'isConsistent()', 'isMapped()', 'isSet()', 'iterator()', 'values()', 'getComment()', 'size()', 'toString()' to ensure bug-revealing capability."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 3515,
+    "completion_tokens": 214,
+    "total_tokens": 3729,
+    "llm_elapsed_time_seconds": 3.93
+  }
+}

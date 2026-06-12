@@ -1,0 +1,32 @@
+
+Failures (1):
+  JUnit Jupiter:ExtendedBufferedReader_1_2Test:testReadAgain()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_1_2Test', methodName = 'testReadAgain', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: expected: not equal but was: <-2>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertNotEquals.failEqual(AssertNotEquals.java:277)
+       org.junit.jupiter.api.AssertNotEquals.assertNotEquals(AssertNotEquals.java:94)
+       org.junit.jupiter.api.AssertNotEquals.assertNotEquals(AssertNotEquals.java:86)
+       org.junit.jupiter.api.Assertions.assertNotEquals(Assertions.java:1978)
+       org.apache.commons.csv.ExtendedBufferedReader_1_2Test.testReadAgain(ExtendedBufferedReader_1_2Test.java:45)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       [...]
+
+Test run finished after 522 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         7 tests found           ]
+[         0 tests skipped         ]
+[         7 tests started         ]
+[         0 tests aborted         ]
+[         6 tests successful      ]
+[         1 tests failed          ]
+
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC

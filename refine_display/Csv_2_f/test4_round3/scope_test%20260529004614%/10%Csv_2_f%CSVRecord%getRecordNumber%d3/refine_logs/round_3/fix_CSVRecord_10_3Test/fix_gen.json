@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Constructor;\nimport java.lang.reflect.Field;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_10_3Test {\n\n    @Test\n    public void testGetRecordNumber_normalCase() throws Exception {\n        // Arrange\n        String[] values = {\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = \"Test comment\";\n        long expectedRecordNumber = 42L;\n\n        CSVRecord csvRecord = createCSVRecord(values, mapping, comment, expectedRecordNumber);\n\n        // Act\n        long actualRecordNumber = csvRecord.getRecordNumber();\n\n        // Assert\n        Assertions.assertEquals(expectedRecordNumber, actualRecordNumber, \"The record number does not match the expected value.\");\n    }\n\n    @Test\n    public void testGetRecordNumber_boundaryCase() throws Exception {\n        // Arrange\n        String[] values = {\"boundaryValue1\", \"boundaryValue2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = \"Boundary case comment\";\n        long expectedRecordNumber = Long.MAX_VALUE; // Testing boundary value\n\n        CSVRecord csvRecord = createCSVRecord(values, mapping, comment, expectedRecordNumber);\n\n        // Act\n        long actualRecordNumber = csvRecord.getRecordNumber();\n\n        // Assert\n        Assertions.assertEquals(expectedRecordNumber, actualRecordNumber, \"The record number does not match the expected boundary value.\");\n    }\n\n    private CSVRecord createCSVRecord(String[] values, Map<String, Integer> mapping, String comment, long recordNumber) \n            throws Exception {\n        Constructor<CSVRecord> constructor = CSVRecord.class.getDeclaredConstructor(String[].class, Map.class, String.class, long.class);\n        constructor.setAccessible(true);\n        return constructor.newInstance(values, mapping, comment, recordNumber);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 971,
+    "completion_tokens": 419,
+    "total_tokens": 1390,
+    "llm_elapsed_time_seconds": 6.333
+  }
+}

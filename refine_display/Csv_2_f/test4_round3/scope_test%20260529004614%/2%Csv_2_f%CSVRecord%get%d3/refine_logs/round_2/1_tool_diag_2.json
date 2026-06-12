@@ -1,0 +1,300 @@
+{
+  "test_diags": {
+    "CSVRecord_2_1Test": {
+      "test_name": "CSVRecord_2_1Test",
+      "compile_ok": true,
+      "exec_ok": true,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [],
+      "focal_line_rate": 11.11,
+      "focal_branch_rate": 0.0,
+      "focal_line_covered": 1,
+      "focal_line_total": 9,
+      "missed_methods": [
+        "line 80: get() — completely uncovered",
+        "line 103: isConsistent() — completely uncovered",
+        "line 114: isMapped() — completely uncovered",
+        "line 125: isSet() — completely uncovered",
+        "line 134: iterator() — completely uncovered",
+        "line 138: values() — completely uncovered",
+        "line 148: getComment() — completely uncovered",
+        "line 157: getRecordNumber() — completely uncovered",
+        "line 166: size() — completely uncovered",
+        "line 171: toString() — completely uncovered"
+      ],
+      "partial_methods": [
+        "line 49: CSVRecord()() — 1/2 branches missed"
+      ],
+      "bug_revealing": false,
+      "redundancy_score": 0.2038,
+      "most_similar_to": "CSVRecord_2_4Test",
+      "diag_data_valid": true
+    },
+    "CSVRecord_2_2Test": {
+      "test_name": "CSVRecord_2_2Test",
+      "compile_ok": false,
+      "exec_ok": false,
+      "exec_timeout": false,
+      "compile_errors": [
+        "Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC",
+        "/home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/2%Csv_2_f%CSVRecord%get%d3/test_cases/CSVRecord_2_2Test.java:50: error: cannot find symbol",
+        "                     ^"
+      ],
+      "exec_errors": [],
+      "focal_line_rate": null,
+      "focal_branch_rate": null,
+      "focal_line_covered": null,
+      "focal_line_total": null,
+      "missed_methods": [],
+      "partial_methods": [],
+      "bug_revealing": false,
+      "redundancy_score": 0.5304,
+      "most_similar_to": "CSVRecord_2_4Test",
+      "diag_data_valid": true
+    },
+    "CSVRecord_2_3Test": {
+      "test_name": "CSVRecord_2_3Test",
+      "compile_ok": true,
+      "exec_ok": true,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [],
+      "focal_line_rate": 11.11,
+      "focal_branch_rate": 0.0,
+      "focal_line_covered": 1,
+      "focal_line_total": 9,
+      "missed_methods": [
+        "line 80: get() — completely uncovered",
+        "line 103: isConsistent() — completely uncovered",
+        "line 114: isMapped() — completely uncovered",
+        "line 125: isSet() — completely uncovered",
+        "line 134: iterator() — completely uncovered",
+        "line 138: values() — completely uncovered",
+        "line 148: getComment() — completely uncovered",
+        "line 157: getRecordNumber() — completely uncovered",
+        "line 166: size() — completely uncovered",
+        "line 171: toString() — completely uncovered"
+      ],
+      "partial_methods": [
+        "line 49: CSVRecord()() — 1/2 branches missed"
+      ],
+      "bug_revealing": false,
+      "redundancy_score": 0.1278,
+      "most_similar_to": "CSVRecord_2_1Test",
+      "diag_data_valid": true
+    },
+    "CSVRecord_2_4Test": {
+      "test_name": "CSVRecord_2_4Test",
+      "compile_ok": false,
+      "exec_ok": false,
+      "exec_timeout": false,
+      "compile_errors": [
+        "Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC",
+        "/home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/2%Csv_2_f%CSVRecord%get%d3/test_cases/CSVRecord_2_4Test.java:56: error: cannot find symbol",
+        "                 ^"
+      ],
+      "exec_errors": [],
+      "focal_line_rate": null,
+      "focal_branch_rate": null,
+      "focal_line_covered": null,
+      "focal_line_total": null,
+      "missed_methods": [],
+      "partial_methods": [],
+      "bug_revealing": false,
+      "redundancy_score": 0.5304,
+      "most_similar_to": "CSVRecord_2_2Test",
+      "diag_data_valid": true
+    }
+  },
+  "test_scores": {
+    "CSVRecord_2_1Test": {
+      "test_name": "CSVRecord_2_1Test",
+      "compile_score": 1.0,
+      "exec_score": 1.0,
+      "focal_line_coverage": 0.1111,
+      "focal_branch_coverage": 0.0,
+      "focal_line_covered": 1,
+      "focal_line_total": 9,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.2038,
+      "similarity": 0.7962,
+      "most_similar_to": "CSVRecord_2_4Test",
+      "issues": [
+        "NOT_BUG_REVEALING",
+        "LOW_COVERAGE",
+        "HIGH_REDUNDANCY"
+      ]
+    },
+    "CSVRecord_2_2Test": {
+      "test_name": "CSVRecord_2_2Test",
+      "compile_score": 0.0,
+      "exec_score": 0.0,
+      "focal_line_coverage": null,
+      "focal_branch_coverage": null,
+      "focal_line_covered": null,
+      "focal_line_total": null,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.5304,
+      "similarity": 0.4696,
+      "most_similar_to": "CSVRecord_2_4Test",
+      "issues": [
+        "COMPILE_FAIL"
+      ]
+    },
+    "CSVRecord_2_3Test": {
+      "test_name": "CSVRecord_2_3Test",
+      "compile_score": 1.0,
+      "exec_score": 1.0,
+      "focal_line_coverage": 0.1111,
+      "focal_branch_coverage": 0.0,
+      "focal_line_covered": 1,
+      "focal_line_total": 9,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.1278,
+      "similarity": 0.8722,
+      "most_similar_to": "CSVRecord_2_1Test",
+      "issues": [
+        "NOT_BUG_REVEALING",
+        "LOW_COVERAGE",
+        "HIGH_REDUNDANCY"
+      ]
+    },
+    "CSVRecord_2_4Test": {
+      "test_name": "CSVRecord_2_4Test",
+      "compile_score": 0.0,
+      "exec_score": 0.0,
+      "focal_line_coverage": null,
+      "focal_branch_coverage": null,
+      "focal_line_covered": null,
+      "focal_line_total": null,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.5304,
+      "similarity": 0.4696,
+      "most_similar_to": "CSVRecord_2_2Test",
+      "issues": [
+        "COMPILE_FAIL"
+      ]
+    }
+  },
+  "suite_score": {
+    "n_tests": 4,
+    "compile_pass_count": 2,
+    "compile_pass_rate": 0.5,
+    "exec_pass_count": 2,
+    "exec_pass_rate": 0.5,
+    "all_compile_pass": false,
+    "per_test_line_coverage": [
+      0.1111,
+      null,
+      0.1111,
+      null
+    ],
+    "per_test_branch_coverage": [
+      0.0,
+      null,
+      0.0,
+      null
+    ],
+    "coverage_line_avg": 0.1111,
+    "coverage_line_max": 0.1111,
+    "coverage_line_min": 0.1111,
+    "coverage_branch_avg": 0.0,
+    "bug_reveal_count": 0,
+    "bug_reveal_checked": 2,
+    "bug_reveal_rate": 0.0,
+    "max_pairwise_similarity": 0.898,
+    "high_redundancy_pairs": [
+      {
+        "test1": "CSVRecord_2_3Test",
+        "test2": "CSVRecord_2_1Test",
+        "similarity": 0.898
+      },
+      {
+        "test1": "CSVRecord_2_1Test",
+        "test2": "CSVRecord_2_3Test",
+        "similarity": 0.898
+      },
+      {
+        "test1": "CSVRecord_2_3Test",
+        "test2": "CSVRecord_2_1Test",
+        "similarity": 0.8722
+      },
+      {
+        "test1": "CSVRecord_2_1Test",
+        "test2": "CSVRecord_2_3Test",
+        "similarity": 0.8722
+      },
+      {
+        "test1": "CSVRecord_2_4Test",
+        "test2": "CSVRecord_2_1Test",
+        "similarity": 0.7962
+      },
+      {
+        "test1": "CSVRecord_2_4Test",
+        "test2": "CSVRecord_2_1Test",
+        "similarity": 0.7962
+      }
+    ],
+    "problem_tests": {
+      "NOT_BUG_REVEALING": [
+        "CSVRecord_2_1Test",
+        "CSVRecord_2_3Test"
+      ],
+      "LOW_COVERAGE": [
+        "CSVRecord_2_1Test",
+        "CSVRecord_2_3Test"
+      ],
+      "HIGH_REDUNDANCY": [
+        "CSVRecord_2_1Test",
+        "CSVRecord_2_3Test"
+      ],
+      "COMPILE_FAIL": [
+        "CSVRecord_2_2Test",
+        "CSVRecord_2_4Test"
+      ]
+    }
+  },
+  "pairwise_sims": [
+    {
+      "tc1": "CSVRecord_2_3Test",
+      "tc2": "CSVRecord_2_1Test",
+      "score": 0.102
+    },
+    {
+      "tc1": "CSVRecord_2_1Test",
+      "tc2": "CSVRecord_2_3Test",
+      "score": 0.102
+    },
+    {
+      "tc1": "CSVRecord_2_2Test",
+      "tc2": "CSVRecord_2_4Test",
+      "score": 0.5304
+    },
+    {
+      "tc1": "CSVRecord_2_4Test",
+      "tc2": "CSVRecord_2_1Test",
+      "score": 0.2038
+    },
+    {
+      "tc1": "CSVRecord_2_3Test",
+      "tc2": "CSVRecord_2_1Test",
+      "score": 0.1278
+    },
+    {
+      "tc1": "CSVRecord_2_1Test",
+      "tc2": "CSVRecord_2_3Test",
+      "score": 0.1278
+    },
+    {
+      "tc1": "CSVRecord_2_2Test",
+      "tc2": "CSVRecord_2_4Test",
+      "score": 0.5304
+    },
+    {
+      "tc1": "CSVRecord_2_4Test",
+      "tc2": "CSVRecord_2_1Test",
+      "score": 0.2038
+    }
+  ]
+}

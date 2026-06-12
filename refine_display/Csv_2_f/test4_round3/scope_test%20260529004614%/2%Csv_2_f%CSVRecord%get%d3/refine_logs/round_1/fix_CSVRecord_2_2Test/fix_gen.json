@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Method;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_2_2Test {\n    private CSVRecord csvRecord;\n\n    @BeforeEach\n    public void setUp() {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"col1\", 0);\n        mapping.put(\"col2\", 1);\n        mapping.put(\"col3\", 2);\n        csvRecord = new CSVRecord(values, mapping, null, 1);\n    }\n\n    @Test\n    public void testGet_validIndex() throws Exception {\n        String result = invokeGetMethod(1);\n        Assertions.assertEquals(\"value2\", result);\n    }\n\n    @Test\n    public void testGet_firstIndex() throws Exception {\n        String result = invokeGetMethod(0);\n        Assertions.assertEquals(\"value1\", result);\n    }\n\n    @Test\n    public void testGet_lastIndex() throws Exception {\n        String result = invokeGetMethod(2);\n        Assertions.assertEquals(\"value3\", result);\n    }\n\n    @Test\n    public void testGet_invalidIndex() throws Exception {\n        Assertions.assertThrows(ArrayIndexOutOfBoundsException.class, () -> {\n            try {\n                invokeGetMethod(3);\n            } catch (InvocationTargetException e) {\n                throw (Throwable) e.getCause();\n            }\n        });\n    }\n\n    private String invokeGetMethod(int index) throws Exception {\n        Method method = CSVRecord.class.getDeclaredMethod(\"get\", int.class);\n        method.setAccessible(true);\n        return (String) method.invoke(csvRecord, index);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 947,
+    "completion_tokens": 396,
+    "total_tokens": 1343,
+    "llm_elapsed_time_seconds": 19.723
+  }
+}

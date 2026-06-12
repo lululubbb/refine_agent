@@ -1,0 +1,32 @@
+{
+  "raw": "{\n  \"suite_summary\": \"All test files compile and execute successfully, but they exhibit high redundancy and do not reveal any bugs. Each test file is essentially testing the same scenarios with minimal variation, leading to redundancy issues. Improvements can be made by diversifying the test cases to cover more edge cases and different paths in the focal method.\",\n  \"test_instructions\": {\n    \"CSVRecord_9_1Test\": [\n      \"This test does not reveal any bugs. Consider adding tests for boundary values, such as null, empty string, and special characters.\"\n    ],\n    \"CSVRecord_9_2Test\": [\n      \"This test does not reveal any bugs. Consider adding tests for boundary values, such as null, empty string, and special characters.\"\n    ],\n    \"CSVRecord_9_3Test\": [\n      \"This test does not reveal any bugs. Consider adding tests for boundary values, such as null, empty string, and special characters.\"\n    ],\n    \"CSVRecord_9_4Test\": [\n      \"This test does not reveal any bugs. Consider adding tests for boundary values, such as null, empty string, and special characters.\"\n    ],\n    \"CSVRecord_9_5Test\": [\n      \"This test does not reveal any bugs. Consider adding tests for boundary values, such as null, empty string, and special characters.\"\n    ],\n    \"CSVRecord_9_6Test\": [\n      \"This test does not reveal any bugs. Consider adding tests for boundary values, such as null, empty string, and special characters.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "All test files compile and execute successfully, but they exhibit high redundancy and do not reveal any bugs. Each test file is essentially testing the same scenarios with minimal variation, leading to redundancy issues. Improvements can be made by diversifying the test cases to cover more edge cases and different paths in the focal method.",
+    "test_instructions": {
+      "CSVRecord_9_1Test": [
+        "This test does not reveal any bugs. Consider adding tests for boundary values, such as null, empty string, and special characters."
+      ],
+      "CSVRecord_9_2Test": [
+        "This test does not reveal any bugs. Consider adding tests for boundary values, such as null, empty string, and special characters."
+      ],
+      "CSVRecord_9_3Test": [
+        "This test does not reveal any bugs. Consider adding tests for boundary values, such as null, empty string, and special characters."
+      ],
+      "CSVRecord_9_4Test": [
+        "This test does not reveal any bugs. Consider adding tests for boundary values, such as null, empty string, and special characters."
+      ],
+      "CSVRecord_9_5Test": [
+        "This test does not reveal any bugs. Consider adding tests for boundary values, such as null, empty string, and special characters."
+      ],
+      "CSVRecord_9_6Test": [
+        "This test does not reveal any bugs. Consider adding tests for boundary values, such as null, empty string, and special characters."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 8299,
+    "completion_tokens": 325,
+    "total_tokens": 8624,
+    "llm_elapsed_time_seconds": 9.6
+  }
+}

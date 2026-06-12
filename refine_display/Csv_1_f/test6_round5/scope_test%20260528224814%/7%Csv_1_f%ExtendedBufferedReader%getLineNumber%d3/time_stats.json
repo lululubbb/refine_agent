@@ -1,0 +1,18 @@
+{
+  "wall_clock": {
+    "start": 1779979694.5467927,
+    "end": 1779981736.625625,
+    "total_seconds": 2042.08
+  },
+  "tool_chain": {
+    "total_seconds": 1205.277366399765
+  },
+  "rounds": {
+    "phase1": 98.85,
+    "round_1": 295.18,
+    "round_2": 348.34,
+    "round_3": 389.28,
+    "round_4": 433.13,
+    "round_5": 477.29
+  }
+}

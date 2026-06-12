@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "package org.apache.commons.csv;\n\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport org.mockito.Mockito;\n\nimport java.io.StringReader;\n\nclass ExtendedBufferedReaderTest {\n\n    @Test\n    void testRead_normalCase() throws Exception {\n        String input = \"Hello\\nWorld\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n        \n        int firstChar = reader.read();\n        Assertions.assertEquals('H', firstChar);\n        \n        int secondChar = reader.read();\n        Assertions.assertEquals('e', secondChar);\n        \n        int lineCount = getLineCounter(reader);\n        Assertions.assertEquals(0, lineCount);\n        \n        // Read until the end of the line\n        while (reader.read() != '\\n') {}\n        \n        lineCount = getLineCounter(reader);\n        Assertions.assertEquals(1, lineCount);\n    }\n\n    @Test\n    void testRead_lineBreaks() throws Exception {\n        String input = \"Line 1\\rLine 2\\nLine 3\\r\\nLine 4\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n        \n        while (reader.read() != -1) {}\n        \n        int lineCount = getLineCounter(reader);\n        Assertions.assertEquals(4, lineCount);\n    }\n\n    @Test\n    void testRead_endOfStream() throws Exception {\n        String input = \"\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n        \n        int result = reader.read();\n        Assertions.assertEquals(ExtendedBufferedReader.END_OF_STREAM, result);\n        \n        int lineCount = getLineCounter(reader);\n        Assertions.assertEquals(0, lineCount);\n    }\n\n    @Test\n    void testRead_multipleLineBreaks() throws Exception {\n        String input = \"\\n\\n\\n\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n        \n        while (reader.read() != -1) {}\n        \n        int lineCount = getLineCounter(reader);\n        Assertions.assertEquals(3, lineCount);\n    }\n\n    private int getLineCounter(ExtendedBufferedReader reader) throws Exception {\n        var field = ExtendedBufferedReader.class.getDeclaredField(\"lineCounter\");\n        field.setAccessible(true);\n        return (int) field.get(reader);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 593,
+    "completion_tokens": 469,
+    "total_tokens": 1062,
+    "llm_elapsed_time_seconds": 5.424
+  }
+}

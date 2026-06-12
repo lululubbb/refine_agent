@@ -1,0 +1,161 @@
+{
+  "CSVRecord_6_1Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [],
+    "exec_errors": [],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": 100.0,
+    "focal_line_covered": 1,
+    "focal_line_total": 1,
+    "missed_methods": [
+      "line 64: get() — completely uncovered",
+      "line 80: get() — completely uncovered",
+      "line 103: isConsistent() — completely uncovered",
+      "line 134: iterator() — completely uncovered",
+      "line 138: values() — completely uncovered",
+      "line 148: getComment() — completely uncovered",
+      "line 157: getRecordNumber() — completely uncovered",
+      "line 166: size() — completely uncovered",
+      "line 171: toString() — completely uncovered"
+    ],
+    "partial_methods": [
+      "line 49: CSVRecord()() — 1/2 branches missed",
+      "line 114: isMapped() — 1/2 branches missed"
+    ]
+  },
+  "CSVRecord_6_2Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [],
+    "exec_errors": [],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": 100.0,
+    "focal_line_covered": 1,
+    "focal_line_total": 1,
+    "missed_methods": [
+      "line 64: get() — completely uncovered",
+      "line 80: get() — completely uncovered",
+      "line 103: isConsistent() — completely uncovered",
+      "line 134: iterator() — completely uncovered",
+      "line 138: values() — completely uncovered",
+      "line 148: getComment() — completely uncovered",
+      "line 157: getRecordNumber() — completely uncovered",
+      "line 166: size() — completely uncovered",
+      "line 171: toString() — completely uncovered"
+    ],
+    "partial_methods": [
+      "line 49: CSVRecord()() — 1/2 branches missed",
+      "line 114: isMapped() — 1/2 branches missed"
+    ]
+  },
+  "CSVRecord_6_3Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [],
+    "exec_errors": [],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": 100.0,
+    "focal_line_covered": 1,
+    "focal_line_total": 1,
+    "missed_methods": [
+      "line 64: get() — completely uncovered",
+      "line 80: get() — completely uncovered",
+      "line 103: isConsistent() — completely uncovered",
+      "line 134: iterator() — completely uncovered",
+      "line 138: values() — completely uncovered",
+      "line 148: getComment() — completely uncovered",
+      "line 157: getRecordNumber() — completely uncovered",
+      "line 166: size() — completely uncovered",
+      "line 171: toString() — completely uncovered"
+    ],
+    "partial_methods": [
+      "line 49: CSVRecord()() — 1/2 branches missed",
+      "line 114: isMapped() — 1/2 branches missed"
+    ]
+  },
+  "CSVRecord_6_4Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [],
+    "exec_errors": [],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": 100.0,
+    "focal_line_covered": 1,
+    "focal_line_total": 1,
+    "missed_methods": [
+      "line 64: get() — completely uncovered",
+      "line 80: get() — completely uncovered",
+      "line 103: isConsistent() — completely uncovered",
+      "line 134: iterator() — completely uncovered",
+      "line 138: values() — completely uncovered",
+      "line 148: getComment() — completely uncovered",
+      "line 157: getRecordNumber() — completely uncovered",
+      "line 166: size() — completely uncovered",
+      "line 171: toString() — completely uncovered"
+    ],
+    "partial_methods": [
+      "line 49: CSVRecord()() — 1/2 branches missed",
+      "line 114: isMapped() — 1/2 branches missed"
+    ]
+  },
+  "CSVRecord_6_5Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [],
+    "exec_errors": [],
+    "focal_line_rate": 0.0,
+    "focal_branch_rate": 0.0,
+    "focal_line_covered": 0,
+    "focal_line_total": 1,
+    "missed_methods": [
+      "line 64: get() — completely uncovered",
+      "line 80: get() — completely uncovered",
+      "line 103: isConsistent() — completely uncovered",
+      "line 125: isSet() — completely uncovered",
+      "line 134: iterator() — completely uncovered",
+      "line 138: values() — completely uncovered",
+      "line 148: getComment() — completely uncovered",
+      "line 157: getRecordNumber() — completely uncovered",
+      "line 166: size() — completely uncovered",
+      "line 171: toString() — completely uncovered"
+    ],
+    "partial_methods": [
+      "line 49: CSVRecord()() — 1/2 branches missed",
+      "line 114: isMapped() — 1/2 branches missed"
+    ]
+  },
+  "CSVRecord_6_6Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "=> org.opentest4j.AssertionFailedError: Expected java.lang.NullPointerException to be thrown, but nothing was thrown.",
+      "Failures (1):",
+      "JUnit Jupiter:CSVRecord_6_6Test:testisSet_nullKey()",
+      "MethodSource [className = 'org.apache.commons.csv.CSVRecord_6_6Test', methodName = 'testisSet_nullKey', methodParameterTypes = '']",
+      "org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)",
+      "org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:73)",
+      "org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)",
+      "org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)",
+      "org.apache.commons.csv.CSVRecord_6_6Test.testisSet_nullKey(CSVRecord_6_6Test.java:59)",
+      "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)",
+      "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)",
+      "java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)",
+      "java.base/java.lang.reflect.Method.invoke(Method.java:566)",
+      "org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)",
+      "[...]",
+      "Test run finished after 254 ms",
+      "[         4 containers found      ]",
+      "[         0 containers skipped    ]",
+      "[         4 containers started    ]",
+      "[         0 containers aborted    ]"
+    ],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": 100.0,
+    "focal_line_covered": 1,
+    "focal_line_total": 1,
+    "missed_methods": [],
+    "partial_methods": []
+  }
+}

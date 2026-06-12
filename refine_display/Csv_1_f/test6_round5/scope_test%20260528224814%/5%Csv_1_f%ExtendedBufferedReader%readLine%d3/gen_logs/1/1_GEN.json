@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport org.mockito.Mockito;\n\nimport java.io.BufferedReader;\nimport java.io.IOException;\nimport java.io.StringReader;\nimport java.lang.reflect.Method;\n\nclass ExtendedBufferedReaderTest {\n\n    @Test\n    void testreadLine_normalCase() throws Exception {\n        String input = \"Hello, World!\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n        \n        String line = reader.readLine();\n        \n        Assertions.assertEquals(\"Hello, World!\", line);\n        Assertions.assertEquals(1, getLineCounter(reader));\n        Assertions.assertEquals('!', getLastChar(reader));\n    }\n\n    @Test\n    void testreadLine_emptyLine() throws Exception {\n        String input = \"\\n\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n        \n        String line = reader.readLine();\n        \n        Assertions.assertEquals(\"\", line);\n        Assertions.assertEquals(1, getLineCounter(reader));\n        Assertions.assertEquals('\\n', getLastChar(reader));\n    }\n\n    @Test\n    void testreadLine_endOfStream() throws Exception {\n        String input = \"First line\\nSecond line\\n\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n        \n        reader.readLine(); // Read first line\n        reader.readLine(); // Read second line\n        String line = reader.readLine(); // Read end of stream\n        \n        Assertions.assertNull(line);\n        Assertions.assertEquals(2, getLineCounter(reader));\n        Assertions.assertEquals(ExtendedBufferedReader.END_OF_STREAM, getLastChar(reader));\n    }\n\n    @Test\n    void testreadLine_multipleLines() throws Exception {\n        String input = \"Line 1\\nLine 2\\nLine 3\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n        \n        reader.readLine(); // Read Line 1\n        reader.readLine(); // Read Line 2\n        String line = reader.readLine(); // Read Line 3\n        \n        Assertions.assertEquals(\"Line 3\", line);\n        Assertions.assertEquals(3, getLineCounter(reader));\n        Assertions.assertEquals('3', getLastChar(reader));\n    }\n\n    private int getLineCounter(ExtendedBufferedReader reader) throws Exception {\n        Method method = ExtendedBufferedReader.class.getDeclaredMethod(\"getLineNumber\");\n        method.setAccessible(true);\n        return (int) method.invoke(reader);\n    }\n\n    private int getLastChar(ExtendedBufferedReader reader) throws Exception {\n        java.lang.reflect.Field field = ExtendedBufferedReader.class.getDeclaredField(\"lastChar\");\n        field.setAccessible(true);\n        return (int) field.get(reader);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 613,
+    "completion_tokens": 549,
+    "total_tokens": 1162,
+    "llm_elapsed_time_seconds": 8.247
+  }
+}

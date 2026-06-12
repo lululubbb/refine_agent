@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport java.util.Map;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Method;\nimport java.util.Collections;\nimport java.util.HashMap;\n\npublic class CSVRecord_12_2Test {\n\n    @Test\n    public void testToString_emptyArray() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{}, new HashMap<>(), null, 0);\n        String result = invokeToString(record);\n        Assertions.assertEquals(\"[]\", result);\n    }\n\n    @Test\n    public void testToString_singleElement() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, new HashMap<>(), null, 1);\n        String result = invokeToString(record);\n        Assertions.assertEquals(\"[value1]\", result);\n    }\n\n    @Test\n    public void testToString_multipleElements() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{\"value1\", \"value2\", \"value3\"}, new HashMap<>(), null, 2);\n        String result = invokeToString(record);\n        Assertions.assertEquals(\"[value1, value2, value3]\", result);\n    }\n\n    @Test\n    public void testToString_withNulls() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{\"value1\", null, \"value3\"}, new HashMap<>(), null, 3);\n        String result = invokeToString(record);\n        Assertions.assertEquals(\"[value1, null, value3]\", result);\n    }\n\n    @Test\n    public void testToString_emptyRecordWithComment() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{}, new HashMap<>(), \"Comment\", 4);\n        String result = invokeToString(record);\n        Assertions.assertEquals(\"[]\", result);\n    }\n\n    @Test\n    public void testToString_boundaryValues() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{\"\", \"value2\"}, new HashMap<>(), null, 5);\n        String result = invokeToString(record);\n        Assertions.assertEquals(\"[, value2]\", result);\n    }\n\n    private String invokeToString(CSVRecord record) throws Exception {\n        Method method = CSVRecord.class.getDeclaredMethod(\"toString\");\n        method.setAccessible(true);\n        return (String) method.invoke(record);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1056,
+    "completion_tokens": 510,
+    "total_tokens": 1566,
+    "llm_elapsed_time_seconds": 10.021
+  }
+}

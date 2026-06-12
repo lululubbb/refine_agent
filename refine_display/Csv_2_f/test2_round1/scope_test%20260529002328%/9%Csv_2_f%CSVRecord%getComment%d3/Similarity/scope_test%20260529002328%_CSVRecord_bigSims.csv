@@ -1,0 +1,3 @@
+project,target_class,test_case_1,test_case_2,combined_subtree_size,combined_similarity,redundancy_score
+scope_test%20260529002328%,CSVRecord,CSVRecord_9_2Test,CSVRecord_9_1Test,66,0.625592,0.374408
+scope_test%20260529002328%,CSVRecord,CSVRecord_9_1Test,CSVRecord_9_2Test,66,0.625592,0.374408

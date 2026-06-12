@@ -1,0 +1,23 @@
+{
+  "raw": "{\n  \"suite_summary\": \"The test suite for the `isConsistent` method in the `CSVRecord` class has a total of 6 test files, with 3 experiencing execution failures. The tests demonstrate high line coverage but lack bug-revealing capabilities. Several tests exhibit high redundancy, indicating potential for consolidation or improvement in test diversity.\",\n  \"test_instructions\": {\n    \"CSVRecord_4_1Test\": [\n      \"Fix the assertion in testisConsistent_singleValueWithIncorrectMapping: Expected isConsistent to return false for single value with incorrect mapping. ==\\u000a> expected: <false> but was: <true>\"\n    ],\n    \"CSVRecord_4_3Test\": [\n      \"Fix the assertion in testIsConsistent_boundaryValues: Expected isConsistent to be true for mapping size equal to values length with additional mapping. ==\\u000a> expected: <true> but was: <false>\"\n    ],\n    \"CSVRecord_4_4Test\": [\n      \"Fix the assertion in testisConsistent_boundaryValues: Expected isConsistent to return false for single value with mapping size not matching values length ==\\u000a> expected: <false> but was: <true>\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "The test suite for the `isConsistent` method in the `CSVRecord` class has a total of 6 test files, with 3 experiencing execution failures. The tests demonstrate high line coverage but lack bug-revealing capabilities. Several tests exhibit high redundancy, indicating potential for consolidation or improvement in test diversity.",
+    "test_instructions": {
+      "CSVRecord_4_1Test": [
+        "Fix the assertion in testisConsistent_singleValueWithIncorrectMapping: Expected isConsistent to return false for single value with incorrect mapping. ==\n> expected: <false> but was: <true>"
+      ],
+      "CSVRecord_4_3Test": [
+        "Fix the assertion in testIsConsistent_boundaryValues: Expected isConsistent to be true for mapping size equal to values length with additional mapping. ==\n> expected: <true> but was: <false>"
+      ],
+      "CSVRecord_4_4Test": [
+        "Fix the assertion in testisConsistent_boundaryValues: Expected isConsistent to return false for single value with mapping size not matching values length ==\n> expected: <false> but was: <true>"
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 11351,
+    "completion_tokens": 263,
+    "total_tokens": 11614,
+    "llm_elapsed_time_seconds": 4.653
+  }
+}

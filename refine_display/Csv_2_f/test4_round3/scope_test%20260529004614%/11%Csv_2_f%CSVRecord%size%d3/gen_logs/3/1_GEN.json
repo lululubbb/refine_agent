@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport org.mockito.Mockito;\n\nimport java.lang.reflect.Constructor;\nimport java.lang.reflect.Field;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecordTest {\n\n    @Test\n    public void testSize_emptyArray() throws Exception {\n        String[] values = new String[0];\n        CSVRecord record = createCSVRecord(values, null, null, 0);\n        Assertions.assertEquals(0, record.size());\n    }\n\n    @Test\n    public void testSize_nonEmptyArray() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        CSVRecord record = createCSVRecord(values, null, null, 0);\n        Assertions.assertEquals(3, record.size());\n    }\n\n    @Test\n    public void testSize_singleElementArray() throws Exception {\n        String[] values = {\"singleValue\"};\n        CSVRecord record = createCSVRecord(values, null, null, 0);\n        Assertions.assertEquals(1, record.size());\n    }\n\n    private CSVRecord createCSVRecord(String[] values, Map<String, Integer> mapping, String comment, long recordNumber) throws Exception {\n        Constructor<CSVRecord> constructor = CSVRecord.class.getDeclaredConstructor(String[].class, Map.class, String.class, long.class);\n        constructor.setAccessible(true);\n        return constructor.newInstance(values, mapping, comment, recordNumber);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 615,
+    "completion_tokens": 298,
+    "total_tokens": 913,
+    "llm_elapsed_time_seconds": 5.059
+  }
+}

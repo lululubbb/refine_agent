@@ -1,0 +1,4 @@
+[SYNTAX_OK] ExtendedBufferedReader_3_1Test.java
+[SYNTAX_OK] ExtendedBufferedReader_3_2Test.java
+[SYNTAX_OK] ExtendedBufferedReader_3_3Test.java
+[SYNTAX_SEMANTIC] ExtendedBufferedReader_3_4Test.java: Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC

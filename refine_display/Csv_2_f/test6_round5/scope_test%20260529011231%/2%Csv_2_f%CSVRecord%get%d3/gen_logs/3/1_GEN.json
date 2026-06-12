@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import static org.junit.jupiter.api.Assertions.*;\nimport static org.mockito.Mockito.*;\n\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Method;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecordTest {\n    private CSVRecord csvRecord;\n\n    @BeforeEach\n    public void setUp() {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"key1\", 0);\n        mapping.put(\"key2\", 1);\n        mapping.put(\"key3\", 2);\n        csvRecord = new CSVRecord(values, mapping, \"comment\", 1);\n    }\n\n    @Test\n    public void testget_validIndex() {\n        assertEquals(\"value1\", csvRecord.get(0));\n        assertEquals(\"value2\", csvRecord.get(1));\n        assertEquals(\"value3\", csvRecord.get(2));\n    }\n\n    @Test\n    public void testget_invalidIndex() {\n        assertThrows(ArrayIndexOutOfBoundsException.class, () -> csvRecord.get(-1));\n        assertThrows(ArrayIndexOutOfBoundsException.class, () -> csvRecord.get(3));\n    }\n\n    @Test\n    public void testget_emptyArray() throws Exception {\n        CSVRecord emptyRecord = new CSVRecord(new String[0], new HashMap<>(), null, 0);\n        assertThrows(ArrayIndexOutOfBoundsException.class, () -> emptyRecord.get(0));\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 615,
+    "completion_tokens": 318,
+    "total_tokens": 933,
+    "llm_elapsed_time_seconds": 5.711
+  }
+}

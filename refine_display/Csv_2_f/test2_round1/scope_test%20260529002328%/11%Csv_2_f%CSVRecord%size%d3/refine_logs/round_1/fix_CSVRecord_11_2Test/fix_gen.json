@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Field;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_11_2Test {\n\n    @Test\n    public void testSize_emptyArray() throws Exception {\n        String[] values = new String[0];\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        Assertions.assertEquals(0, record.size());\n    }\n\n    @Test\n    public void testSize_singleElementArray() throws Exception {\n        String[] values = new String[]{\"value1\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        Assertions.assertEquals(1, record.size());\n        Assertions.assertEquals(\"value1\", record.get(0));\n    }\n\n    @Test\n    public void testSize_multipleElementsArray() throws Exception {\n        String[] values = new String[]{\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        Assertions.assertEquals(3, record.size());\n        Assertions.assertEquals(\"value2\", record.get(1));\n    }\n\n    @Test\n    public void testSize_largeArray() throws Exception {\n        String[] values = new String[1000];\n        for (int i = 0; i < values.length; i++) {\n            values[i] = \"value\" + i;\n        }\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        Assertions.assertEquals(1000, record.size());\n        Assertions.assertEquals(\"value999\", record.get(999));\n    }\n\n    @Test\n    public void testSize_boundaryValues() throws Exception {\n        String[] values = new String[]{\"first\", \"second\", \"third\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        Assertions.assertEquals(3, record.size());\n        Assertions.assertEquals(\"first\", record.get(0));\n        Assertions.assertEquals(\"third\", record.get(2));\n    }\n\n    @Test\n    public void testSize_nullValuesArray() throws Exception {\n        String[] values = new String[]{\"value1\", null, \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        Assertions.assertEquals(3, record.size());\n        Assertions.assertEquals(null, record.get(1));\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 954,
+    "completion_tokens": 596,
+    "total_tokens": 1550,
+    "llm_elapsed_time_seconds": 7.505
+  }
+}

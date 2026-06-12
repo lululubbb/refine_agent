@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Method;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_2_5Test {\n\n    @Test\n    public void testGet_validIndex() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        \n        String result = invokeGet(record, 1);\n        \n        Assertions.assertEquals(\"value2\", result);\n    }\n\n    @Test\n    public void testGet_boundaryIndex() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        \n        String result = invokeGet(record, 0);\n        \n        Assertions.assertEquals(\"value1\", result);\n    }\n\n    @Test\n    public void testGet_invalidIndex() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        \n        Exception exception = Assertions.assertThrows(Exception.class, () -> {\n            invokeGet(record, 3);\n        });\n        \n        Assertions.assertTrue(exception.getCause() instanceof ArrayIndexOutOfBoundsException);\n    }\n\n    private String invokeGet(CSVRecord record, int index) throws Exception {\n        Method method = CSVRecord.class.getDeclaredMethod(\"get\", int.class);\n        method.setAccessible(true);\n        return (String) method.invoke(record, index);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 963,
+    "completion_tokens": 395,
+    "total_tokens": 1358,
+    "llm_elapsed_time_seconds": 6.376
+  }
+}

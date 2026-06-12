@@ -1,0 +1,263 @@
+{
+  "test_diags": {
+    "CSVRecord_3_1Test": {
+      "test_name": "CSVRecord_3_1Test",
+      "compile_ok": true,
+      "exec_ok": false,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [
+        "JUnit Jupiter:CSVRecord_3_1Test:testGet_withOutOfBoundsIndex_throwsIllegalArgumentException()",
+        "MethodSource [className = 'org.apache.commons.csv.CSVRecord_3_1Test', methodName = 'testGet_withOutOfBoundsIndex_throwsIllegalArgumentException', methodParameterTypes = '']",
+        "=> org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.reflect.InvocationTargetException>",
+        "org.apache.commons.csv.CSVRecord_3_1Test.testGet_withOutOfBoundsIndex_throwsIllegalArgumentException(CSVRecord_3_1Test.java:60)",
+        "Caused by: java.lang.reflect.InvocationTargetException",
+        "Caused by: java.lang.IllegalArgumentException: Index for header 'header2' is 2 but CSVRecord only has 2 values!"
+      ],
+      "focal_line_rate": 88.89,
+      "focal_branch_rate": 100.0,
+      "focal_line_covered": 8,
+      "focal_line_total": 9,
+      "missed_methods": [],
+      "partial_methods": [],
+      "bug_revealing": false,
+      "redundancy_score": 0.123,
+      "most_similar_to": "CSVRecord_3_3Test",
+      "diag_data_valid": true
+    },
+    "CSVRecord_3_2Test": {
+      "test_name": "CSVRecord_3_2Test",
+      "compile_ok": true,
+      "exec_ok": true,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [],
+      "focal_line_rate": 0.0,
+      "focal_branch_rate": 0.0,
+      "focal_line_covered": 0,
+      "focal_line_total": 9,
+      "missed_methods": [
+        "line 49: CSVRecord()() — completely uncovered",
+        "line 64: get() — completely uncovered",
+        "line 80: get() — completely uncovered",
+        "line 103: isConsistent() — completely uncovered",
+        "line 114: isMapped() — completely uncovered",
+        "line 125: isSet() — completely uncovered",
+        "line 134: iterator() — completely uncovered",
+        "line 138: values() — completely uncovered",
+        "line 148: getComment() — completely uncovered",
+        "line 157: getRecordNumber() — completely uncovered",
+        "line 166: size() — completely uncovered",
+        "line 171: toString() — completely uncovered"
+      ],
+      "partial_methods": [],
+      "bug_revealing": false,
+      "redundancy_score": 0.0406,
+      "most_similar_to": "CSVRecord_3_1Test",
+      "diag_data_valid": true
+    },
+    "CSVRecord_3_3Test": {
+      "test_name": "CSVRecord_3_3Test",
+      "compile_ok": true,
+      "exec_ok": false,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [
+        "=> org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>",
+        "Caused by: java.lang.reflect.InvocationTargetException",
+        "Caused by: java.lang.IllegalStateException: No header mapping was specified, the record values can't be accessed by name",
+        "=> org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.reflect.InvocationTargetException>",
+        "Caused by: java.lang.IllegalArgumentException: Index for header 'header1' is 5 but CSVRecord only has 2 values!"
+      ],
+      "focal_line_rate": 88.89,
+      "focal_branch_rate": 100.0,
+      "focal_line_covered": 8,
+      "focal_line_total": 9,
+      "missed_methods": [],
+      "partial_methods": [],
+      "bug_revealing": false,
+      "redundancy_score": 0.1489,
+      "most_similar_to": "CSVRecord_3_4Test",
+      "diag_data_valid": true
+    },
+    "CSVRecord_3_4Test": {
+      "test_name": "CSVRecord_3_4Test",
+      "compile_ok": true,
+      "exec_ok": false,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [
+        "=> org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>",
+        "Caused by: java.lang.reflect.InvocationTargetException",
+        "Caused by: java.lang.IllegalStateException: No header mapping was specified, the record values can't be accessed by name",
+        "=> org.opentest4j.AssertionFailedError: Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown."
+      ],
+      "focal_line_rate": 44.44,
+      "focal_branch_rate": 100.0,
+      "focal_line_covered": 4,
+      "focal_line_total": 9,
+      "missed_methods": [],
+      "partial_methods": [],
+      "bug_revealing": false,
+      "redundancy_score": 0.1489,
+      "most_similar_to": "CSVRecord_3_3Test",
+      "diag_data_valid": true
+    }
+  },
+  "test_scores": {
+    "CSVRecord_3_1Test": {
+      "test_name": "CSVRecord_3_1Test",
+      "compile_score": 1.0,
+      "exec_score": 0.0,
+      "focal_line_coverage": 0.8889,
+      "focal_branch_coverage": 1.0,
+      "focal_line_covered": 8,
+      "focal_line_total": 9,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.123,
+      "similarity": 0.877,
+      "most_similar_to": "CSVRecord_3_3Test",
+      "issues": [
+        "EXEC_FAIL"
+      ]
+    },
+    "CSVRecord_3_2Test": {
+      "test_name": "CSVRecord_3_2Test",
+      "compile_score": 1.0,
+      "exec_score": 1.0,
+      "focal_line_coverage": 0.0,
+      "focal_branch_coverage": 0.0,
+      "focal_line_covered": 0,
+      "focal_line_total": 9,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.0406,
+      "similarity": 0.9594,
+      "most_similar_to": "CSVRecord_3_1Test",
+      "issues": [
+        "NOT_BUG_REVEALING",
+        "LOW_COVERAGE",
+        "HIGH_REDUNDANCY"
+      ]
+    },
+    "CSVRecord_3_3Test": {
+      "test_name": "CSVRecord_3_3Test",
+      "compile_score": 1.0,
+      "exec_score": 0.0,
+      "focal_line_coverage": 0.8889,
+      "focal_branch_coverage": 1.0,
+      "focal_line_covered": 8,
+      "focal_line_total": 9,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.1489,
+      "similarity": 0.8511,
+      "most_similar_to": "CSVRecord_3_4Test",
+      "issues": [
+        "EXEC_FAIL"
+      ]
+    },
+    "CSVRecord_3_4Test": {
+      "test_name": "CSVRecord_3_4Test",
+      "compile_score": 1.0,
+      "exec_score": 0.0,
+      "focal_line_coverage": 0.4444,
+      "focal_branch_coverage": 1.0,
+      "focal_line_covered": 4,
+      "focal_line_total": 9,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.1489,
+      "similarity": 0.8511,
+      "most_similar_to": "CSVRecord_3_3Test",
+      "issues": [
+        "EXEC_FAIL"
+      ]
+    }
+  },
+  "suite_score": {
+    "n_tests": 4,
+    "compile_pass_count": 4,
+    "compile_pass_rate": 1.0,
+    "exec_pass_count": 1,
+    "exec_pass_rate": 0.25,
+    "all_compile_pass": true,
+    "per_test_line_coverage": [
+      0.8889,
+      0.0,
+      0.8889,
+      0.4444
+    ],
+    "per_test_branch_coverage": [
+      1.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "coverage_line_avg": 0.5555,
+    "coverage_line_max": 0.8889,
+    "coverage_line_min": 0.0,
+    "coverage_branch_avg": 0.75,
+    "bug_reveal_count": 0,
+    "bug_reveal_checked": 4,
+    "bug_reveal_rate": 0.0,
+    "max_pairwise_similarity": 0.9594,
+    "high_redundancy_pairs": [
+      {
+        "test1": "CSVRecord_3_1Test",
+        "test2": "CSVRecord_3_2Test",
+        "similarity": 0.9594
+      },
+      {
+        "test1": "CSVRecord_3_2Test",
+        "test2": "CSVRecord_3_1Test",
+        "similarity": 0.9594
+      },
+      {
+        "test1": "CSVRecord_3_3Test",
+        "test2": "CSVRecord_3_1Test",
+        "similarity": 0.877
+      },
+      {
+        "test1": "CSVRecord_3_4Test",
+        "test2": "CSVRecord_3_3Test",
+        "similarity": 0.8511
+      }
+    ],
+    "problem_tests": {
+      "EXEC_FAIL": [
+        "CSVRecord_3_1Test",
+        "CSVRecord_3_3Test",
+        "CSVRecord_3_4Test"
+      ],
+      "NOT_BUG_REVEALING": [
+        "CSVRecord_3_2Test"
+      ],
+      "LOW_COVERAGE": [
+        "CSVRecord_3_2Test"
+      ],
+      "HIGH_REDUNDANCY": [
+        "CSVRecord_3_2Test"
+      ]
+    }
+  },
+  "pairwise_sims": [
+    {
+      "tc1": "CSVRecord_3_3Test",
+      "tc2": "CSVRecord_3_1Test",
+      "score": 0.123
+    },
+    {
+      "tc1": "CSVRecord_3_1Test",
+      "tc2": "CSVRecord_3_2Test",
+      "score": 0.0406
+    },
+    {
+      "tc1": "CSVRecord_3_2Test",
+      "tc2": "CSVRecord_3_1Test",
+      "score": 0.0406
+    },
+    {
+      "tc1": "CSVRecord_3_4Test",
+      "tc2": "CSVRecord_3_3Test",
+      "score": 0.1489
+    }
+  ]
+}

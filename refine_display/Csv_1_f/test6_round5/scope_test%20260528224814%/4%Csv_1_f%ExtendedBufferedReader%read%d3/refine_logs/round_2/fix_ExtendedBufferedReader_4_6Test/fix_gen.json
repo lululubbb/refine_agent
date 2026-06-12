@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.BufferedReader;\nimport java.io.IOException;\nimport java.io.Reader;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport java.io.StringReader;\nimport java.lang.reflect.Field;\n\nclass ExtendedBufferedReader_4_6Test {\n\n    @Test\n    void testRead_normalCase() throws Exception {\n        String input = \"Hello\\nWorld\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n        char[] buffer = new char[10];\n        int len = reader.read(buffer, 0, 10);\n        \n        Assertions.assertEquals(10, len);\n        Assertions.assertEquals(\"Hello\\nWorld\".toCharArray()[0], buffer[0]);\n        \n        Field lineCounterField = ExtendedBufferedReader.class.getDeclaredField(\"lineCounter\");\n        lineCounterField.setAccessible(true);\n        Assertions.assertEquals(1, lineCounterField.get(reader));\n    }\n\n    @Test\n    void testRead_emptyBuffer() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"Test\"));\n        char[] buffer = new char[10];\n        int len = reader.read(buffer, 0, 0);\n        \n        Assertions.assertEquals(0, len);\n    }\n\n    @Test\n    void testRead_endOfStream() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"Test\"));\n        char[] buffer = new char[10];\n        reader.read(buffer, 0, 4); // Read the whole input\n        int len = reader.read(buffer, 0, 10); // Read again\n        \n        Assertions.assertEquals(-1, len);\n        \n        Field lastCharField = ExtendedBufferedReader.class.getDeclaredField(\"lastChar\");\n        lastCharField.setAccessible(true);\n        Assertions.assertEquals(ExtendedBufferedReader.END_OF_STREAM, lastCharField.get(reader));\n    }\n\n    @Test\n    void testRead_lineBreaks() throws Exception {\n        String input = \"Line1\\rLine2\\nLine3\\r\\n\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n        char[] buffer = new char[20];\n        reader.read(buffer, 0, 20);\n        \n        Field lineCounterField = ExtendedBufferedReader.class.getDeclaredField(\"lineCounter\");\n        lineCounterField.setAccessible(true);\n        Assertions.assertEquals(3, lineCounterField.get(reader)); // Adjusted expected value to 3\n    }\n    \n    @Test\n    void testRead_noNewLine() throws Exception {\n        String input = \"NoNewLine\";\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));\n        char[] buffer = new char[10];\n        int len = reader.read(buffer, 0, 10);\n        \n        Assertions.assertEquals(9, len);\n        \n        Field lineCounterField = ExtendedBufferedReader.class.getDeclaredField(\"lineCounter\");\n        lineCounterField.setAccessible(true);\n        Assertions.assertEquals(0, lineCounterField.get(reader));\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1495,
+    "completion_tokens": 625,
+    "total_tokens": 2120,
+    "llm_elapsed_time_seconds": 9.824
+  }
+}

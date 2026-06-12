@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "package org.apache.commons.csv;\n\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport org.mockito.Mockito;\n\nimport java.io.IOException;\nimport java.io.Reader;\nimport java.io.StringReader;\nimport java.lang.reflect.Method;\n\nclass ExtendedBufferedReaderTest {\n\n    @Test\n    void testLookAhead_normalCase() throws Exception {\n        String input = \"Hello\";\n        Reader reader = new StringReader(input);\n        ExtendedBufferedReader ebr = new ExtendedBufferedReader(reader);\n\n        int result = invokeLookAhead(ebr);\n\n        Assertions.assertEquals('H', result);\n    }\n\n    @Test\n    void testLookAhead_emptyInput() throws Exception {\n        String input = \"\";\n        Reader reader = new StringReader(input);\n        ExtendedBufferedReader ebr = new ExtendedBufferedReader(reader);\n\n        int result = invokeLookAhead(ebr);\n\n        Assertions.assertEquals(ExtendedBufferedReader.END_OF_STREAM, result);\n    }\n\n    @Test\n    void testLookAhead_endOfStream() throws Exception {\n        String input = \"A\";\n        Reader reader = new StringReader(input);\n        ExtendedBufferedReader ebr = new ExtendedBufferedReader(reader);\n\n        invokeLookAhead(ebr); // Read the first character\n\n        int result = invokeLookAhead(ebr); // Now we should be at the end\n\n        Assertions.assertEquals(ExtendedBufferedReader.END_OF_STREAM, result);\n    }\n\n    private int invokeLookAhead(ExtendedBufferedReader ebr) throws Exception {\n        Method method = ExtendedBufferedReader.class.getDeclaredMethod(\"lookAhead\");\n        method.setAccessible(true);\n        return (int) method.invoke(ebr);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 567,
+    "completion_tokens": 330,
+    "total_tokens": 897,
+    "llm_elapsed_time_seconds": 7.482
+  }
+}

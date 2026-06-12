@@ -1,0 +1,15 @@
+project,version,test_case,ast_generation_time_nanosec
+scope_test%20260529002328%,1%Csv_2_f%CSVRecord%CSVRecord%d3,CSVRecord_1_1Test.testCSVRecord_withValidParameters,51758793
+scope_test%20260529002328%,1%Csv_2_f%CSVRecord%CSVRecord%d3,CSVRecord_1_1Test.testCSVRecord_withNullValues,52523015
+scope_test%20260529002328%,1%Csv_2_f%CSVRecord%CSVRecord%d3,CSVRecord_1_1Test.testCSVRecord_withEmptyMapping,53118481
+scope_test%20260529002328%,1%Csv_2_f%CSVRecord%CSVRecord%d3,CSVRecord_1_1Test.testCSVRecord_withComment,53673770
+scope_test%20260529002328%,1%Csv_2_f%CSVRecord%CSVRecord%d3,CSVRecord_1_1Test.testCSVRecord_iterator,65322490
+scope_test%20260529002328%,1%Csv_2_f%CSVRecord%CSVRecord%d3,CSVRecord_1_1Test,67261018
+scope_test%20260529002328%,1%Csv_2_f%CSVRecord%CSVRecord%d3,CSVRecord_1_2Test.testCSVRecord_normalCase,50498489
+scope_test%20260529002328%,1%Csv_2_f%CSVRecord%CSVRecord%d3,CSVRecord_1_2Test.testCSVRecord_emptyValues,52037197
+scope_test%20260529002328%,1%Csv_2_f%CSVRecord%CSVRecord%d3,CSVRecord_1_2Test.testCSVRecord_withMapping,52556862
+scope_test%20260529002328%,1%Csv_2_f%CSVRecord%CSVRecord%d3,CSVRecord_1_2Test.testCSVRecord_isConsistent,58964733
+scope_test%20260529002328%,1%Csv_2_f%CSVRecord%CSVRecord%d3,CSVRecord_1_2Test.testCSVRecord_isSet,59544257
+scope_test%20260529002328%,1%Csv_2_f%CSVRecord%CSVRecord%d3,CSVRecord_1_2Test.testCSVRecord_iterator,60105996
+scope_test%20260529002328%,1%Csv_2_f%CSVRecord%CSVRecord%d3,CSVRecord_1_2Test.testCSVRecord_toString,60721930
+scope_test%20260529002328%,1%Csv_2_f%CSVRecord%CSVRecord%d3,CSVRecord_1_2Test,70117020

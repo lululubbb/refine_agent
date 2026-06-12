@@ -1,0 +1,13 @@
+project,target_class,test_class,focal_method,exec_status,m_per_line_cov,m_per_line_total,m_per_line_rate,m_per_branch_cov,m_per_branch_total,m_per_branch_rate,m_line_contrib_pct,m_branch_contrib_pct,m_coverage_score,f_per_line_cov,f_per_line_total,f_per_line_rate,f_per_branch_cov,f_per_branch_total,f_per_branch_rate,f_line_contrib_pct,f_branch_contrib_pct,f_coverage_score
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_7_1Test,getLineNumber,fail,10,37,27.027,2,26,7.6923,25.0,25.0,0.211798,0,1,0.0,,,,0.0,0.0,0.0
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_7_2Test,getLineNumber,fail,10,37,27.027,2,26,7.6923,25.0,25.0,0.211798,0,1,0.0,,,,0.0,0.0,0.0
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_7_3Test,getLineNumber,ok,10,37,27.027,2,26,7.6923,25.0,25.0,0.211798,0,1,0.0,,,,0.0,0.0,0.0
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_7_4Test,getLineNumber,ok,10,37,27.027,2,26,7.6923,25.0,25.0,0.211798,0,1,0.0,,,,0.0,0.0,0.0
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_7_1Test,getLineNumber,ok,10,37,27.027,2,26,7.6923,25.0,22.2222,0.204854,0,1,0.0,,,,0.0,0.0,0.0
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_7_2Test,getLineNumber,ok,10,37,27.027,2,26,7.6923,25.0,22.2222,0.204854,0,1,0.0,,,,0.0,0.0,0.0
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_7_3Test,getLineNumber,ok,10,37,27.027,3,26,11.5385,25.0,33.3333,0.242247,0,1,0.0,,,,0.0,0.0,0.0
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_7_4Test,getLineNumber,ok,10,37,27.027,2,26,7.6923,25.0,22.2222,0.204854,0,1,0.0,,,,0.0,0.0,0.0
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_7_1Test,getLineNumber,fail,11,37,29.7297,4,26,15.3846,26.1905,30.7692,0.255185,0,1,0.0,,,,0.0,0.0,0.0
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_7_2Test,getLineNumber,fail,11,37,29.7297,4,26,15.3846,26.1905,30.7692,0.255185,0,1,0.0,,,,0.0,0.0,0.0
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_7_3Test,getLineNumber,ok,10,37,27.027,3,26,11.5385,23.8095,23.0769,0.21363,0,1,0.0,,,,0.0,0.0,0.0
+Csv_1_f,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_7_4Test,getLineNumber,ok,10,37,27.027,2,26,7.6923,23.8095,15.3846,0.184784,0,1,0.0,,,,0.0,0.0,0.0

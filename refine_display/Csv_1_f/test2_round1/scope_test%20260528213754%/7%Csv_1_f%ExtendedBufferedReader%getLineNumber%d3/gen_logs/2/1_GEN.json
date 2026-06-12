@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "package org.apache.commons.csv;\n\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\n\nimport java.io.StringReader;\nimport java.lang.reflect.Field;\n\nclass ExtendedBufferedReaderTest {\n    private ExtendedBufferedReader reader;\n\n    @BeforeEach\n    void setUp() {\n        reader = new ExtendedBufferedReader(new StringReader(\"Line 1\\nLine 2\\nLine 3\"));\n    }\n\n    @Test\n    void testGetLineNumber_initialState() throws Exception {\n        // Access the private field lineCounter using reflection\n        Field lineCounterField = ExtendedBufferedReader.class.getDeclaredField(\"lineCounter\");\n        lineCounterField.setAccessible(true);\n        lineCounterField.set(reader, 0);\n        \n        Assertions.assertEquals(0, reader.getLineNumber());\n    }\n\n    @Test\n    void testGetLineNumber_afterReadingLines() throws Exception {\n        // Simulate reading lines to increase lineCounter\n        reader.readLine(); // Read first line\n        reader.readLine(); // Read second line\n\n        // Access the private field lineCounter using reflection\n        Field lineCounterField = ExtendedBufferedReader.class.getDeclaredField(\"lineCounter\");\n        lineCounterField.setAccessible(true);\n        lineCounterField.set(reader, 2);\n        \n        Assertions.assertEquals(2, reader.getLineNumber());\n    }\n\n    @Test\n    void testGetLineNumber_afterReadingAllLines() throws Exception {\n        // Read all lines\n        reader.readLine(); // Read first line\n        reader.readLine(); // Read second line\n        reader.readLine(); // Read third line\n\n        // Access the private field lineCounter using reflection\n        Field lineCounterField = ExtendedBufferedReader.class.getDeclaredField(\"lineCounter\");\n        lineCounterField.setAccessible(true);\n        lineCounterField.set(reader, 3);\n        \n        Assertions.assertEquals(3, reader.getLineNumber());\n    }\n\n    @Test\n    void testGetLineNumber_noLinesRead() throws Exception {\n        // Ensure no lines read\n        Assertions.assertEquals(0, reader.getLineNumber());\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 551,
+    "completion_tokens": 430,
+    "total_tokens": 981,
+    "llm_elapsed_time_seconds": 8.077
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "raw": "{\n  \"suite_summary\": \"All test files in the suite compile successfully, but they all fail at runtime due to various assertion errors. The tests exhibit high line coverage but do not reveal any bugs. There are also instances of redundancy among the tests that could be optimized.\",\n  \"test_instructions\": {\n    \"ExtendedBufferedReader_4_1Test\": [\n      \"Fix the assertion in 'testRead_normalCase()': expected: <8> but was: <10>. Adjust the expected length to match the actual output.\"\n    ],\n    \"ExtendedBufferedReader_4_2Test\": [\n      \"Fix the assertion in 'testRead_normalCase()': expected: <10> but was: <8>. Adjust the expected length to match the actual output.\"\n    ],\n    \"ExtendedBufferedReader_4_3Test\": [\n      \"Fix the assertion in 'testRead_normalCase()': expected: <10> but was: <8>. Adjust the expected length to match the actual output.\"\n    ],\n    \"ExtendedBufferedReader_4_4Test\": [\n      \"Fix the assertion in 'testRead_normalCase()': expected: <10> but was: <8>. Adjust the expected length to match the actual output.\"\n    ],\n    \"ExtendedBufferedReader_4_5Test\": [\n      \"Fix the assertion in 'testRead_normalCase()': expected: <8> but was: <10>. Adjust the expected length to match the actual output.\"\n    ],\n    \"ExtendedBufferedReader_4_6Test\": [\n      \"Fix the assertion in 'testRead_lineBreaks()': expected: <4> but was: <3>. Adjust the expected line count to match the actual output.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "All test files in the suite compile successfully, but they all fail at runtime due to various assertion errors. The tests exhibit high line coverage but do not reveal any bugs. There are also instances of redundancy among the tests that could be optimized.",
+    "test_instructions": {
+      "ExtendedBufferedReader_4_1Test": [
+        "Fix the assertion in 'testRead_normalCase()': expected: <8> but was: <10>. Adjust the expected length to match the actual output."
+      ],
+      "ExtendedBufferedReader_4_2Test": [
+        "Fix the assertion in 'testRead_normalCase()': expected: <10> but was: <8>. Adjust the expected length to match the actual output."
+      ],
+      "ExtendedBufferedReader_4_3Test": [
+        "Fix the assertion in 'testRead_normalCase()': expected: <10> but was: <8>. Adjust the expected length to match the actual output."
+      ],
+      "ExtendedBufferedReader_4_4Test": [
+        "Fix the assertion in 'testRead_normalCase()': expected: <10> but was: <8>. Adjust the expected length to match the actual output."
+      ],
+      "ExtendedBufferedReader_4_5Test": [
+        "Fix the assertion in 'testRead_normalCase()': expected: <8> but was: <10>. Adjust the expected length to match the actual output."
+      ],
+      "ExtendedBufferedReader_4_6Test": [
+        "Fix the assertion in 'testRead_lineBreaks()': expected: <4> but was: <3>. Adjust the expected line count to match the actual output."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 9334,
+    "completion_tokens": 356,
+    "total_tokens": 9690,
+    "llm_elapsed_time_seconds": 6.698
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "raw": "{\n  \"suite_summary\": \"The test suite for the `read` method in `ExtendedBufferedReader` has a 100% compile pass rate but only 17% execution pass rate. Five test files are failing at runtime due to assertion errors, while one test file exhibits high redundancy and is not bug-revealing. The focus is on fixing runtime errors first.\",\n  \"test_instructions\": {\n    \"ExtendedBufferedReader_4_1Test\": [\n      \"Fix the assertion in 'testRead_normalCase': expected:<-1> but was:<8>. Adjust the expected length to match the actual output.\"\n    ],\n    \"ExtendedBufferedReader_4_2Test\": [\n      \"Fix the assertion in 'testRead_normalCase': expected:<8> but was:<10>. Adjust the expected length to match the actual output.\",\n      \"Fix the assertion in 'testRead_normalCase': expected:<Line1> but was:<Line1>. Ensure the expected value matches the actual output.\"\n    ],\n    \"ExtendedBufferedReader_4_3Test\": [\n      \"Fix the assertion in 'testRead_newLineCount': expected:<3> but was:<1>. Adjust the expected value to reflect the actual line count.\"\n    ],\n    \"ExtendedBufferedReader_4_4Test\": [\n      \"Fix the assertion in 'testRead_normalCase': expected:<8> but was:<10>. Adjust the expected length to match the actual output.\",\n      \"Fix the assertion in 'testRead_countLines': expected:<3> but was:<2>. Adjust the expected value to reflect the actual line count.\"\n    ],\n    \"ExtendedBufferedReader_4_5Test\": [\n      \"Fix the assertion in 'testRead_normalCase': expected:<10> but was:<8>. Adjust the expected length to match the actual output.\",\n      \"Fix the assertion in 'testRead_countLines': expected:<3> but was:<2>. Adjust the expected value to reflect the actual line count.\"\n    ],\n    \"ExtendedBufferedReader_4_6Test\": [\n      \"This test file exhibits high redundancy and is not bug-revealing. Consider removing or modifying it to target different code paths in the focal method.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "The test suite for the `read` method in `ExtendedBufferedReader` has a 100% compile pass rate but only 17% execution pass rate. Five test files are failing at runtime due to assertion errors, while one test file exhibits high redundancy and is not bug-revealing. The focus is on fixing runtime errors first.",
+    "test_instructions": {
+      "ExtendedBufferedReader_4_1Test": [
+        "Fix the assertion in 'testRead_normalCase': expected:<-1> but was:<8>. Adjust the expected length to match the actual output."
+      ],
+      "ExtendedBufferedReader_4_2Test": [
+        "Fix the assertion in 'testRead_normalCase': expected:<8> but was:<10>. Adjust the expected length to match the actual output.",
+        "Fix the assertion in 'testRead_normalCase': expected:<Line1> but was:<Line1>. Ensure the expected value matches the actual output."
+      ],
+      "ExtendedBufferedReader_4_3Test": [
+        "Fix the assertion in 'testRead_newLineCount': expected:<3> but was:<1>. Adjust the expected value to reflect the actual line count."
+      ],
+      "ExtendedBufferedReader_4_4Test": [
+        "Fix the assertion in 'testRead_normalCase': expected:<8> but was:<10>. Adjust the expected length to match the actual output.",
+        "Fix the assertion in 'testRead_countLines': expected:<3> but was:<2>. Adjust the expected value to reflect the actual line count."
+      ],
+      "ExtendedBufferedReader_4_5Test": [
+        "Fix the assertion in 'testRead_normalCase': expected:<10> but was:<8>. Adjust the expected length to match the actual output.",
+        "Fix the assertion in 'testRead_countLines': expected:<3> but was:<2>. Adjust the expected value to reflect the actual line count."
+      ],
+      "ExtendedBufferedReader_4_6Test": [
+        "This test file exhibits high redundancy and is not bug-revealing. Consider removing or modifying it to target different code paths in the focal method."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 9303,
+    "completion_tokens": 455,
+    "total_tokens": 9758,
+    "llm_elapsed_time_seconds": 13.248
+  }
+}

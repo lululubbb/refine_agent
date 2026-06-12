@@ -1,0 +1,20 @@
+{
+  "raw": "{\n  \"suite_summary\": \"The test suite for the `lookAhead` method in `ExtendedBufferedReader` has 6 test files, all of which compile successfully. However, 2 tests are experiencing execution timeouts, indicating potential inefficiencies or infinite loops in the test logic. The tests exhibit high redundancy, particularly among pairs that are nearly identical in structure and logic.\",\n  \"test_instructions\": {\n    \"ExtendedBufferedReader_6_4Test\": [\n      \"Fix the execution timeout issue: 'Exceeded TIMEOUT limit'. Adjust the timeout threshold in the invokeLookAhead method to ensure it does not exceed the limit.\"\n    ],\n    \"ExtendedBufferedReader_6_5Test\": [\n      \"Fix the execution timeout issue: 'Exceeded TIMEOUT limit'. Adjust the timeout threshold in the invokeLookAhead method to ensure it does not exceed the limit.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "The test suite for the `lookAhead` method in `ExtendedBufferedReader` has 6 test files, all of which compile successfully. However, 2 tests are experiencing execution timeouts, indicating potential inefficiencies or infinite loops in the test logic. The tests exhibit high redundancy, particularly among pairs that are nearly identical in structure and logic.",
+    "test_instructions": {
+      "ExtendedBufferedReader_6_4Test": [
+        "Fix the execution timeout issue: 'Exceeded TIMEOUT limit'. Adjust the timeout threshold in the invokeLookAhead method to ensure it does not exceed the limit."
+      ],
+      "ExtendedBufferedReader_6_5Test": [
+        "Fix the execution timeout issue: 'Exceeded TIMEOUT limit'. Adjust the timeout threshold in the invokeLookAhead method to ensure it does not exceed the limit."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 3463,
+    "completion_tokens": 181,
+    "total_tokens": 3644,
+    "llm_elapsed_time_seconds": 3.219
+  }
+}

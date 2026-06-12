@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\nimport org.mockito.Mockito;\n\nimport java.io.IOException;\nimport java.io.Reader;\nimport java.io.StringReader;\n\nclass ExtendedBufferedReaderTest {\n\n    private ExtendedBufferedReader extendedBufferedReader;\n\n    @BeforeEach\n    void setUp() {\n        String input = \"Hello\\rWorld\\nThis is a test.\\n\";\n        Reader reader = new StringReader(input);\n        extendedBufferedReader = new ExtendedBufferedReader(reader);\n    }\n\n    @Test\n    void testRead_normalCase() throws Exception {\n        int firstChar = extendedBufferedReader.read();\n        Assertions.assertEquals('H', firstChar);\n    }\n\n    @Test\n    void testRead_newLine() throws Exception {\n        extendedBufferedReader.read(); // Read 'H'\n        extendedBufferedReader.read(); // Read 'e'\n        extendedBufferedReader.read(); // Read 'l'\n        extendedBufferedReader.read(); // Read 'l'\n        extendedBufferedReader.read(); // Read 'o'\n        extendedBufferedReader.read(); // Read '\\r'\n\n        int nextChar = extendedBufferedReader.read(); // Read 'W'\n        Assertions.assertEquals('W', nextChar);\n        \n        // Verify line count increment\n        int lineNumber = (int) getPrivateField(\"lineCounter\");\n        Assertions.assertEquals(1, lineNumber);\n    }\n\n    @Test\n    void testRead_carriageReturn() throws Exception {\n        extendedBufferedReader.read(); // Read 'H'\n        extendedBufferedReader.read(); // Read 'e'\n        extendedBufferedReader.read(); // Read 'l'\n        extendedBufferedReader.read(); // Read 'l'\n        extendedBufferedReader.read(); // Read 'o'\n        extendedBufferedReader.read(); // Read '\\r'\n\n        extendedBufferedReader.read(); // Read 'W'\n        extendedBufferedReader.read(); // Read 'o'\n        extendedBufferedReader.read(); // Read 'r'\n        extendedBufferedReader.read(); // Read 'l'\n        extendedBufferedReader.read(); // Read 'd'\n        extendedBufferedReader.read(); // Read '\\n'\n\n        int lineNumber = (int) getPrivateField(\"lineCounter\");\n        Assertions.assertEquals(2, lineNumber);\n    }\n\n    @Test\n    void testRead_endOfStream() throws Exception {\n        while (extendedBufferedReader.read() != ExtendedBufferedReader.END_OF_STREAM) {\n            // Read until the end of the stream\n        }\n        int endChar = extendedBufferedReader.read();\n        Assertions.assertEquals(ExtendedBufferedReader.END_OF_STREAM, endChar);\n    }\n\n    private Object getPrivateField(String fieldName) throws Exception {\n        java.lang.reflect.Field field = ExtendedBufferedReader.class.getDeclaredField(fieldName);\n        field.setAccessible(true);\n        return field.get(extendedBufferedReader);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 593,
+    "completion_tokens": 577,
+    "total_tokens": 1170,
+    "llm_elapsed_time_seconds": 5.804
+  }
+}

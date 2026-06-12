@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Method;\nimport java.util.Arrays;\nimport java.util.Collections;\nimport java.util.Iterator;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_7_5Test {\n\n    @Test\n    public void testIterator_normalCase() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"key1\", 0);\n        mapping.put(\"key2\", 1);\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n\n        Iterator<String> iterator = record.iterator();\n        Assertions.assertTrue(iterator.hasNext());\n        Assertions.assertEquals(\"value1\", iterator.next());\n        Assertions.assertEquals(\"value2\", iterator.next());\n        Assertions.assertEquals(\"value3\", iterator.next());\n        Assertions.assertFalse(iterator.hasNext());\n        Assertions.assertEquals(3, record.size()); // Assert the size of the record\n    }\n\n    @Test\n    public void testIterator_emptyArray() throws Exception {\n        String[] values = {};\n        Map<String, Integer> mapping = Collections.emptyMap();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n\n        Iterator<String> iterator = record.iterator();\n        Assertions.assertFalse(iterator.hasNext());\n        Assertions.assertEquals(0, record.size()); // Assert the size of the record\n    }\n\n    @Test\n    public void testIterator_singleElement() throws Exception {\n        String[] values = {\"singleValue\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"key1\", 0);\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n\n        Iterator<String> iterator = record.iterator();\n        Assertions.assertTrue(iterator.hasNext());\n        Assertions.assertEquals(\"singleValue\", iterator.next());\n        Assertions.assertFalse(iterator.hasNext());\n        Assertions.assertEquals(1, record.size()); // Assert the size of the record\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 964,
+    "completion_tokens": 438,
+    "total_tokens": 1402,
+    "llm_elapsed_time_seconds": 6.277
+  }
+}

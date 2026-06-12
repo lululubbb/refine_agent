@@ -1,0 +1,299 @@
+{
+  "test_diags": {
+    "CSVRecord_3_1Test": {
+      "test_name": "CSVRecord_3_1Test",
+      "compile_ok": true,
+      "exec_ok": false,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [
+        "JUnit Jupiter:CSVRecord_3_1Test:testGet_withOutOfBoundsIndex_throwsIllegalArgumentException()",
+        "MethodSource [className = 'org.apache.commons.csv.CSVRecord_3_1Test', methodName = 'testGet_withOutOfBoundsIndex_throwsIllegalArgumentException', methodParameterTypes = '']",
+        "=> org.opentest4j.AssertionFailedError: Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.",
+        "org.apache.commons.csv.CSVRecord_3_1Test.testGet_withOutOfBoundsIndex_throwsIllegalArgumentException(CSVRecord_3_1Test.java:59)"
+      ],
+      "focal_line_rate": 44.44,
+      "focal_branch_rate": 100.0,
+      "focal_line_covered": 4,
+      "focal_line_total": 9,
+      "missed_methods": [],
+      "partial_methods": [],
+      "bug_revealing": false,
+      "redundancy_score": 0.2362,
+      "most_similar_to": "CSVRecord_3_2Test",
+      "diag_data_valid": true
+    },
+    "CSVRecord_3_2Test": {
+      "test_name": "CSVRecord_3_2Test",
+      "compile_ok": true,
+      "exec_ok": false,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [
+        "=> org.opentest4j.AssertionFailedError: Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.",
+        "Failures (1):",
+        "JUnit Jupiter:CSVRecord_3_2Test:testGet_invalidHeaderName()",
+        "MethodSource [className = 'org.apache.commons.csv.CSVRecord_3_2Test', methodName = 'testGet_invalidHeaderName', methodParameterTypes = '']",
+        "org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)",
+        "org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:73)",
+        "org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)",
+        "org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)",
+        "org.apache.commons.csv.CSVRecord_3_2Test.testGet_invalidHeaderName(CSVRecord_3_2Test.java:82)",
+        "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)",
+        "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)",
+        "java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)",
+        "java.base/java.lang.reflect.Method.invoke(Method.java:566)",
+        "org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)",
+        "[...]",
+        "Test run finished after 278 ms",
+        "[         4 containers found      ]",
+        "[         0 containers skipped    ]",
+        "[         4 containers started    ]",
+        "[         0 containers aborted    ]"
+      ],
+      "focal_line_rate": 0.0,
+      "focal_branch_rate": 0.0,
+      "focal_line_covered": 0,
+      "focal_line_total": 9,
+      "missed_methods": [],
+      "partial_methods": [],
+      "bug_revealing": false,
+      "redundancy_score": 0.2362,
+      "most_similar_to": "CSVRecord_3_1Test",
+      "diag_data_valid": true
+    },
+    "CSVRecord_3_3Test": {
+      "test_name": "CSVRecord_3_3Test",
+      "compile_ok": true,
+      "exec_ok": false,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [
+        "=> org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>",
+        "Caused by: java.lang.reflect.InvocationTargetException",
+        "Caused by: java.lang.IllegalStateException: No header mapping was specified, the record values can't be accessed by name",
+        "=> org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.reflect.InvocationTargetException>",
+        "Caused by: java.lang.IllegalArgumentException: Index for header 'header1' is 2 but CSVRecord only has 2 values!"
+      ],
+      "focal_line_rate": 88.89,
+      "focal_branch_rate": 100.0,
+      "focal_line_covered": 8,
+      "focal_line_total": 9,
+      "missed_methods": [],
+      "partial_methods": [],
+      "bug_revealing": false,
+      "redundancy_score": 0.1489,
+      "most_similar_to": "CSVRecord_3_4Test",
+      "diag_data_valid": true
+    },
+    "CSVRecord_3_4Test": {
+      "test_name": "CSVRecord_3_4Test",
+      "compile_ok": true,
+      "exec_ok": false,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [
+        "=> org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>",
+        "Caused by: java.lang.reflect.InvocationTargetException",
+        "Caused by: java.lang.IllegalStateException: No header mapping was specified, the record values can't be accessed by name",
+        "=> org.opentest4j.AssertionFailedError: Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown."
+      ],
+      "focal_line_rate": 44.44,
+      "focal_branch_rate": 100.0,
+      "focal_line_covered": 4,
+      "focal_line_total": 9,
+      "missed_methods": [],
+      "partial_methods": [],
+      "bug_revealing": false,
+      "redundancy_score": 0.1489,
+      "most_similar_to": "CSVRecord_3_3Test",
+      "diag_data_valid": true
+    }
+  },
+  "test_scores": {
+    "CSVRecord_3_1Test": {
+      "test_name": "CSVRecord_3_1Test",
+      "compile_score": 1.0,
+      "exec_score": 0.0,
+      "focal_line_coverage": 0.4444,
+      "focal_branch_coverage": 1.0,
+      "focal_line_covered": 4,
+      "focal_line_total": 9,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.2362,
+      "similarity": 0.7638,
+      "most_similar_to": "CSVRecord_3_2Test",
+      "issues": [
+        "EXEC_FAIL"
+      ]
+    },
+    "CSVRecord_3_2Test": {
+      "test_name": "CSVRecord_3_2Test",
+      "compile_score": 1.0,
+      "exec_score": 0.0,
+      "focal_line_coverage": 0.0,
+      "focal_branch_coverage": 0.0,
+      "focal_line_covered": 0,
+      "focal_line_total": 9,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.2362,
+      "similarity": 0.7638,
+      "most_similar_to": "CSVRecord_3_1Test",
+      "issues": [
+        "EXEC_FAIL"
+      ]
+    },
+    "CSVRecord_3_3Test": {
+      "test_name": "CSVRecord_3_3Test",
+      "compile_score": 1.0,
+      "exec_score": 0.0,
+      "focal_line_coverage": 0.8889,
+      "focal_branch_coverage": 1.0,
+      "focal_line_covered": 8,
+      "focal_line_total": 9,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.1489,
+      "similarity": 0.8511,
+      "most_similar_to": "CSVRecord_3_4Test",
+      "issues": [
+        "EXEC_FAIL"
+      ]
+    },
+    "CSVRecord_3_4Test": {
+      "test_name": "CSVRecord_3_4Test",
+      "compile_score": 1.0,
+      "exec_score": 0.0,
+      "focal_line_coverage": 0.4444,
+      "focal_branch_coverage": 1.0,
+      "focal_line_covered": 4,
+      "focal_line_total": 9,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.1489,
+      "similarity": 0.8511,
+      "most_similar_to": "CSVRecord_3_3Test",
+      "issues": [
+        "EXEC_FAIL"
+      ]
+    }
+  },
+  "suite_score": {
+    "n_tests": 4,
+    "compile_pass_count": 4,
+    "compile_pass_rate": 1.0,
+    "exec_pass_count": 0,
+    "exec_pass_rate": 0.0,
+    "all_compile_pass": true,
+    "per_test_line_coverage": [
+      0.4444,
+      0.0,
+      0.8889,
+      0.4444
+    ],
+    "per_test_branch_coverage": [
+      1.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "coverage_line_avg": 0.4444,
+    "coverage_line_max": 0.8889,
+    "coverage_line_min": 0.0,
+    "coverage_branch_avg": 0.75,
+    "bug_reveal_count": 0,
+    "bug_reveal_checked": 4,
+    "bug_reveal_rate": 0.0,
+    "max_pairwise_similarity": 0.9594,
+    "high_redundancy_pairs": [
+      {
+        "test1": "CSVRecord_3_1Test",
+        "test2": "CSVRecord_3_2Test",
+        "similarity": 0.9594
+      },
+      {
+        "test1": "CSVRecord_3_2Test",
+        "test2": "CSVRecord_3_1Test",
+        "similarity": 0.9594
+      },
+      {
+        "test1": "CSVRecord_3_3Test",
+        "test2": "CSVRecord_3_1Test",
+        "similarity": 0.8852
+      },
+      {
+        "test1": "CSVRecord_3_1Test",
+        "test2": "CSVRecord_3_3Test",
+        "similarity": 0.8852
+      },
+      {
+        "test1": "CSVRecord_3_3Test",
+        "test2": "CSVRecord_3_1Test",
+        "similarity": 0.877
+      },
+      {
+        "test1": "CSVRecord_3_4Test",
+        "test2": "CSVRecord_3_3Test",
+        "similarity": 0.8511
+      },
+      {
+        "test1": "CSVRecord_3_4Test",
+        "test2": "CSVRecord_3_3Test",
+        "similarity": 0.8511
+      },
+      {
+        "test1": "CSVRecord_3_2Test",
+        "test2": "CSVRecord_3_1Test",
+        "similarity": 0.7638
+      }
+    ],
+    "problem_tests": {
+      "EXEC_FAIL": [
+        "CSVRecord_3_1Test",
+        "CSVRecord_3_2Test",
+        "CSVRecord_3_3Test",
+        "CSVRecord_3_4Test"
+      ]
+    }
+  },
+  "pairwise_sims": [
+    {
+      "tc1": "CSVRecord_3_3Test",
+      "tc2": "CSVRecord_3_1Test",
+      "score": 0.123
+    },
+    {
+      "tc1": "CSVRecord_3_1Test",
+      "tc2": "CSVRecord_3_2Test",
+      "score": 0.0406
+    },
+    {
+      "tc1": "CSVRecord_3_2Test",
+      "tc2": "CSVRecord_3_1Test",
+      "score": 0.0406
+    },
+    {
+      "tc1": "CSVRecord_3_4Test",
+      "tc2": "CSVRecord_3_3Test",
+      "score": 0.1489
+    },
+    {
+      "tc1": "CSVRecord_3_3Test",
+      "tc2": "CSVRecord_3_1Test",
+      "score": 0.1148
+    },
+    {
+      "tc1": "CSVRecord_3_1Test",
+      "tc2": "CSVRecord_3_3Test",
+      "score": 0.1148
+    },
+    {
+      "tc1": "CSVRecord_3_2Test",
+      "tc2": "CSVRecord_3_1Test",
+      "score": 0.2362
+    },
+    {
+      "tc1": "CSVRecord_3_4Test",
+      "tc2": "CSVRecord_3_3Test",
+      "score": 0.1489
+    }
+  ]
+}

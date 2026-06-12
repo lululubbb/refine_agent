@@ -1,0 +1,13 @@
+project,target_class,test_class,compile_status,exec_status,exec_timeout,jacoco_exec_size,compile_score,exec_score
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_10_1Test,pass,pass,False,31614,1.0,1.0
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_10_2Test,pass,pass,False,31613,1.0,1.0
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_10_3Test,pass,pass,False,31613,1.0,1.0
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_10_4Test,pass,pass,False,31614,1.0,1.0
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_10_1Test,pass,pass,False,31614,1.0,1.0
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_10_2Test,pass,pass,False,31613,1.0,1.0
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_10_3Test,pass,pass,False,31613,1.0,1.0
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_10_4Test,pass,pass,False,31615,1.0,1.0
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_10_1Test,pass,pass,False,31614,1.0,1.0
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_10_2Test,pass,pass,False,31613,1.0,1.0
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_10_3Test,pass,pass,False,31613,1.0,1.0
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_10_4Test,pass,pass,False,31616,1.0,1.0

@@ -1,0 +1,455 @@
+{
+  "test_diags": {
+    "CSVRecord_10_1Test": {
+      "test_name": "CSVRecord_10_1Test",
+      "compile_ok": true,
+      "exec_ok": true,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [],
+      "focal_line_rate": 100.0,
+      "focal_branch_rate": null,
+      "focal_line_covered": 1,
+      "focal_line_total": 1,
+      "missed_methods": [
+        "line 64: get() — completely uncovered",
+        "line 80: get() — completely uncovered",
+        "line 103: isConsistent() — completely uncovered",
+        "line 114: isMapped() — completely uncovered",
+        "line 125: isSet() — completely uncovered",
+        "line 134: iterator() — completely uncovered",
+        "line 138: values() — completely uncovered",
+        "line 148: getComment() — completely uncovered",
+        "line 166: size() — completely uncovered",
+        "line 171: toString() — completely uncovered"
+      ],
+      "partial_methods": [
+        "line 49: CSVRecord()() — 1/2 branches missed"
+      ],
+      "bug_revealing": false,
+      "redundancy_score": 0.3415,
+      "most_similar_to": "CSVRecord_10_3Test",
+      "diag_data_valid": true
+    },
+    "CSVRecord_10_2Test": {
+      "test_name": "CSVRecord_10_2Test",
+      "compile_ok": true,
+      "exec_ok": true,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [],
+      "focal_line_rate": 100.0,
+      "focal_branch_rate": null,
+      "focal_line_covered": 1,
+      "focal_line_total": 1,
+      "missed_methods": [
+        "line 64: get() — completely uncovered",
+        "line 80: get() — completely uncovered",
+        "line 103: isConsistent() — completely uncovered",
+        "line 114: isMapped() — completely uncovered",
+        "line 125: isSet() — completely uncovered",
+        "line 134: iterator() — completely uncovered",
+        "line 138: values() — completely uncovered",
+        "line 148: getComment() — completely uncovered",
+        "line 166: size() — completely uncovered",
+        "line 171: toString() — completely uncovered"
+      ],
+      "partial_methods": [
+        "line 49: CSVRecord()() — 1/2 branches missed"
+      ],
+      "bug_revealing": false,
+      "redundancy_score": 0.1825,
+      "most_similar_to": "CSVRecord_10_3Test",
+      "diag_data_valid": true
+    },
+    "CSVRecord_10_3Test": {
+      "test_name": "CSVRecord_10_3Test",
+      "compile_ok": true,
+      "exec_ok": true,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [],
+      "focal_line_rate": 100.0,
+      "focal_branch_rate": null,
+      "focal_line_covered": 1,
+      "focal_line_total": 1,
+      "missed_methods": [
+        "line 64: get() — completely uncovered",
+        "line 80: get() — completely uncovered",
+        "line 103: isConsistent() — completely uncovered",
+        "line 114: isMapped() — completely uncovered",
+        "line 125: isSet() — completely uncovered",
+        "line 134: iterator() — completely uncovered",
+        "line 138: values() — completely uncovered",
+        "line 148: getComment() — completely uncovered",
+        "line 166: size() — completely uncovered",
+        "line 171: toString() — completely uncovered"
+      ],
+      "partial_methods": [
+        "line 49: CSVRecord()() — 1/2 branches missed"
+      ],
+      "bug_revealing": false,
+      "redundancy_score": 0.3415,
+      "most_similar_to": "CSVRecord_10_1Test",
+      "diag_data_valid": true
+    },
+    "CSVRecord_10_4Test": {
+      "test_name": "CSVRecord_10_4Test",
+      "compile_ok": true,
+      "exec_ok": true,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [],
+      "focal_line_rate": 100.0,
+      "focal_branch_rate": null,
+      "focal_line_covered": 1,
+      "focal_line_total": 1,
+      "missed_methods": [
+        "line 64: get() — completely uncovered",
+        "line 80: get() — completely uncovered",
+        "line 103: isConsistent() — completely uncovered",
+        "line 114: isMapped() — completely uncovered",
+        "line 125: isSet() — completely uncovered",
+        "line 134: iterator() — completely uncovered",
+        "line 138: values() — completely uncovered",
+        "line 148: getComment() — completely uncovered",
+        "line 166: size() — completely uncovered",
+        "line 171: toString() — completely uncovered"
+      ],
+      "partial_methods": [
+        "line 49: CSVRecord()() — 1/2 branches missed"
+      ],
+      "bug_revealing": false,
+      "redundancy_score": 0.0238,
+      "most_similar_to": "CSVRecord_10_1Test",
+      "diag_data_valid": true
+    },
+    "CSVRecord_10_5Test": {
+      "test_name": "CSVRecord_10_5Test",
+      "compile_ok": true,
+      "exec_ok": false,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [
+        "=> org.opentest4j.AssertionFailedError: Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.",
+        "Failures (1):",
+        "JUnit Jupiter:CSVRecord_10_5Test:testgetRecordNumber_exceptionThrowing()",
+        "MethodSource [className = 'org.apache.commons.csv.CSVRecord_10_5Test', methodName = 'testgetRecordNumber_exceptionThrowing', methodParameterTypes = '']",
+        "org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)",
+        "org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:73)",
+        "org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)",
+        "org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)",
+        "org.apache.commons.csv.CSVRecord_10_5Test.testgetRecordNumber_exceptionThrowing(CSVRecord_10_5Test.java:95)",
+        "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)",
+        "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)",
+        "java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)",
+        "java.base/java.lang.reflect.Method.invoke(Method.java:566)",
+        "org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)",
+        "[...]",
+        "Test run finished after 235 ms",
+        "[         4 containers found      ]",
+        "[         0 containers skipped    ]",
+        "[         4 containers started    ]",
+        "[         0 containers aborted    ]"
+      ],
+      "focal_line_rate": 100.0,
+      "focal_branch_rate": null,
+      "focal_line_covered": 1,
+      "focal_line_total": 1,
+      "missed_methods": [],
+      "partial_methods": [],
+      "bug_revealing": false,
+      "redundancy_score": 0.3655,
+      "most_similar_to": "CSVRecord_10_6Test",
+      "diag_data_valid": true
+    },
+    "CSVRecord_10_6Test": {
+      "test_name": "CSVRecord_10_6Test",
+      "compile_ok": true,
+      "exec_ok": true,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [],
+      "focal_line_rate": 100.0,
+      "focal_branch_rate": null,
+      "focal_line_covered": 1,
+      "focal_line_total": 1,
+      "missed_methods": [
+        "line 64: get() — completely uncovered",
+        "line 80: get() — completely uncovered",
+        "line 103: isConsistent() — completely uncovered",
+        "line 114: isMapped() — completely uncovered",
+        "line 125: isSet() — completely uncovered",
+        "line 134: iterator() — completely uncovered",
+        "line 138: values() — completely uncovered",
+        "line 148: getComment() — completely uncovered",
+        "line 166: size() — completely uncovered",
+        "line 171: toString() — completely uncovered"
+      ],
+      "partial_methods": [
+        "line 49: CSVRecord()() — 1/2 branches missed"
+      ],
+      "bug_revealing": false,
+      "redundancy_score": 0.3655,
+      "most_similar_to": "CSVRecord_10_5Test",
+      "diag_data_valid": true
+    }
+  },
+  "test_scores": {
+    "CSVRecord_10_1Test": {
+      "test_name": "CSVRecord_10_1Test",
+      "compile_score": 1.0,
+      "exec_score": 1.0,
+      "focal_line_coverage": 1.0,
+      "focal_branch_coverage": null,
+      "focal_line_covered": 1,
+      "focal_line_total": 1,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.3415,
+      "similarity": 0.6585,
+      "most_similar_to": "CSVRecord_10_3Test",
+      "issues": [
+        "NOT_BUG_REVEALING"
+      ]
+    },
+    "CSVRecord_10_2Test": {
+      "test_name": "CSVRecord_10_2Test",
+      "compile_score": 1.0,
+      "exec_score": 1.0,
+      "focal_line_coverage": 1.0,
+      "focal_branch_coverage": null,
+      "focal_line_covered": 1,
+      "focal_line_total": 1,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.1825,
+      "similarity": 0.8175,
+      "most_similar_to": "CSVRecord_10_3Test",
+      "issues": [
+        "NOT_BUG_REVEALING",
+        "HIGH_REDUNDANCY"
+      ]
+    },
+    "CSVRecord_10_3Test": {
+      "test_name": "CSVRecord_10_3Test",
+      "compile_score": 1.0,
+      "exec_score": 1.0,
+      "focal_line_coverage": 1.0,
+      "focal_branch_coverage": null,
+      "focal_line_covered": 1,
+      "focal_line_total": 1,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.3415,
+      "similarity": 0.6585,
+      "most_similar_to": "CSVRecord_10_1Test",
+      "issues": [
+        "NOT_BUG_REVEALING"
+      ]
+    },
+    "CSVRecord_10_4Test": {
+      "test_name": "CSVRecord_10_4Test",
+      "compile_score": 1.0,
+      "exec_score": 1.0,
+      "focal_line_coverage": 1.0,
+      "focal_branch_coverage": null,
+      "focal_line_covered": 1,
+      "focal_line_total": 1,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.0238,
+      "similarity": 0.9762,
+      "most_similar_to": "CSVRecord_10_1Test",
+      "issues": [
+        "NOT_BUG_REVEALING",
+        "HIGH_REDUNDANCY"
+      ]
+    },
+    "CSVRecord_10_5Test": {
+      "test_name": "CSVRecord_10_5Test",
+      "compile_score": 1.0,
+      "exec_score": 0.0,
+      "focal_line_coverage": 1.0,
+      "focal_branch_coverage": null,
+      "focal_line_covered": 1,
+      "focal_line_total": 1,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.3655,
+      "similarity": 0.6345,
+      "most_similar_to": "CSVRecord_10_6Test",
+      "issues": [
+        "EXEC_FAIL"
+      ]
+    },
+    "CSVRecord_10_6Test": {
+      "test_name": "CSVRecord_10_6Test",
+      "compile_score": 1.0,
+      "exec_score": 1.0,
+      "focal_line_coverage": 1.0,
+      "focal_branch_coverage": null,
+      "focal_line_covered": 1,
+      "focal_line_total": 1,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.3655,
+      "similarity": 0.6345,
+      "most_similar_to": "CSVRecord_10_5Test",
+      "issues": [
+        "NOT_BUG_REVEALING"
+      ]
+    }
+  },
+  "suite_score": {
+    "n_tests": 6,
+    "compile_pass_count": 6,
+    "compile_pass_rate": 1.0,
+    "exec_pass_count": 5,
+    "exec_pass_rate": 0.8333,
+    "all_compile_pass": true,
+    "per_test_line_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_test_branch_coverage": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "coverage_line_avg": 1.0,
+    "coverage_line_max": 1.0,
+    "coverage_line_min": 1.0,
+    "coverage_branch_avg": null,
+    "bug_reveal_count": 0,
+    "bug_reveal_checked": 6,
+    "bug_reveal_rate": 0.0,
+    "max_pairwise_similarity": 0.9901,
+    "high_redundancy_pairs": [
+      {
+        "test1": "CSVRecord_10_2Test",
+        "test2": "CSVRecord_10_4Test",
+        "similarity": 0.9901
+      },
+      {
+        "test1": "CSVRecord_10_4Test",
+        "test2": "CSVRecord_10_2Test",
+        "similarity": 0.9901
+      },
+      {
+        "test1": "CSVRecord_10_1Test",
+        "test2": "CSVRecord_10_2Test",
+        "similarity": 0.9901
+      },
+      {
+        "test1": "CSVRecord_10_4Test",
+        "test2": "CSVRecord_10_1Test",
+        "similarity": 0.9762
+      },
+      {
+        "test1": "CSVRecord_10_1Test",
+        "test2": "CSVRecord_10_4Test",
+        "similarity": 0.9762
+      },
+      {
+        "test1": "CSVRecord_10_2Test",
+        "test2": "CSVRecord_10_1Test",
+        "similarity": 0.953
+      },
+      {
+        "test1": "CSVRecord_10_6Test",
+        "test2": "CSVRecord_10_1Test",
+        "similarity": 0.8687
+      },
+      {
+        "test1": "CSVRecord_10_6Test",
+        "test2": "CSVRecord_10_1Test",
+        "similarity": 0.8595
+      },
+      {
+        "test1": "CSVRecord_10_3Test",
+        "test2": "CSVRecord_10_2Test",
+        "similarity": 0.8175
+      }
+    ],
+    "problem_tests": {
+      "NOT_BUG_REVEALING": [
+        "CSVRecord_10_1Test",
+        "CSVRecord_10_2Test",
+        "CSVRecord_10_3Test",
+        "CSVRecord_10_4Test",
+        "CSVRecord_10_6Test"
+      ],
+      "HIGH_REDUNDANCY": [
+        "CSVRecord_10_2Test",
+        "CSVRecord_10_4Test"
+      ],
+      "EXEC_FAIL": [
+        "CSVRecord_10_5Test"
+      ]
+    }
+  },
+  "pairwise_sims": [
+    {
+      "tc1": "CSVRecord_10_2Test",
+      "tc2": "CSVRecord_10_4Test",
+      "score": 0.0099
+    },
+    {
+      "tc1": "CSVRecord_10_5Test",
+      "tc2": "CSVRecord_10_6Test",
+      "score": 0.3651
+    },
+    {
+      "tc1": "CSVRecord_10_4Test",
+      "tc2": "CSVRecord_10_2Test",
+      "score": 0.0099
+    },
+    {
+      "tc1": "CSVRecord_10_6Test",
+      "tc2": "CSVRecord_10_1Test",
+      "score": 0.1405
+    },
+    {
+      "tc1": "CSVRecord_10_3Test",
+      "tc2": "CSVRecord_10_1Test",
+      "score": 0.3415
+    },
+    {
+      "tc1": "CSVRecord_10_1Test",
+      "tc2": "CSVRecord_10_2Test",
+      "score": 0.0099
+    },
+    {
+      "tc1": "CSVRecord_10_2Test",
+      "tc2": "CSVRecord_10_1Test",
+      "score": 0.047
+    },
+    {
+      "tc1": "CSVRecord_10_5Test",
+      "tc2": "CSVRecord_10_6Test",
+      "score": 0.3655
+    },
+    {
+      "tc1": "CSVRecord_10_4Test",
+      "tc2": "CSVRecord_10_1Test",
+      "score": 0.0238
+    },
+    {
+      "tc1": "CSVRecord_10_6Test",
+      "tc2": "CSVRecord_10_1Test",
+      "score": 0.1313
+    },
+    {
+      "tc1": "CSVRecord_10_3Test",
+      "tc2": "CSVRecord_10_2Test",
+      "score": 0.1825
+    },
+    {
+      "tc1": "CSVRecord_10_1Test",
+      "tc2": "CSVRecord_10_4Test",
+      "score": 0.0238
+    }
+  ]
+}

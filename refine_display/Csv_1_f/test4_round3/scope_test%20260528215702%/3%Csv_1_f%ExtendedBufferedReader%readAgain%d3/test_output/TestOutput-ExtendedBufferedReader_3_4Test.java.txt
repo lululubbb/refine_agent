@@ -1,0 +1,60 @@
+
+Failures (3):
+  JUnit Jupiter:ExtendedBufferedReader_3_4Test:testReadAgain_afterSettingLastCharToEndOfStream()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_3_4Test', methodName = 'testReadAgain_afterSettingLastCharToEndOfStream', methodParameterTypes = '']
+    => java.lang.NoSuchMethodException: org.apache.commons.csv.ExtendedBufferedReader.setLastChar(int)
+       java.base/java.lang.Class.getDeclaredMethod(Class.java:2475)
+       org.apache.commons.csv.ExtendedBufferedReader_3_4Test.invokeSetLastChar(ExtendedBufferedReader_3_4Test.java:37)
+       org.apache.commons.csv.ExtendedBufferedReader_3_4Test.testReadAgain_afterSettingLastCharToEndOfStream(ExtendedBufferedReader_3_4Test.java:32)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+       org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+       org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+       [...]
+  JUnit Jupiter:ExtendedBufferedReader_3_4Test:testReadAgain_initialState()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_3_4Test', methodName = 'testReadAgain_initialState', methodParameterTypes = '']
+    => java.lang.NoSuchMethodException: org.apache.commons.csv.ExtendedBufferedReader.setLastChar(int)
+       java.base/java.lang.Class.getDeclaredMethod(Class.java:2475)
+       org.apache.commons.csv.ExtendedBufferedReader_3_4Test.invokeSetLastChar(ExtendedBufferedReader_3_4Test.java:37)
+       org.apache.commons.csv.ExtendedBufferedReader_3_4Test.testReadAgain_initialState(ExtendedBufferedReader_3_4Test.java:18)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+       org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+       org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+       [...]
+  JUnit Jupiter:ExtendedBufferedReader_3_4Test:testReadAgain_afterSettingLastChar()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_3_4Test', methodName = 'testReadAgain_afterSettingLastChar', methodParameterTypes = '']
+    => java.lang.NoSuchMethodException: org.apache.commons.csv.ExtendedBufferedReader.setLastChar(int)
+       java.base/java.lang.Class.getDeclaredMethod(Class.java:2475)
+       org.apache.commons.csv.ExtendedBufferedReader_3_4Test.invokeSetLastChar(ExtendedBufferedReader_3_4Test.java:37)
+       org.apache.commons.csv.ExtendedBufferedReader_3_4Test.testReadAgain_afterSettingLastChar(ExtendedBufferedReader_3_4Test.java:25)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+       org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+       org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+       [...]
+
+Test run finished after 130 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         3 tests found           ]
+[         0 tests skipped         ]
+[         3 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         3 tests failed          ]
+
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC

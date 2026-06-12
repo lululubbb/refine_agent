@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Constructor;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_10_1Test {\n\n    @Test\n    public void testgetRecordNumber_normalCase() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = \"Test comment\";\n        long recordNumber = 5L;\n\n        CSVRecord csvRecord = createCSVRecord(values, mapping, comment, recordNumber);\n        long result = csvRecord.getRecordNumber();\n\n        Assertions.assertEquals(recordNumber, result);\n        Assertions.assertEquals(5L, result); // Strengthened assertion\n        Assertions.assertNotNull(csvRecord); // Ensures csvRecord is not null\n    }\n\n    @Test\n    public void testgetRecordNumber_zeroRecordNumber() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = \"Test comment\";\n        long recordNumber = 0L;\n\n        CSVRecord csvRecord = createCSVRecord(values, mapping, comment, recordNumber);\n        long result = csvRecord.getRecordNumber();\n\n        Assertions.assertEquals(recordNumber, result);\n        Assertions.assertEquals(0L, result); // Strengthened assertion\n        Assertions.assertNotNull(csvRecord); // Ensures csvRecord is not null\n    }\n\n    @Test\n    public void testgetRecordNumber_negativeRecordNumber() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = \"Test comment\";\n        long recordNumber = -10L;\n\n        CSVRecord csvRecord = createCSVRecord(values, mapping, comment, recordNumber);\n        long result = csvRecord.getRecordNumber();\n\n        Assertions.assertEquals(recordNumber, result);\n        Assertions.assertEquals(-10L, result); // Strengthened assertion\n        Assertions.assertNotNull(csvRecord); // Ensures csvRecord is not null\n    }\n\n    private CSVRecord createCSVRecord(String[] values, Map<String, Integer> mapping, String comment, long recordNumber) throws Exception {\n        Constructor<CSVRecord> constructor = CSVRecord.class.getDeclaredConstructor(String[].class, Map.class, String.class, long.class);\n        constructor.setAccessible(true);\n        return constructor.newInstance((Object) values, mapping, comment, recordNumber);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1042,
+    "completion_tokens": 541,
+    "total_tokens": 1583,
+    "llm_elapsed_time_seconds": 6.327
+  }
+}

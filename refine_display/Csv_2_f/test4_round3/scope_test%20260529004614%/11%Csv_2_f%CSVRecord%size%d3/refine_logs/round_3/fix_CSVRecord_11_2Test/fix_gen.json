@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Constructor;\nimport java.lang.reflect.Field;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_11_2Test {\n\n    @Test\n    public void testSize_emptyArray() throws Exception {\n        CSVRecord record = createCSVRecord(new String[]{});\n        Assertions.assertEquals(0, record.size(), \"Size should be 0 for an empty array\");\n    }\n\n    @Test\n    public void testSize_singleElementArray() throws Exception {\n        CSVRecord record = createCSVRecord(new String[]{\"value1\"});\n        Assertions.assertEquals(1, record.size(), \"Size should be 1 for a single element array\");\n        Assertions.assertEquals(\"value1\", record.get(0), \"Value at index 0 should be 'value1'\");\n    }\n\n    @Test\n    public void testSize_multipleElementsArray() throws Exception {\n        CSVRecord record = createCSVRecord(new String[]{\"value1\", \"value2\", \"value3\"});\n        Assertions.assertEquals(3, record.size(), \"Size should be 3 for an array with three elements\");\n        Assertions.assertEquals(\"value1\", record.get(0), \"Value at index 0 should be 'value1'\");\n        Assertions.assertEquals(\"value2\", record.get(1), \"Value at index 1 should be 'value2'\");\n        Assertions.assertEquals(\"value3\", record.get(2), \"Value at index 2 should be 'value3'\");\n    }\n\n    @Test\n    public void testSize_boundaryValues() throws Exception {\n        CSVRecord record = createCSVRecord(new String[]{\"\", \"value2\", \" \"});\n        Assertions.assertEquals(3, record.size(), \"Size should be 3 for an array with boundary values\");\n        Assertions.assertEquals(\"\", record.get(0), \"Value at index 0 should be an empty string\");\n        Assertions.assertEquals(\"value2\", record.get(1), \"Value at index 1 should be 'value2'\");\n        Assertions.assertEquals(\" \", record.get(2), \"Value at index 2 should be a space character\");\n    }\n\n    @Test\n    public void testSize_withNullValues() throws Exception {\n        CSVRecord record = createCSVRecord(new String[]{null, \"value2\", null});\n        Assertions.assertEquals(3, record.size(), \"Size should be 3 for an array with null values\");\n        Assertions.assertNull(record.get(0), \"Value at index 0 should be null\");\n        Assertions.assertEquals(\"value2\", record.get(1), \"Value at index 1 should be 'value2'\");\n        Assertions.assertNull(record.get(2), \"Value at index 2 should be null\");\n    }\n\n    private CSVRecord createCSVRecord(String[] values) throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        Constructor<CSVRecord> constructor = CSVRecord.class.getDeclaredConstructor(String[].class, Map.class, String.class, long.class);\n        constructor.setAccessible(true);\n        return constructor.newInstance(values, mapping, null, 0);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1113,
+    "completion_tokens": 669,
+    "total_tokens": 1782,
+    "llm_elapsed_time_seconds": 7.837
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "raw": "{\n  \"suite_summary\": \"The test suite for the `getLineNumber` method in `ExtendedBufferedReader` has a mix of execution failures and redundancy issues. Four test files are failing at runtime, while one test file exhibits both low coverage and high redundancy. The overall coverage is moderate, indicating potential areas for improvement in test design.\",\n  \"test_instructions\": {\n    \"ExtendedBufferedReader_7_1Test\": [\n      \"Fix the assertion in testReadWithBuffer: expected: <Buffer content should match expected string> but was: <line1>.\"\n    ],\n    \"ExtendedBufferedReader_7_4Test\": [\n      \"Fix the assertion in testReadAgain: expected: <105> but was: <76>.\"\n    ],\n    \"ExtendedBufferedReader_7_5Test\": [\n      \"Fix the assertion in testRead: expected: <66> but was: <10>.\",\n      \"Fix the assertion in testReadAgain: expected: <101> but was: <84>.\"\n    ],\n    \"ExtendedBufferedReader_7_6Test\": [\n      \"Fix the assertion in testReadAgain: expected: <1> but was: <0>.\"\n    ],\n    \"ExtendedBufferedReader_7_2Test\": [\n      \"Add additional tests to cover boundary values and edge cases for getLineNumber, as it currently has low coverage and is not bug-revealing.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "The test suite for the `getLineNumber` method in `ExtendedBufferedReader` has a mix of execution failures and redundancy issues. Four test files are failing at runtime, while one test file exhibits both low coverage and high redundancy. The overall coverage is moderate, indicating potential areas for improvement in test design.",
+    "test_instructions": {
+      "ExtendedBufferedReader_7_1Test": [
+        "Fix the assertion in testReadWithBuffer: expected: <Buffer content should match expected string> but was: <line1>."
+      ],
+      "ExtendedBufferedReader_7_4Test": [
+        "Fix the assertion in testReadAgain: expected: <105> but was: <76>."
+      ],
+      "ExtendedBufferedReader_7_5Test": [
+        "Fix the assertion in testRead: expected: <66> but was: <10>.",
+        "Fix the assertion in testReadAgain: expected: <101> but was: <84>."
+      ],
+      "ExtendedBufferedReader_7_6Test": [
+        "Fix the assertion in testReadAgain: expected: <1> but was: <0>."
+      ],
+      "ExtendedBufferedReader_7_2Test": [
+        "Add additional tests to cover boundary values and edge cases for getLineNumber, as it currently has low coverage and is not bug-revealing."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 12769,
+    "completion_tokens": 297,
+    "total_tokens": 13066,
+    "llm_elapsed_time_seconds": 5.23
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.BufferedReader;\nimport java.io.IOException;\nimport java.io.Reader;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport java.io.StringReader;\n\nclass ExtendedBufferedReader_3_4Test {\n\n    @Test\n    void testReadAgain_initialState() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"\"));\n        reader.setLastChar(ExtendedBufferedReader.UNDEFINED);\n        Assertions.assertEquals(ExtendedBufferedReader.UNDEFINED, reader.readAgain());\n    }\n\n    @Test\n    void testReadAgain_afterSettingLastChar() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"\"));\n        reader.setLastChar(5);\n        Assertions.assertEquals(5, reader.readAgain());\n    }\n\n    @Test\n    void testReadAgain_afterSettingLastCharToEndOfStream() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"\"));\n        reader.setLastChar(ExtendedBufferedReader.END_OF_STREAM);\n        Assertions.assertEquals(ExtendedBufferedReader.END_OF_STREAM, reader.readAgain());\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 932,
+    "completion_tokens": 234,
+    "total_tokens": 1166,
+    "llm_elapsed_time_seconds": 5.342
+  }
+}

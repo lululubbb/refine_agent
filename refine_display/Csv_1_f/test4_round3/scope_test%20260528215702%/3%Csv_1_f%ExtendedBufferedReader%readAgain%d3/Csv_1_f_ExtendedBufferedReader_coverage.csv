@@ -1,0 +1,4 @@
+project,modified_class,Attempts,Aborted,SyntaxError,SyntaxRate,CompileError,CompileRate,RuntimeError,RunRate,Passed,PassRate,line_cov,line_total,line_rate,branch_cov,branch_total,branch_rate,m_line_cov,m_line_total,m_line_rate,m_branch_cov,m_branch_total,m_branch_rate,run_time
+Csv_1_f,ExtendedBufferedReader,4,0,0,1.0,0,1.0,1,0.75,3,0.75,9,455,1.98,2,296,0.68,9,37,24.32,2,26,7.69,21.51
+Csv_1_f,ExtendedBufferedReader,4,0,0,1.0,1,0.75,1,0.6667,2,0.5,29,455,6.37,10,296,3.38,29,37,78.38,10,26,38.46,17.66
+Csv_1_f,ExtendedBufferedReader,4,0,0,1.0,1,0.75,1,0.6667,2,0.5,29,455,6.37,10,296,3.38,29,37,78.38,10,26,38.46,18.52

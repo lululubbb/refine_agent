@@ -1,0 +1,10 @@
+project_name,target_class,test_class,test_method,fixed_status,buggy_status,bug_revealing
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_5_1Test,testisMapped_mappingIsNull,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_5_1Test,testisMapped_mappingContainsKey,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_5_1Test,testisMapped_mappingDoesNotContainKey,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_5_1Test,testisMapped_emptyMapping,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_5_2Test,testisMapped_mappingIsNull,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_5_2Test,testisMapped_nameExistsInMapping,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_5_2Test,testisMapped_nameDoesNotExistInMapping,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_5_2Test,testisMapped_emptyMapping,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_5_2Test,testisMapped_mappingIsNotNullAndEmpty,pass,pass,false

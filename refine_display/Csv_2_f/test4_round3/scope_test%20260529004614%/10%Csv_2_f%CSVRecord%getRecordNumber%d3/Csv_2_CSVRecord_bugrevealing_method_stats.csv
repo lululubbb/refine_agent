@@ -1,0 +1,16 @@
+project_name,target_class,test_class,test_method,fixed_status,buggy_status,bug_revealing
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_10_1Test,testgetRecordNumber_normalCase,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_10_1Test,testgetRecordNumber_zeroRecordNumber,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_10_1Test,testgetRecordNumber_negativeRecordNumber,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_10_2Test,testGetRecordNumber_normalCase,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_10_2Test,testGetRecordNumber_zeroRecordNumber,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_10_2Test,testGetRecordNumber_negativeRecordNumber,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_10_3Test,testGetRecordNumber_normalCase,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_10_3Test,testGetRecordNumber_boundaryCase,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_10_4Test,testGetRecordNumber_normalCase,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_10_4Test,testGetRecordNumber_zeroRecordNumber,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_10_4Test,testGetRecordNumber_negativeRecordNumber,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_10_4Test,testGetRecordNumber_boundaryValues,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_10_4Test,testGetRecordNumber_exceptionCase,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_10_4Test,testGetRecordNumber_emptyValues,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_10_4Test,testGetRecordNumber_nullValues,pass,pass,false

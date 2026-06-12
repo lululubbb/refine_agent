@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport java.util.Collections;\nimport java.util.HashMap;\nimport java.util.Map;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\npublic class CSVRecord_5_3Test {\n\n    @Test\n    public void testisMapped_mappingIsNull() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, null, null, 1);\n        Assertions.assertEquals(false, record.isMapped(\"testName\"));\n    }\n\n    @Test\n    public void testisMapped_keyExistsInMapping() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"testName\", 0);\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n        Assertions.assertEquals(true, record.isMapped(\"testName\"));\n    }\n\n    @Test\n    public void testisMapped_keyDoesNotExistInMapping() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"otherName\", 0);\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n        Assertions.assertEquals(false, record.isMapped(\"testName\"));\n    }\n\n    @Test\n    public void testisMapped_emptyMapping() throws Exception {\n        Map<String, Integer> mapping = Collections.emptyMap();\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n        Assertions.assertEquals(false, record.isMapped(\"testName\"));\n    }\n\n    @Test\n    public void testisMapped_mappingContainsDifferentKey() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"anotherName\", 1);\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n        Assertions.assertEquals(false, record.isMapped(\"testName\"));\n    }\n\n    @Test\n    public void testisMapped_nullKey() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(null, 0);\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n        Assertions.assertEquals(false, record.isMapped(null));\n    }\n\n    @Test\n    public void testisMapped_emptyKey() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"\", 0);\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n        Assertions.assertEquals(false, record.isMapped(\"\"));\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1116,
+    "completion_tokens": 552,
+    "total_tokens": 1668,
+    "llm_elapsed_time_seconds": 7.029
+  }
+}

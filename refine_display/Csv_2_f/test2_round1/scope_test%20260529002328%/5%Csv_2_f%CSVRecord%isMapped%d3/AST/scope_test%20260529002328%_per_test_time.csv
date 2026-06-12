@@ -1,0 +1,12 @@
+project,version,test_case,ast_generation_time_nanosec
+scope_test%20260529002328%,5%Csv_2_f%CSVRecord%isMapped%d3,CSVRecord_5_1Test.testisMapped_mappingIsNull,6577156
+scope_test%20260529002328%,5%Csv_2_f%CSVRecord%isMapped%d3,CSVRecord_5_1Test.testisMapped_mappingContainsKey,7073760
+scope_test%20260529002328%,5%Csv_2_f%CSVRecord%isMapped%d3,CSVRecord_5_1Test.testisMapped_mappingDoesNotContainKey,7590783
+scope_test%20260529002328%,5%Csv_2_f%CSVRecord%isMapped%d3,CSVRecord_5_1Test.testisMapped_emptyMapping,8072453
+scope_test%20260529002328%,5%Csv_2_f%CSVRecord%isMapped%d3,CSVRecord_5_1Test,9089667
+scope_test%20260529002328%,5%Csv_2_f%CSVRecord%isMapped%d3,CSVRecord_5_2Test.testisMapped_mappingIsNull,6935350
+scope_test%20260529002328%,5%Csv_2_f%CSVRecord%isMapped%d3,CSVRecord_5_2Test.testisMapped_nameExistsInMapping,7387652
+scope_test%20260529002328%,5%Csv_2_f%CSVRecord%isMapped%d3,CSVRecord_5_2Test.testisMapped_nameDoesNotExistInMapping,7905810
+scope_test%20260529002328%,5%Csv_2_f%CSVRecord%isMapped%d3,CSVRecord_5_2Test.testisMapped_emptyMapping,8336509
+scope_test%20260529002328%,5%Csv_2_f%CSVRecord%isMapped%d3,CSVRecord_5_2Test.testisMapped_mappingIsNotNullAndEmpty,8696959
+scope_test%20260529002328%,5%Csv_2_f%CSVRecord%isMapped%d3,CSVRecord_5_2Test,9712788

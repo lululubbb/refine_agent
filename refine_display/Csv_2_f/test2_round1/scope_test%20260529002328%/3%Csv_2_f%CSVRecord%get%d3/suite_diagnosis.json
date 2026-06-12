@@ -1,0 +1,38 @@
+{
+  "CSVRecord_3_1Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "=> org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>",
+      "Caused by: java.lang.reflect.InvocationTargetException",
+      "Caused by: java.lang.IllegalStateException: No header mapping was specified, the record values can't be accessed by name",
+      "=> org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.reflect.InvocationTargetException>",
+      "Caused by: java.lang.IllegalArgumentException: Index for header 'header1' is 2 but CSVRecord only has 2 values!"
+    ],
+    "focal_line_rate": 88.89,
+    "focal_branch_rate": 100.0,
+    "focal_line_covered": 8,
+    "focal_line_total": 9,
+    "missed_methods": [],
+    "partial_methods": []
+  },
+  "CSVRecord_3_2Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "=> org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>",
+      "Caused by: java.lang.reflect.InvocationTargetException",
+      "Caused by: java.lang.IllegalStateException: No header mapping was specified, the record values can't be accessed by name",
+      "=> org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.reflect.InvocationTargetException>",
+      "Caused by: java.lang.IllegalArgumentException: Index for header 'name' is 1 but CSVRecord only has 1 values!"
+    ],
+    "focal_line_rate": 88.89,
+    "focal_branch_rate": 100.0,
+    "focal_line_covered": 8,
+    "focal_line_total": 9,
+    "missed_methods": [],
+    "partial_methods": []
+  }
+}

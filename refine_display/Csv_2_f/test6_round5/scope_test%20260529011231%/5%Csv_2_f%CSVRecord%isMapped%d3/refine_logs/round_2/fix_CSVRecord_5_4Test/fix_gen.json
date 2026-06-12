@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.util.Collections;\nimport java.util.HashMap;\nimport java.util.Map;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\npublic class CSVRecord_5_4Test {\n\n    @Test\n    public void testisMapped_mappingIsNull() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, null, null, 1);\n        Assertions.assertEquals(false, record.isMapped(\"name\"), \"Expected mapping to be null, so isMapped should return false\");\n    }\n\n    @Test\n    public void testisMapped_nameExistsInMapping() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"name\", 0);\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n        Assertions.assertEquals(true, record.isMapped(\"name\"), \"Expected name to exist in mapping, so isMapped should return true\");\n    }\n\n    @Test\n    public void testisMapped_nameDoesNotExistInMapping() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"otherName\", 0);\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n        Assertions.assertEquals(false, record.isMapped(\"name\"), \"Expected name to not exist in mapping, so isMapped should return false\");\n    }\n\n    @Test\n    public void testisMapped_emptyMapping() throws Exception {\n        Map<String, Integer> mapping = Collections.emptyMap();\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n        Assertions.assertEquals(false, record.isMapped(\"name\"), \"Expected empty mapping, so isMapped should return false\");\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 966,
+    "completion_tokens": 375,
+    "total_tokens": 1341,
+    "llm_elapsed_time_seconds": 6.065
+  }
+}

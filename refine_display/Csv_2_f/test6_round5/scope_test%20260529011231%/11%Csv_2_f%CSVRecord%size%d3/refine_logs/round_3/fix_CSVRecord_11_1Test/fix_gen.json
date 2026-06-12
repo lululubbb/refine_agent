@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport java.util.Map;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Field;\nimport java.util.Collections;\nimport java.util.HashMap;\n\npublic class CSVRecord_11_1Test {\n\n    @Test\n    public void testSize_emptyArray() throws Exception {\n        CSVRecord record = new CSVRecord(new String[0], new HashMap<>(), null, 0);\n        Assertions.assertEquals(0, record.size());\n    }\n\n    @Test\n    public void testSize_singleElementArray() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, new HashMap<>(), null, 1);\n        Assertions.assertEquals(1, record.size());\n    }\n\n    @Test\n    public void testSize_multipleElementsArray() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{\"value1\", \"value2\", \"value3\"}, new HashMap<>(), null, 2);\n        Assertions.assertEquals(3, record.size());\n    }\n\n    @Test\n    public void testSize_largeArray() throws Exception {\n        String[] values = new String[1000];\n        Arrays.fill(values, \"value\");\n        CSVRecord record = new CSVRecord(values, new HashMap<>(), null, 3);\n        Assertions.assertEquals(1000, record.size());\n    }\n\n    @Test\n    public void testSize_withNullValues() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{null, null}, new HashMap<>(), null, 4);\n        Assertions.assertEquals(2, record.size());\n    }\n\n    @Test\n    public void testSize_boundaryValues() throws Exception {\n        CSVRecord record = new CSVRecord(new String[1000], new HashMap<>(), null, 5);\n        Assertions.assertEquals(1000, record.size());\n\n        CSVRecord recordWithOneLess = new CSVRecord(new String[999], new HashMap<>(), null, 6);\n        Assertions.assertEquals(999, recordWithOneLess.size());\n    }\n\n    private void setPrivateField(CSVRecord record, String fieldName, Object value) throws Exception {\n        Field field = CSVRecord.class.getDeclaredField(fieldName);\n        field.setAccessible(true);\n        field.set(record, value);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 996,
+    "completion_tokens": 495,
+    "total_tokens": 1491,
+    "llm_elapsed_time_seconds": 7.706
+  }
+}

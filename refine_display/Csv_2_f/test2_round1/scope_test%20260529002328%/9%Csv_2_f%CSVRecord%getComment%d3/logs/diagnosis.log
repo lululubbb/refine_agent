@@ -1,0 +1,47 @@
+# diagnosis.log — 测试用例问题诊断
+# 每个 [DIAGNOSIS] 块对应一个测试类，供优化指令生成使用
+# status 取值: compile_fail | exec_fail | exec_timeout | exec_ok
+# =============================================================
+
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_9_1Test
+  project=Csv_2_f  target_class=CSVRecord  focal_method=getComment
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=32.0000%  (8/25)
+  branch_rate=6.2500%  (1/16)
+  coverage_score=0.345625
+  uncovered_methods (10):
+    - line 64: get() — completely uncovered
+    - line 80: get() — completely uncovered
+    - line 103: isConsistent() — completely uncovered
+    - line 114: isMapped() — completely uncovered
+    - line 125: isSet() — completely uncovered
+    - line 134: iterator() — completely uncovered
+    - line 138: values() — completely uncovered
+    - line 157: getRecordNumber() — completely uncovered
+    - line 166: size() — completely uncovered
+    - line 171: toString() — completely uncovered
+  partial_branch_methods (1):
+    - line 49: CSVRecord()() — 1/2 branches missed
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_9_2Test
+  project=Csv_2_f  target_class=CSVRecord  focal_method=getComment
+  status=exec_ok
+  error_type=coverage_gap
+  line_rate=32.0000%  (8/25)
+  branch_rate=6.2500%  (1/16)
+  coverage_score=0.345625
+  uncovered_methods (10):
+    - line 64: get() — completely uncovered
+    - line 80: get() — completely uncovered
+    - line 103: isConsistent() — completely uncovered
+    - line 114: isMapped() — completely uncovered
+    - line 125: isSet() — completely uncovered
+    - line 134: iterator() — completely uncovered
+    - line 138: values() — completely uncovered
+    - line 157: getRecordNumber() — completely uncovered
+    - line 166: size() — completely uncovered
+    - line 171: toString() — completely uncovered
+  partial_branch_methods (1):
+    - line 49: CSVRecord()() — 1/2 branches missed
+---

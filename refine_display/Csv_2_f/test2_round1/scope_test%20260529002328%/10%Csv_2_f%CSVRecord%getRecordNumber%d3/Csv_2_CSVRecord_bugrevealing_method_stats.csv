@@ -1,0 +1,7 @@
+project_name,target_class,test_class,test_method,fixed_status,buggy_status,bug_revealing
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_10_1Test,testGetRecordNumber_normalCase,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_10_1Test,testGetRecordNumber_zeroRecordNumber,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_10_1Test,testGetRecordNumber_negativeRecordNumber,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_10_2Test,testgetRecordNumber_normalCase,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_10_2Test,testgetRecordNumber_zeroRecordNumber,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_10_2Test,testgetRecordNumber_negativeRecordNumber,pass,pass,false

@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_9_2Test {\n\n    @Test\n    public void testGetComment_normalCase() throws Exception {\n        String[] values = new String[]{\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"key1\", 0);\n        String comment = \"This is a comment\";\n        long recordNumber = 1L;\n\n        CSVRecord csvRecord = new CSVRecord(values, mapping, comment, recordNumber);\n        \n        Assertions.assertEquals(\"This is a comment\", csvRecord.getComment());\n    }\n\n    @Test\n    public void testGetComment_emptyComment() throws Exception {\n        String[] values = new String[]{\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = \"\";\n        long recordNumber = 1L;\n\n        CSVRecord csvRecord = new CSVRecord(values, mapping, comment, recordNumber);\n        \n        Assertions.assertEquals(\"\", csvRecord.getComment());\n    }\n\n    @Test\n    public void testGetComment_nullComment() throws Exception {\n        String[] values = new String[]{\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = null;\n        long recordNumber = 1L;\n\n        CSVRecord csvRecord = new CSVRecord(values, mapping, comment, recordNumber);\n        \n        Assertions.assertEquals(null, csvRecord.getComment());\n    }\n\n    @Test\n    public void testGetComment_specialCharacters() throws Exception {\n        String[] values = new String[]{\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = \"!@#$%^&*()_+\";\n        long recordNumber = 1L;\n\n        CSVRecord csvRecord = new CSVRecord(values, mapping, comment, recordNumber);\n        \n        Assertions.assertEquals(\"!@#$%^&*()_+\", csvRecord.getComment());\n    }\n\n    @Test\n    public void testGetComment_longComment() throws Exception {\n        String[] values = new String[]{\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = \"This is a very long comment that exceeds normal lengths\";\n        long recordNumber = 1L;\n\n        CSVRecord csvRecord = new CSVRecord(values, mapping, comment, recordNumber);\n        \n        Assertions.assertEquals(\"This is a very long comment that exceeds normal lengths\", csvRecord.getComment());\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1119,
+    "completion_tokens": 564,
+    "total_tokens": 1683,
+    "llm_elapsed_time_seconds": 8.608
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport org.mockito.Mockito;\n\nimport java.lang.reflect.Method;\nimport java.util.Collections;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecordTest {\n\n    @Test\n    public void testtoString_emptyArray() throws Exception {\n        String[] values = new String[0];\n        CSVRecord record = new CSVRecord(values, Collections.emptyMap(), null, 0);\n        String result = invokeToString(record);\n        Assertions.assertEquals(\"[]\", result);\n    }\n\n    @Test\n    public void testtoString_singleElement() throws Exception {\n        String[] values = new String[]{\"value1\"};\n        CSVRecord record = new CSVRecord(values, Collections.emptyMap(), null, 1);\n        String result = invokeToString(record);\n        Assertions.assertEquals(\"[value1]\", result);\n    }\n\n    @Test\n    public void testtoString_multipleElements() throws Exception {\n        String[] values = new String[]{\"value1\", \"value2\", \"value3\"};\n        CSVRecord record = new CSVRecord(values, Collections.emptyMap(), null, 2);\n        String result = invokeToString(record);\n        Assertions.assertEquals(\"[value1, value2, value3]\", result);\n    }\n\n    @Test\n    public void testtoString_withNullValues() throws Exception {\n        String[] values = new String[]{\"value1\", null, \"value3\"};\n        CSVRecord record = new CSVRecord(values, Collections.emptyMap(), null, 3);\n        String result = invokeToString(record);\n        Assertions.assertEquals(\"[value1, null, value3]\", result);\n    }\n\n    private String invokeToString(CSVRecord record) throws Exception {\n        Method method = CSVRecord.class.getDeclaredMethod(\"toString\");\n        method.setAccessible(true);\n        return (String) method.invoke(record);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 621,
+    "completion_tokens": 386,
+    "total_tokens": 1007,
+    "llm_elapsed_time_seconds": 8.307
+  }
+}

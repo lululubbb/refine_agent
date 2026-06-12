@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport java.util.HashMap;\nimport java.util.Map;\n\nclass CSVRecord_4_5Test {\n\n    @Test\n    void testIsConsistent_mappingIsNull() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{\"value1\", \"value2\"}, null, null, 1);\n        Assertions.assertEquals(true, record.isConsistent(), \"Expected isConsistent to return true when mapping is null.\");\n    }\n\n    @Test\n    void testIsConsistent_mappingSizeEqualsValuesLength() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"key1\", 0);\n        mapping.put(\"key2\", 1);\n        \n        CSVRecord record = new CSVRecord(new String[]{\"value1\", \"value2\"}, mapping, null, 1);\n        Assertions.assertEquals(true, record.isConsistent(), \"Expected isConsistent to return true when mapping size equals values length.\");\n    }\n\n    @Test\n    void testIsConsistent_mappingSizeNotEqualsValuesLength() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"key1\", 0);\n\n        CSVRecord record = new CSVRecord(new String[]{\"value1\", \"value2\"}, mapping, null, 1);\n        Assertions.assertEquals(false, record.isConsistent(), \"Expected isConsistent to return false when mapping size does not equal values length.\");\n    }\n\n    @Test\n    void testIsConsistent_emptyValues() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(new String[]{}, mapping, null, 1);\n        Assertions.assertEquals(true, record.isConsistent(), \"Expected isConsistent to return true when values are empty and mapping is not null.\");\n    }\n\n    @Test\n    void testIsConsistent_emptyMapping() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        \n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n        Assertions.assertEquals(false, record.isConsistent(), \"Expected isConsistent to return false when mapping is empty and values are not.\");\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 988,
+    "completion_tokens": 489,
+    "total_tokens": 1477,
+    "llm_elapsed_time_seconds": 11.516
+  }
+}

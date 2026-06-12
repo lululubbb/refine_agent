@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "package org.apache.commons.csv;\n\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Array;\nimport java.lang.reflect.Method;\nimport java.util.Collections;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecordTest {\n\n    @Test\n    public void testGet_validIndex() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"first\", 0);\n        mapping.put(\"second\", 1);\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        \n        String result = invokeGetMethod(record, 1);\n        \n        Assertions.assertEquals(\"value2\", result);\n    }\n\n    @Test\n    public void testGet_indexOutOfBounds() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        \n        Assertions.assertThrows(ArrayIndexOutOfBoundsException.class, () -> {\n            invokeGetMethod(record, 3);\n        });\n    }\n\n    @Test\n    public void testGet_emptyArray() throws Exception {\n        String[] values = {};\n        Map<String, Integer> mapping = Collections.emptyMap();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        \n        Assertions.assertThrows(ArrayIndexOutOfBoundsException.class, () -> {\n            invokeGetMethod(record, 0);\n        });\n    }\n\n    private String invokeGetMethod(CSVRecord record, int index) throws Exception {\n        Method method = CSVRecord.class.getDeclaredMethod(\"get\", int.class);\n        method.setAccessible(true);\n        return (String) method.invoke(record, index);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 615,
+    "completion_tokens": 384,
+    "total_tokens": 999,
+    "llm_elapsed_time_seconds": 6.475
+  }
+}

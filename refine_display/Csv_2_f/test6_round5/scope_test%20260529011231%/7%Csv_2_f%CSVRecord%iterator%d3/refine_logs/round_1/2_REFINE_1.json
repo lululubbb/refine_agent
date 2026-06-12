@@ -1,0 +1,32 @@
+{
+  "raw": "{\n  \"suite_summary\": \"All test files compile and execute successfully, but they exhibit high redundancy and do not reveal any bugs. Each test file has similar test cases that cover the same scenarios, leading to redundancy. Additionally, none of the tests are designed to reveal potential bugs in the focal method.\",\n  \"test_instructions\": {\n    \"CSVRecord_7_1Test\": [\n      \"This test is not bug-revealing. Consider adding assertions that check for specific expected values rather than just checking for non-null results.\"\n    ],\n    \"CSVRecord_7_2Test\": [\n      \"This test is not bug-revealing. Consider adding assertions that check for specific expected values rather than just checking for non-null results.\"\n    ],\n    \"CSVRecord_7_3Test\": [\n      \"This test is not bug-revealing. Consider adding assertions that check for specific expected values rather than just checking for non-null results.\"\n    ],\n    \"CSVRecord_7_4Test\": [\n      \"This test is not bug-revealing. Consider adding assertions that check for specific expected values rather than just checking for non-null results.\"\n    ],\n    \"CSVRecord_7_5Test\": [\n      \"This test is not bug-revealing. Consider adding assertions that check for specific expected values rather than just checking for non-null results.\"\n    ],\n    \"CSVRecord_7_6Test\": [\n      \"This test is not bug-revealing. Consider adding assertions that check for specific expected values rather than just checking for non-null results.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "All test files compile and execute successfully, but they exhibit high redundancy and do not reveal any bugs. Each test file has similar test cases that cover the same scenarios, leading to redundancy. Additionally, none of the tests are designed to reveal potential bugs in the focal method.",
+    "test_instructions": {
+      "CSVRecord_7_1Test": [
+        "This test is not bug-revealing. Consider adding assertions that check for specific expected values rather than just checking for non-null results."
+      ],
+      "CSVRecord_7_2Test": [
+        "This test is not bug-revealing. Consider adding assertions that check for specific expected values rather than just checking for non-null results."
+      ],
+      "CSVRecord_7_3Test": [
+        "This test is not bug-revealing. Consider adding assertions that check for specific expected values rather than just checking for non-null results."
+      ],
+      "CSVRecord_7_4Test": [
+        "This test is not bug-revealing. Consider adding assertions that check for specific expected values rather than just checking for non-null results."
+      ],
+      "CSVRecord_7_5Test": [
+        "This test is not bug-revealing. Consider adding assertions that check for specific expected values rather than just checking for non-null results."
+      ],
+      "CSVRecord_7_6Test": [
+        "This test is not bug-revealing. Consider adding assertions that check for specific expected values rather than just checking for non-null results."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 8246,
+    "completion_tokens": 324,
+    "total_tokens": 8570,
+    "llm_elapsed_time_seconds": 7.031
+  }
+}

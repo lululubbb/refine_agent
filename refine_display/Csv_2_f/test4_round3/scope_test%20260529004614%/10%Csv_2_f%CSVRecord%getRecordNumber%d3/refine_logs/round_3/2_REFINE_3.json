@@ -1,0 +1,26 @@
+{
+  "raw": "{\n  \"suite_summary\": \"All test files compile and execute successfully, but several have issues related to redundancy, low coverage, and lack of bug-revealing capabilities. The tests need to be improved to cover more scenarios and reduce redundancy among them.\",\n  \"test_instructions\": {\n    \"CSVRecord_10_1Test\": [\n      \"This test is not bug-revealing. Consider adding more precise assertions and testing boundary conditions to ensure it reveals potential bugs.\"\n    ],\n    \"CSVRecord_10_2Test\": [\n      \"This test is not bug-revealing. Consider adding more precise assertions and testing boundary conditions to ensure it reveals potential bugs.\"\n    ],\n    \"CSVRecord_10_3Test\": [\n      \"This test is not bug-revealing. Consider adding more precise assertions and testing boundary conditions to ensure it reveals potential bugs.\"\n    ],\n    \"CSVRecord_10_4Test\": [\n      \"This test has low coverage. Add tests for boundary values (null, empty string, 0, negative numbers, max values) to improve coverage.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "All test files compile and execute successfully, but several have issues related to redundancy, low coverage, and lack of bug-revealing capabilities. The tests need to be improved to cover more scenarios and reduce redundancy among them.",
+    "test_instructions": {
+      "CSVRecord_10_1Test": [
+        "This test is not bug-revealing. Consider adding more precise assertions and testing boundary conditions to ensure it reveals potential bugs."
+      ],
+      "CSVRecord_10_2Test": [
+        "This test is not bug-revealing. Consider adding more precise assertions and testing boundary conditions to ensure it reveals potential bugs."
+      ],
+      "CSVRecord_10_3Test": [
+        "This test is not bug-revealing. Consider adding more precise assertions and testing boundary conditions to ensure it reveals potential bugs."
+      ],
+      "CSVRecord_10_4Test": [
+        "This test has low coverage. Add tests for boundary values (null, empty string, 0, negative numbers, max values) to improve coverage."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 6718,
+    "completion_tokens": 227,
+    "total_tokens": 6945,
+    "llm_elapsed_time_seconds": 4.648
+  }
+}

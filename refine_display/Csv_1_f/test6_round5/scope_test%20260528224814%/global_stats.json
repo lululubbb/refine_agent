@@ -1,0 +1,25 @@
+{
+  "generator": {
+    "prompt_tokens": 251765,
+    "completion_tokens": 140868,
+    "total_tokens": 392633,
+    "llm_elapsed_seconds": 2217.612,
+    "call_count": 219
+  },
+  "refiner": {
+    "prompt_tokens": 318696,
+    "completion_tokens": 13235,
+    "total_tokens": 331931,
+    "llm_elapsed_seconds": 266.656,
+    "call_count": 35
+  },
+  "all_total": {
+    "prompt_tokens": 570461,
+    "completion_tokens": 154103,
+    "total_tokens": 724564,
+    "llm_elapsed_seconds": 2484.268,
+    "call_count": 254
+  },
+  "wall_clock_seconds": 2817.61,
+  "total_focal_methods": 7
+}

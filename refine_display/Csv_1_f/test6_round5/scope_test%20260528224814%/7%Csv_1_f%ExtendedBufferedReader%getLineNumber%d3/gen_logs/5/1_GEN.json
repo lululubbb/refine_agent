@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport org.mockito.Mockito;\n\nimport java.io.StringReader;\nimport java.lang.reflect.Field;\nimport java.lang.reflect.Method;\n\nclass ExtendedBufferedReaderTest {\n\n    @Test\n    void testgetLineNumber_initialState() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"\"));\n\n        int lineNumber = invokeGetLineNumber(reader);\n        \n        Assertions.assertEquals(0, lineNumber);\n    }\n\n    @Test\n    void testgetLineNumber_afterReadingLine() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"First line\\nSecond line\"));\n\n        // Simulate reading a line\n        reader.readLine(); // This would typically increase the line counter\n\n        int lineNumber = invokeGetLineNumber(reader);\n        \n        Assertions.assertEquals(1, lineNumber);\n    }\n\n    @Test\n    void testgetLineNumber_afterMultipleReads() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"Line 1\\nLine 2\\nLine 3\"));\n\n        // Simulate reading multiple lines\n        reader.readLine();\n        reader.readLine();\n\n        int lineNumber = invokeGetLineNumber(reader);\n        \n        Assertions.assertEquals(2, lineNumber);\n    }\n\n    private int invokeGetLineNumber(ExtendedBufferedReader reader) throws Exception {\n        Method method = ExtendedBufferedReader.class.getDeclaredMethod(\"getLineNumber\");\n        method.setAccessible(true);\n        return (int) method.invoke(reader);\n    }\n\n    private void setLineCounter(ExtendedBufferedReader reader, int lineCounter) throws Exception {\n        Field field = ExtendedBufferedReader.class.getDeclaredField(\"lineCounter\");\n        field.setAccessible(true);\n        field.setInt(reader, lineCounter);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 551,
+    "completion_tokens": 368,
+    "total_tokens": 919,
+    "llm_elapsed_time_seconds": 6.368
+  }
+}

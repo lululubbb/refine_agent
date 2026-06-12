@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "package org.apache.commons.csv;\n\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Field;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecordTest {\n\n    @Test\n    public void testGet_validIndex() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        \n        String result = record.get(1);\n        \n        Assertions.assertEquals(\"value2\", result);\n    }\n\n    @Test\n    public void testGet_indexOutOfBounds() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        \n        Assertions.assertThrows(ArrayIndexOutOfBoundsException.class, () -> {\n            record.get(3);\n        });\n    }\n\n    @Test\n    public void testGet_negativeIndex() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        \n        Assertions.assertThrows(ArrayIndexOutOfBoundsException.class, () -> {\n            record.get(-1);\n        });\n    }\n\n    @Test\n    public void testGet_emptyValuesArray() throws Exception {\n        String[] values = {};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        \n        Assertions.assertThrows(ArrayIndexOutOfBoundsException.class, () -> {\n            record.get(0);\n        });\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 615,
+    "completion_tokens": 382,
+    "total_tokens": 997,
+    "llm_elapsed_time_seconds": 5.414
+  }
+}

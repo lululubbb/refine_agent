@@ -1,0 +1,11 @@
+project,version,test_case,ast_generation_time_nanosec
+scope_test%20260528213754%,2%Csv_1_f%ExtendedBufferedReader%read%d3,ExtendedBufferedReader_2_1Test.testRead_normalCase,8896500
+scope_test%20260528213754%,2%Csv_1_f%ExtendedBufferedReader%read%d3,ExtendedBufferedReader_2_1Test.testRead_lineCounterIncrement,9413660
+scope_test%20260528213754%,2%Csv_1_f%ExtendedBufferedReader%read%d3,ExtendedBufferedReader_2_1Test.testRead_endOfStream,9730944
+scope_test%20260528213754%,2%Csv_1_f%ExtendedBufferedReader%read%d3,ExtendedBufferedReader_2_1Test.testRead_exceptionHandling,9946463
+scope_test%20260528213754%,2%Csv_1_f%ExtendedBufferedReader%read%d3,ExtendedBufferedReader_2_1Test,11081283
+scope_test%20260528213754%,2%Csv_1_f%ExtendedBufferedReader%read%d3,ExtendedBufferedReader_2_2Test.testRead_normalCase,5559886
+scope_test%20260528213754%,2%Csv_1_f%ExtendedBufferedReader%read%d3,ExtendedBufferedReader_2_2Test.testRead_lineBreaks,5806626
+scope_test%20260528213754%,2%Csv_1_f%ExtendedBufferedReader%read%d3,ExtendedBufferedReader_2_2Test.testRead_endOfStream,6043047
+scope_test%20260528213754%,2%Csv_1_f%ExtendedBufferedReader%read%d3,ExtendedBufferedReader_2_2Test.testRead_invalidCharacter,6229692
+scope_test%20260528213754%,2%Csv_1_f%ExtendedBufferedReader%read%d3,ExtendedBufferedReader_2_2Test,6941638

@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "package org.apache.commons.csv;\n\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport org.mockito.Mockito;\n\nimport java.io.IOException;\nimport java.io.Reader;\nimport java.io.StringReader;\n\nclass ExtendedBufferedReaderTest {\n\n    @Test\n    void testRead_normalCase() throws Exception {\n        Reader stringReader = new StringReader(\"Hello\\nWorld\");\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(stringReader);\n        \n        int firstChar = reader.read();\n        Assertions.assertEquals('H', firstChar);\n        \n        int secondChar = reader.read();\n        Assertions.assertEquals('e', secondChar);\n        \n        int thirdChar = reader.read();\n        Assertions.assertEquals('l', thirdChar);\n        \n        int fourthChar = reader.read();\n        Assertions.assertEquals('l', fourthChar);\n        \n        int fifthChar = reader.read();\n        Assertions.assertEquals('o', fifthChar);\n        \n        int sixthChar = reader.read();\n        Assertions.assertEquals('\\n', sixthChar);\n    }\n\n    @Test\n    void testRead_lineCounterIncrement() throws Exception {\n        Reader stringReader = new StringReader(\"First Line\\nSecond Line\");\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(stringReader);\n        \n        reader.read(); // Read 'F'\n        reader.read(); // Read 'i'\n        reader.read(); // Read 'r'\n        reader.read(); // Read 's'\n        reader.read(); // Read 't'\n        reader.read(); // Read ' '\n        reader.read(); // Read 'L'\n        reader.read(); // Read 'i'\n        reader.read(); // Read 'n'\n        reader.read(); // Read 'e'\n        Assertions.assertEquals(0, getLineNumber(reader)); // Line counter should be 0\n        \n        reader.read(); // Read '\\n'\n        Assertions.assertEquals(1, getLineNumber(reader)); // Line counter should be 1\n        \n        reader.read(); // Read 'S'\n        reader.read(); // Read 'e'\n        reader.read(); // Read 'c'\n        reader.read(); // Read 'o'\n        reader.read(); // Read 'n'\n        reader.read(); // Read 'd'\n        reader.read(); // Read ' '\n        reader.read(); // Read 'L'\n        reader.read(); // Read 'i'\n        reader.read(); // Read 'n'\n        reader.read(); // Read 'e'\n        Assertions.assertEquals(1, getLineNumber(reader)); // Line counter should still be 1\n    }\n\n    @Test\n    void testRead_endOfStream() throws Exception {\n        Reader stringReader = new StringReader(\"\");\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(stringReader);\n        \n        int result = reader.read();\n        Assertions.assertEquals(ExtendedBufferedReader.END_OF_STREAM, result);\n    }\n\n    private int getLineNumber(ExtendedBufferedReader reader) throws Exception {\n        var field = ExtendedBufferedReader.class.getDeclaredField(\"lineCounter\");\n        field.setAccessible(true);\n        return field.getInt(reader);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 593,
+    "completion_tokens": 614,
+    "total_tokens": 1207,
+    "llm_elapsed_time_seconds": 10.933
+  }
+}

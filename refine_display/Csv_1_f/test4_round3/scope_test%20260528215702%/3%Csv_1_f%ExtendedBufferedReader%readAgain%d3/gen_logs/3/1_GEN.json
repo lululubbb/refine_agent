@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\n\nimport java.io.StringReader;\nimport java.lang.reflect.Field;\n\nclass ExtendedBufferedReaderTest {\n    private ExtendedBufferedReader reader;\n\n    @BeforeEach\n    void setUp() {\n        reader = new ExtendedBufferedReader(new StringReader(\"Test input\"));\n    }\n\n    @Test\n    void testreadAgain_initialValue() throws Exception {\n        Field lastCharField = ExtendedBufferedReader.class.getDeclaredField(\"lastChar\");\n        lastCharField.setAccessible(true);\n        lastCharField.setInt(reader, -2); // Setting to UNDEFINED\n        Assertions.assertEquals(-2, reader.readAgain());\n    }\n\n    @Test\n    void testreadAgain_afterReading() throws Exception {\n        Field lastCharField = ExtendedBufferedReader.class.getDeclaredField(\"lastChar\");\n        lastCharField.setAccessible(true);\n        lastCharField.setInt(reader, 65); // Setting to a valid character (e.g., 'A')\n        Assertions.assertEquals(65, reader.readAgain());\n    }\n\n    @Test\n    void testreadAgain_afterStreamEnd() throws Exception {\n        Field lastCharField = ExtendedBufferedReader.class.getDeclaredField(\"lastChar\");\n        lastCharField.setAccessible(true);\n        lastCharField.setInt(reader, -1); // Setting to END_OF_STREAM\n        Assertions.assertEquals(-1, reader.readAgain());\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 549,
+    "completion_tokens": 295,
+    "total_tokens": 844,
+    "llm_elapsed_time_seconds": 5.258
+  }
+}

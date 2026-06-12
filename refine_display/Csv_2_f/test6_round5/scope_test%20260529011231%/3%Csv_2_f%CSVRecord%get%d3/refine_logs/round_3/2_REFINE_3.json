@@ -1,0 +1,32 @@
+{
+  "raw": "{\n  \"suite_summary\": \"The test suite for the `get` method in the `CSVRecord` class has several issues, including one compile failure and multiple runtime failures. The tests exhibit high redundancy and low coverage in some cases, indicating a need for more diverse and comprehensive test cases. The overall quality of the tests can be improved significantly by addressing these issues in a structured manner.\",\n  \"test_instructions\": {\n    \"CSVRecord_3_4Test\": [\n      \"Fix the compile error: 'unreported exception Throwable; must be caught or declared to be thrown' (CE-XX). Add 'throws Exception' to all @Test methods.\"\n    ],\n    \"CSVRecord_3_1Test\": [\n      \"Fix the runtime error: 'Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>'. Ensure that the exception is properly thrown by the method under test.\"\n    ],\n    \"CSVRecord_3_3Test\": [\n      \"Fix the runtime error: 'Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>'. Ensure that the exception is properly thrown by the method under test.\"\n    ],\n    \"CSVRecord_3_5Test\": [\n      \"Fix the runtime error: 'Index for header 'header3' is 2 but CSVRecord only has 2 values!'. Ensure that the test setup does not create an out-of-bounds condition.\"\n    ],\n    \"CSVRecord_3_2Test\": [\n      \"Reduce redundancy in tests. The test cases are highly similar to those in CSVRecord_3_1Test and CSVRecord_3_3Test. Consider merging or modifying tests to cover different scenarios.\"\n    ],\n    \"CSVRecord_3_6Test\": [\n      \"Increase coverage by adding tests for boundary values and exception-throwing paths. The current tests do not cover all branches of the focal method.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "The test suite for the `get` method in the `CSVRecord` class has several issues, including one compile failure and multiple runtime failures. The tests exhibit high redundancy and low coverage in some cases, indicating a need for more diverse and comprehensive test cases. The overall quality of the tests can be improved significantly by addressing these issues in a structured manner.",
+    "test_instructions": {
+      "CSVRecord_3_4Test": [
+        "Fix the compile error: 'unreported exception Throwable; must be caught or declared to be thrown' (CE-XX). Add 'throws Exception' to all @Test methods."
+      ],
+      "CSVRecord_3_1Test": [
+        "Fix the runtime error: 'Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>'. Ensure that the exception is properly thrown by the method under test."
+      ],
+      "CSVRecord_3_3Test": [
+        "Fix the runtime error: 'Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>'. Ensure that the exception is properly thrown by the method under test."
+      ],
+      "CSVRecord_3_5Test": [
+        "Fix the runtime error: 'Index for header 'header3' is 2 but CSVRecord only has 2 values!'. Ensure that the test setup does not create an out-of-bounds condition."
+      ],
+      "CSVRecord_3_2Test": [
+        "Reduce redundancy in tests. The test cases are highly similar to those in CSVRecord_3_1Test and CSVRecord_3_3Test. Consider merging or modifying tests to cover different scenarios."
+      ],
+      "CSVRecord_3_6Test": [
+        "Increase coverage by adding tests for boundary values and exception-throwing paths. The current tests do not cover all branches of the focal method."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 9387,
+    "completion_tokens": 412,
+    "total_tokens": 9799,
+    "llm_elapsed_time_seconds": 6.415
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport org.mockito.Mockito;\n\nimport java.lang.reflect.Field;\nimport java.util.Collections;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecordTest {\n\n    @Test\n    public void testisMapped_mappingIsNull() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, null, null, 1);\n        Assertions.assertFalse(record.isMapped(\"testName\"));\n    }\n\n    @Test\n    public void testisMapped_keyExistsInMapping() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"testName\", 0);\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n        Assertions.assertTrue(record.isMapped(\"testName\"));\n    }\n\n    @Test\n    public void testisMapped_keyDoesNotExistInMapping() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"otherName\", 0);\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n        Assertions.assertFalse(record.isMapped(\"testName\"));\n    }\n\n    @Test\n    public void testisMapped_emptyMapping() throws Exception {\n        Map<String, Integer> mapping = Collections.emptyMap();\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n        Assertions.assertFalse(record.isMapped(\"testName\"));\n    }\n\n    @Test\n    public void testisMapped_mappingContainsDifferentKey() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"anotherName\", 1);\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n        Assertions.assertFalse(record.isMapped(\"testName\"));\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 626,
+    "completion_tokens": 386,
+    "total_tokens": 1012,
+    "llm_elapsed_time_seconds": 8.226
+  }
+}

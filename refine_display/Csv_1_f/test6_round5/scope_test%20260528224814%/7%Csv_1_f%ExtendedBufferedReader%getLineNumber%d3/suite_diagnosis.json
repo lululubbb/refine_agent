@@ -1,0 +1,153 @@
+{
+  "ExtendedBufferedReader_7_1Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "=> org.opentest4j.AssertionFailedError: Buffer content should match expected string ==> expected: <line1",
+      "> but was: <line1",
+      "Failures (1):",
+      "JUnit Jupiter:ExtendedBufferedReader_7_1Test:testReadWithBuffer()",
+      "MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_7_1Test', methodName = 'testReadWithBuffer', methodParameterTypes = '']",
+      "line2",
+      "line>",
+      "org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)",
+      "org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)",
+      "org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)",
+      "org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)",
+      "org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1153)",
+      "org.apache.commons.csv.ExtendedBufferedReader_7_1Test.testReadWithBuffer(ExtendedBufferedReader_7_1Test.java:86)",
+      "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)",
+      "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)",
+      "java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)",
+      "java.base/java.lang.reflect.Method.invoke(Method.java:566)",
+      "[...]",
+      "Test run finished after 517 ms",
+      "[         4 containers found      ]"
+    ],
+    "focal_line_rate": 0.0,
+    "focal_branch_rate": null,
+    "focal_line_covered": 0,
+    "focal_line_total": 1,
+    "missed_methods": [],
+    "partial_methods": []
+  },
+  "ExtendedBufferedReader_7_2Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [],
+    "exec_errors": [],
+    "focal_line_rate": 0.0,
+    "focal_branch_rate": null,
+    "focal_line_covered": 0,
+    "focal_line_total": 1,
+    "missed_methods": [
+      "line 76: readAgain() — completely uncovered",
+      "line 159: getLineNumber() — completely uncovered"
+    ],
+    "partial_methods": [
+      "line 57: read() — 4/6 branches missed",
+      "line 81: read() — 10/16 branches missed",
+      "line 123: readLine() — 1/4 branches missed"
+    ]
+  },
+  "ExtendedBufferedReader_7_3Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [],
+    "exec_errors": [],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": null,
+    "focal_line_covered": 1,
+    "focal_line_total": 1,
+    "missed_methods": [
+      "line 76: readAgain() — completely uncovered",
+      "line 81: read() — completely uncovered"
+    ],
+    "partial_methods": [
+      "line 57: read() — 4/6 branches missed"
+    ]
+  },
+  "ExtendedBufferedReader_7_4Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "=> org.opentest4j.AssertionFailedError: expected: <105> but was: <76>",
+      "Failures (1):",
+      "JUnit Jupiter:ExtendedBufferedReader_7_4Test:testReadAgain()",
+      "MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_7_4Test', methodName = 'testReadAgain', methodParameterTypes = '']",
+      "org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)",
+      "org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)",
+      "org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)",
+      "org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)",
+      "org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)",
+      "org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:528)",
+      "org.apache.commons.csv.ExtendedBufferedReader_7_4Test.testReadAgain(ExtendedBufferedReader_7_4Test.java:88)",
+      "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)",
+      "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)",
+      "java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)",
+      "[...]",
+      "Test run finished after 354 ms",
+      "[         4 containers found      ]",
+      "[         0 containers skipped    ]",
+      "[         4 containers started    ]",
+      "[         0 containers aborted    ]"
+    ],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": null,
+    "focal_line_covered": 1,
+    "focal_line_total": 1,
+    "missed_methods": [],
+    "partial_methods": []
+  },
+  "ExtendedBufferedReader_7_5Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "=> org.opentest4j.AssertionFailedError: expected: <66> but was: <10>",
+      "=> org.opentest4j.AssertionFailedError: expected: <101> but was: <84>",
+      "Failures (2):",
+      "JUnit Jupiter:ExtendedBufferedReader_7_5Test:testRead()",
+      "MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_7_5Test', methodName = 'testRead', methodParameterTypes = '']",
+      "org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)",
+      "org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)",
+      "org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)",
+      "org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)",
+      "org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)",
+      "org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:528)",
+      "org.apache.commons.csv.ExtendedBufferedReader_7_5Test.testRead(ExtendedBufferedReader_7_5Test.java:112)",
+      "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)",
+      "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)",
+      "java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)",
+      "[...]",
+      "JUnit Jupiter:ExtendedBufferedReader_7_5Test:testReadAgain()",
+      "MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_7_5Test', methodName = 'testReadAgain', methodParameterTypes = '']",
+      "org.apache.commons.csv.ExtendedBufferedReader_7_5Test.testReadAgain(ExtendedBufferedReader_7_5Test.java:126)",
+      "Test run finished after 537 ms"
+    ],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": null,
+    "focal_line_covered": 1,
+    "focal_line_total": 1,
+    "missed_methods": [],
+    "partial_methods": []
+  },
+  "ExtendedBufferedReader_7_6Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "=> org.opentest4j.AssertionFailedError: expected: <105> but was: <76>",
+      "=> org.opentest4j.AssertionFailedError: expected: <Bufferd> but was: <Buffered>",
+      "=> org.opentest4j.AssertionFailedError: expected: <1> but was: <0>"
+    ],
+    "focal_line_rate": 0.0,
+    "focal_branch_rate": null,
+    "focal_line_covered": 0,
+    "focal_line_total": 1,
+    "missed_methods": [],
+    "partial_methods": []
+  }
+}

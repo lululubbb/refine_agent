@@ -1,0 +1,32 @@
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_12_1Test:testtoString_exceptionThrowingPath()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_12_1Test', methodName = 'testtoString_exceptionThrowingPath', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.NullPointerException> but was: <java.lang.ArrayIndexOutOfBoundsException>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+       org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)
+       org.apache.commons.csv.CSVRecord_12_1Test.testtoString_exceptionThrowingPath(CSVRecord_12_1Test.java:107)
+       [...]
+     Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 1 out of bounds for length 1
+       org.apache.commons.csv.CSVRecord.get(CSVRecord.java:64)
+       org.apache.commons.csv.CSVRecord_12_1Test.lambda$testtoString_exceptionThrowingPath$0(CSVRecord_12_1Test.java:108)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:53)
+       [...]
+
+Test run finished after 312 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         9 tests found           ]
+[         0 tests skipped         ]
+[         9 tests started         ]
+[         0 tests aborted         ]
+[         8 tests successful      ]
+[         1 tests failed          ]
+
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC

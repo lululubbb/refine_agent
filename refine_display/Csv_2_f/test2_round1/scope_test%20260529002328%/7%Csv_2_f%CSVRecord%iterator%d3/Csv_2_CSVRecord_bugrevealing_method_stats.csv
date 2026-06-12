@@ -1,0 +1,8 @@
+project_name,target_class,test_class,test_method,fixed_status,buggy_status,bug_revealing
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_7_1Test,testiterator_normalCase,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_7_1Test,testiterator_emptyArray,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_7_1Test,testiterator_singleElement,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_7_2Test,testIterator_withValues,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_7_2Test,testIterator_withEmptyValues,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_7_2Test,testIterator_withNullValues,pass,pass,false
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_7_2Test,testIterator_withSingleValue,pass,pass,false

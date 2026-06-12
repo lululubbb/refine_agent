@@ -1,0 +1,35 @@
+{
+  "raw": "{\n  \"suite_summary\": \"All test files compile and execute successfully, but several tests exhibit high redundancy and do not reveal any bugs. The suite has excellent line coverage, but lacks tests that effectively reveal bugs in the focal method. Redundant tests can be consolidated to improve clarity and maintainability.\",\n  \"test_instructions\": {\n    \"CSVRecord_11_1Test\": [\n      \"This test is not bug-revealing. Consider adding tests that assert specific edge cases or boundary conditions to improve bug detection.\"\n    ],\n    \"CSVRecord_11_2Test\": [\n      \"This test is not bug-revealing. Consider adding tests that assert specific edge cases or boundary conditions to improve bug detection.\"\n    ],\n    \"CSVRecord_11_3Test\": [\n      \"This test is not bug-revealing. Consider adding tests that assert specific edge cases or boundary conditions to improve bug detection.\"\n    ],\n    \"CSVRecord_11_4Test\": [\n      \"This test is not bug-revealing. Consider adding tests that assert specific edge cases or boundary conditions to improve bug detection.\",\n      \"This test exhibits high redundancy. Consider consolidating it with similar tests to reduce duplication.\"\n    ],\n    \"CSVRecord_11_5Test\": [\n      \"This test is not bug-revealing. Consider adding tests that assert specific edge cases or boundary conditions to improve bug detection.\",\n      \"This test exhibits high redundancy. Consider consolidating it with similar tests to reduce duplication.\"\n    ],\n    \"CSVRecord_11_6Test\": [\n      \"This test is not bug-revealing. Consider adding tests that assert specific edge cases or boundary conditions to improve bug detection.\",\n      \"This test exhibits high redundancy. Consider consolidating it with similar tests to reduce duplication.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "All test files compile and execute successfully, but several tests exhibit high redundancy and do not reveal any bugs. The suite has excellent line coverage, but lacks tests that effectively reveal bugs in the focal method. Redundant tests can be consolidated to improve clarity and maintainability.",
+    "test_instructions": {
+      "CSVRecord_11_1Test": [
+        "This test is not bug-revealing. Consider adding tests that assert specific edge cases or boundary conditions to improve bug detection."
+      ],
+      "CSVRecord_11_2Test": [
+        "This test is not bug-revealing. Consider adding tests that assert specific edge cases or boundary conditions to improve bug detection."
+      ],
+      "CSVRecord_11_3Test": [
+        "This test is not bug-revealing. Consider adding tests that assert specific edge cases or boundary conditions to improve bug detection."
+      ],
+      "CSVRecord_11_4Test": [
+        "This test is not bug-revealing. Consider adding tests that assert specific edge cases or boundary conditions to improve bug detection.",
+        "This test exhibits high redundancy. Consider consolidating it with similar tests to reduce duplication."
+      ],
+      "CSVRecord_11_5Test": [
+        "This test is not bug-revealing. Consider adding tests that assert specific edge cases or boundary conditions to improve bug detection.",
+        "This test exhibits high redundancy. Consider consolidating it with similar tests to reduce duplication."
+      ],
+      "CSVRecord_11_6Test": [
+        "This test is not bug-revealing. Consider adding tests that assert specific edge cases or boundary conditions to improve bug detection.",
+        "This test exhibits high redundancy. Consider consolidating it with similar tests to reduce duplication."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 10895,
+    "completion_tokens": 368,
+    "total_tokens": 11263,
+    "llm_elapsed_time_seconds": 6.059
+  }
+}

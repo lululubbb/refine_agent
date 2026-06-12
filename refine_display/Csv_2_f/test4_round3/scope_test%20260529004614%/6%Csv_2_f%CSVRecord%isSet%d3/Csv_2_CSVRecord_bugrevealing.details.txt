@@ -1,0 +1,270 @@
+bug_revealing log started: 2026-05-29T00:55:07.034426
+buggy=/home/chenlu/refine_test_gen_v5/defect4j_projects/Csv_2_b
+fixed=/home/chenlu/refine_test_gen_v5/defect4j_projects/Csv_2_f
+tests_dir=/home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/6%Csv_2_f%CSVRecord%isSet%d3/test_cases
+
+Running org.apache.commons.csv.CSVRecord_6_1Test#testisSet_keyExistsAndMapped on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_1Test#testisSet_keyExistsAndMapped on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_1Test#testisSet_keyExistsButNotMapped on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_1Test#testisSet_keyExistsButNotMapped on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_1Test#testisSet_keyDoesNotExist on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_1Test#testisSet_keyDoesNotExist on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_1Test#testisSet_keyMappedBeyondValuesLength on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_1Test#testisSet_keyMappedBeyondValuesLength on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_1Test#testisSet_emptyMapping on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_1Test#testisSet_emptyMapping on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_2Test#testisSet_nameMappedAndWithinBounds on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_2Test#testisSet_nameMappedAndWithinBounds on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_2Test#testisSet_nameMappedButOutOfBounds on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_2Test#testisSet_nameMappedButOutOfBounds on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_2Test#testisSet_nameNotMapped on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_2Test#testisSet_nameNotMapped on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_2Test#testisSet_emptyMapping on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_2Test#testisSet_emptyMapping on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_2Test#testisSet_nullName on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_2Test#testisSet_nullName on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_3Test#testisSet_nameMappedAndWithinBounds on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_3Test#testisSet_nameMappedAndWithinBounds on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_3Test#testisSet_nameMappedButOutOfBounds on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_3Test#testisSet_nameMappedButOutOfBounds on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_3Test#testisSet_nameNotMapped on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_3Test#testisSet_nameNotMapped on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_3Test#testisSet_emptyValuesArray on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_3Test#testisSet_emptyValuesArray on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_3Test#testisSet_nameMappedButNegativeIndex on buggy...
+  -> fail
+Running org.apache.commons.csv.CSVRecord_6_3Test#testisSet_nameMappedButNegativeIndex on fixed...
+  -> fail
+---
+[2026-05-29T00:56:01.071907] buggy org.apache.commons.csv.CSVRecord_6_3Test#testisSet_nameMappedButNegativeIndex status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_6_3Test:testisSet_nameMappedButNegativeIndex()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_6_3Test', methodName = 'testisSet_nameMappedButNegativeIndex', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: expected: <false> but was: <true>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+       org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1142)
+       org.apache.commons.csv.CSVRecord_6_3Test.testisSet_nameMappedButNegativeIndex(CSVRecord_6_3Test.java:70)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       [...]
+
+Test run finished after 231 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+---
+[2026-05-29T00:56:01.071936] fixed org.apache.commons.csv.CSVRecord_6_3Test#testisSet_nameMappedButNegativeIndex status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_6_3Test:testisSet_nameMappedButNegativeIndex()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_6_3Test', methodName = 'testisSet_nameMappedButNegativeIndex', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: expected: <false> but was: <true>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+       org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1142)
+       org.apache.commons.csv.CSVRecord_6_3Test.testisSet_nameMappedButNegativeIndex(CSVRecord_6_3Test.java:70)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       [...]
+
+Test run finished after 194 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+Running org.apache.commons.csv.CSVRecord_6_4Test#testisSet_nameMappedAndIndexInRange on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_4Test#testisSet_nameMappedAndIndexInRange on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_4Test#testisSet_nameMappedButIndexOutOfRange on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_4Test#testisSet_nameMappedButIndexOutOfRange on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_4Test#testisSet_nameNotMapped on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_4Test#testisSet_nameNotMapped on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_4Test#testisSet_emptyValuesArray on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_4Test#testisSet_emptyValuesArray on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_6_4Test#testisSet_nullName on buggy...
+  -> fail
+Running org.apache.commons.csv.CSVRecord_6_4Test#testisSet_nullName on fixed...
+  -> fail
+---
+[2026-05-29T00:56:19.015050] buggy org.apache.commons.csv.CSVRecord_6_4Test#testisSet_nullName status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_6_4Test:testisSet_nullName()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_6_4Test', methodName = 'testisSet_nullName', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: Expected java.lang.NullPointerException to be thrown, but nothing was thrown.
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:73)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+       org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)
+       org.apache.commons.csv.CSVRecord_6_4Test.testisSet_nullName(CSVRecord_6_4Test.java:74)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+       [...]
+
+Test run finished after 243 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+---
+[2026-05-29T00:56:19.015080] fixed org.apache.commons.csv.CSVRecord_6_4Test#testisSet_nullName status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_6_4Test:testisSet_nullName()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_6_4Test', methodName = 'testisSet_nullName', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: Expected java.lang.NullPointerException to be thrown, but nothing was thrown.
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:73)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+       org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)
+       org.apache.commons.csv.CSVRecord_6_4Test.testisSet_nullName(CSVRecord_6_4Test.java:74)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+       [...]
+
+Test run finished after 237 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+Class-level summary: /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/6%Csv_2_f%CSVRecord%isSet%d3/Csv_2_CSVRecord_bugrevealing_class_level.csv
+Class-level CSV: /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/6%Csv_2_f%CSVRecord%isSet%d3/Csv_2_CSVRecord_bugrevealing_class_level.csv
+@Test method-level stats: /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/6%Csv_2_f%CSVRecord%isSet%d3/Csv_2_CSVRecord_bugrevealing_method_stats.csv
+
+===== SUMMARY =====
+Total tests evaluated: 20
+Bug revealing tests: 0
+Summary CSV: /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/6%Csv_2_f%CSVRecord%isSet%d3/Csv_2_CSVRecord_bugrevealing.csv
+
+===== @Test METHOD-LEVEL STATISTICS =====
+Total @Test methods run: 20
+--- Fixed version (Csv_2_f) ---
+  PASS   : 18
+  FAIL   : 2
+  TIMEOUT: 0
+  Pass rate: 90.0%
+--- Buggy version (Csv_2_b) ---
+  PASS   : 18
+  FAIL   : 2
+  TIMEOUT: 0
+  Pass rate: 90.0%
+
+===== @Test METHOD-LEVEL STATISTICS =====
+Total @Test methods run: 20
+--- Fixed version (Csv_2_f) ---
+  PASS   : 18
+  FAIL   : 2
+  TIMEOUT: 0
+  Pass rate: 90.0%
+--- Buggy version (Csv_2_b) ---
+  PASS   : 18
+  FAIL   : 2
+  TIMEOUT: 0
+  Pass rate: 90.0%
+
+===== END =====
+log finished: 2026-05-29T00:56:19.015929

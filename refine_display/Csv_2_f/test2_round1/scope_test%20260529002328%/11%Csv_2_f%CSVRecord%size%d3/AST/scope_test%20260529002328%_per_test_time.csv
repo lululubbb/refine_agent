@@ -1,0 +1,11 @@
+project,version,test_case,ast_generation_time_nanosec
+scope_test%20260529002328%,11%Csv_2_f%CSVRecord%size%d3,CSVRecord_11_1Test.testSize_emptyArray,28501182
+scope_test%20260529002328%,11%Csv_2_f%CSVRecord%size%d3,CSVRecord_11_1Test.testSize_singleElementArray,28931993
+scope_test%20260529002328%,11%Csv_2_f%CSVRecord%size%d3,CSVRecord_11_1Test.testSize_multipleElementsArray,29373962
+scope_test%20260529002328%,11%Csv_2_f%CSVRecord%size%d3,CSVRecord_11_1Test.testSize_largeArray,30034874
+scope_test%20260529002328%,11%Csv_2_f%CSVRecord%size%d3,CSVRecord_11_1Test,43119344
+scope_test%20260529002328%,11%Csv_2_f%CSVRecord%size%d3,CSVRecord_11_2Test.testSize_emptyArray,36590464
+scope_test%20260529002328%,11%Csv_2_f%CSVRecord%size%d3,CSVRecord_11_2Test.testSize_singleElementArray,37109591
+scope_test%20260529002328%,11%Csv_2_f%CSVRecord%size%d3,CSVRecord_11_2Test.testSize_multipleElementsArray,37607646
+scope_test%20260529002328%,11%Csv_2_f%CSVRecord%size%d3,CSVRecord_11_2Test.testSize_largeArray,52356616
+scope_test%20260529002328%,11%Csv_2_f%CSVRecord%size%d3,CSVRecord_11_2Test,53694271

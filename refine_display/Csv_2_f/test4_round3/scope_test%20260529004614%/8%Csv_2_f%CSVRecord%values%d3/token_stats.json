@@ -1,0 +1,97 @@
+{
+  "generator": {
+    "prompt_tokens": 15298,
+    "completion_tokens": 7732,
+    "total_tokens": 23030,
+    "llm_elapsed_seconds": 141.811,
+    "call_count": 16
+  },
+  "refiner": {
+    "prompt_tokens": 19213,
+    "completion_tokens": 841,
+    "total_tokens": 20054,
+    "llm_elapsed_seconds": 14.982,
+    "call_count": 3
+  },
+  "all_total": {
+    "prompt_tokens": 34511,
+    "completion_tokens": 8573,
+    "total_tokens": 43084,
+    "llm_elapsed_seconds": 156.793,
+    "call_count": 19
+  },
+  "rounds": {
+    "phase1": {
+      "generator": {
+        "prompt_tokens": 2456,
+        "completion_tokens": 1437,
+        "total_tokens": 3893,
+        "llm_elapsed_seconds": 23.333,
+        "call_count": 4
+      },
+      "refiner": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0,
+        "llm_elapsed_seconds": 0,
+        "call_count": 0
+      },
+      "round_total_tokens": 3893,
+      "round_llm_elapsed_seconds": 23.333
+    },
+    "round_1": {
+      "generator": {
+        "prompt_tokens": 4023,
+        "completion_tokens": 1985,
+        "total_tokens": 6008,
+        "llm_elapsed_seconds": 32.135,
+        "call_count": 4
+      },
+      "refiner": {
+        "prompt_tokens": 5990,
+        "completion_tokens": 267,
+        "total_tokens": 6257,
+        "llm_elapsed_seconds": 5.123,
+        "call_count": 1
+      },
+      "round_total_tokens": 12265,
+      "round_llm_elapsed_seconds": 37.258
+    },
+    "round_2": {
+      "generator": {
+        "prompt_tokens": 4219,
+        "completion_tokens": 2272,
+        "total_tokens": 6491,
+        "llm_elapsed_seconds": 57.499,
+        "call_count": 4
+      },
+      "refiner": {
+        "prompt_tokens": 6434,
+        "completion_tokens": 257,
+        "total_tokens": 6691,
+        "llm_elapsed_seconds": 4.858,
+        "call_count": 1
+      },
+      "round_total_tokens": 13182,
+      "round_llm_elapsed_seconds": 62.357
+    },
+    "round_3": {
+      "generator": {
+        "prompt_tokens": 4600,
+        "completion_tokens": 2038,
+        "total_tokens": 6638,
+        "llm_elapsed_seconds": 28.843,
+        "call_count": 4
+      },
+      "refiner": {
+        "prompt_tokens": 6789,
+        "completion_tokens": 317,
+        "total_tokens": 7106,
+        "llm_elapsed_seconds": 5.001,
+        "call_count": 1
+      },
+      "round_total_tokens": 13744,
+      "round_llm_elapsed_seconds": 33.844
+    }
+  }
+}

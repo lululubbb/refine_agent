@@ -1,0 +1,20 @@
+{
+  "raw": "{\n  \"suite_summary\": \"The test suite for the `lookAhead` method in `ExtendedBufferedReader` has two test files, both of which encounter execution failures. One test file exceeds the timeout limit, while the other fails due to an assertion error. Both tests have high redundancy, indicating they may be testing similar scenarios.\",\n  \"test_instructions\": {\n    \"ExtendedBufferedReader_6_1Test\": [\n      \"Fix the timeout issue by optimizing the test execution or increasing the timeout limit. Current error: 'Exceeded TIMEOUT limit'\"\n    ],\n    \"ExtendedBufferedReader_6_2Test\": [\n      \"Fix the assertion failure by ensuring the expected value matches the actual return value. Current error: 'expected: < -1 > but was: < 65 >'\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "The test suite for the `lookAhead` method in `ExtendedBufferedReader` has two test files, both of which encounter execution failures. One test file exceeds the timeout limit, while the other fails due to an assertion error. Both tests have high redundancy, indicating they may be testing similar scenarios.",
+    "test_instructions": {
+      "ExtendedBufferedReader_6_1Test": [
+        "Fix the timeout issue by optimizing the test execution or increasing the timeout limit. Current error: 'Exceeded TIMEOUT limit'"
+      ],
+      "ExtendedBufferedReader_6_2Test": [
+        "Fix the assertion failure by ensuring the expected value matches the actual return value. Current error: 'expected: < -1 > but was: < 65 >'"
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 3460,
+    "completion_tokens": 167,
+    "total_tokens": 3627,
+    "llm_elapsed_time_seconds": 3.437
+  }
+}

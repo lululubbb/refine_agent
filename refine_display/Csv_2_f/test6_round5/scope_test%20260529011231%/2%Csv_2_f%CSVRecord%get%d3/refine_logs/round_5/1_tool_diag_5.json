@@ -1,0 +1,611 @@
+{
+  "test_diags": {
+    "CSVRecord_2_1Test": {
+      "test_name": "CSVRecord_2_1Test",
+      "compile_ok": false,
+      "exec_ok": false,
+      "exec_timeout": false,
+      "compile_errors": [
+        "Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC",
+        "/home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test6_round5/scope_test%20260529011231%/2%Csv_2_f%CSVRecord%get%d3/test_cases/CSVRecord_2_1Test.java:98: error: unreported exception Throwable; must be caught or declared to be thrown",
+        "            ^"
+      ],
+      "exec_errors": [],
+      "focal_line_rate": null,
+      "focal_branch_rate": null,
+      "focal_line_covered": null,
+      "focal_line_total": null,
+      "missed_methods": [],
+      "partial_methods": [],
+      "bug_revealing": false,
+      "redundancy_score": 0.0982,
+      "most_similar_to": "CSVRecord_2_2Test",
+      "diag_data_valid": true
+    },
+    "CSVRecord_2_2Test": {
+      "test_name": "CSVRecord_2_2Test",
+      "compile_ok": true,
+      "exec_ok": true,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [],
+      "focal_line_rate": 11.11,
+      "focal_branch_rate": 0.0,
+      "focal_line_covered": 1,
+      "focal_line_total": 9,
+      "missed_methods": [
+        "line 80: get() — completely uncovered",
+        "line 103: isConsistent() — completely uncovered",
+        "line 114: isMapped() — completely uncovered",
+        "line 125: isSet() — completely uncovered",
+        "line 134: iterator() — completely uncovered",
+        "line 138: values() — completely uncovered",
+        "line 148: getComment() — completely uncovered",
+        "line 157: getRecordNumber() — completely uncovered",
+        "line 166: size() — completely uncovered",
+        "line 171: toString() — completely uncovered"
+      ],
+      "partial_methods": [
+        "line 49: CSVRecord()() — 1/2 branches missed"
+      ],
+      "bug_revealing": false,
+      "redundancy_score": 0.1429,
+      "most_similar_to": "CSVRecord_2_6Test",
+      "diag_data_valid": true
+    },
+    "CSVRecord_2_3Test": {
+      "test_name": "CSVRecord_2_3Test",
+      "compile_ok": true,
+      "exec_ok": true,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [],
+      "focal_line_rate": 11.11,
+      "focal_branch_rate": 0.0,
+      "focal_line_covered": 1,
+      "focal_line_total": 9,
+      "missed_methods": [
+        "line 80: get() — completely uncovered",
+        "line 103: isConsistent() — completely uncovered",
+        "line 114: isMapped() — completely uncovered",
+        "line 125: isSet() — completely uncovered",
+        "line 134: iterator() — completely uncovered",
+        "line 138: values() — completely uncovered",
+        "line 148: getComment() — completely uncovered",
+        "line 157: getRecordNumber() — completely uncovered",
+        "line 166: size() — completely uncovered",
+        "line 171: toString() — completely uncovered"
+      ],
+      "partial_methods": [
+        "line 49: CSVRecord()() — 1/2 branches missed"
+      ],
+      "bug_revealing": false,
+      "redundancy_score": 0.6078,
+      "most_similar_to": "CSVRecord_2_5Test",
+      "diag_data_valid": true
+    },
+    "CSVRecord_2_4Test": {
+      "test_name": "CSVRecord_2_4Test",
+      "compile_ok": true,
+      "exec_ok": true,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [],
+      "focal_line_rate": 11.11,
+      "focal_branch_rate": 0.0,
+      "focal_line_covered": 1,
+      "focal_line_total": 9,
+      "missed_methods": [
+        "line 80: get() — completely uncovered",
+        "line 103: isConsistent() — completely uncovered",
+        "line 114: isMapped() — completely uncovered",
+        "line 125: isSet() — completely uncovered",
+        "line 134: iterator() — completely uncovered",
+        "line 138: values() — completely uncovered",
+        "line 148: getComment() — completely uncovered",
+        "line 157: getRecordNumber() — completely uncovered",
+        "line 166: size() — completely uncovered",
+        "line 171: toString() — completely uncovered"
+      ],
+      "partial_methods": [
+        "line 49: CSVRecord()() — 1/2 branches missed"
+      ],
+      "bug_revealing": false,
+      "redundancy_score": 0.171,
+      "most_similar_to": "CSVRecord_2_5Test",
+      "diag_data_valid": true
+    },
+    "CSVRecord_2_5Test": {
+      "test_name": "CSVRecord_2_5Test",
+      "compile_ok": false,
+      "exec_ok": false,
+      "exec_timeout": false,
+      "compile_errors": [
+        "Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC",
+        "/home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test6_round5/scope_test%20260529011231%/2%Csv_2_f%CSVRecord%get%d3/test_cases/CSVRecord_2_5Test.java:92: error: cannot find symbol",
+        "                 ^"
+      ],
+      "exec_errors": [],
+      "focal_line_rate": null,
+      "focal_branch_rate": null,
+      "focal_line_covered": null,
+      "focal_line_total": null,
+      "missed_methods": [],
+      "partial_methods": [],
+      "bug_revealing": false,
+      "redundancy_score": 0.6078,
+      "most_similar_to": "CSVRecord_2_3Test",
+      "diag_data_valid": true
+    },
+    "CSVRecord_2_6Test": {
+      "test_name": "CSVRecord_2_6Test",
+      "compile_ok": true,
+      "exec_ok": true,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [],
+      "focal_line_rate": 11.11,
+      "focal_branch_rate": 0.0,
+      "focal_line_covered": 1,
+      "focal_line_total": 9,
+      "missed_methods": [
+        "line 80: get() — completely uncovered",
+        "line 103: isConsistent() — completely uncovered",
+        "line 114: isMapped() — completely uncovered",
+        "line 125: isSet() — completely uncovered",
+        "line 134: iterator() — completely uncovered",
+        "line 138: values() — completely uncovered",
+        "line 148: getComment() — completely uncovered",
+        "line 157: getRecordNumber() — completely uncovered",
+        "line 166: size() — completely uncovered",
+        "line 171: toString() — completely uncovered"
+      ],
+      "partial_methods": [
+        "line 49: CSVRecord()() — 1/2 branches missed"
+      ],
+      "bug_revealing": false,
+      "redundancy_score": 0.1429,
+      "most_similar_to": "CSVRecord_2_2Test",
+      "diag_data_valid": true
+    }
+  },
+  "test_scores": {
+    "CSVRecord_2_1Test": {
+      "test_name": "CSVRecord_2_1Test",
+      "compile_score": 0.0,
+      "exec_score": 0.0,
+      "focal_line_coverage": null,
+      "focal_branch_coverage": null,
+      "focal_line_covered": null,
+      "focal_line_total": null,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.0982,
+      "similarity": 0.9018,
+      "most_similar_to": "CSVRecord_2_2Test",
+      "issues": [
+        "COMPILE_FAIL"
+      ]
+    },
+    "CSVRecord_2_2Test": {
+      "test_name": "CSVRecord_2_2Test",
+      "compile_score": 1.0,
+      "exec_score": 1.0,
+      "focal_line_coverage": 0.1111,
+      "focal_branch_coverage": 0.0,
+      "focal_line_covered": 1,
+      "focal_line_total": 9,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.1429,
+      "similarity": 0.8571,
+      "most_similar_to": "CSVRecord_2_6Test",
+      "issues": [
+        "NOT_BUG_REVEALING",
+        "LOW_COVERAGE",
+        "HIGH_REDUNDANCY"
+      ]
+    },
+    "CSVRecord_2_3Test": {
+      "test_name": "CSVRecord_2_3Test",
+      "compile_score": 1.0,
+      "exec_score": 1.0,
+      "focal_line_coverage": 0.1111,
+      "focal_branch_coverage": 0.0,
+      "focal_line_covered": 1,
+      "focal_line_total": 9,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.6078,
+      "similarity": 0.3922,
+      "most_similar_to": "CSVRecord_2_5Test",
+      "issues": [
+        "NOT_BUG_REVEALING",
+        "LOW_COVERAGE"
+      ]
+    },
+    "CSVRecord_2_4Test": {
+      "test_name": "CSVRecord_2_4Test",
+      "compile_score": 1.0,
+      "exec_score": 1.0,
+      "focal_line_coverage": 0.1111,
+      "focal_branch_coverage": 0.0,
+      "focal_line_covered": 1,
+      "focal_line_total": 9,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.171,
+      "similarity": 0.829,
+      "most_similar_to": "CSVRecord_2_5Test",
+      "issues": [
+        "NOT_BUG_REVEALING",
+        "LOW_COVERAGE",
+        "HIGH_REDUNDANCY"
+      ]
+    },
+    "CSVRecord_2_5Test": {
+      "test_name": "CSVRecord_2_5Test",
+      "compile_score": 0.0,
+      "exec_score": 0.0,
+      "focal_line_coverage": null,
+      "focal_branch_coverage": null,
+      "focal_line_covered": null,
+      "focal_line_total": null,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.6078,
+      "similarity": 0.3922,
+      "most_similar_to": "CSVRecord_2_3Test",
+      "issues": [
+        "COMPILE_FAIL"
+      ]
+    },
+    "CSVRecord_2_6Test": {
+      "test_name": "CSVRecord_2_6Test",
+      "compile_score": 1.0,
+      "exec_score": 1.0,
+      "focal_line_coverage": 0.1111,
+      "focal_branch_coverage": 0.0,
+      "focal_line_covered": 1,
+      "focal_line_total": 9,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.1429,
+      "similarity": 0.8571,
+      "most_similar_to": "CSVRecord_2_2Test",
+      "issues": [
+        "NOT_BUG_REVEALING",
+        "LOW_COVERAGE",
+        "HIGH_REDUNDANCY"
+      ]
+    }
+  },
+  "suite_score": {
+    "n_tests": 6,
+    "compile_pass_count": 4,
+    "compile_pass_rate": 0.6667,
+    "exec_pass_count": 4,
+    "exec_pass_rate": 0.6667,
+    "all_compile_pass": false,
+    "per_test_line_coverage": [
+      null,
+      0.1111,
+      0.1111,
+      0.1111,
+      null,
+      0.1111
+    ],
+    "per_test_branch_coverage": [
+      null,
+      0.0,
+      0.0,
+      0.0,
+      null,
+      0.0
+    ],
+    "coverage_line_avg": 0.1111,
+    "coverage_line_max": 0.1111,
+    "coverage_line_min": 0.1111,
+    "coverage_branch_avg": 0.0,
+    "bug_reveal_count": 0,
+    "bug_reveal_checked": 4,
+    "bug_reveal_rate": 0.0,
+    "max_pairwise_similarity": 0.9648,
+    "high_redundancy_pairs": [
+      {
+        "test1": "CSVRecord_2_6Test",
+        "test2": "CSVRecord_2_4Test",
+        "similarity": 0.9648
+      },
+      {
+        "test1": "CSVRecord_2_4Test",
+        "test2": "CSVRecord_2_6Test",
+        "similarity": 0.9648
+      },
+      {
+        "test1": "CSVRecord_2_2Test",
+        "test2": "CSVRecord_2_6Test",
+        "similarity": 0.9515
+      },
+      {
+        "test1": "CSVRecord_2_6Test",
+        "test2": "CSVRecord_2_2Test",
+        "similarity": 0.9515
+      },
+      {
+        "test1": "CSVRecord_2_2Test",
+        "test2": "CSVRecord_2_6Test",
+        "similarity": 0.9515
+      },
+      {
+        "test1": "CSVRecord_2_6Test",
+        "test2": "CSVRecord_2_2Test",
+        "similarity": 0.9515
+      },
+      {
+        "test1": "CSVRecord_2_1Test",
+        "test2": "CSVRecord_2_5Test",
+        "similarity": 0.9341
+      },
+      {
+        "test1": "CSVRecord_2_5Test",
+        "test2": "CSVRecord_2_1Test",
+        "similarity": 0.9341
+      },
+      {
+        "test1": "CSVRecord_2_1Test",
+        "test2": "CSVRecord_2_5Test",
+        "similarity": 0.9341
+      },
+      {
+        "test1": "CSVRecord_2_5Test",
+        "test2": "CSVRecord_2_1Test",
+        "similarity": 0.9341
+      },
+      {
+        "test1": "CSVRecord_2_1Test",
+        "test2": "CSVRecord_2_5Test",
+        "similarity": 0.9341
+      },
+      {
+        "test1": "CSVRecord_2_5Test",
+        "test2": "CSVRecord_2_1Test",
+        "similarity": 0.9341
+      },
+      {
+        "test1": "CSVRecord_2_1Test",
+        "test2": "CSVRecord_2_4Test",
+        "similarity": 0.9333
+      },
+      {
+        "test1": "CSVRecord_2_6Test",
+        "test2": "CSVRecord_2_5Test",
+        "similarity": 0.9272
+      },
+      {
+        "test1": "CSVRecord_2_5Test",
+        "test2": "CSVRecord_2_6Test",
+        "similarity": 0.9272
+      },
+      {
+        "test1": "CSVRecord_2_4Test",
+        "test2": "CSVRecord_2_6Test",
+        "similarity": 0.9264
+      },
+      {
+        "test1": "CSVRecord_2_4Test",
+        "test2": "CSVRecord_2_6Test",
+        "similarity": 0.9264
+      },
+      {
+        "test1": "CSVRecord_2_6Test",
+        "test2": "CSVRecord_2_1Test",
+        "similarity": 0.9257
+      },
+      {
+        "test1": "CSVRecord_2_4Test",
+        "test2": "CSVRecord_2_6Test",
+        "similarity": 0.9249
+      },
+      {
+        "test1": "CSVRecord_2_2Test",
+        "test2": "CSVRecord_2_4Test",
+        "similarity": 0.9231
+      },
+      {
+        "test1": "CSVRecord_2_4Test",
+        "test2": "CSVRecord_2_2Test",
+        "similarity": 0.9231
+      },
+      {
+        "test1": "CSVRecord_2_2Test",
+        "test2": "CSVRecord_2_6Test",
+        "similarity": 0.9126
+      },
+      {
+        "test1": "CSVRecord_2_1Test",
+        "test2": "CSVRecord_2_2Test",
+        "similarity": 0.9018
+      },
+      {
+        "test1": "CSVRecord_2_2Test",
+        "test2": "CSVRecord_2_6Test",
+        "similarity": 0.8571
+      },
+      {
+        "test1": "CSVRecord_2_5Test",
+        "test2": "CSVRecord_2_4Test",
+        "similarity": 0.829
+      }
+    ],
+    "problem_tests": {
+      "COMPILE_FAIL": [
+        "CSVRecord_2_1Test",
+        "CSVRecord_2_5Test"
+      ],
+      "NOT_BUG_REVEALING": [
+        "CSVRecord_2_2Test",
+        "CSVRecord_2_3Test",
+        "CSVRecord_2_4Test",
+        "CSVRecord_2_6Test"
+      ],
+      "LOW_COVERAGE": [
+        "CSVRecord_2_2Test",
+        "CSVRecord_2_3Test",
+        "CSVRecord_2_4Test",
+        "CSVRecord_2_6Test"
+      ],
+      "HIGH_REDUNDANCY": [
+        "CSVRecord_2_2Test",
+        "CSVRecord_2_4Test",
+        "CSVRecord_2_6Test"
+      ]
+    }
+  },
+  "pairwise_sims": [
+    {
+      "tc1": "CSVRecord_2_3Test",
+      "tc2": "CSVRecord_2_5Test",
+      "score": 0.596
+    },
+    {
+      "tc1": "CSVRecord_2_1Test",
+      "tc2": "CSVRecord_2_2Test",
+      "score": 0.0982
+    },
+    {
+      "tc1": "CSVRecord_2_2Test",
+      "tc2": "CSVRecord_2_4Test",
+      "score": 0.0769
+    },
+    {
+      "tc1": "CSVRecord_2_6Test",
+      "tc2": "CSVRecord_2_5Test",
+      "score": 0.0728
+    },
+    {
+      "tc1": "CSVRecord_2_5Test",
+      "tc2": "CSVRecord_2_6Test",
+      "score": 0.0728
+    },
+    {
+      "tc1": "CSVRecord_2_4Test",
+      "tc2": "CSVRecord_2_2Test",
+      "score": 0.0769
+    },
+    {
+      "tc1": "CSVRecord_2_3Test",
+      "tc2": "CSVRecord_2_5Test",
+      "score": 0.6078
+    },
+    {
+      "tc1": "CSVRecord_2_1Test",
+      "tc2": "CSVRecord_2_4Test",
+      "score": 0.0667
+    },
+    {
+      "tc1": "CSVRecord_2_2Test",
+      "tc2": "CSVRecord_2_6Test",
+      "score": 0.1429
+    },
+    {
+      "tc1": "CSVRecord_2_6Test",
+      "tc2": "CSVRecord_2_4Test",
+      "score": 0.0352
+    },
+    {
+      "tc1": "CSVRecord_2_5Test",
+      "tc2": "CSVRecord_2_4Test",
+      "score": 0.171
+    },
+    {
+      "tc1": "CSVRecord_2_4Test",
+      "tc2": "CSVRecord_2_6Test",
+      "score": 0.0352
+    },
+    {
+      "tc1": "CSVRecord_2_3Test",
+      "tc2": "CSVRecord_2_5Test",
+      "score": 0.5692
+    },
+    {
+      "tc1": "CSVRecord_2_1Test",
+      "tc2": "CSVRecord_2_5Test",
+      "score": 0.0659
+    },
+    {
+      "tc1": "CSVRecord_2_2Test",
+      "tc2": "CSVRecord_2_6Test",
+      "score": 0.0874
+    },
+    {
+      "tc1": "CSVRecord_2_6Test",
+      "tc2": "CSVRecord_2_1Test",
+      "score": 0.0743
+    },
+    {
+      "tc1": "CSVRecord_2_5Test",
+      "tc2": "CSVRecord_2_1Test",
+      "score": 0.0659
+    },
+    {
+      "tc1": "CSVRecord_2_4Test",
+      "tc2": "CSVRecord_2_6Test",
+      "score": 0.0751
+    },
+    {
+      "tc1": "CSVRecord_2_3Test",
+      "tc2": "CSVRecord_2_5Test",
+      "score": 0.5692
+    },
+    {
+      "tc1": "CSVRecord_2_1Test",
+      "tc2": "CSVRecord_2_5Test",
+      "score": 0.0659
+    },
+    {
+      "tc1": "CSVRecord_2_2Test",
+      "tc2": "CSVRecord_2_6Test",
+      "score": 0.0485
+    },
+    {
+      "tc1": "CSVRecord_2_6Test",
+      "tc2": "CSVRecord_2_2Test",
+      "score": 0.0485
+    },
+    {
+      "tc1": "CSVRecord_2_5Test",
+      "tc2": "CSVRecord_2_1Test",
+      "score": 0.0659
+    },
+    {
+      "tc1": "CSVRecord_2_4Test",
+      "tc2": "CSVRecord_2_6Test",
+      "score": 0.0736
+    },
+    {
+      "tc1": "CSVRecord_2_3Test",
+      "tc2": "CSVRecord_2_5Test",
+      "score": 0.5692
+    },
+    {
+      "tc1": "CSVRecord_2_1Test",
+      "tc2": "CSVRecord_2_5Test",
+      "score": 0.0659
+    },
+    {
+      "tc1": "CSVRecord_2_2Test",
+      "tc2": "CSVRecord_2_6Test",
+      "score": 0.0485
+    },
+    {
+      "tc1": "CSVRecord_2_6Test",
+      "tc2": "CSVRecord_2_2Test",
+      "score": 0.0485
+    },
+    {
+      "tc1": "CSVRecord_2_5Test",
+      "tc2": "CSVRecord_2_1Test",
+      "score": 0.0659
+    },
+    {
+      "tc1": "CSVRecord_2_4Test",
+      "tc2": "CSVRecord_2_6Test",
+      "score": 0.0736
+    }
+  ]
+}

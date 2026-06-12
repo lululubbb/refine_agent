@@ -1,0 +1,28 @@
+{
+  "raw": "{\n  \"suite_summary\": \"All test files in the suite are currently failing at runtime. Each test file has specific issues related to the execution of the `get` method in the `CSVRecord` class. The tests need to be revised to ensure they correctly trigger the expected exceptions and validate the method's behavior under various conditions.\",\n  \"test_instructions\": {\n    \"CSVRecord_3_1Test\": [\n      \"Fix the testGet_withOutOfBoundsIndex_throwsIllegalArgumentException() method: Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown. Ensure that the index used in the mapping is out of bounds to trigger the exception.\"\n    ],\n    \"CSVRecord_3_2Test\": [\n      \"Fix the testGet_invalidHeaderName() method: Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown. Ensure that the header name passed to the get method is invalid to trigger the exception.\"\n    ],\n    \"CSVRecord_3_3Test\": [\n      \"Fix the testGet_noHeaderMapping() method: Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>. Ensure that the method correctly handles the case where no header mapping is provided.\",\n      \"Fix the testGet_indexOutOfBounds() method: Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.reflect.InvocationTargetException>. Ensure that the index in the mapping is set to an out-of-bounds value.\"\n    ],\n    \"CSVRecord_3_4Test\": [\n      \"Fix the testGet_noMapping() method: Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>. Ensure that the method correctly handles the case where no mapping is provided.\",\n      \"Fix the testGet_indexOutOfBounds() method: Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown. Ensure that the index in the mapping is set to an out-of-bounds value.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "All test files in the suite are currently failing at runtime. Each test file has specific issues related to the execution of the `get` method in the `CSVRecord` class. The tests need to be revised to ensure they correctly trigger the expected exceptions and validate the method's behavior under various conditions.",
+    "test_instructions": {
+      "CSVRecord_3_1Test": [
+        "Fix the testGet_withOutOfBoundsIndex_throwsIllegalArgumentException() method: Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown. Ensure that the index used in the mapping is out of bounds to trigger the exception."
+      ],
+      "CSVRecord_3_2Test": [
+        "Fix the testGet_invalidHeaderName() method: Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown. Ensure that the header name passed to the get method is invalid to trigger the exception."
+      ],
+      "CSVRecord_3_3Test": [
+        "Fix the testGet_noHeaderMapping() method: Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>. Ensure that the method correctly handles the case where no header mapping is provided.",
+        "Fix the testGet_indexOutOfBounds() method: Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.reflect.InvocationTargetException>. Ensure that the index in the mapping is set to an out-of-bounds value."
+      ],
+      "CSVRecord_3_4Test": [
+        "Fix the testGet_noMapping() method: Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>. Ensure that the method correctly handles the case where no mapping is provided.",
+        "Fix the testGet_indexOutOfBounds() method: Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown. Ensure that the index in the mapping is set to an out-of-bounds value."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 7309,
+    "completion_tokens": 427,
+    "total_tokens": 7736,
+    "llm_elapsed_time_seconds": 7.947
+  }
+}

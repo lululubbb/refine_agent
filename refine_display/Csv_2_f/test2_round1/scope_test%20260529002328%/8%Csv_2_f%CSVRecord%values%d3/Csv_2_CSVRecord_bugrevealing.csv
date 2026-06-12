@@ -1,0 +1,7 @@
+project_name,target_class,test_class,test_method,buggy_status,fixed_status,bug_revealing,buggy_rc,fixed_rc,notes
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_8_1Test,testvalues_normalCase,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_8_1Test,testvalues_emptyArray,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_8_1Test,testvalues_singleElement,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_8_2Test,testvalues_normalCase,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_8_2Test,testvalues_emptyArray,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_8_2Test,testvalues_singleElement,pass,pass,false,0,0,

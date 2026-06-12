@@ -1,0 +1,13 @@
+test_class,focal_method,compile_score,exec_score,coverage_score,bug_revealing_score,redundancy_score,final_score,valid_weight_pct
+org.apache.commons.csv.CSVRecord_5_1Test,isMapped,1.0,1.0,,,,1.0,0.3
+org.apache.commons.csv.CSVRecord_5_2Test,isMapped,1.0,1.0,,,,1.0,0.3
+org.apache.commons.csv.CSVRecord_5_3Test,isMapped,1.0,1.0,,,,1.0,0.3
+org.apache.commons.csv.CSVRecord_5_4Test,isMapped,1.0,1.0,,,,1.0,0.3
+org.apache.commons.csv.CSVRecord_5_1Test,isMapped,1.0,1.0,,0.0,,0.6,0.5
+org.apache.commons.csv.CSVRecord_5_2Test,isMapped,1.0,1.0,,0.0,,0.6,0.5
+org.apache.commons.csv.CSVRecord_5_3Test,isMapped,1.0,1.0,,0.0,,0.6,0.5
+org.apache.commons.csv.CSVRecord_5_4Test,isMapped,0.0,0.0,,0.0,,0.0,0.5
+org.apache.commons.csv.CSVRecord_5_1Test,isMapped,1.0,1.0,,0.0,,0.6,0.5
+org.apache.commons.csv.CSVRecord_5_2Test,isMapped,1.0,1.0,,0.0,,0.6,0.5
+org.apache.commons.csv.CSVRecord_5_3Test,isMapped,1.0,1.0,,0.0,,0.6,0.5
+org.apache.commons.csv.CSVRecord_5_4Test,isMapped,1.0,1.0,,0.0,,0.6,0.5

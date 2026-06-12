@@ -1,0 +1,220 @@
+bug_revealing log started: 2026-05-29T00:55:01.839502
+buggy=/home/chenlu/refine_test_gen_v5/defect4j_projects/Csv_2_b
+fixed=/home/chenlu/refine_test_gen_v5/defect4j_projects/Csv_2_f
+tests_dir=/home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/12%Csv_2_f%CSVRecord%toString%d3/test_cases
+
+Running org.apache.commons.csv.CSVRecord_12_1Test#testtoString_normalCase on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_1Test#testtoString_normalCase on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_1Test#testtoString_emptyArray on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_1Test#testtoString_emptyArray on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_1Test#testtoString_singleElement on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_1Test#testtoString_singleElement on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_1Test#testtoString_boundaryValues on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_1Test#testtoString_boundaryValues on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_1Test#testtoString_withWhitespace on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_1Test#testtoString_withWhitespace on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_1Test#testtoString_specialCharacters on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_1Test#testtoString_specialCharacters on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_2Test#testToString_emptyArray on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_2Test#testToString_emptyArray on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_2Test#testToString_singleElement on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_2Test#testToString_singleElement on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_2Test#testToString_multipleElements on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_2Test#testToString_multipleElements on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_2Test#testToString_withNulls on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_2Test#testToString_withNulls on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_2Test#testToString_emptyRecordWithComment on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_2Test#testToString_emptyRecordWithComment on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_2Test#testToString_boundaryValues on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_2Test#testToString_boundaryValues on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_2Test#testToString_withEmptyAndNull on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_2Test#testToString_withEmptyAndNull on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_2Test#testToString_largeArray on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_2Test#testToString_largeArray on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_3Test#testToString_emptyArray on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_3Test#testToString_emptyArray on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_3Test#testToString_singleElement on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_3Test#testToString_singleElement on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_3Test#testToString_multipleElements on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_3Test#testToString_multipleElements on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_3Test#testToString_withNullValues on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_3Test#testToString_withNullValues on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_3Test#testToString_boundaryValues on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_3Test#testToString_boundaryValues on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_3Test#testToString_specialCharacters on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_3Test#testToString_specialCharacters on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_4Test#testtoString_emptyValues on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_4Test#testtoString_emptyValues on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_4Test#testtoString_singleValue on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_4Test#testtoString_singleValue on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_4Test#testtoString_multipleValues on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_4Test#testtoString_multipleValues on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_4Test#testtoString_withNullValue on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_4Test#testtoString_withNullValue on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_4Test#testtoString_withAllNullValues on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_4Test#testtoString_withAllNullValues on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_12_4Test#testtoString_boundaryValues on buggy...
+  -> fail
+Running org.apache.commons.csv.CSVRecord_12_4Test#testtoString_boundaryValues on fixed...
+  -> fail
+---
+[2026-05-29T00:56:33.636606] buggy org.apache.commons.csv.CSVRecord_12_4Test#testtoString_boundaryValues status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_12_4Test:testtoString_boundaryValues()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_12_4Test', methodName = 'testtoString_boundaryValues', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: expected: <[ ]> but was: <[]>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+       org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1142)
+       org.apache.commons.csv.CSVRecord_12_4Test.testtoString_boundaryValues(CSVRecord_12_4Test.java:69)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       [...]
+
+Test run finished after 178 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+---
+[2026-05-29T00:56:33.636648] fixed org.apache.commons.csv.CSVRecord_12_4Test#testtoString_boundaryValues status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_12_4Test:testtoString_boundaryValues()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_12_4Test', methodName = 'testtoString_boundaryValues', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: expected: <[ ]> but was: <[]>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+       org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1142)
+       org.apache.commons.csv.CSVRecord_12_4Test.testtoString_boundaryValues(CSVRecord_12_4Test.java:69)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       [...]
+
+Test run finished after 195 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+Class-level summary: /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/12%Csv_2_f%CSVRecord%toString%d3/Csv_2_CSVRecord_bugrevealing_class_level.csv
+Class-level CSV: /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/12%Csv_2_f%CSVRecord%toString%d3/Csv_2_CSVRecord_bugrevealing_class_level.csv
+@Test method-level stats: /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/12%Csv_2_f%CSVRecord%toString%d3/Csv_2_CSVRecord_bugrevealing_method_stats.csv
+
+===== SUMMARY =====
+Total tests evaluated: 26
+Bug revealing tests: 0
+Summary CSV: /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/12%Csv_2_f%CSVRecord%toString%d3/Csv_2_CSVRecord_bugrevealing.csv
+
+===== @Test METHOD-LEVEL STATISTICS =====
+Total @Test methods run: 26
+--- Fixed version (Csv_2_f) ---
+  PASS   : 25
+  FAIL   : 1
+  TIMEOUT: 0
+  Pass rate: 96.15%
+--- Buggy version (Csv_2_b) ---
+  PASS   : 25
+  FAIL   : 1
+  TIMEOUT: 0
+  Pass rate: 96.15%
+
+===== @Test METHOD-LEVEL STATISTICS =====
+Total @Test methods run: 26
+--- Fixed version (Csv_2_f) ---
+  PASS   : 25
+  FAIL   : 1
+  TIMEOUT: 0
+  Pass rate: 96.15%
+--- Buggy version (Csv_2_b) ---
+  PASS   : 25
+  FAIL   : 1
+  TIMEOUT: 0
+  Pass rate: 96.15%
+
+===== END =====
+log finished: 2026-05-29T00:56:33.639727

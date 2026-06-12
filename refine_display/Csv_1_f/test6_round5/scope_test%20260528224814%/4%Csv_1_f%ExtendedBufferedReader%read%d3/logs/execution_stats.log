@@ -1,0 +1,17 @@
+[PER_TEST_RUN] ExtendedBufferedReader_4_1Test.java exec_ok=False exec_size=32022
+[PER_TEST_RUN] ExtendedBufferedReader_4_2Test.java exec_ok=False exec_size=32023
+[PER_TEST_RUN] ExtendedBufferedReader_4_3Test.java exec_ok=False exec_size=31968
+[PER_TEST_RUN] ExtendedBufferedReader_4_4Test.java exec_ok=False exec_size=32022
+[PER_TEST_RUN] ExtendedBufferedReader_4_5Test.java exec_ok=False exec_size=32022
+[PER_TEST_RUN] ExtendedBufferedReader_4_6Test.java exec_ok=False exec_size=32102
+[ALL ATTEMPTS]
+  total_tests=6
+  syntax_errors=0
+  compile_errors=0
+  test_run_errors=6
+  全项目行覆盖率: 4.18% (19/455)
+  全项目分支覆盖率: 4.73% (14/296)
+  target_classes: ['ExtendedBufferedReader']
+  target_class: ExtendedBufferedReader
+    行覆盖率: 51.35% (19/37)
+    分支覆盖率: 53.85% (14/26)

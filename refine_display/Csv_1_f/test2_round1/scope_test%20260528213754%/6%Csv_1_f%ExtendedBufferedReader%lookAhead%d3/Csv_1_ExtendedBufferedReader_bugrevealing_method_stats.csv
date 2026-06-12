@@ -1,0 +1,7 @@
+project_name,target_class,test_class,test_method,fixed_status,buggy_status,bug_revealing
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_6_1Test,testLookAhead_normalCase,pass,pass,false
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_6_1Test,testLookAhead_endOfStream,pass,pass,false
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_6_1Test,testLookAhead_exceptionDuringRead,timeout,timeout,false
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_6_2Test,testLookAhead_normalCase,pass,pass,false
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_6_2Test,testLookAhead_emptyInput,pass,pass,false
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_6_2Test,testLookAhead_endOfStream,fail,fail,false

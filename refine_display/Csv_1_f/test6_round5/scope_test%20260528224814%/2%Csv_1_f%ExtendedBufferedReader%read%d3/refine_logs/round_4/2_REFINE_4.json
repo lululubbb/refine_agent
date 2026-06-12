@@ -1,0 +1,30 @@
+{
+  "raw": "{\n  \"suite_summary\": \"The test suite for the ExtendedBufferedReader class has a high compile pass rate but suffers from significant execution failures across multiple test files. The tests primarily fail due to assertion errors, indicating discrepancies between expected and actual results. This suggests potential issues in the focal method's logic or the test assertions themselves.\",\n  \"test_instructions\": {\n    \"ExtendedBufferedReader_2_2Test\": [\n      \"Fix the assertion in testRead_lineBreaks: expected: <4> but was: <3>. Trace the focal method logic carefully to ensure the correct line count is asserted.\"\n    ],\n    \"ExtendedBufferedReader_2_3Test\": [\n      \"Fix the assertion in testRead_newLine: expected: <1> but was: <111>. Trace the focal method logic carefully to ensure the correct line count is asserted.\"\n    ],\n    \"ExtendedBufferedReader_2_4Test\": [\n      \"Fix the assertion in testRead_normalCase: expected: <3> but was: <108>. Trace the focal method logic carefully to ensure the correct line count is asserted.\"\n    ],\n    \"ExtendedBufferedReader_2_5Test\": [\n      \"Fix the assertion in testRead_multipleNewLines: expected: <-1> but was: <10>. Trace the focal method logic carefully to ensure the correct end of stream value is asserted.\"\n    ],\n    \"ExtendedBufferedReader_2_6Test\": [\n      \"Fix the assertion in testGetLineNumber: expected: <1> but was: <0>. Trace the focal method logic carefully to ensure the correct line number is asserted.\",\n      \"Fix the assertion in testLookAhead: expected: <76> but was: <111>. Trace the focal method logic carefully to ensure the correct value is asserted.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "The test suite for the ExtendedBufferedReader class has a high compile pass rate but suffers from significant execution failures across multiple test files. The tests primarily fail due to assertion errors, indicating discrepancies between expected and actual results. This suggests potential issues in the focal method's logic or the test assertions themselves.",
+    "test_instructions": {
+      "ExtendedBufferedReader_2_2Test": [
+        "Fix the assertion in testRead_lineBreaks: expected: <4> but was: <3>. Trace the focal method logic carefully to ensure the correct line count is asserted."
+      ],
+      "ExtendedBufferedReader_2_3Test": [
+        "Fix the assertion in testRead_newLine: expected: <1> but was: <111>. Trace the focal method logic carefully to ensure the correct line count is asserted."
+      ],
+      "ExtendedBufferedReader_2_4Test": [
+        "Fix the assertion in testRead_normalCase: expected: <3> but was: <108>. Trace the focal method logic carefully to ensure the correct line count is asserted."
+      ],
+      "ExtendedBufferedReader_2_5Test": [
+        "Fix the assertion in testRead_multipleNewLines: expected: <-1> but was: <10>. Trace the focal method logic carefully to ensure the correct end of stream value is asserted."
+      ],
+      "ExtendedBufferedReader_2_6Test": [
+        "Fix the assertion in testGetLineNumber: expected: <1> but was: <0>. Trace the focal method logic carefully to ensure the correct line number is asserted.",
+        "Fix the assertion in testLookAhead: expected: <76> but was: <111>. Trace the focal method logic carefully to ensure the correct value is asserted."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 11991,
+    "completion_tokens": 371,
+    "total_tokens": 12362,
+    "llm_elapsed_time_seconds": 7.146
+  }
+}

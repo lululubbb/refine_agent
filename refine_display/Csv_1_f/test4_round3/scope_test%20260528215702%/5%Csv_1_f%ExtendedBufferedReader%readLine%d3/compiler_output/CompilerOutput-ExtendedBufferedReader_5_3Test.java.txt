@@ -1,0 +1,18 @@
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+/home/chenlu/refine_test_gen_v5/refine_display/Csv_1_f/test4_round3/scope_test%20260528215702%/5%Csv_1_f%ExtendedBufferedReader%readLine%d3/test_cases/ExtendedBufferedReader_5_3Test.java:47: error: incompatible types: Field cannot be converted to Method
+        Method lastCharField = ExtendedBufferedReader.class.getDeclaredField("lastChar");
+                                                                            ^
+/home/chenlu/refine_test_gen_v5/refine_display/Csv_1_f/test4_round3/scope_test%20260528215702%/5%Csv_1_f%ExtendedBufferedReader%readLine%d3/test_cases/ExtendedBufferedReader_5_3Test.java:49: error: cannot find symbol
+        Assertions.assertEquals(ExtendedBufferedReader.UNDEFINED, lastCharField.get(reader));
+                                                                               ^
+  symbol:   method get(ExtendedBufferedReader)
+  location: variable lastCharField of type Method
+/home/chenlu/refine_test_gen_v5/refine_display/Csv_1_f/test4_round3/scope_test%20260528215702%/5%Csv_1_f%ExtendedBufferedReader%readLine%d3/test_cases/ExtendedBufferedReader_5_3Test.java:61: error: incompatible types: Field cannot be converted to Method
+        Method lastCharField = ExtendedBufferedReader.class.getDeclaredField("lastChar");
+                                                                            ^
+/home/chenlu/refine_test_gen_v5/refine_display/Csv_1_f/test4_round3/scope_test%20260528215702%/5%Csv_1_f%ExtendedBufferedReader%readLine%d3/test_cases/ExtendedBufferedReader_5_3Test.java:63: error: cannot find symbol
+        Assertions.assertEquals(ExtendedBufferedReader.END_OF_STREAM, lastCharField.get(reader));
+                                                                                   ^
+  symbol:   method get(ExtendedBufferedReader)
+  location: variable lastCharField of type Method
+4 errors

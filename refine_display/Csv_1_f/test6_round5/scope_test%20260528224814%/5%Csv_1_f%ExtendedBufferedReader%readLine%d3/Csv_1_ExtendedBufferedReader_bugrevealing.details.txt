@@ -1,0 +1,442 @@
+bug_revealing log started: 2026-05-28T23:09:02.333198
+buggy=/home/chenlu/refine_test_gen_v5/defect4j_projects/Csv_1_b
+fixed=/home/chenlu/refine_test_gen_v5/defect4j_projects/Csv_1_f
+tests_dir=/home/chenlu/refine_test_gen_v5/refine_display/Csv_1_f/test6_round5/scope_test%20260528224814%/5%Csv_1_f%ExtendedBufferedReader%readLine%d3/test_cases
+
+Running org.apache.commons.csv.ExtendedBufferedReader_5_1Test#testreadLine_normalCase on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_1Test#testreadLine_normalCase on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_1Test#testreadLine_emptyLine on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_5_1Test#testreadLine_emptyLine on fixed...
+  -> fail
+---
+[2026-05-28T23:09:08.529549] buggy org.apache.commons.csv.ExtendedBufferedReader_5_1Test#testreadLine_emptyLine status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:ExtendedBufferedReader_5_1Test:testreadLine_emptyLine()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_5_1Test', methodName = 'testreadLine_emptyLine', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: expected: <-1> but was: <-2>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+       org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:528)
+       org.apache.commons.csv.ExtendedBufferedReader_5_1Test.testreadLine_emptyLine(ExtendedBufferedReader_5_1Test.java:34)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       [...]
+
+Test run finished after 179 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+---
+[2026-05-28T23:09:08.529582] fixed org.apache.commons.csv.ExtendedBufferedReader_5_1Test#testreadLine_emptyLine status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:ExtendedBufferedReader_5_1Test:testreadLine_emptyLine()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_5_1Test', methodName = 'testreadLine_emptyLine', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: expected: <-1> but was: <-2>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+       org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:528)
+       org.apache.commons.csv.ExtendedBufferedReader_5_1Test.testreadLine_emptyLine(ExtendedBufferedReader_5_1Test.java:34)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       [...]
+
+Test run finished after 257 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+Running org.apache.commons.csv.ExtendedBufferedReader_5_1Test#testreadLine_endOfStream on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_1Test#testreadLine_endOfStream on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_1Test#testreadLine_multipleLines on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_1Test#testreadLine_multipleLines on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_2Test#testReadLine_normalCase on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_2Test#testReadLine_normalCase on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_2Test#testReadLine_emptyLine on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_2Test#testReadLine_emptyLine on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_2Test#testReadLine_endOfStream on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_2Test#testReadLine_endOfStream on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_2Test#testReadLine_singleCharacter on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_2Test#testReadLine_singleCharacter on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_3Test#testreadLine_normalCase on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_3Test#testreadLine_normalCase on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_3Test#testreadLine_emptyLine on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_5_3Test#testreadLine_emptyLine on fixed...
+  -> fail
+---
+[2026-05-28T23:09:34.758239] buggy org.apache.commons.csv.ExtendedBufferedReader_5_3Test#testreadLine_emptyLine status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:ExtendedBufferedReader_5_3Test:testreadLine_emptyLine()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_5_3Test', methodName = 'testreadLine_emptyLine', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: expected: <-1> but was: <101>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+       org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:528)
+       org.apache.commons.csv.ExtendedBufferedReader_5_3Test.testreadLine_emptyLine(ExtendedBufferedReader_5_3Test.java:42)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       [...]
+
+Test run finished after 216 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+---
+[2026-05-28T23:09:34.758271] fixed org.apache.commons.csv.ExtendedBufferedReader_5_3Test#testreadLine_emptyLine status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:ExtendedBufferedReader_5_3Test:testreadLine_emptyLine()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_5_3Test', methodName = 'testreadLine_emptyLine', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: expected: <-1> but was: <101>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+       org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:528)
+       org.apache.commons.csv.ExtendedBufferedReader_5_3Test.testreadLine_emptyLine(ExtendedBufferedReader_5_3Test.java:42)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       [...]
+
+Test run finished after 128 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+Running org.apache.commons.csv.ExtendedBufferedReader_5_3Test#testreadLine_endOfStream on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_3Test#testreadLine_endOfStream on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_4Test#testReadLine_normalCase on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_4Test#testReadLine_normalCase on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_4Test#testReadLine_emptyLine on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_4Test#testReadLine_emptyLine on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_4Test#testReadLine_endOfStream on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_4Test#testReadLine_endOfStream on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_4Test#testReadLine_multipleLines on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_4Test#testReadLine_multipleLines on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_4Test#testReadLine_withWhitespace on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_4Test#testReadLine_withWhitespace on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_4Test#testReadLine_checkLastChar on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_4Test#testReadLine_checkLastChar on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_5Test#testReadLine_normalCase on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_5Test#testReadLine_normalCase on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_5Test#testReadLine_emptyLine on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_5Test#testReadLine_emptyLine on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_5Test#testReadLine_endOfStream on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_5Test#testReadLine_endOfStream on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_5Test#testReadLine_multipleLines on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_5Test#testReadLine_multipleLines on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_5Test#testReadLine_lastCharTracking on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_5_5Test#testReadLine_lastCharTracking on fixed...
+  -> fail
+---
+[2026-05-28T23:10:14.165954] buggy org.apache.commons.csv.ExtendedBufferedReader_5_5Test#testReadLine_lastCharTracking status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:ExtendedBufferedReader_5_5Test:testReadLine_lastCharTracking()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_5_5Test', methodName = 'testReadLine_lastCharTracking', methodParameterTypes = '']
+    => java.lang.NoSuchMethodException: org.apache.commons.csv.ExtendedBufferedReader.getLastChar()
+       java.base/java.lang.Class.getDeclaredMethod(Class.java:2475)
+       org.apache.commons.csv.ExtendedBufferedReader_5_5Test.testReadLine_lastCharTracking(ExtendedBufferedReader_5_5Test.java:67)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+       org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+       org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+       org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)
+       [...]
+
+Test run finished after 251 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+---
+[2026-05-28T23:10:14.165984] fixed org.apache.commons.csv.ExtendedBufferedReader_5_5Test#testReadLine_lastCharTracking status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:ExtendedBufferedReader_5_5Test:testReadLine_lastCharTracking()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_5_5Test', methodName = 'testReadLine_lastCharTracking', methodParameterTypes = '']
+    => java.lang.NoSuchMethodException: org.apache.commons.csv.ExtendedBufferedReader.getLastChar()
+       java.base/java.lang.Class.getDeclaredMethod(Class.java:2475)
+       org.apache.commons.csv.ExtendedBufferedReader_5_5Test.testReadLine_lastCharTracking(ExtendedBufferedReader_5_5Test.java:67)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+       org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+       org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+       org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)
+       [...]
+
+Test run finished after 146 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+Running org.apache.commons.csv.ExtendedBufferedReader_5_6Test#testReadLine_normalCase on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_6Test#testReadLine_normalCase on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_6Test#testReadLine_emptyLine on buggy...
+  -> fail
+Running org.apache.commons.csv.ExtendedBufferedReader_5_6Test#testReadLine_emptyLine on fixed...
+  -> fail
+---
+[2026-05-28T23:10:20.713868] buggy org.apache.commons.csv.ExtendedBufferedReader_5_6Test#testReadLine_emptyLine status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:ExtendedBufferedReader_5_6Test:testReadLine_emptyLine()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_5_6Test', methodName = 'testReadLine_emptyLine', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: expected: <78> but was: <-2>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+       org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:528)
+       org.apache.commons.csv.ExtendedBufferedReader_5_6Test.testReadLine_emptyLine(ExtendedBufferedReader_5_6Test.java:34)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       [...]
+
+Test run finished after 250 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+---
+[2026-05-28T23:10:20.713899] fixed org.apache.commons.csv.ExtendedBufferedReader_5_6Test#testReadLine_emptyLine status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:ExtendedBufferedReader_5_6Test:testReadLine_emptyLine()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_5_6Test', methodName = 'testReadLine_emptyLine', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: expected: <78> but was: <-2>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+       org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:528)
+       org.apache.commons.csv.ExtendedBufferedReader_5_6Test.testReadLine_emptyLine(ExtendedBufferedReader_5_6Test.java:34)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       [...]
+
+Test run finished after 176 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+Running org.apache.commons.csv.ExtendedBufferedReader_5_6Test#testReadLine_endOfStream on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_6Test#testReadLine_endOfStream on fixed...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_6Test#testReadLine_multipleLines on buggy...
+  -> pass
+Running org.apache.commons.csv.ExtendedBufferedReader_5_6Test#testReadLine_multipleLines on fixed...
+  -> pass
+Class-level summary: /home/chenlu/refine_test_gen_v5/refine_display/Csv_1_f/test6_round5/scope_test%20260528224814%/5%Csv_1_f%ExtendedBufferedReader%readLine%d3/Csv_1_ExtendedBufferedReader_bugrevealing_class_level.csv
+Class-level CSV: /home/chenlu/refine_test_gen_v5/refine_display/Csv_1_f/test6_round5/scope_test%20260528224814%/5%Csv_1_f%ExtendedBufferedReader%readLine%d3/Csv_1_ExtendedBufferedReader_bugrevealing_class_level.csv
+@Test method-level stats: /home/chenlu/refine_test_gen_v5/refine_display/Csv_1_f/test6_round5/scope_test%20260528224814%/5%Csv_1_f%ExtendedBufferedReader%readLine%d3/Csv_1_ExtendedBufferedReader_bugrevealing_method_stats.csv
+
+===== SUMMARY =====
+Total tests evaluated: 26
+Bug revealing tests: 0
+Summary CSV: /home/chenlu/refine_test_gen_v5/refine_display/Csv_1_f/test6_round5/scope_test%20260528224814%/5%Csv_1_f%ExtendedBufferedReader%readLine%d3/Csv_1_ExtendedBufferedReader_bugrevealing.csv
+
+===== @Test METHOD-LEVEL STATISTICS =====
+Total @Test methods run: 26
+--- Fixed version (Csv_1_f) ---
+  PASS   : 22
+  FAIL   : 4
+  TIMEOUT: 0
+  Pass rate: 84.62%
+--- Buggy version (Csv_1_b) ---
+  PASS   : 22
+  FAIL   : 4
+  TIMEOUT: 0
+  Pass rate: 84.62%
+
+===== @Test METHOD-LEVEL STATISTICS =====
+Total @Test methods run: 26
+--- Fixed version (Csv_1_f) ---
+  PASS   : 22
+  FAIL   : 4
+  TIMEOUT: 0
+  Pass rate: 84.62%
+--- Buggy version (Csv_1_b) ---
+  PASS   : 22
+  FAIL   : 4
+  TIMEOUT: 0
+  Pass rate: 84.62%
+
+===== END =====
+log finished: 2026-05-28T23:10:27.573922

@@ -1,0 +1,6 @@
+project,target_class,focal_method,exec_status,f_per_line_cov,f_per_line_total,f_per_line_rate,f_per_branch_cov,f_per_branch_total,f_per_branch_rate,line_contrib_pct,branch_contrib_pct,coverage_score
+Csv_1_f,ExtendedBufferedReader,read,fail,15,15,100.0,14,16,87.5,100.0,87.5,0.9375
+Csv_1_f,ExtendedBufferedReader,read,fail,15,15,100.0,14,16,87.5,100.0,87.5,0.9375
+Csv_1_f,ExtendedBufferedReader,read,ok,15,15,100.0,14,16,87.5,100.0,87.5,0.9375
+Csv_1_f,ExtendedBufferedReader,read,fail,15,15,100.0,14,16,87.5,100.0,87.5,0.9375
+Csv_1_f,ExtendedBufferedReader,read,fail,15,15,100.0,14,16,87.5,100.0,87.5,0.9375

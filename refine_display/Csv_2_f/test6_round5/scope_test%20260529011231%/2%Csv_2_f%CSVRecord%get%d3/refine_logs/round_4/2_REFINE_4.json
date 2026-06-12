@@ -1,0 +1,32 @@
+{
+  "raw": "{\n  \"suite_summary\": \"The test suite for the `get` method in the `CSVRecord` class has a mix of compile and execution failures, with some tests also suffering from low coverage and redundancy issues. A total of 6 test files were analyzed, with 2 failing to compile, 1 failing during execution, and several others lacking sufficient coverage and bug-revealing capabilities.\",\n  \"test_instructions\": {\n    \"CSVRecord_2_1Test\": [\n      \"Fix compile error: 'cannot find symbol' at line 98. Ensure that all @Test methods declare 'throws Exception'.\"\n    ],\n    \"CSVRecord_2_5Test\": [\n      \"Fix execution error: 'Unexpected exception type thrown, expected: <java.lang.ArrayIndexOutOfBoundsException> but was: <java.lang.reflect.InvocationTargetException>'. Ensure that the invokeGet method correctly handles exceptions.\"\n    ],\n    \"CSVRecord_2_2Test\": [\n      \"Increase coverage by adding tests for boundary values and exception-throwing paths, such as testing with an empty array and negative indices.\"\n    ],\n    \"CSVRecord_2_3Test\": [\n      \"Increase coverage by adding tests for boundary values and exception-throwing paths, such as testing with an empty array and negative indices.\"\n    ],\n    \"CSVRecord_2_4Test\": [\n      \"Increase coverage by adding tests for boundary values and exception-throwing paths, such as testing with an empty array and negative indices.\"\n    ],\n    \"CSVRecord_2_6Test\": [\n      \"Fix compile error: 'cannot find symbol' at line 101. Ensure that all @Test methods declare 'throws Exception'.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "The test suite for the `get` method in the `CSVRecord` class has a mix of compile and execution failures, with some tests also suffering from low coverage and redundancy issues. A total of 6 test files were analyzed, with 2 failing to compile, 1 failing during execution, and several others lacking sufficient coverage and bug-revealing capabilities.",
+    "test_instructions": {
+      "CSVRecord_2_1Test": [
+        "Fix compile error: 'cannot find symbol' at line 98. Ensure that all @Test methods declare 'throws Exception'."
+      ],
+      "CSVRecord_2_5Test": [
+        "Fix execution error: 'Unexpected exception type thrown, expected: <java.lang.ArrayIndexOutOfBoundsException> but was: <java.lang.reflect.InvocationTargetException>'. Ensure that the invokeGet method correctly handles exceptions."
+      ],
+      "CSVRecord_2_2Test": [
+        "Increase coverage by adding tests for boundary values and exception-throwing paths, such as testing with an empty array and negative indices."
+      ],
+      "CSVRecord_2_3Test": [
+        "Increase coverage by adding tests for boundary values and exception-throwing paths, such as testing with an empty array and negative indices."
+      ],
+      "CSVRecord_2_4Test": [
+        "Increase coverage by adding tests for boundary values and exception-throwing paths, such as testing with an empty array and negative indices."
+      ],
+      "CSVRecord_2_6Test": [
+        "Fix compile error: 'cannot find symbol' at line 101. Ensure that all @Test methods declare 'throws Exception'."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 10803,
+    "completion_tokens": 354,
+    "total_tokens": 11157,
+    "llm_elapsed_time_seconds": 5.206
+  }
+}

@@ -1,0 +1,29 @@
+# diagnosis.log — 测试用例问题诊断
+# 每个 [DIAGNOSIS] 块对应一个测试类，供优化指令生成使用
+# status 取值: compile_fail | exec_fail | exec_timeout | exec_ok
+# =============================================================
+
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_3_1Test
+  project=Csv_2_f  target_class=CSVRecord
+  status=exec_fail
+  error_type=runtime_error
+  core_errors:
+    - => org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>
+    - Caused by: java.lang.reflect.InvocationTargetException
+    - Caused by: java.lang.IllegalStateException: No header mapping was specified, the record values can't be accessed by name
+    - => org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.reflect.InvocationTargetException>
+    - Caused by: java.lang.reflect.InvocationTargetException
+    - Caused by: java.lang.IllegalArgumentException: Index for header 'header1' is 2 but CSVRecord only has 2 values!
+---
+[DIAGNOSIS] test_class=org.apache.commons.csv.CSVRecord_3_2Test
+  project=Csv_2_f  target_class=CSVRecord
+  status=exec_fail
+  error_type=runtime_error
+  core_errors:
+    - => org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>
+    - Caused by: java.lang.reflect.InvocationTargetException
+    - Caused by: java.lang.IllegalStateException: No header mapping was specified, the record values can't be accessed by name
+    - => org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.reflect.InvocationTargetException>
+    - Caused by: java.lang.reflect.InvocationTargetException
+    - Caused by: java.lang.IllegalArgumentException: Index for header 'name' is 1 but CSVRecord only has 1 values!
+---

@@ -1,0 +1,26 @@
+{
+  "raw": "{\n  \"suite_summary\": \"All test files compile and execute successfully, but they exhibit high redundancy and are not bug-revealing. Each test file has similar test cases that do not explore different paths or edge cases effectively. Enhancing the diversity of test cases will improve the overall quality of the test suite.\",\n  \"test_instructions\": {\n    \"CSVRecord_4_1Test\": [\n      \"This test is not bug-revealing. Consider adding tests for boundary values and edge cases to ensure the method behaves as expected under various conditions.\"\n    ],\n    \"CSVRecord_4_2Test\": [\n      \"This test is not bug-revealing. Consider adding tests for boundary values and edge cases to ensure the method behaves as expected under various conditions.\"\n    ],\n    \"CSVRecord_4_3Test\": [\n      \"This test is not bug-revealing. Consider adding tests for boundary values and edge cases to ensure the method behaves as expected under various conditions.\"\n    ],\n    \"CSVRecord_4_4Test\": [\n      \"This test is not bug-revealing. Consider adding tests for boundary values and edge cases to ensure the method behaves as expected under various conditions.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "All test files compile and execute successfully, but they exhibit high redundancy and are not bug-revealing. Each test file has similar test cases that do not explore different paths or edge cases effectively. Enhancing the diversity of test cases will improve the overall quality of the test suite.",
+    "test_instructions": {
+      "CSVRecord_4_1Test": [
+        "This test is not bug-revealing. Consider adding tests for boundary values and edge cases to ensure the method behaves as expected under various conditions."
+      ],
+      "CSVRecord_4_2Test": [
+        "This test is not bug-revealing. Consider adding tests for boundary values and edge cases to ensure the method behaves as expected under various conditions."
+      ],
+      "CSVRecord_4_3Test": [
+        "This test is not bug-revealing. Consider adding tests for boundary values and edge cases to ensure the method behaves as expected under various conditions."
+      ],
+      "CSVRecord_4_4Test": [
+        "This test is not bug-revealing. Consider adding tests for boundary values and edge cases to ensure the method behaves as expected under various conditions."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 6040,
+    "completion_tokens": 250,
+    "total_tokens": 6290,
+    "llm_elapsed_time_seconds": 5.19
+  }
+}

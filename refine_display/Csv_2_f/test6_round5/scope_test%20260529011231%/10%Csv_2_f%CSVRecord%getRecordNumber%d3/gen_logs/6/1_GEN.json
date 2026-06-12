@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Constructor;\nimport java.lang.reflect.Field;\nimport java.util.Collections;\nimport java.util.HashMap;\n\npublic class CSVRecordTest {\n\n    @Test\n    public void testGetRecordNumber_normalCase() throws Exception {\n        long expectedRecordNumber = 5L;\n        CSVRecord csvRecord = createCSVRecord(new String[]{\"value1\", \"value2\"}, expectedRecordNumber);\n        long actualRecordNumber = csvRecord.getRecordNumber();\n        Assertions.assertEquals(expectedRecordNumber, actualRecordNumber);\n    }\n\n    @Test\n    public void testGetRecordNumber_zeroRecordNumber() throws Exception {\n        long expectedRecordNumber = 0L;\n        CSVRecord csvRecord = createCSVRecord(new String[]{\"value1\"}, expectedRecordNumber);\n        long actualRecordNumber = csvRecord.getRecordNumber();\n        Assertions.assertEquals(expectedRecordNumber, actualRecordNumber);\n    }\n\n    @Test\n    public void testGetRecordNumber_negativeRecordNumber() throws Exception {\n        long expectedRecordNumber = -1L;\n        CSVRecord csvRecord = createCSVRecord(new String[]{\"value1\", \"value2\", \"value3\"}, expectedRecordNumber);\n        long actualRecordNumber = csvRecord.getRecordNumber();\n        Assertions.assertEquals(expectedRecordNumber, actualRecordNumber);\n    }\n\n    private CSVRecord createCSVRecord(String[] values, long recordNumber) throws Exception {\n        Constructor<CSVRecord> constructor = CSVRecord.class.getDeclaredConstructor(String[].class, Map.class, String.class, long.class);\n        constructor.setAccessible(true);\n        return constructor.newInstance(values, new HashMap<>(), null, recordNumber);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 619,
+    "completion_tokens": 350,
+    "total_tokens": 969,
+    "llm_elapsed_time_seconds": 6.099
+  }
+}

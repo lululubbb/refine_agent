@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport org.mockito.Mockito;\n\nimport java.lang.reflect.Field;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecordTest {\n\n    @Test\n    public void testGetComment_normalCase() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"key1\", 0);\n        String comment = \"This is a comment\";\n        long recordNumber = 1L;\n\n        CSVRecord record = new CSVRecord(values, mapping, comment, recordNumber);\n        Assertions.assertEquals(comment, record.getComment());\n    }\n\n    @Test\n    public void testGetComment_emptyComment() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = \"\";\n        long recordNumber = 1L;\n\n        CSVRecord record = new CSVRecord(values, mapping, comment, recordNumber);\n        Assertions.assertEquals(comment, record.getComment());\n    }\n\n    @Test\n    public void testGetComment_nullComment() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = null;\n        long recordNumber = 1L;\n\n        CSVRecord record = new CSVRecord(values, mapping, comment, recordNumber);\n        Assertions.assertNull(record.getComment());\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 616,
+    "completion_tokens": 310,
+    "total_tokens": 926,
+    "llm_elapsed_time_seconds": 5.495
+  }
+}

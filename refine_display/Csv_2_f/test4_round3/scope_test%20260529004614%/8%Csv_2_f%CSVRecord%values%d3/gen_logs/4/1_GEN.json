@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Method;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecordTest {\n\n    @Test\n    public void testvalues_nonEmptyArray() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        \n        Method method = CSVRecord.class.getDeclaredMethod(\"values\");\n        method.setAccessible(true);\n        \n        String[] result = (String[]) method.invoke(record);\n        Assertions.assertArrayEquals(values, result);\n    }\n\n    @Test\n    public void testvalues_emptyArray() throws Exception {\n        String[] values = {};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        \n        Method method = CSVRecord.class.getDeclaredMethod(\"values\");\n        method.setAccessible(true);\n        \n        String[] result = (String[]) method.invoke(record);\n        Assertions.assertArrayEquals(values, result);\n    }\n\n    @Test\n    public void testvalues_nullArray() throws Exception {\n        String[] values = null;\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        \n        Method method = CSVRecord.class.getDeclaredMethod(\"values\");\n        method.setAccessible(true);\n        \n        String[] result = (String[]) method.invoke(record);\n        Assertions.assertNull(result);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 614,
+    "completion_tokens": 331,
+    "total_tokens": 945,
+    "llm_elapsed_time_seconds": 5.126
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_6_2Test {\n    private CSVRecord csvRecord;\n    private Map<String, Integer> mapping;\n\n    @BeforeEach\n    public void setUp() {\n        mapping = new HashMap<>();\n    }\n\n    @Test\n    public void testisSet_nameMappedAndWithinBounds() throws Exception {\n        mapping.put(\"name\", 0);\n        String[] values = {\"value1\", \"value2\"};\n        csvRecord = new CSVRecord(values, mapping, null, 1);\n        \n        Assertions.assertTrue(csvRecord.isSet(\"name\"), \"Expected 'name' to be set when mapped and within bounds.\");\n    }\n\n    @Test\n    public void testisSet_nameMappedButOutOfBounds() throws Exception {\n        mapping.put(\"name\", 2);\n        String[] values = {\"value1\", \"value2\"};\n        csvRecord = new CSVRecord(values, mapping, null, 1);\n        \n        Assertions.assertFalse(csvRecord.isSet(\"name\"), \"Expected 'name' to not be set when mapped but out of bounds.\");\n    }\n\n    @Test\n    public void testisSet_nameNotMapped() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        csvRecord = new CSVRecord(values, mapping, null, 1);\n        \n        Assertions.assertFalse(csvRecord.isSet(\"name\"), \"Expected 'name' to not be set when not mapped.\");\n    }\n\n    @Test\n    public void testisSet_emptyMapping() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        csvRecord = new CSVRecord(values, mapping, null, 1);\n        \n        Assertions.assertFalse(csvRecord.isSet(\"nonExistentName\"), \"Expected 'nonExistentName' to not be set with empty mapping.\");\n    }\n\n    @Test\n    public void testisSet_nullName() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        csvRecord = new CSVRecord(values, mapping, null, 1);\n        \n        Assertions.assertFalse(csvRecord.isSet(null), \"Expected null name to not be set.\");\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1019,
+    "completion_tokens": 498,
+    "total_tokens": 1517,
+    "llm_elapsed_time_seconds": 7.502
+  }
+}

@@ -1,0 +1,3 @@
+org.apache.commons.csv.CSVRecord_3_1Test	CSVRecord_3_1Test.java
+org.apache.commons.csv.CSVRecord_3_3Test	CSVRecord_3_3Test.java
+org.apache.commons.csv.CSVRecord_3_4Test	CSVRecord_3_4Test.java

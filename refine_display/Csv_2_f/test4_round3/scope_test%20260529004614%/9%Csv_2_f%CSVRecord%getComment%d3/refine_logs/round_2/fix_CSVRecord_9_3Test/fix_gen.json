@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.HashMap;\nimport java.util.Map;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\npublic class CSVRecord_9_3Test {\n\n    @Test\n    public void testGetComment_normalCase() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = \"This is a comment\";\n        long recordNumber = 1;\n\n        CSVRecord record = new CSVRecord(values, mapping, comment, recordNumber);\n        Assertions.assertEquals(comment, record.getComment());\n    }\n\n    @Test\n    public void testGetComment_emptyComment() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = \"\";\n        long recordNumber = 1;\n\n        CSVRecord record = new CSVRecord(values, mapping, comment, recordNumber);\n        Assertions.assertEquals(comment, record.getComment());\n    }\n\n    @Test\n    public void testGetComment_nullComment() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = null;\n        long recordNumber = 1;\n\n        CSVRecord record = new CSVRecord(values, mapping, comment, recordNumber);\n        Assertions.assertEquals(comment, record.getComment());\n    }\n\n    @Test\n    public void testGetComment_withSpecialCharacters() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = \"!@#$%^&*()_+\";\n        long recordNumber = 1;\n\n        CSVRecord record = new CSVRecord(values, mapping, comment, recordNumber);\n        Assertions.assertEquals(comment, record.getComment());\n    }\n\n    @Test\n    public void testGetComment_boundaryCase() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = \"A\"; // boundary case with a single character\n        long recordNumber = 1;\n\n        CSVRecord record = new CSVRecord(values, mapping, comment, recordNumber);\n        Assertions.assertEquals(comment, record.getComment());\n    }\n\n    @Test\n    public void testGetComment_longComment() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = new String(new char[1000]).replace(\"\\0\", \"longComment\"); // long comment\n        long recordNumber = 1;\n\n        CSVRecord record = new CSVRecord(values, mapping, comment, recordNumber);\n        Assertions.assertEquals(comment, record.getComment());\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1152,
+    "completion_tokens": 595,
+    "total_tokens": 1747,
+    "llm_elapsed_time_seconds": 8.492
+  }
+}

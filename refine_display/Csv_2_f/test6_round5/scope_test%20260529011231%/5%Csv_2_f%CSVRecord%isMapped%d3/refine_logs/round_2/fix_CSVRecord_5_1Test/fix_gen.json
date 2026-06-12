@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.HashMap;\nimport java.util.Map;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\npublic class CSVRecord_5_1Test {\n\n    @Test\n    public void testisMapped_normalCase() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"name\", 0);\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n        \n        Assertions.assertEquals(true, record.isMapped(\"name\"));\n    }\n\n    @Test\n    public void testisMapped_keyNotPresent() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"name\", 0);\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n        \n        Assertions.assertEquals(false, record.isMapped(\"otherName\"));\n    }\n\n    @Test\n    public void testisMapped_emptyMapping() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, null, 1);\n        \n        Assertions.assertEquals(false, record.isMapped(\"name\"));\n    }\n\n    @Test\n    public void testisMapped_nullMapping() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, null, null, 1);\n        \n        Assertions.assertEquals(false, record.isMapped(\"name\"));\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 964,
+    "completion_tokens": 316,
+    "total_tokens": 1280,
+    "llm_elapsed_time_seconds": 5.287
+  }
+}

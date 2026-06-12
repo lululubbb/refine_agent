@@ -1,0 +1,37 @@
+{
+  "raw": "{\n  \"suite_summary\": \"All test files in the suite compile successfully, but they all fail during execution. The tests exhibit high line coverage but do not reveal any bugs. There are also pairs of tests with high redundancy, indicating potential for consolidation. Each test file needs to address runtime errors to ensure they pass successfully.\",\n  \"test_instructions\": {\n    \"ExtendedBufferedReader_4_1Test\": [\n      \"Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <-1> but was: <8>. Check the expected value for the end of stream case.\",\n      \"Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <line1> but was: <line1line2>. Ensure the buffer content is correctly asserted.\"\n    ],\n    \"ExtendedBufferedReader_4_2Test\": [\n      \"Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <Line1> but was: <Line1>. Ensure the expected value matches the actual output.\",\n      \"Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <Hello> but was: <Hello>. Check the expected value for the input.\"\n    ],\n    \"ExtendedBufferedReader_4_3Test\": [\n      \"Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <2> but was: <1>. Verify the expected line count after reading the input.\",\n      \"Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <50> but was: <101>. Ensure the expected value matches the actual output.\"\n    ],\n    \"ExtendedBufferedReader_4_4Test\": [\n      \"Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <30> but was: <-1>. Check the expected value for the buffer length.\",\n      \"Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <Hello> but was: <Hello>. Ensure the expected value matches the actual output.\"\n    ],\n    \"ExtendedBufferedReader_4_5Test\": [\n      \"Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <10> but was: <8>. Verify the expected length of the read buffer.\",\n      \"Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <3> but was: <2>. Ensure the expected line count is correct.\"\n    ],\n    \"ExtendedBufferedReader_4_6Test\": [\n      \"Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <4> but was: <3>. Verify the expected line count after reading the input.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "All test files in the suite compile successfully, but they all fail during execution. The tests exhibit high line coverage but do not reveal any bugs. There are also pairs of tests with high redundancy, indicating potential for consolidation. Each test file needs to address runtime errors to ensure they pass successfully.",
+    "test_instructions": {
+      "ExtendedBufferedReader_4_1Test": [
+        "Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <-1> but was: <8>. Check the expected value for the end of stream case.",
+        "Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <line1> but was: <line1line2>. Ensure the buffer content is correctly asserted."
+      ],
+      "ExtendedBufferedReader_4_2Test": [
+        "Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <Line1> but was: <Line1>. Ensure the expected value matches the actual output.",
+        "Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <Hello> but was: <Hello>. Check the expected value for the input."
+      ],
+      "ExtendedBufferedReader_4_3Test": [
+        "Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <2> but was: <1>. Verify the expected line count after reading the input.",
+        "Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <50> but was: <101>. Ensure the expected value matches the actual output."
+      ],
+      "ExtendedBufferedReader_4_4Test": [
+        "Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <30> but was: <-1>. Check the expected value for the buffer length.",
+        "Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <Hello> but was: <Hello>. Ensure the expected value matches the actual output."
+      ],
+      "ExtendedBufferedReader_4_5Test": [
+        "Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <10> but was: <8>. Verify the expected length of the read buffer.",
+        "Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <3> but was: <2>. Ensure the expected line count is correct."
+      ],
+      "ExtendedBufferedReader_4_6Test": [
+        "Fix the assertion error: => org.opentest4j.AssertionFailedError: expected: <4> but was: <3>. Verify the expected line count after reading the input."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 9195,
+    "completion_tokens": 586,
+    "total_tokens": 9781,
+    "llm_elapsed_time_seconds": 10.232
+  }
+}

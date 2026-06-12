@@ -1,0 +1,90 @@
+{
+  "CSVRecord_3_1Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "JUnit Jupiter:CSVRecord_3_1Test:testGet_withOutOfBoundsIndex_throwsIllegalArgumentException()",
+      "MethodSource [className = 'org.apache.commons.csv.CSVRecord_3_1Test', methodName = 'testGet_withOutOfBoundsIndex_throwsIllegalArgumentException', methodParameterTypes = '']",
+      "=> org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.reflect.InvocationTargetException>",
+      "org.apache.commons.csv.CSVRecord_3_1Test.testGet_withOutOfBoundsIndex_throwsIllegalArgumentException(CSVRecord_3_1Test.java:59)",
+      "Caused by: java.lang.reflect.InvocationTargetException",
+      "Caused by: java.lang.IllegalArgumentException: Index for header 'header2' is 2 but CSVRecord only has 2 values!"
+    ],
+    "focal_line_rate": 88.89,
+    "focal_branch_rate": 100.0,
+    "focal_line_covered": 8,
+    "focal_line_total": 9,
+    "missed_methods": [],
+    "partial_methods": []
+  },
+  "CSVRecord_3_2Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "=> org.opentest4j.AssertionFailedError: Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.",
+      "Failures (1):",
+      "JUnit Jupiter:CSVRecord_3_2Test:testGet_invalidHeaderName()",
+      "MethodSource [className = 'org.apache.commons.csv.CSVRecord_3_2Test', methodName = 'testGet_invalidHeaderName', methodParameterTypes = '']",
+      "org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)",
+      "org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:73)",
+      "org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)",
+      "org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)",
+      "org.apache.commons.csv.CSVRecord_3_2Test.testGet_invalidHeaderName(CSVRecord_3_2Test.java:82)",
+      "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)",
+      "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)",
+      "java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)",
+      "java.base/java.lang.reflect.Method.invoke(Method.java:566)",
+      "org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)",
+      "[...]",
+      "Test run finished after 441 ms",
+      "[         4 containers found      ]",
+      "[         0 containers skipped    ]",
+      "[         4 containers started    ]",
+      "[         0 containers aborted    ]"
+    ],
+    "focal_line_rate": 0.0,
+    "focal_branch_rate": 0.0,
+    "focal_line_covered": 0,
+    "focal_line_total": 9,
+    "missed_methods": [],
+    "partial_methods": []
+  },
+  "CSVRecord_3_3Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "=> org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>",
+      "Caused by: java.lang.reflect.InvocationTargetException",
+      "Caused by: java.lang.IllegalStateException: No header mapping was specified, the record values can't be accessed by name",
+      "=> org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.reflect.InvocationTargetException>",
+      "Caused by: java.lang.IllegalArgumentException: Index for header 'header1' is 2 but CSVRecord only has 2 values!"
+    ],
+    "focal_line_rate": 88.89,
+    "focal_branch_rate": 100.0,
+    "focal_line_covered": 8,
+    "focal_line_total": 9,
+    "missed_methods": [],
+    "partial_methods": []
+  },
+  "CSVRecord_3_4Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "=> org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>",
+      "Caused by: java.lang.reflect.InvocationTargetException",
+      "Caused by: java.lang.IllegalStateException: No header mapping was specified, the record values can't be accessed by name",
+      "=> org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.reflect.InvocationTargetException>",
+      "Caused by: java.lang.IllegalArgumentException: Index for header 'age' is 2 but CSVRecord only has 1 values!"
+    ],
+    "focal_line_rate": 88.89,
+    "focal_branch_rate": 100.0,
+    "focal_line_covered": 8,
+    "focal_line_total": 9,
+    "missed_methods": [],
+    "partial_methods": []
+  }
+}

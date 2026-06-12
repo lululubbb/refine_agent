@@ -1,0 +1,27 @@
+{
+  "raw": "{\n  \"suite_summary\": \"The test suite for the `get` method in the `CSVRecord` class has a total of 4 test files, with 3 experiencing runtime errors and one exhibiting high redundancy and low coverage. The tests primarily focus on validating the behavior of the `get` method under various conditions, but several tests fail to execute correctly due to exceptions not being handled as expected.\",\n  \"test_instructions\": {\n    \"CSVRecord_3_1Test\": [\n      \"Fix the testGet_withOutOfBoundsIndex_throwsIllegalArgumentException() method: 'Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.reflect.InvocationTargetException>'. Ensure the exception is thrown correctly by checking the mapping and values.\"\n    ],\n    \"CSVRecord_3_3Test\": [\n      \"Fix the testGet_noHeaderMapping() method: 'Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>'. Ensure the exception is thrown correctly by checking the mapping.\",\n      \"Fix the testGet_indexOutOfBounds() method: 'Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown'. Ensure the index is out of bounds to trigger the exception.\"\n    ],\n    \"CSVRecord_3_4Test\": [\n      \"Fix the testGet_noMapping() method: 'Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>'. Ensure the exception is thrown correctly by checking the mapping.\"\n    ],\n    \"CSVRecord_3_2Test\": [\n      \"Increase coverage by adding tests for edge cases such as null values, empty strings, and invalid header names. Ensure to cover all branches of the get method.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "The test suite for the `get` method in the `CSVRecord` class has a total of 4 test files, with 3 experiencing runtime errors and one exhibiting high redundancy and low coverage. The tests primarily focus on validating the behavior of the `get` method under various conditions, but several tests fail to execute correctly due to exceptions not being handled as expected.",
+    "test_instructions": {
+      "CSVRecord_3_1Test": [
+        "Fix the testGet_withOutOfBoundsIndex_throwsIllegalArgumentException() method: 'Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.reflect.InvocationTargetException>'. Ensure the exception is thrown correctly by checking the mapping and values."
+      ],
+      "CSVRecord_3_3Test": [
+        "Fix the testGet_noHeaderMapping() method: 'Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>'. Ensure the exception is thrown correctly by checking the mapping.",
+        "Fix the testGet_indexOutOfBounds() method: 'Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown'. Ensure the index is out of bounds to trigger the exception."
+      ],
+      "CSVRecord_3_4Test": [
+        "Fix the testGet_noMapping() method: 'Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>'. Ensure the exception is thrown correctly by checking the mapping."
+      ],
+      "CSVRecord_3_2Test": [
+        "Increase coverage by adding tests for edge cases such as null values, empty strings, and invalid header names. Ensure to cover all branches of the get method."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 6815,
+    "completion_tokens": 373,
+    "total_tokens": 7188,
+    "llm_elapsed_time_seconds": 7.812
+  }
+}

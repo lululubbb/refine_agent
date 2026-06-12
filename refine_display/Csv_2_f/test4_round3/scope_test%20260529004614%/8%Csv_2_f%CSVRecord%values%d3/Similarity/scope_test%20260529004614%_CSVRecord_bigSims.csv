@@ -1,0 +1,13 @@
+project,target_class,test_case_1,test_case_2,combined_subtree_size,combined_similarity,redundancy_score
+scope_test%20260529004614%,CSVRecord,CSVRecord_8_4Test,CSVRecord_8_2Test,78,0.783920,0.216080
+scope_test%20260529004614%,CSVRecord,CSVRecord_8_1Test,CSVRecord_8_2Test,72,0.742268,0.257732
+scope_test%20260529004614%,CSVRecord,CSVRecord_8_2Test,CSVRecord_8_3Test,80,0.874317,0.125683
+scope_test%20260529004614%,CSVRecord,CSVRecord_8_3Test,CSVRecord_8_2Test,80,0.874317,0.125683
+scope_test%20260529004614%,CSVRecord,CSVRecord_8_4Test,CSVRecord_8_2Test,88,0.775330,0.224670
+scope_test%20260529004614%,CSVRecord,CSVRecord_8_1Test,CSVRecord_8_3Test,118,0.702381,0.297619
+scope_test%20260529004614%,CSVRecord,CSVRecord_8_2Test,CSVRecord_8_3Test,114,0.953975,0.046025
+scope_test%20260529004614%,CSVRecord,CSVRecord_8_3Test,CSVRecord_8_2Test,114,0.953975,0.046025
+scope_test%20260529004614%,CSVRecord,CSVRecord_8_4Test,CSVRecord_8_2Test,96,0.747082,0.252918
+scope_test%20260529004614%,CSVRecord,CSVRecord_8_1Test,CSVRecord_8_2Test,117,0.682216,0.317784
+scope_test%20260529004614%,CSVRecord,CSVRecord_8_2Test,CSVRecord_8_3Test,114,0.880309,0.119691
+scope_test%20260529004614%,CSVRecord,CSVRecord_8_3Test,CSVRecord_8_2Test,114,0.880309,0.119691

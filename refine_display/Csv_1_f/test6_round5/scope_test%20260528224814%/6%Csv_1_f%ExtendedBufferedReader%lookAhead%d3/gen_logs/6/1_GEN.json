@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import static org.junit.jupiter.api.Assertions.assertEquals;\nimport static org.mockito.Mockito.mock;\nimport static org.mockito.Mockito.when;\n\nimport java.io.IOException;\nimport java.io.Reader;\nimport java.io.StringReader;\n\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\n\nclass ExtendedBufferedReaderTest {\n    private ExtendedBufferedReader extendedBufferedReader;\n\n    @BeforeEach\n    void setUp() {\n        Reader reader = new StringReader(\"Hello\");\n        extendedBufferedReader = new ExtendedBufferedReader(reader);\n    }\n\n    @Test\n    void testLookAhead_normalCase() throws Exception {\n        int result = invokeLookAhead();\n        assertEquals('H', result);\n    }\n\n    @Test\n    void testLookAhead_emptyStream() throws Exception {\n        ExtendedBufferedReader emptyReader = new ExtendedBufferedReader(new StringReader(\"\"));\n        int result = emptyReader.lookAhead();\n        assertEquals(ExtendedBufferedReader.END_OF_STREAM, result);\n    }\n\n    @Test\n    void testLookAhead_afterRead() throws Exception {\n        extendedBufferedReader.read(); // read 'H'\n        int result = invokeLookAhead();\n        assertEquals('e', result);\n    }\n\n    private int invokeLookAhead() throws Exception {\n        var method = ExtendedBufferedReader.class.getDeclaredMethod(\"lookAhead\");\n        method.setAccessible(true);\n        return (int) method.invoke(extendedBufferedReader);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 567,
+    "completion_tokens": 282,
+    "total_tokens": 849,
+    "llm_elapsed_time_seconds": 5.794
+  }
+}

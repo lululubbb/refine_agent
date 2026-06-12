@@ -1,0 +1,12 @@
+[EXEC_OK] /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/6%Csv_2_f%CSVRecord%isSet%d3/test_cases/CSVRecord_6_1Test.java
+[EXEC_OK] /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/6%Csv_2_f%CSVRecord%isSet%d3/test_cases/CSVRecord_6_2Test.java
+[EXEC_FAILED] /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/6%Csv_2_f%CSVRecord%isSet%d3/test_cases/CSVRecord_6_3Test.java:
+[EXEC_CORE_ERROR] 未提取到明确异常信息
+[EXEC_STDERR]
+    Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+================================================================================
+[EXEC_FAILED] /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/6%Csv_2_f%CSVRecord%isSet%d3/test_cases/CSVRecord_6_4Test.java:
+[EXEC_CORE_ERROR] 未提取到明确异常信息
+[EXEC_STDERR]
+    Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+================================================================================

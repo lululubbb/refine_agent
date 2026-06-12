@@ -1,0 +1,117 @@
+{
+  "ExtendedBufferedReader_4_1Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "=> org.opentest4j.AssertionFailedError: expected: <-1> but was: <8>",
+      "=> org.opentest4j.AssertionFailedError: expected: <line1",
+      "line2> but was: <line1"
+    ],
+    "focal_line_rate": 86.67,
+    "focal_branch_rate": 68.75,
+    "focal_line_covered": 13,
+    "focal_line_total": 15,
+    "missed_methods": [],
+    "partial_methods": []
+  },
+  "ExtendedBufferedReader_4_2Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "=> org.opentest4j.AssertionFailedError: expected: <Line1",
+      "Li> but was: <Line1",
+      "=> org.opentest4j.AssertionFailedError: expected: <8> but was: <10>"
+    ],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": 81.25,
+    "focal_line_covered": 15,
+    "focal_line_total": 15,
+    "missed_methods": [],
+    "partial_methods": []
+  },
+  "ExtendedBufferedReader_4_3Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "=> org.opentest4j.AssertionFailedError: expected: <3> but was: <1>",
+      "=> org.opentest4j.AssertionFailedError: expected: <50> but was: <101>",
+      "=> org.opentest4j.AssertionFailedError: expected: <8> but was: <10>"
+    ],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": 87.5,
+    "focal_line_covered": 15,
+    "focal_line_total": 15,
+    "missed_methods": [],
+    "partial_methods": []
+  },
+  "ExtendedBufferedReader_4_4Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "=> org.opentest4j.AssertionFailedError: expected: <-1> but was: <1>",
+      "=> org.opentest4j.AssertionFailedError: expected: <Line1",
+      "Line3> but was: <Line1",
+      "=> org.opentest4j.AssertionFailedError: expected: <8> but was: <10>"
+    ],
+    "focal_line_rate": 86.67,
+    "focal_branch_rate": 75.0,
+    "focal_line_covered": 13,
+    "focal_line_total": 15,
+    "missed_methods": [],
+    "partial_methods": []
+  },
+  "ExtendedBufferedReader_4_5Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "=> org.opentest4j.AssertionFailedError: expected: <6> but was: <8>",
+      "=> org.opentest4j.AssertionFailedError: expected: <line1",
+      "line2> but was: <line1",
+      "=> org.opentest4j.AssertionFailedError: expected: <3> but was: <2>"
+    ],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": 87.5,
+    "focal_line_covered": 15,
+    "focal_line_total": 15,
+    "missed_methods": [],
+    "partial_methods": []
+  },
+  "ExtendedBufferedReader_4_6Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "=> org.opentest4j.AssertionFailedError: array lengths differ, expected: <19> but was: <20>",
+      "Failures (1):",
+      "JUnit Jupiter:ExtendedBufferedReader_4_6Test:testRead_lineBreaks()",
+      "MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_4_6Test', methodName = 'testRead_lineBreaks', methodParameterTypes = '']",
+      "org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)",
+      "org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)",
+      "org.junit.jupiter.api.AssertArrayEquals.assertArraysHaveSameLength(AssertArrayEquals.java:428)",
+      "org.junit.jupiter.api.AssertArrayEquals.assertArrayEquals(AssertArrayEquals.java:189)",
+      "org.junit.jupiter.api.AssertArrayEquals.assertArrayEquals(AssertArrayEquals.java:47)",
+      "org.junit.jupiter.api.AssertArrayEquals.assertArrayEquals(AssertArrayEquals.java:51)",
+      "org.junit.jupiter.api.Assertions.assertArrayEquals(Assertions.java:1200)",
+      "org.apache.commons.csv.ExtendedBufferedReader_4_6Test.testRead_lineBreaks(ExtendedBufferedReader_4_6Test.java:62)",
+      "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)",
+      "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)",
+      "[...]",
+      "Test run finished after 405 ms",
+      "[         4 containers found      ]",
+      "[         0 containers skipped    ]",
+      "[         4 containers started    ]",
+      "[         0 containers aborted    ]"
+    ],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": 87.5,
+    "focal_line_covered": 15,
+    "focal_line_total": 15,
+    "missed_methods": [],
+    "partial_methods": []
+  }
+}

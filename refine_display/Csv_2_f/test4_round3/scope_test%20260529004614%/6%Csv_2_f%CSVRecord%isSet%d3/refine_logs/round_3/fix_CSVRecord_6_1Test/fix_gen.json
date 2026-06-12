@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\nimport java.lang.reflect.Method;\nimport java.util.HashMap;\nimport java.util.Map;\n\nclass CSVRecord_6_1Test {\n    private CSVRecord csvRecord;\n    private Map<String, Integer> mapping;\n\n    @BeforeEach\n    void setUp() {\n        mapping = new HashMap<>();\n        mapping.put(\"key1\", 0);\n        mapping.put(\"key2\", 1);\n        mapping.put(\"key3\", 2);\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        csvRecord = new CSVRecord(values, mapping, \"comment\", 1L);\n    }\n\n    @Test\n    void testisSet_keyExistsAndMapped() throws Exception {\n        Method method = CSVRecord.class.getDeclaredMethod(\"isSet\", String.class);\n        method.setAccessible(true);\n        boolean result = (boolean) method.invoke(csvRecord, \"key1\");\n        Assertions.assertEquals(true, result);\n    }\n\n    @Test\n    void testisSet_keyExistsButNotMapped() throws Exception {\n        Method method = CSVRecord.class.getDeclaredMethod(\"isSet\", String.class);\n        method.setAccessible(true);\n        boolean result = (boolean) method.invoke(csvRecord, \"key2\");\n        Assertions.assertEquals(true, result); // key2 is mapped\n    }\n\n    @Test\n    void testisSet_keyDoesNotExist() throws Exception {\n        Method method = CSVRecord.class.getDeclaredMethod(\"isSet\", String.class);\n        method.setAccessible(true);\n        boolean result = (boolean) method.invoke(csvRecord, \"key4\");\n        Assertions.assertEquals(false, result);\n    }\n\n    @Test\n    void testisSet_keyMappedBeyondValuesLength() throws Exception {\n        Method method = CSVRecord.class.getDeclaredMethod(\"isSet\", String.class);\n        method.setAccessible(true);\n        mapping.put(\"key5\", 3); // Map key5 to an index outside the values array\n        boolean result = (boolean) method.invoke(csvRecord, \"key5\");\n        Assertions.assertEquals(false, result);\n    }\n\n    @Test\n    void testisSet_emptyMapping() throws Exception {\n        String[] values = {\"value1\"};\n        CSVRecord emptyMappingRecord = new CSVRecord(values, new HashMap<>(), \"comment\", 1L);\n        Method method = CSVRecord.class.getDeclaredMethod(\"isSet\", String.class);\n        method.setAccessible(true);\n        boolean result = (boolean) method.invoke(emptyMappingRecord, \"key1\");\n        Assertions.assertEquals(false, result);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1140,
+    "completion_tokens": 568,
+    "total_tokens": 1708,
+    "llm_elapsed_time_seconds": 8.39
+  }
+}

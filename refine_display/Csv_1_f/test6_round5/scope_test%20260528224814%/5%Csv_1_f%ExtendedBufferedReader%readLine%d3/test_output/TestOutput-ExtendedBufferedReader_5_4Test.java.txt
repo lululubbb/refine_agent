@@ -1,0 +1,32 @@
+
+Failures (1):
+  JUnit Jupiter:ExtendedBufferedReader_5_4Test:testReadLine_checkLastChar()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_5_4Test', methodName = 'testReadLine_checkLastChar', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: expected: <o> but was: <1>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:54)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:49)
+       org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1038)
+       org.apache.commons.csv.ExtendedBufferedReader_5_4Test.testReadLine_checkLastChar(ExtendedBufferedReader_5_4Test.java:74)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       [...]
+
+Test run finished after 584 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         6 tests found           ]
+[         0 tests skipped         ]
+[         6 tests started         ]
+[         0 tests aborted         ]
+[         5 tests successful      ]
+[         1 tests failed          ]
+
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC

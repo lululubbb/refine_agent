@@ -1,0 +1,13 @@
+project_name,target_class,test_class,test_method,buggy_status,fixed_status,bug_revealing,buggy_rc,fixed_rc,notes
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_1_1Test,testCSVRecord_withValidParameters,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_1_1Test,testCSVRecord_withNullValues,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_1_1Test,testCSVRecord_withEmptyMapping,fail,fail,false,1,1,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_1_1Test,testCSVRecord_withComment,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_1_1Test,testCSVRecord_iterator,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_1_2Test,testCSVRecord_normalCase,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_1_2Test,testCSVRecord_emptyValues,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_1_2Test,testCSVRecord_withMapping,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_1_2Test,testCSVRecord_isConsistent,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_1_2Test,testCSVRecord_isSet,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_1_2Test,testCSVRecord_iterator,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_1_2Test,testCSVRecord_toString,pass,pass,false,0,0,

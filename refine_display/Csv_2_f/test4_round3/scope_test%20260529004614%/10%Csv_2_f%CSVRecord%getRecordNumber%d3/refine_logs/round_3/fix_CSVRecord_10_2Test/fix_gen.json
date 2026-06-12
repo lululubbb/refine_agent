@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_10_2Test {\n\n    @Test\n    public void testGetRecordNumber_normalCase() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = \"Test comment\";\n        long recordNumber = 12345L;\n\n        CSVRecord record = new CSVRecord(values, mapping, comment, recordNumber);\n        long result = record.getRecordNumber();\n\n        Assertions.assertEquals(12345L, result, \"Expected record number to be 12345L\");\n    }\n\n    @Test\n    public void testGetRecordNumber_zeroRecordNumber() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = \"Test comment\";\n        long recordNumber = 0L;\n\n        CSVRecord record = new CSVRecord(values, mapping, comment, recordNumber);\n        long result = record.getRecordNumber();\n\n        Assertions.assertEquals(0L, result, \"Expected record number to be 0L\");\n    }\n\n    @Test\n    public void testGetRecordNumber_negativeRecordNumber() throws Exception {\n        String[] values = {\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        String comment = \"Test comment\";\n        long recordNumber = -1L;\n\n        CSVRecord record = new CSVRecord(values, mapping, comment, recordNumber);\n        long result = record.getRecordNumber();\n\n        Assertions.assertEquals(-1L, result, \"Expected record number to be -1L\");\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 940,
+    "completion_tokens": 388,
+    "total_tokens": 1328,
+    "llm_elapsed_time_seconds": 6.506
+  }
+}

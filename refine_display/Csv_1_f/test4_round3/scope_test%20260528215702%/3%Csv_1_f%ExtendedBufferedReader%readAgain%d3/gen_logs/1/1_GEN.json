@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport org.mockito.Mockito;\n\nimport java.io.StringReader;\nimport java.lang.reflect.Method;\n\nclass ExtendedBufferedReaderTest {\n\n    @Test\n    void testReadAgain_initialValue() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"test\"));\n        Method method = ExtendedBufferedReader.class.getDeclaredMethod(\"readAgain\");\n        method.setAccessible(true);\n        int result = (int) method.invoke(reader);\n        Assertions.assertEquals(-2, result);\n    }\n\n    @Test\n    void testReadAgain_afterReading() throws Exception {\n        ExtendedBufferedReader reader = Mockito.spy(new ExtendedBufferedReader(new StringReader(\"test\")));\n        // Simulating reading to change lastChar\n        Method readMethod = BufferedReader.class.getDeclaredMethod(\"read\");\n        readMethod.setAccessible(true);\n        reader.read(); // This should set lastChar to the first character's ASCII value\n\n        Method method = ExtendedBufferedReader.class.getDeclaredMethod(\"readAgain\");\n        method.setAccessible(true);\n        int result = (int) method.invoke(reader);\n        Assertions.assertNotEquals(-2, result);\n    }\n\n    @Test\n    void testReadAgain_afterMultipleReads() throws Exception {\n        ExtendedBufferedReader reader = Mockito.spy(new ExtendedBufferedReader(new StringReader(\"test\")));\n        Method readMethod = BufferedReader.class.getDeclaredMethod(\"read\");\n        readMethod.setAccessible(true);\n        \n        // Reading multiple times to simulate state change\n        reader.read();\n        reader.read();\n\n        Method method = ExtendedBufferedReader.class.getDeclaredMethod(\"readAgain\");\n        method.setAccessible(true);\n        int result = (int) method.invoke(reader);\n        Assertions.assertNotEquals(-2, result);\n    }\n\n    @Test\n    void testReadAgain_noReads() throws Exception {\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(\"test\"));\n        Method method = ExtendedBufferedReader.class.getDeclaredMethod(\"readAgain\");\n        method.setAccessible(true);\n        int result = (int) method.invoke(reader);\n        Assertions.assertEquals(-2, result);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 549,
+    "completion_tokens": 431,
+    "total_tokens": 980,
+    "llm_elapsed_time_seconds": 7.79
+  }
+}

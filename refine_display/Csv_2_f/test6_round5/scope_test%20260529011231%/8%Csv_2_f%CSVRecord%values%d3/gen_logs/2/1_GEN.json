@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "package org.apache.commons.csv;\n\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Method;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecordTest {\n\n    @Test\n    public void testvalues_normalCase() throws Exception {\n        String[] inputValues = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(inputValues, mapping, null, 1);\n        \n        Method method = CSVRecord.class.getDeclaredMethod(\"values\");\n        method.setAccessible(true);\n        String[] result = (String[]) method.invoke(record);\n        \n        Assertions.assertArrayEquals(inputValues, result);\n    }\n\n    @Test\n    public void testvalues_emptyArray() throws Exception {\n        String[] inputValues = {};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(inputValues, mapping, null, 1);\n        \n        Method method = CSVRecord.class.getDeclaredMethod(\"values\");\n        method.setAccessible(true);\n        String[] result = (String[]) method.invoke(record);\n        \n        Assertions.assertArrayEquals(inputValues, result);\n    }\n\n    @Test\n    public void testvalues_singleElement() throws Exception {\n        String[] inputValues = {\"singleValue\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(inputValues, mapping, null, 1);\n        \n        Method method = CSVRecord.class.getDeclaredMethod(\"values\");\n        method.setAccessible(true);\n        String[] result = (String[]) method.invoke(record);\n        \n        Assertions.assertArrayEquals(inputValues, result);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 614,
+    "completion_tokens": 350,
+    "total_tokens": 964,
+    "llm_elapsed_time_seconds": 5.698
+  }
+}

@@ -1,0 +1,26 @@
+[COMPILE_FAILED] org.apache.commons.csv.CSVRecord_3_1Test:
+    Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+    /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test6_round5/scope_test%20260529011231%/3%Csv_2_f%CSVRecord%get%d3/test_cases/CSVRecord_3_1Test.java:67: error: cannot find symbol
+            } catch (InvocationTargetException e) {
+                     ^
+      symbol:   class InvocationTargetException
+      location: class CSVRecord_3_1Test
+    1 error
+================================================================================
+[COMPILE_OK] org.apache.commons.csv.CSVRecord_3_2Test
+[COMPILE_FAILED] org.apache.commons.csv.CSVRecord_3_3Test:
+    Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+    /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test6_round5/scope_test%20260529011231%/3%Csv_2_f%CSVRecord%get%d3/test_cases/CSVRecord_3_3Test.java:69: error: unreported exception Throwable; must be caught or declared to be thrown
+                throw e.getCause(); // Rethrow the underlying exception
+                ^
+    1 error
+================================================================================
+[COMPILE_FAILED] org.apache.commons.csv.CSVRecord_3_4Test:
+    Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+    /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test6_round5/scope_test%20260529011231%/3%Csv_2_f%CSVRecord%get%d3/test_cases/CSVRecord_3_4Test.java:64: error: unreported exception Throwable; must be caught or declared to be thrown
+                throw e.getCause(); // unwrap the InvocationTargetException to throw the actual cause
+                ^
+    1 error
+================================================================================
+[COMPILE_OK] org.apache.commons.csv.CSVRecord_3_5Test
+[COMPILE_OK] org.apache.commons.csv.CSVRecord_3_6Test

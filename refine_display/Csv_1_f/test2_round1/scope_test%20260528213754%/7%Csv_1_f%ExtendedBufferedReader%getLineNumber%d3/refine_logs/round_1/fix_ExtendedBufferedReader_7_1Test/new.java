@@ -1,0 +1,83 @@
+package org.apache.commons.csv;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.Reader;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import java.io.StringReader;
+import java.lang.reflect.Field;
+
+class ExtendedBufferedReader_7_1Test {
+
+    @Test
+    void testgetLineNumber_initialValue() throws Exception {
+        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(""));
+        int lineNumber = invokeGetLineNumber(reader);
+        Assertions.assertEquals(0, lineNumber);
+    }
+
+    @Test
+    void testgetLineNumber_afterReadingLines() throws Exception {
+        String input = "First line\nSecond line\nThird line";
+        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader(input));
+        
+        // Simulate reading lines
+        reader.readLine(); // First line
+        reader.readLine(); // Second line
+        
+        int lineNumber = invokeGetLineNumber(reader);
+        Assertions.assertEquals(2, lineNumber);
+    }
+
+    @Test
+    void testgetLineNumber_noLinesRead() throws Exception {
+        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader("Some text"));
+        int lineNumber = invokeGetLineNumber(reader);
+        Assertions.assertEquals(0, lineNumber);
+    }
+
+    @Test
+    void testRead_singleCharacter() throws Exception {
+        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader("A"));
+        int result = reader.read();
+        Assertions.assertEquals('A', result);
+        Assertions.assertEquals(1, invokeGetLineNumber(reader));
+    }
+
+    @Test
+    void testRead_multipleCharacters() throws Exception {
+        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader("Line 1\nLine 2"));
+        reader.read(); // Read 'L'
+        reader.read(); // Read 'i'
+        reader.read(); // Read 'n'
+        reader.read(); // Read 'e'
+        reader.read(); // Read ' '
+        reader.read(); // Read '1'
+        Assertions.assertEquals(1, invokeGetLineNumber(reader));
+    }
+
+    @Test
+    void testLookAhead() throws Exception {
+        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader("Look Ahead\nTest"));
+        int lookAheadResult = reader.lookAhead();
+        Assertions.assertEquals('L', lookAheadResult);
+        Assertions.assertEquals(0, invokeGetLineNumber(reader));
+    }
+
+    @Test
+    void testReadAgain() throws Exception {
+        ExtendedBufferedReader reader = new ExtendedBufferedReader(new StringReader("Read Again"));
+        reader.read(); // Read 'R'
+        reader.readAgain(); // Assume it reads the same character again
+        Assertions.assertEquals('R', reader.read());
+        Assertions.assertEquals(1, invokeGetLineNumber(reader));
+    }
+
+    private int invokeGetLineNumber(ExtendedBufferedReader reader) throws Exception {
+        Field lineCounterField = ExtendedBufferedReader.class.getDeclaredField("lineCounter");
+        lineCounterField.setAccessible(true);
+        return (int) lineCounterField.get(reader);
+    }
+}

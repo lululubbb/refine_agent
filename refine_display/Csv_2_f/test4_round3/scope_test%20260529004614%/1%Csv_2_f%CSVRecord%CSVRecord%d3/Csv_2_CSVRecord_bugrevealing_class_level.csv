@@ -1,0 +1,15 @@
+project_name,target_class,test_class,total_methods,bug_revealing_methods,bug_revealing_rate,has_bug_revealing,br_score
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_1_1Test,7,0,0.0,false,0.0
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_1_2Test,7,0,0.0,false,0.0
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_1_3Test,5,0,0.0,false,0.0
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_1_4Test,6,0,0.0,false,0.0
+project_name,target_class,test_class,total_methods,bug_revealing_methods,bug_revealing_rate,has_bug_revealing,br_score
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_1_1Test,7,0,0.0,false,0.0
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_1_2Test,7,0,0.0,false,0.0
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_1_3Test,5,0,0.0,false,0.0
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_1_4Test,6,0,0.0,false,0.0
+project_name,target_class,test_class,total_methods,bug_revealing_methods,bug_revealing_rate,has_bug_revealing,br_score
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_1_1Test,7,0,0.0,false,0.0
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_1_2Test,7,0,0.0,false,0.0
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_1_3Test,5,0,0.0,false,0.0
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_1_4Test,6,0,0.0,false,0.0

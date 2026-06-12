@@ -1,0 +1,11 @@
+project_name,target_class,test_class,test_method,buggy_status,fixed_status,bug_revealing,buggy_rc,fixed_rc,notes
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_4_1Test,testisConsistent_mappingIsNull,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_4_1Test,testisConsistent_mappingSizeEqualsValuesLength,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_4_1Test,testisConsistent_mappingSizeNotEqualsValuesLength,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_4_1Test,testisConsistent_emptyValuesAndNullMapping,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_4_1Test,testisConsistent_emptyValuesAndNonEmptyMapping,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_4_2Test,testisConsistent_mappingIsNull,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_4_2Test,testisConsistent_mappingSizeEqualsValuesLength,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_4_2Test,testisConsistent_mappingSizeNotEqualsValuesLength,pass,pass,false,0,0,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_4_2Test,testisConsistent_emptyValuesArray,fail,fail,false,1,1,
+Csv_2,CSVRecord,org.apache.commons.csv.CSVRecord_4_2Test,testisConsistent_emptyMapping,pass,pass,false,0,0,

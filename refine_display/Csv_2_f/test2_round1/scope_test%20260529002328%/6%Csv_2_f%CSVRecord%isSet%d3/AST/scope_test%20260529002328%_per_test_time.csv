@@ -1,0 +1,9 @@
+project,version,test_case,ast_generation_time_nanosec
+scope_test%20260529002328%,6%Csv_2_f%CSVRecord%isSet%d3,CSVRecord_6_2Test.testisSet_nameMappedAndWithinBounds,34081490
+scope_test%20260529002328%,6%Csv_2_f%CSVRecord%isSet%d3,CSVRecord_6_2Test.testisSet_nameMappedButOutOfBounds,34553251
+scope_test%20260529002328%,6%Csv_2_f%CSVRecord%isSet%d3,CSVRecord_6_2Test.testisSet_nameNotMapped,34954100
+scope_test%20260529002328%,6%Csv_2_f%CSVRecord%isSet%d3,CSVRecord_6_2Test,36052960
+scope_test%20260529002328%,6%Csv_2_f%CSVRecord%isSet%d3,CSVRecord_6_1Test.testisSet_nameMappedAndWithinBounds,35027547
+scope_test%20260529002328%,6%Csv_2_f%CSVRecord%isSet%d3,CSVRecord_6_1Test.testisSet_nameMappedButOutOfBounds,35586570
+scope_test%20260529002328%,6%Csv_2_f%CSVRecord%isSet%d3,CSVRecord_6_1Test.testisSet_nameNotMapped,36077407
+scope_test%20260529002328%,6%Csv_2_f%CSVRecord%isSet%d3,CSVRecord_6_1Test,49606021

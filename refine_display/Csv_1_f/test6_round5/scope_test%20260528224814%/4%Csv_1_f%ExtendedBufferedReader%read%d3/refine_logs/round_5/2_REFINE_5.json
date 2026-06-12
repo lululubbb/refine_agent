@@ -1,0 +1,44 @@
+{
+  "raw": "{\n  \"suite_summary\": \"All test files for the focal method 'read' in class 'ExtendedBufferedReader' compile successfully but encounter runtime errors. Each test file has specific assertion failures indicating discrepancies between expected and actual results. There are also high redundancy issues among some test files, suggesting potential for consolidation.\",\n  \"test_instructions\": {\n    \"ExtendedBufferedReader_4_1Test\": [\n      \"Fix the assertion in 'testRead_normalCase': expected: <10> but was: <8>\",\n      \"Fix the assertion in 'testRead_endOfStream': expected: <-1> but was: <1>\",\n      \"Fix the assertion in 'testRead_withCarriageReturn': expected: <3> but was: <2>\"\n    ],\n    \"ExtendedBufferedReader_4_2Test\": [\n      \"Fix the assertion in 'testRead_normalCase': expected: <8> but was: <10>\",\n      \"Fix the assertion in 'testRead_endOfStream': expected: <-1> but was: <1>\",\n      \"Fix the assertion in 'testRead_withCarriageReturn': expected: <3> but was: <2>\"\n    ],\n    \"ExtendedBufferedReader_4_3Test\": [\n      \"Fix the assertion in 'testRead_normalCase': expected: <8> but was: <10>\",\n      \"Fix the assertion in 'testRead_endOfStream': expected: <-1> but was: <1>\",\n      \"Fix the assertion in 'testRead_newLineCount': expected: <3> but was: <1>\"\n    ],\n    \"ExtendedBufferedReader_4_4Test\": [\n      \"Fix the assertion in 'testRead_normalCase': expected: <8> but was: <10>\",\n      \"Fix the assertion in 'testRead_endOfStream': expected: <-1> but was: <1>\",\n      \"Fix the assertion in 'testRead_mixedLineEndings': expected: <3> but was: <2>\"\n    ],\n    \"ExtendedBufferedReader_4_5Test\": [\n      \"Fix the assertion in 'testRead_normalCase': expected: <10> but was: <8>\",\n      \"Fix the assertion in 'testRead_withNewLine': expected: <6> but was: <8>\",\n      \"Fix the assertion in 'testRead_countLines': expected: <3> but was: <2>\"\n    ],\n    \"ExtendedBufferedReader_4_6Test\": [\n      \"Fix the assertion in 'testRead_lineBreaks': expected: <19> but was: <20>\",\n      \"Fix the assertion in 'testRead_normalCase': expected: <1> but was: <0>\",\n      \"Fix the assertion in 'testRead_noNewLine': expected: <0> but was: <1>\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "All test files for the focal method 'read' in class 'ExtendedBufferedReader' compile successfully but encounter runtime errors. Each test file has specific assertion failures indicating discrepancies between expected and actual results. There are also high redundancy issues among some test files, suggesting potential for consolidation.",
+    "test_instructions": {
+      "ExtendedBufferedReader_4_1Test": [
+        "Fix the assertion in 'testRead_normalCase': expected: <10> but was: <8>",
+        "Fix the assertion in 'testRead_endOfStream': expected: <-1> but was: <1>",
+        "Fix the assertion in 'testRead_withCarriageReturn': expected: <3> but was: <2>"
+      ],
+      "ExtendedBufferedReader_4_2Test": [
+        "Fix the assertion in 'testRead_normalCase': expected: <8> but was: <10>",
+        "Fix the assertion in 'testRead_endOfStream': expected: <-1> but was: <1>",
+        "Fix the assertion in 'testRead_withCarriageReturn': expected: <3> but was: <2>"
+      ],
+      "ExtendedBufferedReader_4_3Test": [
+        "Fix the assertion in 'testRead_normalCase': expected: <8> but was: <10>",
+        "Fix the assertion in 'testRead_endOfStream': expected: <-1> but was: <1>",
+        "Fix the assertion in 'testRead_newLineCount': expected: <3> but was: <1>"
+      ],
+      "ExtendedBufferedReader_4_4Test": [
+        "Fix the assertion in 'testRead_normalCase': expected: <8> but was: <10>",
+        "Fix the assertion in 'testRead_endOfStream': expected: <-1> but was: <1>",
+        "Fix the assertion in 'testRead_mixedLineEndings': expected: <3> but was: <2>"
+      ],
+      "ExtendedBufferedReader_4_5Test": [
+        "Fix the assertion in 'testRead_normalCase': expected: <10> but was: <8>",
+        "Fix the assertion in 'testRead_withNewLine': expected: <6> but was: <8>",
+        "Fix the assertion in 'testRead_countLines': expected: <3> but was: <2>"
+      ],
+      "ExtendedBufferedReader_4_6Test": [
+        "Fix the assertion in 'testRead_lineBreaks': expected: <19> but was: <20>",
+        "Fix the assertion in 'testRead_normalCase': expected: <1> but was: <0>",
+        "Fix the assertion in 'testRead_noNewLine': expected: <0> but was: <1>"
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 9929,
+    "completion_tokens": 586,
+    "total_tokens": 10515,
+    "llm_elapsed_time_seconds": 7.561
+  }
+}

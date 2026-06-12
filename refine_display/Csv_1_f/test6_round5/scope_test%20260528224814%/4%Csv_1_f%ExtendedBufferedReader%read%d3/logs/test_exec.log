@@ -1,0 +1,30 @@
+[EXEC_FAILED] /home/chenlu/refine_test_gen_v5/refine_display/Csv_1_f/test6_round5/scope_test%20260528224814%/4%Csv_1_f%ExtendedBufferedReader%read%d3/test_cases/ExtendedBufferedReader_4_1Test.java:
+[EXEC_CORE_ERROR] 未提取到明确异常信息
+[EXEC_STDERR]
+    Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+================================================================================
+[EXEC_FAILED] /home/chenlu/refine_test_gen_v5/refine_display/Csv_1_f/test6_round5/scope_test%20260528224814%/4%Csv_1_f%ExtendedBufferedReader%read%d3/test_cases/ExtendedBufferedReader_4_2Test.java:
+[EXEC_CORE_ERROR] 未提取到明确异常信息
+[EXEC_STDERR]
+    Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+================================================================================
+[EXEC_FAILED] /home/chenlu/refine_test_gen_v5/refine_display/Csv_1_f/test6_round5/scope_test%20260528224814%/4%Csv_1_f%ExtendedBufferedReader%read%d3/test_cases/ExtendedBufferedReader_4_3Test.java:
+[EXEC_CORE_ERROR] 未提取到明确异常信息
+[EXEC_STDERR]
+    Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+================================================================================
+[EXEC_FAILED] /home/chenlu/refine_test_gen_v5/refine_display/Csv_1_f/test6_round5/scope_test%20260528224814%/4%Csv_1_f%ExtendedBufferedReader%read%d3/test_cases/ExtendedBufferedReader_4_4Test.java:
+[EXEC_CORE_ERROR] 未提取到明确异常信息
+[EXEC_STDERR]
+    Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+================================================================================
+[EXEC_FAILED] /home/chenlu/refine_test_gen_v5/refine_display/Csv_1_f/test6_round5/scope_test%20260528224814%/4%Csv_1_f%ExtendedBufferedReader%read%d3/test_cases/ExtendedBufferedReader_4_5Test.java:
+[EXEC_CORE_ERROR] 未提取到明确异常信息
+[EXEC_STDERR]
+    Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+================================================================================
+[EXEC_FAILED] /home/chenlu/refine_test_gen_v5/refine_display/Csv_1_f/test6_round5/scope_test%20260528224814%/4%Csv_1_f%ExtendedBufferedReader%read%d3/test_cases/ExtendedBufferedReader_4_6Test.java:
+[EXEC_CORE_ERROR] 未提取到明确异常信息
+[EXEC_STDERR]
+    Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+================================================================================

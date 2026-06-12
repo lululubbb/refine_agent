@@ -1,0 +1,9 @@
+project_name,target_class,test_class,test_method,buggy_status,fixed_status,bug_revealing,buggy_rc,fixed_rc,notes
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_2_1Test,testRead_normalCase,pass,pass,false,0,0,
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_2_1Test,testRead_lineCounterIncrement,fail,pass,true,1,0,
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_2_1Test,testRead_endOfStream,pass,pass,false,0,0,
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_2_1Test,testRead_exceptionHandling,timeout,timeout,false,None,None,timeout
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_2_2Test,testRead_normalCase,pass,pass,false,0,0,
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_2_2Test,testRead_lineBreaks,fail,fail,false,1,1,
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_2_2Test,testRead_endOfStream,pass,pass,false,0,0,
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_2_2Test,testRead_invalidCharacter,pass,pass,false,0,0,

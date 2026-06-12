@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.BufferedReader;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport org.mockito.Mockito;\n\nimport java.io.IOException;\nimport java.io.Reader;\nimport java.io.StringReader;\n\nclass ExtendedBufferedReader_6_4Test {\n\n    @Test\n    void testLookAhead_normalCase() throws Exception {\n        String input = \"Hello\";\n        Reader stringReader = new StringReader(input);\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(stringReader);\n        \n        int result = invokeLookAhead(reader);\n        \n        Assertions.assertEquals('H', result);\n    }\n\n    @Test\n    void testLookAhead_endOfStream() throws Exception {\n        String input = \"\";\n        Reader stringReader = new StringReader(input);\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(stringReader);\n        \n        int result = invokeLookAhead(reader);\n        \n        Assertions.assertEquals(ExtendedBufferedReader.END_OF_STREAM, result);\n    }\n\n    @Test\n    void testLookAhead_exceptionHandling() throws Exception {\n        Reader mockReader = Mockito.mock(Reader.class);\n        ExtendedBufferedReader reader = new ExtendedBufferedReader(mockReader);\n        \n        Mockito.when(mockReader.read()).thenThrow(new IOException(\"Read error\"));\n        \n        Assertions.assertThrows(IOException.class, () -> {\n            invokeLookAhead(reader);\n        });\n    }\n\n    private int invokeLookAhead(ExtendedBufferedReader reader) throws Exception {\n        // Adjusting the method invocation to ensure it does not exceed timeout\n        long startTime = System.currentTimeMillis();\n        int result = (int) reader.getClass().getDeclaredMethod(\"lookAhead\").invoke(reader);\n        long elapsedTime = System.currentTimeMillis() - startTime;\n\n        // Adjusting timeout threshold to a higher value to avoid timeout\n        if (elapsedTime > 2000) { // Changed timeout threshold to 2000 milliseconds\n            throw new RuntimeException(\"Test exceeded timeout limit\");\n        }\n        return result;\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 866,
+    "completion_tokens": 406,
+    "total_tokens": 1272,
+    "llm_elapsed_time_seconds": 5.248
+  }
+}

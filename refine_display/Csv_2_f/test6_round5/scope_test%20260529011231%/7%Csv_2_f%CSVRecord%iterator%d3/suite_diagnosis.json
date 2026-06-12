@@ -1,0 +1,149 @@
+{
+  "CSVRecord_7_1Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [],
+    "exec_errors": [],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": null,
+    "focal_line_covered": 1,
+    "focal_line_total": 1,
+    "missed_methods": [
+      "line 64: get() — completely uncovered",
+      "line 80: get() — completely uncovered",
+      "line 103: isConsistent() — completely uncovered",
+      "line 114: isMapped() — completely uncovered",
+      "line 125: isSet() — completely uncovered",
+      "line 138: values() — completely uncovered",
+      "line 148: getComment() — completely uncovered",
+      "line 157: getRecordNumber() — completely uncovered",
+      "line 166: size() — completely uncovered",
+      "line 171: toString() — completely uncovered"
+    ],
+    "partial_methods": [
+      "line 49: CSVRecord()() — 1/2 branches missed"
+    ]
+  },
+  "CSVRecord_7_2Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [],
+    "exec_errors": [],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": null,
+    "focal_line_covered": 1,
+    "focal_line_total": 1,
+    "missed_methods": [
+      "line 64: get() — completely uncovered",
+      "line 80: get() — completely uncovered",
+      "line 103: isConsistent() — completely uncovered",
+      "line 114: isMapped() — completely uncovered",
+      "line 125: isSet() — completely uncovered",
+      "line 138: values() — completely uncovered",
+      "line 148: getComment() — completely uncovered",
+      "line 157: getRecordNumber() — completely uncovered",
+      "line 166: size() — completely uncovered",
+      "line 171: toString() — completely uncovered"
+    ],
+    "partial_methods": [
+      "line 49: CSVRecord()() — 1/2 branches missed"
+    ]
+  },
+  "CSVRecord_7_3Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [],
+    "exec_errors": [],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": null,
+    "focal_line_covered": 1,
+    "focal_line_total": 1,
+    "missed_methods": [
+      "line 64: get() — completely uncovered",
+      "line 80: get() — completely uncovered",
+      "line 103: isConsistent() — completely uncovered",
+      "line 114: isMapped() — completely uncovered",
+      "line 125: isSet() — completely uncovered",
+      "line 138: values() — completely uncovered",
+      "line 148: getComment() — completely uncovered",
+      "line 157: getRecordNumber() — completely uncovered",
+      "line 166: size() — completely uncovered",
+      "line 171: toString() — completely uncovered"
+    ],
+    "partial_methods": [
+      "line 49: CSVRecord()() — 1/2 branches missed"
+    ]
+  },
+  "CSVRecord_7_4Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [],
+    "exec_errors": [],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": null,
+    "focal_line_covered": 1,
+    "focal_line_total": 1,
+    "missed_methods": [
+      "line 64: get() — completely uncovered",
+      "line 80: get() — completely uncovered",
+      "line 103: isConsistent() — completely uncovered",
+      "line 114: isMapped() — completely uncovered",
+      "line 125: isSet() — completely uncovered",
+      "line 138: values() — completely uncovered",
+      "line 148: getComment() — completely uncovered",
+      "line 157: getRecordNumber() — completely uncovered",
+      "line 166: size() — completely uncovered",
+      "line 171: toString() — completely uncovered"
+    ],
+    "partial_methods": [
+      "line 49: CSVRecord()() — 1/2 branches missed"
+    ]
+  },
+  "CSVRecord_7_5Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [],
+    "exec_errors": [],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": null,
+    "focal_line_covered": 1,
+    "focal_line_total": 1,
+    "missed_methods": [
+      "line 64: get() — completely uncovered",
+      "line 80: get() — completely uncovered",
+      "line 103: isConsistent() — completely uncovered",
+      "line 114: isMapped() — completely uncovered",
+      "line 125: isSet() — completely uncovered",
+      "line 148: getComment() — completely uncovered",
+      "line 157: getRecordNumber() — completely uncovered",
+      "line 171: toString() — completely uncovered"
+    ],
+    "partial_methods": [
+      "line 49: CSVRecord()() — 1/2 branches missed"
+    ]
+  },
+  "CSVRecord_7_6Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [],
+    "exec_errors": [],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": null,
+    "focal_line_covered": 1,
+    "focal_line_total": 1,
+    "missed_methods": [
+      "line 64: get() — completely uncovered",
+      "line 80: get() — completely uncovered",
+      "line 103: isConsistent() — completely uncovered",
+      "line 114: isMapped() — completely uncovered",
+      "line 125: isSet() — completely uncovered",
+      "line 138: values() — completely uncovered",
+      "line 148: getComment() — completely uncovered",
+      "line 157: getRecordNumber() — completely uncovered",
+      "line 171: toString() — completely uncovered"
+    ],
+    "partial_methods": [
+      "line 49: CSVRecord()() — 1/2 branches missed"
+    ]
+  }
+}

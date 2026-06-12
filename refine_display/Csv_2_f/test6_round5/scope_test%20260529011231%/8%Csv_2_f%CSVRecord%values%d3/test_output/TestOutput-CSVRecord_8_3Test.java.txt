@@ -1,0 +1,32 @@
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_8_3Test:testvalues_nullValues()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_8_3Test', methodName = 'testvalues_nullValues', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: expected: <null> but was: <[]>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertNull.failNotNull(AssertNull.java:50)
+       org.junit.jupiter.api.AssertNull.assertNull(AssertNull.java:35)
+       org.junit.jupiter.api.AssertNull.assertNull(AssertNull.java:30)
+       org.junit.jupiter.api.Assertions.assertNull(Assertions.java:276)
+       org.apache.commons.csv.CSVRecord_8_3Test.testvalues_nullValues(CSVRecord_8_3Test.java:52)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       [...]
+
+Test run finished after 241 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         4 tests found           ]
+[         0 tests skipped         ]
+[         4 tests started         ]
+[         0 tests aborted         ]
+[         3 tests successful      ]
+[         1 tests failed          ]
+
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC

@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "The whole unit test file is:\n```java\npackage org.apache.commons.csv;\n\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\n\nimport java.lang.reflect.Method;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecordTest {\n\n    @Test\n    public void testGet_validIndex() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        \n        String result = record.get(1);\n        Assertions.assertEquals(\"value2\", result);\n    }\n\n    @Test\n    public void testGet_indexOutOfBounds() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        \n        Assertions.assertThrows(ArrayIndexOutOfBoundsException.class, () -> {\n            record.get(3);\n        });\n    }\n\n    @Test\n    public void testGet_negativeIndex() throws Exception {\n        String[] values = {\"value1\", \"value2\", \"value3\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        \n        Assertions.assertThrows(ArrayIndexOutOfBoundsException.class, () -> {\n            record.get(-1);\n        });\n    }\n\n    @Test\n    public void testGet_emptyArray() throws Exception {\n        String[] values = {};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        \n        Assertions.assertThrows(ArrayIndexOutOfBoundsException.class, () -> {\n            record.get(0);\n        });\n    }\n\n    @Test\n    public void testGet_singleElementArray() throws Exception {\n        String[] values = {\"onlyValue\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(values, mapping, null, 1);\n        \n        String result = record.get(0);\n        Assertions.assertEquals(\"onlyValue\", result);\n        \n        Assertions.assertThrows(ArrayIndexOutOfBoundsException.class, () -> {\n            record.get(1);\n        });\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 615,
+    "completion_tokens": 491,
+    "total_tokens": 1106,
+    "llm_elapsed_time_seconds": 6.854
+  }
+}

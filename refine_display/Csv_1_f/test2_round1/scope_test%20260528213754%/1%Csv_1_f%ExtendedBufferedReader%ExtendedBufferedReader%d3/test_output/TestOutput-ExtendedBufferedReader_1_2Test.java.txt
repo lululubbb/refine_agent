@@ -1,0 +1,74 @@
+
+Failures (4):
+  JUnit Jupiter:ExtendedBufferedReader_1_2Test:testRead_charArray_normalCase()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_1_2Test', methodName = 'testRead_charArray_normalCase', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: array lengths differ, expected: <5> but was: <10>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertArrayEquals.assertArraysHaveSameLength(AssertArrayEquals.java:428)
+       org.junit.jupiter.api.AssertArrayEquals.assertArrayEquals(AssertArrayEquals.java:189)
+       org.junit.jupiter.api.AssertArrayEquals.assertArrayEquals(AssertArrayEquals.java:47)
+       org.junit.jupiter.api.AssertArrayEquals.assertArrayEquals(AssertArrayEquals.java:51)
+       org.junit.jupiter.api.Assertions.assertArrayEquals(Assertions.java:1200)
+       org.apache.commons.csv.ExtendedBufferedReader_1_2Test.testRead_charArray_normalCase(ExtendedBufferedReader_1_2Test.java:60)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       [...]
+  JUnit Jupiter:ExtendedBufferedReader_1_2Test:testReadAgain()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_1_2Test', methodName = 'testReadAgain', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: expected: not equal but was: <-2>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertNotEquals.failEqual(AssertNotEquals.java:277)
+       org.junit.jupiter.api.AssertNotEquals.assertNotEquals(AssertNotEquals.java:94)
+       org.junit.jupiter.api.AssertNotEquals.assertNotEquals(AssertNotEquals.java:86)
+       org.junit.jupiter.api.Assertions.assertNotEquals(Assertions.java:1978)
+       org.apache.commons.csv.ExtendedBufferedReader_1_2Test.testReadAgain(ExtendedBufferedReader_1_2Test.java:52)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       [...]
+  JUnit Jupiter:ExtendedBufferedReader_1_2Test:testReadLine_endOfStream()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_1_2Test', methodName = 'testReadLine_endOfStream', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: expected: <null> but was: <World>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertNull.failNotNull(AssertNull.java:50)
+       org.junit.jupiter.api.AssertNull.assertNull(AssertNull.java:35)
+       org.junit.jupiter.api.AssertNull.assertNull(AssertNull.java:30)
+       org.junit.jupiter.api.Assertions.assertNull(Assertions.java:276)
+       org.apache.commons.csv.ExtendedBufferedReader_1_2Test.testReadLine_endOfStream(ExtendedBufferedReader_1_2Test.java:89)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       [...]
+  JUnit Jupiter:ExtendedBufferedReader_1_2Test:testGetLineNumber()
+    MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_1_2Test', methodName = 'testGetLineNumber', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: expected: <1> but was: <0>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+       org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:528)
+       org.apache.commons.csv.ExtendedBufferedReader_1_2Test.testGetLineNumber(ExtendedBufferedReader_1_2Test.java:82)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       [...]
+
+Test run finished after 173 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         8 tests found           ]
+[         0 tests skipped         ]
+[         8 tests started         ]
+[         0 tests aborted         ]
+[         4 tests successful      ]
+[         4 tests failed          ]
+
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC

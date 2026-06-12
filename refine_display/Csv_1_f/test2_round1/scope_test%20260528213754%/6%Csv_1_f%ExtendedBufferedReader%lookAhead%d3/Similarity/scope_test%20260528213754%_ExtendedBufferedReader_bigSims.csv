@@ -1,0 +1,3 @@
+project,target_class,test_case_1,test_case_2,combined_subtree_size,combined_similarity,redundancy_score
+scope_test%20260528213754%,ExtendedBufferedReader,ExtendedBufferedReader_6_1Test,ExtendedBufferedReader_6_2Test,62,0.843537,0.156463
+scope_test%20260528213754%,ExtendedBufferedReader,ExtendedBufferedReader_6_2Test,ExtendedBufferedReader_6_1Test,62,0.843537,0.156463

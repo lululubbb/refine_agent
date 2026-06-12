@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Reader;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\nimport java.io.BufferedReader;\nimport java.io.IOException;\nimport java.io.StringReader;\n\nclass ExtendedBufferedReader_5_6Test {\n    private ExtendedBufferedReader reader;\n\n    @BeforeEach\n    void setUp() {\n        reader = new ExtendedBufferedReader(new StringReader(\"\"));\n    }\n\n    @Test\n    void testReadLine_normalCase() throws Exception {\n        reader = new ExtendedBufferedReader(new StringReader(\"Hello World\\nNext Line\"));\n        String line = reader.readLine();\n        Assertions.assertEquals(\"Hello World\", line);\n        Assertions.assertEquals(1, getLineCounter(reader));\n        Assertions.assertEquals('d', getLastChar(reader));\n    }\n\n    @Test\n    void testReadLine_emptyLine() throws Exception {\n        reader = new ExtendedBufferedReader(new StringReader(\"\\nNext Line\"));\n        String line = reader.readLine();\n        Assertions.assertEquals(\"\", line);\n        Assertions.assertEquals(1, getLineCounter(reader));\n        Assertions.assertEquals('N', getLastChar(reader));\n    }\n\n    @Test\n    void testReadLine_endOfStream() throws Exception {\n        reader = new ExtendedBufferedReader(new StringReader(\"\"));\n        String line = reader.readLine();\n        Assertions.assertNull(line);\n        Assertions.assertEquals(0, getLineCounter(reader));\n        Assertions.assertEquals(ExtendedBufferedReader.END_OF_STREAM, getLastChar(reader));\n    }\n\n    @Test\n    void testReadLine_multipleLines() throws Exception {\n        reader = new ExtendedBufferedReader(new StringReader(\"First Line\\nSecond Line\\n\"));\n        String line1 = reader.readLine();\n        String line2 = reader.readLine();\n        Assertions.assertEquals(\"First Line\", line1);\n        Assertions.assertEquals(\"Second Line\", line2);\n        Assertions.assertEquals(2, getLineCounter(reader));\n        Assertions.assertEquals('e', getLastChar(reader));\n    }\n\n    private int getLineCounter(ExtendedBufferedReader reader) throws Exception {\n        var field = ExtendedBufferedReader.class.getDeclaredField(\"lineCounter\");\n        field.setAccessible(true);\n        return field.getInt(reader);\n    }\n\n    private int getLastChar(ExtendedBufferedReader reader) throws Exception {\n        var field = ExtendedBufferedReader.class.getDeclaredField(\"lastChar\");\n        field.setAccessible(true);\n        return field.getInt(reader);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1317,
+    "completion_tokens": 505,
+    "total_tokens": 1822,
+    "llm_elapsed_time_seconds": 14.084
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "import static org.junit.jupiter.api.Assertions.assertEquals;\nimport static org.mockito.Mockito.mock;\nimport static org.mockito.Mockito.when;\n\nimport java.util.HashMap;\nimport java.util.Map;\n\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\n\npublic class CSVRecordTest {\n    private CSVRecord csvRecord;\n\n    @BeforeEach\n    public void setUp() {\n        String[] values = new String[]{\"value1\", \"value2\"};\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"column1\", 0);\n        mapping.put(\"column2\", 1);\n        String comment = \"This is a comment\";\n        long recordNumber = 1L;\n\n        csvRecord = new CSVRecord(values, mapping, comment, recordNumber);\n    }\n\n    @Test\n    public void testgetRecordNumber_normalCase() throws Exception {\n        long expectedRecordNumber = 1L;\n        long actualRecordNumber = csvRecord.getRecordNumber();\n        assertEquals(expectedRecordNumber, actualRecordNumber);\n    }\n\n    @Test\n    public void testgetRecordNumber_edgeCase() throws Exception {\n        CSVRecord edgeCaseRecord = new CSVRecord(new String[]{}, new HashMap<>(), null, 0L);\n        long actualRecordNumber = edgeCaseRecord.getRecordNumber();\n        assertEquals(0L, actualRecordNumber);\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 619,
+    "completion_tokens": 281,
+    "total_tokens": 900,
+    "llm_elapsed_time_seconds": 5.452
+  }
+}

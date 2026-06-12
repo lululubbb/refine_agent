@@ -1,0 +1,13 @@
+project,target_class,test_class,focal_method,exec_status,m_per_line_cov,m_per_line_total,m_per_line_rate,m_per_branch_cov,m_per_branch_total,m_per_branch_rate,m_line_contrib_pct,m_branch_contrib_pct,m_coverage_score,f_per_line_cov,f_per_line_total,f_per_line_rate,f_per_branch_cov,f_per_branch_total,f_per_branch_rate,f_line_contrib_pct,f_branch_contrib_pct,f_coverage_score
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_10_1Test,getRecordNumber,ok,8,25,32.0,1,16,6.25,25.8065,25.0,0.222641,1,1,100.0,,,,100.0,0.0,0.5
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_10_2Test,getRecordNumber,ok,8,25,32.0,1,16,6.25,25.8065,25.0,0.222641,1,1,100.0,,,,100.0,0.0,0.5
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_10_3Test,getRecordNumber,ok,8,25,32.0,1,16,6.25,25.8065,25.0,0.222641,1,1,100.0,,,,100.0,0.0,0.5
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_10_4Test,getRecordNumber,ok,7,25,28.0,1,16,6.25,22.5806,25.0,0.204576,0,1,0.0,,,,0.0,0.0,0.0
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_10_1Test,getRecordNumber,ok,8,25,32.0,1,16,6.25,25.8065,25.0,0.222641,1,1,100.0,,,,100.0,0.0,0.5
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_10_2Test,getRecordNumber,ok,8,25,32.0,1,16,6.25,25.8065,25.0,0.222641,1,1,100.0,,,,100.0,0.0,0.5
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_10_3Test,getRecordNumber,ok,8,25,32.0,1,16,6.25,25.8065,25.0,0.222641,1,1,100.0,,,,100.0,0.0,0.5
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_10_4Test,getRecordNumber,ok,7,25,28.0,1,16,6.25,22.5806,25.0,0.204576,0,1,0.0,,,,0.0,0.0,0.0
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_10_1Test,getRecordNumber,ok,8,25,32.0,1,16,6.25,25.8065,20.0,0.210141,1,1,100.0,,,,100.0,0.0,0.5
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_10_2Test,getRecordNumber,ok,8,25,32.0,1,16,6.25,25.8065,20.0,0.210141,1,1,100.0,,,,100.0,0.0,0.5
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_10_3Test,getRecordNumber,ok,8,25,32.0,1,16,6.25,25.8065,20.0,0.210141,1,1,100.0,,,,100.0,0.0,0.5
+Csv_2_f,CSVRecord,org.apache.commons.csv.CSVRecord_10_4Test,getRecordNumber,ok,7,25,28.0,2,16,12.5,22.5806,40.0,0.257702,0,1,0.0,,,,0.0,0.0,0.0

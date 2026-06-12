@@ -1,0 +1,612 @@
+bug_revealing log started: 2026-05-29T00:55:09.258255
+buggy=/home/chenlu/refine_test_gen_v5/defect4j_projects/Csv_2_b
+fixed=/home/chenlu/refine_test_gen_v5/defect4j_projects/Csv_2_f
+tests_dir=/home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/3%Csv_2_f%CSVRecord%get%d3/test_cases
+
+Running org.apache.commons.csv.CSVRecord_3_1Test#testGet_withValidHeader_returnsValue on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_1Test#testGet_withValidHeader_returnsValue on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_1Test#testGet_withNullMapping_throwsIllegalStateException on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_1Test#testGet_withNullMapping_throwsIllegalStateException on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_1Test#testGet_withInvalidHeader_returnsNull on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_1Test#testGet_withInvalidHeader_returnsNull on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_1Test#testGet_withOutOfBoundsIndex_throwsIllegalArgumentException on buggy...
+  -> fail
+Running org.apache.commons.csv.CSVRecord_3_1Test#testGet_withOutOfBoundsIndex_throwsIllegalArgumentException on fixed...
+  -> fail
+---
+[2026-05-29T00:55:22.748889] buggy org.apache.commons.csv.CSVRecord_3_1Test#testGet_withOutOfBoundsIndex_throwsIllegalArgumentException status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_3_1Test:testGet_withOutOfBoundsIndex_throwsIllegalArgumentException()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_3_1Test', methodName = 'testGet_withOutOfBoundsIndex_throwsIllegalArgumentException', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.reflect.InvocationTargetException>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+       org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)
+       org.apache.commons.csv.CSVRecord_3_1Test.testGet_withOutOfBoundsIndex_throwsIllegalArgumentException(CSVRecord_3_1Test.java:59)
+       [...]
+     Caused by: java.lang.reflect.InvocationTargetException
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.apache.commons.csv.CSVRecord_3_1Test.invokeGet(CSVRecord_3_1Test.java:69)
+       [...]
+     Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 2 out of bounds for length 2
+       org.apache.commons.csv.CSVRecord.get(CSVRecord.java:85)
+       [...]
+
+Test run finished after 176 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+---
+[2026-05-29T00:55:22.748923] fixed org.apache.commons.csv.CSVRecord_3_1Test#testGet_withOutOfBoundsIndex_throwsIllegalArgumentException status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_3_1Test:testGet_withOutOfBoundsIndex_throwsIllegalArgumentException()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_3_1Test', methodName = 'testGet_withOutOfBoundsIndex_throwsIllegalArgumentException', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.reflect.InvocationTargetException>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+       org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)
+       org.apache.commons.csv.CSVRecord_3_1Test.testGet_withOutOfBoundsIndex_throwsIllegalArgumentException(CSVRecord_3_1Test.java:59)
+       [...]
+     Caused by: java.lang.reflect.InvocationTargetException
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.apache.commons.csv.CSVRecord_3_1Test.invokeGet(CSVRecord_3_1Test.java:69)
+       [...]
+     Caused by: java.lang.IllegalArgumentException: Index for header 'header2' is 2 but CSVRecord only has 2 values!
+       org.apache.commons.csv.CSVRecord.get(CSVRecord.java:89)
+       [...]
+
+Test run finished after 156 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+Running org.apache.commons.csv.CSVRecord_3_2Test#testGet_normalCase on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_2Test#testGet_normalCase on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_2Test#testGet_nullMapping on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_2Test#testGet_nullMapping on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_2Test#testGet_nonExistentHeader on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_2Test#testGet_nonExistentHeader on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_2Test#testGet_outOfBoundsIndex on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_2Test#testGet_outOfBoundsIndex on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_2Test#testGet_emptyValues on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_2Test#testGet_emptyValues on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_2Test#testGet_invalidHeaderName on buggy...
+  -> fail
+Running org.apache.commons.csv.CSVRecord_3_2Test#testGet_invalidHeaderName on fixed...
+  -> fail
+---
+[2026-05-29T00:55:44.032536] buggy org.apache.commons.csv.CSVRecord_3_2Test#testGet_invalidHeaderName status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_3_2Test:testGet_invalidHeaderName()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_3_2Test', methodName = 'testGet_invalidHeaderName', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:73)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+       org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)
+       org.apache.commons.csv.CSVRecord_3_2Test.testGet_invalidHeaderName(CSVRecord_3_2Test.java:82)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+       [...]
+
+Test run finished after 163 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+---
+[2026-05-29T00:55:44.032565] fixed org.apache.commons.csv.CSVRecord_3_2Test#testGet_invalidHeaderName status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_3_2Test:testGet_invalidHeaderName()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_3_2Test', methodName = 'testGet_invalidHeaderName', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:73)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+       org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)
+       org.apache.commons.csv.CSVRecord_3_2Test.testGet_invalidHeaderName(CSVRecord_3_2Test.java:82)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+       [...]
+
+Test run finished after 159 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+Running org.apache.commons.csv.CSVRecord_3_2Test#testGet_nullValue on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_2Test#testGet_nullValue on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_3Test#testGet_normalCase on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_3Test#testGet_normalCase on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_3Test#testGet_headerNotMapped on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_3Test#testGet_headerNotMapped on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_3Test#testGet_noHeaderMapping on buggy...
+  -> fail
+Running org.apache.commons.csv.CSVRecord_3_3Test#testGet_noHeaderMapping on fixed...
+  -> fail
+---
+[2026-05-29T00:55:58.581213] buggy org.apache.commons.csv.CSVRecord_3_3Test#testGet_noHeaderMapping status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_3_3Test:testGet_noHeaderMapping()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_3_3Test', methodName = 'testGet_noHeaderMapping', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+       org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)
+       org.apache.commons.csv.CSVRecord_3_3Test.testGet_noHeaderMapping(CSVRecord_3_3Test.java:45)
+       [...]
+     Caused by: java.lang.reflect.InvocationTargetException
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.apache.commons.csv.CSVRecord_3_3Test.invokeGetMethod(CSVRecord_3_3Test.java:68)
+       [...]
+     Caused by: java.lang.IllegalStateException: No header mapping was specified, the record values can't be accessed by name
+       org.apache.commons.csv.CSVRecord.get(CSVRecord.java:81)
+       [...]
+
+Test run finished after 242 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+---
+[2026-05-29T00:55:58.581247] fixed org.apache.commons.csv.CSVRecord_3_3Test#testGet_noHeaderMapping status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_3_3Test:testGet_noHeaderMapping()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_3_3Test', methodName = 'testGet_noHeaderMapping', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+       org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)
+       org.apache.commons.csv.CSVRecord_3_3Test.testGet_noHeaderMapping(CSVRecord_3_3Test.java:45)
+       [...]
+     Caused by: java.lang.reflect.InvocationTargetException
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.apache.commons.csv.CSVRecord_3_3Test.invokeGetMethod(CSVRecord_3_3Test.java:68)
+       [...]
+     Caused by: java.lang.IllegalStateException: No header mapping was specified, the record values can't be accessed by name
+       org.apache.commons.csv.CSVRecord.get(CSVRecord.java:81)
+       [...]
+
+Test run finished after 170 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+Running org.apache.commons.csv.CSVRecord_3_3Test#testGet_indexOutOfBounds on buggy...
+  -> fail
+Running org.apache.commons.csv.CSVRecord_3_3Test#testGet_indexOutOfBounds on fixed...
+  -> fail
+---
+[2026-05-29T00:56:01.847681] buggy org.apache.commons.csv.CSVRecord_3_3Test#testGet_indexOutOfBounds status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_3_3Test:testGet_indexOutOfBounds()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_3_3Test', methodName = 'testGet_indexOutOfBounds', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.reflect.InvocationTargetException>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+       org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)
+       org.apache.commons.csv.CSVRecord_3_3Test.testGet_indexOutOfBounds(CSVRecord_3_3Test.java:59)
+       [...]
+     Caused by: java.lang.reflect.InvocationTargetException
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.apache.commons.csv.CSVRecord_3_3Test.invokeGetMethod(CSVRecord_3_3Test.java:68)
+       [...]
+     Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 2 out of bounds for length 2
+       org.apache.commons.csv.CSVRecord.get(CSVRecord.java:85)
+       [...]
+
+Test run finished after 187 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+---
+[2026-05-29T00:56:01.847706] fixed org.apache.commons.csv.CSVRecord_3_3Test#testGet_indexOutOfBounds status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_3_3Test:testGet_indexOutOfBounds()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_3_3Test', methodName = 'testGet_indexOutOfBounds', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.reflect.InvocationTargetException>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+       org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)
+       org.apache.commons.csv.CSVRecord_3_3Test.testGet_indexOutOfBounds(CSVRecord_3_3Test.java:59)
+       [...]
+     Caused by: java.lang.reflect.InvocationTargetException
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.apache.commons.csv.CSVRecord_3_3Test.invokeGetMethod(CSVRecord_3_3Test.java:68)
+       [...]
+     Caused by: java.lang.IllegalArgumentException: Index for header 'header1' is 2 but CSVRecord only has 2 values!
+       org.apache.commons.csv.CSVRecord.get(CSVRecord.java:89)
+       [...]
+
+Test run finished after 171 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+Running org.apache.commons.csv.CSVRecord_3_4Test#testGet_normalCase on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_4Test#testGet_normalCase on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_4Test#testGet_nonExistentKey on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_4Test#testGet_nonExistentKey on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_3_4Test#testGet_noMapping on buggy...
+  -> fail
+Running org.apache.commons.csv.CSVRecord_3_4Test#testGet_noMapping on fixed...
+  -> fail
+---
+[2026-05-29T00:56:12.621330] buggy org.apache.commons.csv.CSVRecord_3_4Test#testGet_noMapping status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_3_4Test:testGet_noMapping()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_3_4Test', methodName = 'testGet_noMapping', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+       org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)
+       org.apache.commons.csv.CSVRecord_3_4Test.testGet_noMapping(CSVRecord_3_4Test.java:45)
+       [...]
+     Caused by: java.lang.reflect.InvocationTargetException
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.apache.commons.csv.CSVRecord_3_4Test.invokeGetMethod(CSVRecord_3_4Test.java:66)
+       [...]
+     Caused by: java.lang.IllegalStateException: No header mapping was specified, the record values can't be accessed by name
+       org.apache.commons.csv.CSVRecord.get(CSVRecord.java:81)
+       [...]
+
+Test run finished after 283 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+---
+[2026-05-29T00:56:12.621367] fixed org.apache.commons.csv.CSVRecord_3_4Test#testGet_noMapping status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_3_4Test:testGet_noMapping()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_3_4Test', methodName = 'testGet_noMapping', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.reflect.InvocationTargetException>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+       org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)
+       org.apache.commons.csv.CSVRecord_3_4Test.testGet_noMapping(CSVRecord_3_4Test.java:45)
+       [...]
+     Caused by: java.lang.reflect.InvocationTargetException
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.apache.commons.csv.CSVRecord_3_4Test.invokeGetMethod(CSVRecord_3_4Test.java:66)
+       [...]
+     Caused by: java.lang.IllegalStateException: No header mapping was specified, the record values can't be accessed by name
+       org.apache.commons.csv.CSVRecord.get(CSVRecord.java:81)
+       [...]
+
+Test run finished after 197 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+Running org.apache.commons.csv.CSVRecord_3_4Test#testGet_indexOutOfBounds on buggy...
+  -> fail
+Running org.apache.commons.csv.CSVRecord_3_4Test#testGet_indexOutOfBounds on fixed...
+  -> fail
+---
+[2026-05-29T00:56:16.279875] buggy org.apache.commons.csv.CSVRecord_3_4Test#testGet_indexOutOfBounds status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_3_4Test:testGet_indexOutOfBounds()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_3_4Test', methodName = 'testGet_indexOutOfBounds', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.reflect.InvocationTargetException>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+       org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)
+       org.apache.commons.csv.CSVRecord_3_4Test.testGet_indexOutOfBounds(CSVRecord_3_4Test.java:58)
+       [...]
+     Caused by: java.lang.reflect.InvocationTargetException
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.apache.commons.csv.CSVRecord_3_4Test.invokeGetMethod(CSVRecord_3_4Test.java:66)
+       [...]
+     Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 2 out of bounds for length 1
+       org.apache.commons.csv.CSVRecord.get(CSVRecord.java:85)
+       [...]
+
+Test run finished after 212 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+---
+[2026-05-29T00:56:16.279916] fixed org.apache.commons.csv.CSVRecord_3_4Test#testGet_indexOutOfBounds status=fail returncode=1
+STDOUT:
+
+Failures (1):
+  JUnit Jupiter:CSVRecord_3_4Test:testGet_indexOutOfBounds()
+    MethodSource [className = 'org.apache.commons.csv.CSVRecord_3_4Test', methodName = 'testGet_indexOutOfBounds', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.reflect.InvocationTargetException>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+       org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+       org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)
+       org.apache.commons.csv.CSVRecord_3_4Test.testGet_indexOutOfBounds(CSVRecord_3_4Test.java:58)
+       [...]
+     Caused by: java.lang.reflect.InvocationTargetException
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+       java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+       java.base/java.lang.reflect.Method.invoke(Method.java:566)
+       org.apache.commons.csv.CSVRecord_3_4Test.invokeGetMethod(CSVRecord_3_4Test.java:66)
+       [...]
+     Caused by: java.lang.IllegalArgumentException: Index for header 'age' is 2 but CSVRecord only has 1 values!
+       org.apache.commons.csv.CSVRecord.get(CSVRecord.java:89)
+       [...]
+
+Test run finished after 155 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+
+STDERR:
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -Xms256m -XX:+UseG1GC
+
+Class-level summary: /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/3%Csv_2_f%CSVRecord%get%d3/Csv_2_CSVRecord_bugrevealing_class_level.csv
+Class-level CSV: /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/3%Csv_2_f%CSVRecord%get%d3/Csv_2_CSVRecord_bugrevealing_class_level.csv
+@Test method-level stats: /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/3%Csv_2_f%CSVRecord%get%d3/Csv_2_CSVRecord_bugrevealing_method_stats.csv
+
+===== SUMMARY =====
+Total tests evaluated: 19
+Bug revealing tests: 0
+Summary CSV: /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test4_round3/scope_test%20260529004614%/3%Csv_2_f%CSVRecord%get%d3/Csv_2_CSVRecord_bugrevealing.csv
+
+===== @Test METHOD-LEVEL STATISTICS =====
+Total @Test methods run: 19
+--- Fixed version (Csv_2_f) ---
+  PASS   : 13
+  FAIL   : 6
+  TIMEOUT: 0
+  Pass rate: 68.42%
+--- Buggy version (Csv_2_b) ---
+  PASS   : 13
+  FAIL   : 6
+  TIMEOUT: 0
+  Pass rate: 68.42%
+
+===== @Test METHOD-LEVEL STATISTICS =====
+Total @Test methods run: 19
+--- Fixed version (Csv_2_f) ---
+  PASS   : 13
+  FAIL   : 6
+  TIMEOUT: 0
+  Pass rate: 68.42%
+--- Buggy version (Csv_2_b) ---
+  PASS   : 13
+  FAIL   : 6
+  TIMEOUT: 0
+  Pass rate: 68.42%
+
+===== END =====
+log finished: 2026-05-29T00:56:16.281096

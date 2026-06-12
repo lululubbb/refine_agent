@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "package org.apache.commons.csv;\n\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\n\nimport java.io.StringReader;\nimport java.lang.reflect.Field;\n\nclass ExtendedBufferedReaderTest {\n\n    private ExtendedBufferedReader reader;\n\n    @BeforeEach\n    void setUp() {\n        reader = new ExtendedBufferedReader(new StringReader(\"Sample line\"));\n    }\n\n    @Test\n    void testReadAgain_initialValue() throws Exception {\n        // Accessing private field lastChar using reflection\n        Field lastCharField = ExtendedBufferedReader.class.getDeclaredField(\"lastChar\");\n        lastCharField.setAccessible(true);\n        lastCharField.setInt(reader, ExtendedBufferedReader.UNDEFINED);\n        \n        Assertions.assertEquals(ExtendedBufferedReader.UNDEFINED, reader.readAgain());\n    }\n\n    @Test\n    void testReadAgain_afterSettingLastChar() throws Exception {\n        // Accessing private field lastChar using reflection\n        Field lastCharField = ExtendedBufferedReader.class.getDeclaredField(\"lastChar\");\n        lastCharField.setAccessible(true);\n        lastCharField.setInt(reader, 100); // Arbitrary value for testing\n        \n        Assertions.assertEquals(100, reader.readAgain());\n    }\n\n    @Test\n    void testReadAgain_afterSettingLastCharToEndOfStream() throws Exception {\n        // Accessing private field lastChar using reflection\n        Field lastCharField = ExtendedBufferedReader.class.getDeclaredField(\"lastChar\");\n        lastCharField.setAccessible(true);\n        lastCharField.setInt(reader, ExtendedBufferedReader.END_OF_STREAM);\n        \n        Assertions.assertEquals(ExtendedBufferedReader.END_OF_STREAM, reader.readAgain());\n    }\n}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 549,
+    "completion_tokens": 340,
+    "total_tokens": 889,
+    "llm_elapsed_time_seconds": 4.052
+  }
+}

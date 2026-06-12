@@ -1,0 +1,26 @@
+{
+  "raw": "{\n  \"suite_summary\": \"All test files compile and execute successfully, but they exhibit high redundancy and do not reveal any bugs. Each test file has similar logic and coverage, leading to a lack of diversity in testing the focal method `isMapped` in class `CSVRecord`. Improvements can be made by adding more varied test cases to enhance bug detection and reduce redundancy.\",\n  \"test_instructions\": {\n    \"CSVRecord_5_1Test\": [\n      \"The test is not bug-revealing. Consider adding assertions that check for specific expected values rather than just checking if the result is true or false.\"\n    ],\n    \"CSVRecord_5_2Test\": [\n      \"The test is not bug-revealing. Consider adding assertions that check for specific expected values rather than just checking if the result is true or false.\"\n    ],\n    \"CSVRecord_5_3Test\": [\n      \"The test is not bug-revealing. Consider adding assertions that check for specific expected values rather than just checking if the result is true or false.\"\n    ],\n    \"CSVRecord_5_4Test\": [\n      \"The test is not bug-revealing. Consider adding assertions that check for specific expected values rather than just checking if the result is true or false.\"\n    ]\n  }\n}",
+  "parsed": {
+    "suite_summary": "All test files compile and execute successfully, but they exhibit high redundancy and do not reveal any bugs. Each test file has similar logic and coverage, leading to a lack of diversity in testing the focal method `isMapped` in class `CSVRecord`. Improvements can be made by adding more varied test cases to enhance bug detection and reduce redundancy.",
+    "test_instructions": {
+      "CSVRecord_5_1Test": [
+        "The test is not bug-revealing. Consider adding assertions that check for specific expected values rather than just checking if the result is true or false."
+      ],
+      "CSVRecord_5_2Test": [
+        "The test is not bug-revealing. Consider adding assertions that check for specific expected values rather than just checking if the result is true or false."
+      ],
+      "CSVRecord_5_3Test": [
+        "The test is not bug-revealing. Consider adding assertions that check for specific expected values rather than just checking if the result is true or false."
+      ],
+      "CSVRecord_5_4Test": [
+        "The test is not bug-revealing. Consider adding assertions that check for specific expected values rather than just checking if the result is true or false."
+      ]
+    }
+  },
+  "usage": {
+    "prompt_tokens": 5648,
+    "completion_tokens": 266,
+    "total_tokens": 5914,
+    "llm_elapsed_time_seconds": 5.758
+  }
+}

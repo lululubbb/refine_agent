@@ -1,0 +1,6 @@
+project,target_class,focal_method,exec_status,f_per_line_cov,f_per_line_total,f_per_line_rate,f_per_branch_cov,f_per_branch_total,f_per_branch_rate,line_contrib_pct,branch_contrib_pct,coverage_score
+Csv_2_f,CSVRecord,isConsistent,ok,1,1,100.0,4,4,100.0,100.0,100.0,1.0
+Csv_2_f,CSVRecord,isConsistent,ok,1,1,100.0,4,4,100.0,100.0,100.0,1.0
+Csv_2_f,CSVRecord,isConsistent,ok,1,1,100.0,4,4,100.0,100.0,100.0,1.0
+Csv_2_f,CSVRecord,isConsistent,ok,1,1,100.0,4,4,100.0,100.0,100.0,1.0
+Csv_2_f,CSVRecord,isConsistent,ok,1,1,100.0,4,4,100.0,100.0,100.0,1.0

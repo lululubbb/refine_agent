@@ -1,0 +1,254 @@
+{
+  "test_diags": {
+    "CSVRecord_2_1Test": {
+      "test_name": "CSVRecord_2_1Test",
+      "compile_ok": true,
+      "exec_ok": false,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [
+        "=> org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.ArrayIndexOutOfBoundsException> but was: <java.lang.reflect.InvocationTargetException>",
+        "Caused by: java.lang.reflect.InvocationTargetException",
+        "Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 3 out of bounds for length 3",
+        "Caused by: java.lang.ArrayIndexOutOfBoundsException: Index -1 out of bounds for length 3"
+      ],
+      "focal_line_rate": 11.11,
+      "focal_branch_rate": 0.0,
+      "focal_line_covered": 1,
+      "focal_line_total": 9,
+      "missed_methods": [],
+      "partial_methods": [],
+      "bug_revealing": false,
+      "redundancy_score": 0.2038,
+      "most_similar_to": "CSVRecord_2_4Test",
+      "diag_data_valid": true
+    },
+    "CSVRecord_2_2Test": {
+      "test_name": "CSVRecord_2_2Test",
+      "compile_ok": true,
+      "exec_ok": false,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [
+        "=> org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.ArrayIndexOutOfBoundsException> but was: <java.lang.reflect.InvocationTargetException>",
+        "Caused by: java.lang.reflect.InvocationTargetException",
+        "Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 3 out of bounds for length 3"
+      ],
+      "focal_line_rate": 11.11,
+      "focal_branch_rate": 0.0,
+      "focal_line_covered": 1,
+      "focal_line_total": 9,
+      "missed_methods": [],
+      "partial_methods": [],
+      "bug_revealing": false,
+      "redundancy_score": 0.5304,
+      "most_similar_to": "CSVRecord_2_4Test",
+      "diag_data_valid": true
+    },
+    "CSVRecord_2_3Test": {
+      "test_name": "CSVRecord_2_3Test",
+      "compile_ok": true,
+      "exec_ok": true,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [],
+      "focal_line_rate": 11.11,
+      "focal_branch_rate": 0.0,
+      "focal_line_covered": 1,
+      "focal_line_total": 9,
+      "missed_methods": [
+        "line 80: get() — completely uncovered",
+        "line 103: isConsistent() — completely uncovered",
+        "line 114: isMapped() — completely uncovered",
+        "line 125: isSet() — completely uncovered",
+        "line 134: iterator() — completely uncovered",
+        "line 138: values() — completely uncovered",
+        "line 148: getComment() — completely uncovered",
+        "line 157: getRecordNumber() — completely uncovered",
+        "line 166: size() — completely uncovered",
+        "line 171: toString() — completely uncovered"
+      ],
+      "partial_methods": [
+        "line 49: CSVRecord()() — 1/2 branches missed"
+      ],
+      "bug_revealing": false,
+      "redundancy_score": 0.102,
+      "most_similar_to": "CSVRecord_2_1Test",
+      "diag_data_valid": true
+    },
+    "CSVRecord_2_4Test": {
+      "test_name": "CSVRecord_2_4Test",
+      "compile_ok": true,
+      "exec_ok": false,
+      "exec_timeout": false,
+      "compile_errors": [],
+      "exec_errors": [
+        "=> org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.ArrayIndexOutOfBoundsException> but was: <java.lang.reflect.InvocationTargetException>",
+        "Caused by: java.lang.reflect.InvocationTargetException",
+        "Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0",
+        "Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 3 out of bounds for length 3"
+      ],
+      "focal_line_rate": 11.11,
+      "focal_branch_rate": 0.0,
+      "focal_line_covered": 1,
+      "focal_line_total": 9,
+      "missed_methods": [],
+      "partial_methods": [],
+      "bug_revealing": false,
+      "redundancy_score": 0.5304,
+      "most_similar_to": "CSVRecord_2_2Test",
+      "diag_data_valid": true
+    }
+  },
+  "test_scores": {
+    "CSVRecord_2_1Test": {
+      "test_name": "CSVRecord_2_1Test",
+      "compile_score": 1.0,
+      "exec_score": 0.0,
+      "focal_line_coverage": 0.1111,
+      "focal_branch_coverage": 0.0,
+      "focal_line_covered": 1,
+      "focal_line_total": 9,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.2038,
+      "similarity": 0.7962,
+      "most_similar_to": "CSVRecord_2_4Test",
+      "issues": [
+        "EXEC_FAIL"
+      ]
+    },
+    "CSVRecord_2_2Test": {
+      "test_name": "CSVRecord_2_2Test",
+      "compile_score": 1.0,
+      "exec_score": 0.0,
+      "focal_line_coverage": 0.1111,
+      "focal_branch_coverage": 0.0,
+      "focal_line_covered": 1,
+      "focal_line_total": 9,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.5304,
+      "similarity": 0.4696,
+      "most_similar_to": "CSVRecord_2_4Test",
+      "issues": [
+        "EXEC_FAIL"
+      ]
+    },
+    "CSVRecord_2_3Test": {
+      "test_name": "CSVRecord_2_3Test",
+      "compile_score": 1.0,
+      "exec_score": 1.0,
+      "focal_line_coverage": 0.1111,
+      "focal_branch_coverage": 0.0,
+      "focal_line_covered": 1,
+      "focal_line_total": 9,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.102,
+      "similarity": 0.898,
+      "most_similar_to": "CSVRecord_2_1Test",
+      "issues": [
+        "NOT_BUG_REVEALING",
+        "LOW_COVERAGE",
+        "HIGH_REDUNDANCY"
+      ]
+    },
+    "CSVRecord_2_4Test": {
+      "test_name": "CSVRecord_2_4Test",
+      "compile_score": 1.0,
+      "exec_score": 0.0,
+      "focal_line_coverage": 0.1111,
+      "focal_branch_coverage": 0.0,
+      "focal_line_covered": 1,
+      "focal_line_total": 9,
+      "bug_reveal_score": false,
+      "redundancy_score": 0.5304,
+      "similarity": 0.4696,
+      "most_similar_to": "CSVRecord_2_2Test",
+      "issues": [
+        "EXEC_FAIL"
+      ]
+    }
+  },
+  "suite_score": {
+    "n_tests": 4,
+    "compile_pass_count": 4,
+    "compile_pass_rate": 1.0,
+    "exec_pass_count": 1,
+    "exec_pass_rate": 0.25,
+    "all_compile_pass": true,
+    "per_test_line_coverage": [
+      0.1111,
+      0.1111,
+      0.1111,
+      0.1111
+    ],
+    "per_test_branch_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "coverage_line_avg": 0.1111,
+    "coverage_line_max": 0.1111,
+    "coverage_line_min": 0.1111,
+    "coverage_branch_avg": 0.0,
+    "bug_reveal_count": 0,
+    "bug_reveal_checked": 4,
+    "bug_reveal_rate": 0.0,
+    "max_pairwise_similarity": 0.898,
+    "high_redundancy_pairs": [
+      {
+        "test1": "CSVRecord_2_3Test",
+        "test2": "CSVRecord_2_1Test",
+        "similarity": 0.898
+      },
+      {
+        "test1": "CSVRecord_2_1Test",
+        "test2": "CSVRecord_2_3Test",
+        "similarity": 0.898
+      },
+      {
+        "test1": "CSVRecord_2_4Test",
+        "test2": "CSVRecord_2_1Test",
+        "similarity": 0.7962
+      }
+    ],
+    "problem_tests": {
+      "EXEC_FAIL": [
+        "CSVRecord_2_1Test",
+        "CSVRecord_2_2Test",
+        "CSVRecord_2_4Test"
+      ],
+      "NOT_BUG_REVEALING": [
+        "CSVRecord_2_3Test"
+      ],
+      "LOW_COVERAGE": [
+        "CSVRecord_2_3Test"
+      ],
+      "HIGH_REDUNDANCY": [
+        "CSVRecord_2_3Test"
+      ]
+    }
+  },
+  "pairwise_sims": [
+    {
+      "tc1": "CSVRecord_2_3Test",
+      "tc2": "CSVRecord_2_1Test",
+      "score": 0.102
+    },
+    {
+      "tc1": "CSVRecord_2_1Test",
+      "tc2": "CSVRecord_2_3Test",
+      "score": 0.102
+    },
+    {
+      "tc1": "CSVRecord_2_2Test",
+      "tc2": "CSVRecord_2_4Test",
+      "score": 0.5304
+    },
+    {
+      "tc1": "CSVRecord_2_4Test",
+      "tc2": "CSVRecord_2_1Test",
+      "score": 0.2038
+    }
+  ]
+}

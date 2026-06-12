@@ -1,0 +1,108 @@
+{
+  "ExtendedBufferedReader_7_1Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "=> org.opentest4j.AssertionFailedError: expected: <1> but was: <2>",
+      "Failures (1):",
+      "JUnit Jupiter:ExtendedBufferedReader_7_1Test:testgetLineNumber_variedContent()",
+      "MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_7_1Test', methodName = 'testgetLineNumber_variedContent', methodParameterTypes = '']",
+      "org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)",
+      "org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)",
+      "org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)",
+      "org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)",
+      "org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)",
+      "org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:528)",
+      "org.apache.commons.csv.ExtendedBufferedReader_7_1Test.testgetLineNumber_variedContent(ExtendedBufferedReader_7_1Test.java:52)",
+      "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)",
+      "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)",
+      "java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)",
+      "[...]",
+      "Test run finished after 157 ms",
+      "[         4 containers found      ]",
+      "[         0 containers skipped    ]",
+      "[         4 containers started    ]",
+      "[         0 containers aborted    ]"
+    ],
+    "focal_line_rate": 0.0,
+    "focal_branch_rate": null,
+    "focal_line_covered": 0,
+    "focal_line_total": 1,
+    "missed_methods": [],
+    "partial_methods": []
+  },
+  "ExtendedBufferedReader_7_2Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "=> org.opentest4j.AssertionFailedError: expected: <1> but was: <2>",
+      "Failures (1):",
+      "JUnit Jupiter:ExtendedBufferedReader_7_2Test:testgetLineNumber_afterReadingLinesWithEmptyLine()",
+      "MethodSource [className = 'org.apache.commons.csv.ExtendedBufferedReader_7_2Test', methodName = 'testgetLineNumber_afterReadingLinesWithEmptyLine', methodParameterTypes = '']",
+      "org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)",
+      "org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)",
+      "org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)",
+      "org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)",
+      "org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)",
+      "org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:528)",
+      "org.apache.commons.csv.ExtendedBufferedReader_7_2Test.testgetLineNumber_afterReadingLinesWithEmptyLine(ExtendedBufferedReader_7_2Test.java:54)",
+      "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)",
+      "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)",
+      "java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)",
+      "[...]",
+      "Test run finished after 144 ms",
+      "[         4 containers found      ]",
+      "[         0 containers skipped    ]",
+      "[         4 containers started    ]",
+      "[         0 containers aborted    ]"
+    ],
+    "focal_line_rate": 0.0,
+    "focal_branch_rate": null,
+    "focal_line_covered": 0,
+    "focal_line_total": 1,
+    "missed_methods": [],
+    "partial_methods": []
+  },
+  "ExtendedBufferedReader_7_3Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [],
+    "exec_errors": [],
+    "focal_line_rate": 0.0,
+    "focal_branch_rate": null,
+    "focal_line_covered": 0,
+    "focal_line_total": 1,
+    "missed_methods": [
+      "line 57: read() — completely uncovered",
+      "line 76: readAgain() — completely uncovered",
+      "line 81: read() — completely uncovered",
+      "line 146: lookAhead() — completely uncovered",
+      "line 159: getLineNumber() — completely uncovered"
+    ],
+    "partial_methods": [
+      "line 123: readLine() — 1/4 branches missed"
+    ]
+  },
+  "ExtendedBufferedReader_7_4Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [],
+    "exec_errors": [],
+    "focal_line_rate": 0.0,
+    "focal_branch_rate": null,
+    "focal_line_covered": 0,
+    "focal_line_total": 1,
+    "missed_methods": [
+      "line 57: read() — completely uncovered",
+      "line 76: readAgain() — completely uncovered",
+      "line 81: read() — completely uncovered",
+      "line 146: lookAhead() — completely uncovered",
+      "line 159: getLineNumber() — completely uncovered"
+    ],
+    "partial_methods": [
+      "line 123: readLine() — 2/4 branches missed"
+    ]
+  }
+}

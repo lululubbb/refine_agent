@@ -1,0 +1,7 @@
+project_name,target_class,test_class,test_method,fixed_status,buggy_status,bug_revealing
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_3_1Test,testreadAgain_initialState,pass,pass,false
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_3_1Test,testreadAgain_afterReading,fail,fail,false
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_3_1Test,testreadAgain_afterSettingLastChar,pass,pass,false
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_3_2Test,testreadAgain_initialValue,pass,pass,false
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_3_2Test,testreadAgain_afterReading,pass,pass,false
+Csv_1,ExtendedBufferedReader,org.apache.commons.csv.ExtendedBufferedReader_3_2Test,testreadAgain_afterMultipleReads,pass,pass,false

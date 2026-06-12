@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.Serializable;\nimport java.util.Arrays;\nimport java.util.Iterator;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.Test;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class CSVRecord_5_6Test {\n\n    @Test\n    public void testisMapped_mappingIsNull() throws Exception {\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, null, \"comment\", 1);\n        Assertions.assertEquals(false, record.isMapped(\"name\"), \"Expected isMapped to return false when mapping is null\");\n    }\n\n    @Test\n    public void testisMapped_mappingDoesNotContainKey() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"key1\", 0);\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, \"comment\", 1);\n        Assertions.assertEquals(false, record.isMapped(\"key2\"), \"Expected isMapped to return false for a non-existent key\");\n    }\n\n    @Test\n    public void testisMapped_mappingContainsKey() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"key1\", 0);\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, \"comment\", 1);\n        Assertions.assertEquals(true, record.isMapped(\"key1\"), \"Expected isMapped to return true for an existing key\");\n    }\n\n    @Test\n    public void testisMapped_emptyMapping() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, \"comment\", 1);\n        Assertions.assertEquals(false, record.isMapped(\"key1\"), \"Expected isMapped to return false for an empty mapping\");\n    }\n\n    @Test\n    public void testisMapped_nullKey() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"key1\", 0);\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, \"comment\", 1);\n        Assertions.assertEquals(false, record.isMapped(null), \"Expected isMapped to return false for a null key\");\n    }\n\n    @Test\n    public void testisMapped_emptyStringKey() throws Exception {\n        Map<String, Integer> mapping = new HashMap<>();\n        mapping.put(\"\", 0);\n        CSVRecord record = new CSVRecord(new String[]{\"value1\"}, mapping, \"comment\", 1);\n        Assertions.assertEquals(true, record.isMapped(\"\"), \"Expected isMapped to return true for an empty string key\");\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 883,
+    "completion_tokens": 552,
+    "total_tokens": 1435,
+    "llm_elapsed_time_seconds": 6.51
+  }
+}

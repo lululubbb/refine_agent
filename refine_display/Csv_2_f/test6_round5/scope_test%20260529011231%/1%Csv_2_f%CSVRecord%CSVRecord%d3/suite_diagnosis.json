@@ -1,0 +1,130 @@
+{
+  "CSVRecord_1_1Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "=> org.opentest4j.AssertionFailedError: Expected java.lang.NullPointerException to be thrown, but nothing was thrown.",
+      "Failures (1):",
+      "JUnit Jupiter:CSVRecord_1_1Test:testCSVRecord_invalidMapping()",
+      "MethodSource [className = 'org.apache.commons.csv.CSVRecord_1_1Test', methodName = 'testCSVRecord_invalidMapping', methodParameterTypes = '']",
+      "org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)",
+      "org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:73)",
+      "org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)",
+      "org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3083)",
+      "org.apache.commons.csv.CSVRecord_1_1Test.testCSVRecord_invalidMapping(CSVRecord_1_1Test.java:62)",
+      "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)",
+      "java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)",
+      "java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)",
+      "java.base/java.lang.reflect.Method.invoke(Method.java:566)",
+      "org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)",
+      "[...]",
+      "Test run finished after 259 ms",
+      "[         4 containers found      ]",
+      "[         0 containers skipped    ]",
+      "[         4 containers started    ]",
+      "[         0 containers aborted    ]"
+    ],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": 100.0,
+    "focal_line_covered": 6,
+    "focal_line_total": 6,
+    "missed_methods": [],
+    "partial_methods": []
+  },
+  "CSVRecord_1_2Test": {
+    "compile_status": "pass",
+    "exec_status": "fail",
+    "compile_errors": [],
+    "exec_errors": [
+      "=> org.opentest4j.AssertionFailedError: Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.",
+      "=> org.opentest4j.AssertionFailedError: expected: <true> but was: <false>"
+    ],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": 50.0,
+    "focal_line_covered": 6,
+    "focal_line_total": 6,
+    "missed_methods": [],
+    "partial_methods": []
+  },
+  "CSVRecord_1_3Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [],
+    "exec_errors": [],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": 100.0,
+    "focal_line_covered": 6,
+    "focal_line_total": 6,
+    "missed_methods": [
+      "line 103: isConsistent() — completely uncovered",
+      "line 138: values() — completely uncovered",
+      "line 171: toString() — completely uncovered"
+    ],
+    "partial_methods": [
+      "line 80: get() — 2/4 branches missed",
+      "line 114: isMapped() — 1/2 branches missed",
+      "line 125: isSet() — 1/4 branches missed"
+    ]
+  },
+  "CSVRecord_1_4Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [],
+    "exec_errors": [],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": 100.0,
+    "focal_line_covered": 6,
+    "focal_line_total": 6,
+    "missed_methods": [
+      "line 80: get() — completely uncovered",
+      "line 103: isConsistent() — completely uncovered",
+      "line 138: values() — completely uncovered",
+      "line 171: toString() — completely uncovered"
+    ],
+    "partial_methods": [
+      "line 114: isMapped() — 1/2 branches missed",
+      "line 125: isSet() — 1/4 branches missed"
+    ]
+  },
+  "CSVRecord_1_5Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [],
+    "exec_errors": [],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": 100.0,
+    "focal_line_covered": 6,
+    "focal_line_total": 6,
+    "missed_methods": [
+      "line 80: get() — completely uncovered"
+    ],
+    "partial_methods": [
+      "line 103: isConsistent() — 2/4 branches missed",
+      "line 114: isMapped() — 1/2 branches missed",
+      "line 125: isSet() — 1/4 branches missed"
+    ]
+  },
+  "CSVRecord_1_6Test": {
+    "compile_status": "pass",
+    "exec_status": "pass",
+    "compile_errors": [],
+    "exec_errors": [],
+    "focal_line_rate": 100.0,
+    "focal_branch_rate": 50.0,
+    "focal_line_covered": 6,
+    "focal_line_total": 6,
+    "missed_methods": [
+      "line 80: get() — completely uncovered",
+      "line 125: isSet() — completely uncovered",
+      "line 134: iterator() — completely uncovered",
+      "line 138: values() — completely uncovered",
+      "line 171: toString() — completely uncovered"
+    ],
+    "partial_methods": [
+      "line 49: CSVRecord()() — 1/2 branches missed",
+      "line 103: isConsistent() — 2/4 branches missed",
+      "line 114: isMapped() — 1/2 branches missed"
+    ]
+  }
+}

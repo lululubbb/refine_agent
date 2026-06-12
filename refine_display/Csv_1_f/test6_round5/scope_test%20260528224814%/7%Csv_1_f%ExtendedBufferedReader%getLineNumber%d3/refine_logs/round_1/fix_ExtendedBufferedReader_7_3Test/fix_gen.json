@@ -1,0 +1,16 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "```java\npackage org.apache.commons.csv;\n\nimport java.io.BufferedReader;\nimport java.io.IOException;\nimport java.io.Reader;\nimport org.junit.jupiter.api.Assertions;\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\n\nimport java.io.StringReader;\n\nclass ExtendedBufferedReader_7_3Test {\n    private ExtendedBufferedReader reader;\n\n    @BeforeEach\n    void setUp() {\n        reader = new ExtendedBufferedReader(new StringReader(\"Line 1\\nLine 2\\nLine 3\"));\n    }\n\n    @Test\n    void testgetLineNumber_initialValue() throws Exception {\n        int lineNumber = reader.getLineNumber();\n        Assertions.assertEquals(0, lineNumber);\n    }\n\n    @Test\n    void testgetLineNumber_afterReadingLines() throws Exception {\n        reader.readLine(); // Reads \"Line 1\"\n        reader.readLine(); // Reads \"Line 2\"\n\n        int lineNumber = reader.getLineNumber();\n        Assertions.assertEquals(2, lineNumber);\n    }\n\n    @Test\n    void testgetLineNumber_afterMultipleReads() throws Exception {\n        reader.readLine(); // Reads \"Line 1\"\n        reader.readLine(); // Reads \"Line 2\"\n        reader.readLine(); // Reads \"Line 3\"\n\n        int lineNumber = reader.getLineNumber();\n        Assertions.assertEquals(3, lineNumber);\n    }\n\n    @Test\n    void testgetLineNumber_afterNoReads() throws Exception {\n        // No lines read\n        int lineNumber = reader.getLineNumber();\n        Assertions.assertEquals(0, lineNumber);\n    }\n\n    @Test\n    void testgetLineNumber_afterReadingEmptyLines() throws Exception {\n        ExtendedBufferedReader emptyLineReader = new ExtendedBufferedReader(new StringReader(\"\\n\\n\"));\n        emptyLineReader.readLine(); // Reads empty line\n        emptyLineReader.readLine(); // Reads another empty line\n\n        int lineNumber = emptyLineReader.getLineNumber();\n        Assertions.assertEquals(2, lineNumber);\n    }\n\n    @Test\n    void testgetLineNumber_withMixedContent() throws Exception {\n        ExtendedBufferedReader mixedContentReader = new ExtendedBufferedReader(new StringReader(\"Line 1\\n\\nLine 2\\nLine 3\\n\"));\n        mixedContentReader.readLine(); // Reads \"Line 1\"\n        mixedContentReader.readLine(); // Reads empty line\n        mixedContentReader.readLine(); // Reads \"Line 2\"\n\n        int lineNumber = mixedContentReader.getLineNumber();\n        Assertions.assertEquals(3, lineNumber);\n    }\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 962,
+    "completion_tokens": 527,
+    "total_tokens": 1489,
+    "llm_elapsed_time_seconds": 11.833
+  }
+}

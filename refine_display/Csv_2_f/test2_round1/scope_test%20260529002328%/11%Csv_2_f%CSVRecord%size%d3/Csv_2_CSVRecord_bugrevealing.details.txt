@@ -1,0 +1,74 @@
+bug_revealing log started: 2026-05-29T00:25:00.991863
+buggy=/home/chenlu/refine_test_gen_v5/defect4j_projects/Csv_2_b
+fixed=/home/chenlu/refine_test_gen_v5/defect4j_projects/Csv_2_f
+tests_dir=/home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test2_round1/scope_test%20260529002328%/11%Csv_2_f%CSVRecord%size%d3/test_cases
+
+Running org.apache.commons.csv.CSVRecord_11_1Test#testSize_emptyArray on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_11_1Test#testSize_emptyArray on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_11_1Test#testSize_singleElementArray on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_11_1Test#testSize_singleElementArray on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_11_1Test#testSize_multipleElementsArray on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_11_1Test#testSize_multipleElementsArray on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_11_1Test#testSize_largeArray on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_11_1Test#testSize_largeArray on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_11_2Test#testSize_emptyArray on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_11_2Test#testSize_emptyArray on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_11_2Test#testSize_singleElementArray on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_11_2Test#testSize_singleElementArray on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_11_2Test#testSize_multipleElementsArray on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_11_2Test#testSize_multipleElementsArray on fixed...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_11_2Test#testSize_largeArray on buggy...
+  -> pass
+Running org.apache.commons.csv.CSVRecord_11_2Test#testSize_largeArray on fixed...
+  -> pass
+Class-level summary: /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test2_round1/scope_test%20260529002328%/11%Csv_2_f%CSVRecord%size%d3/Csv_2_CSVRecord_bugrevealing_class_level.csv
+Class-level CSV: /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test2_round1/scope_test%20260529002328%/11%Csv_2_f%CSVRecord%size%d3/Csv_2_CSVRecord_bugrevealing_class_level.csv
+@Test method-level stats: /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test2_round1/scope_test%20260529002328%/11%Csv_2_f%CSVRecord%size%d3/Csv_2_CSVRecord_bugrevealing_method_stats.csv
+
+===== SUMMARY =====
+Total tests evaluated: 8
+Bug revealing tests: 0
+Summary CSV: /home/chenlu/refine_test_gen_v5/refine_display/Csv_2_f/test2_round1/scope_test%20260529002328%/11%Csv_2_f%CSVRecord%size%d3/Csv_2_CSVRecord_bugrevealing.csv
+
+===== @Test METHOD-LEVEL STATISTICS =====
+Total @Test methods run: 8
+--- Fixed version (Csv_2_f) ---
+  PASS   : 8
+  FAIL   : 0
+  TIMEOUT: 0
+  Pass rate: 100.0%
+--- Buggy version (Csv_2_b) ---
+  PASS   : 8
+  FAIL   : 0
+  TIMEOUT: 0
+  Pass rate: 100.0%
+
+===== @Test METHOD-LEVEL STATISTICS =====
+Total @Test methods run: 8
+--- Fixed version (Csv_2_f) ---
+  PASS   : 8
+  FAIL   : 0
+  TIMEOUT: 0
+  Pass rate: 100.0%
+--- Buggy version (Csv_2_b) ---
+  PASS   : 8
+  FAIL   : 0
+  TIMEOUT: 0
+  Pass rate: 100.0%
+
+===== END =====
+log finished: 2026-05-29T00:26:04.298614
