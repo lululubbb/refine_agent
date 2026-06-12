@@ -25,8 +25,7 @@ Output ONLY a JSON object:
   "suite_summary": "<2-4 sentences>",
   "test_instructions": {{
     "<test_name>": ["<instruction1>", "<instruction2>"]
-  }},
-  "delete_tests": ["<test_name>"]
+  }}
 }}
 {% endraw %}
 
@@ -35,5 +34,4 @@ Rules:
   instead focus on coverage improvement and assertion quality.
 - test_name keys must match exactly
 - Only include tests with issues
-- delete_tests: only similarity > 0.95
 - Max 4 instructions per test, must be concrete
